@@ -80,17 +80,19 @@ export default function ProductCard({ product }: ProductCardProps) {
             </div>
             
             <div className="flex flex-col space-y-3">
-              <div className="flex items-center space-x-2">
-                <span className="text-2xl font-bold text-emerald-600">
-                  ${parseFloat(product.price).toFixed(2)}
-                </span>
-                {product.compareAtPrice && (
-                  <span className="text-sm text-gray-500 line-through">
-                    ${parseFloat(product.compareAtPrice).toFixed(2)}
+              <div className="flex flex-col space-y-2">
+                <div className="flex items-center space-x-2">
+                  <span className="text-2xl font-bold text-emerald-600">
+                    ${parseFloat(product.price).toFixed(2)}
                   </span>
-                )}
+                  {product.compareAtPrice && (
+                    <span className="text-sm text-gray-500 line-through">
+                      ${parseFloat(product.compareAtPrice).toFixed(2)}
+                    </span>
+                  )}
+                </div>
                 {product.compareAtPrice && (
-                  <Badge variant="destructive" className="text-xs">
+                  <Badge variant="destructive" className="text-xs w-fit">
                     Save ${(parseFloat(product.compareAtPrice) - parseFloat(product.price)).toFixed(2)}
                   </Badge>
                 )}
