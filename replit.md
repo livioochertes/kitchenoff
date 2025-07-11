@@ -8,6 +8,14 @@ KitchenPro Supply is a full-stack e-commerce platform built for kitchen equipmen
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+### July 11, 2025
+- Fixed product card styling issues with price display and "Add to Cart" button
+- Improved price layout to prevent "Save" badge overflow
+- Enhanced visual hierarchy with larger green prices and full-width buttons
+- Added professional hover effects and better spacing
+
 ## System Architecture
 
 ### Frontend Architecture
