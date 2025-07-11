@@ -318,10 +318,8 @@ export default function Home() {
               <ul className="space-y-2">
                 {categories.map((category) => (
                   <li key={category.id}>
-                    <Link href={`/products?category=${category.slug}`}>
-                      <a className="text-slate-300 hover:text-white transition-colors">
-                        {category.name}
-                      </a>
+                    <Link href={`/products?category=${category.slug}`} className="text-slate-300 hover:text-white transition-colors">
+                      {category.name}
                     </Link>
                   </li>
                 ))}

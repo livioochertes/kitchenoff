@@ -15,31 +15,31 @@ export async function seedDatabase() {
         name: "Food Labels",
         slug: "food-labels",
         description: "Professional food labeling solutions for restaurants and food service",
-        imageUrl: "/api/placeholder/400/300"
+        imageUrl: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop"
       },
       {
         name: "HACCP Equipment",
         slug: "haccp-equipment",
         description: "Essential equipment for HACCP compliance and food safety",
-        imageUrl: "/api/placeholder/400/300"
+        imageUrl: "https://images.unsplash.com/photo-1584308972272-9e4e7685e80f?w=400&h=300&fit=crop"
       },
       {
         name: "Kitchen Supplies",
         slug: "kitchen-supplies",
         description: "Professional kitchen tools and supplies for commercial use",
-        imageUrl: "/api/placeholder/400/300"
+        imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop"
       },
       {
         name: "Cleaning & Sanitizing",
         slug: "cleaning-sanitizing",
         description: "Professional cleaning and sanitizing products for food service",
-        imageUrl: "/api/placeholder/400/300"
+        imageUrl: "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400&h=300&fit=crop"
       },
       {
         name: "Storage Solutions",
         slug: "storage-solutions",
         description: "Food storage containers and organization systems",
-        imageUrl: "/api/placeholder/400/300"
+        imageUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop"
       }
     ]).returning();
 
@@ -52,7 +52,7 @@ export async function seedDatabase() {
         description: "Professional expiration date labels for food safety compliance. Waterproof and freezer-safe.",
         price: "24.99",
         compareAtPrice: "29.99",
-        imageUrl: "/api/placeholder/400/400",
+        imageUrl: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop",
         categoryId: insertedCategories[0].id,
         inStock: true,
         stockQuantity: 150,
@@ -66,7 +66,7 @@ export async function seedDatabase() {
         description: "Color-coded day of the week labels for easy food rotation. Complete 7-day set.",
         price: "19.99",
         compareAtPrice: "24.99",
-        imageUrl: "/api/placeholder/400/400",
+        imageUrl: "https://images.unsplash.com/photo-1604719312566-878b4c46f30a?w=400&h=400&fit=crop",
         categoryId: insertedCategories[0].id,
         inStock: true,
         stockQuantity: 200,
@@ -80,7 +80,7 @@ export async function seedDatabase() {
         description: "Customizable food labels with your restaurant name. Professional quality.",
         price: "45.99",
         compareAtPrice: "55.99",
-        imageUrl: "/api/placeholder/400/400",
+        imageUrl: "https://images.unsplash.com/photo-1511876353-6e2c8c5b1a6c?w=400&h=400&fit=crop",
         categoryId: insertedCategories[0].id,
         inStock: true,
         stockQuantity: 75,
@@ -96,7 +96,7 @@ export async function seedDatabase() {
         description: "Instant-read digital thermometer for HACCP temperature monitoring. Waterproof design.",
         price: "34.99",
         compareAtPrice: "39.99",
-        imageUrl: "/api/placeholder/400/400",
+        imageUrl: "https://images.unsplash.com/photo-1584308972272-9e4e7685e80f?w=400&h=400&fit=crop",
         categoryId: insertedCategories[1].id,
         inStock: true,
         stockQuantity: 120,
@@ -110,7 +110,7 @@ export async function seedDatabase() {
         description: "Professional temperature logging book for HACCP compliance. 100 pages.",
         price: "12.99",
         compareAtPrice: "15.99",
-        imageUrl: "/api/placeholder/400/400",
+        imageUrl: "https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=400&h=400&fit=crop",
         categoryId: insertedCategories[1].id,
         inStock: true,
         stockQuantity: 300,
@@ -124,7 +124,7 @@ export async function seedDatabase() {
         description: "Non-contact infrared thermometer for quick temperature checks. Professional grade.",
         price: "89.99",
         compareAtPrice: "109.99",
-        imageUrl: "/api/placeholder/400/400",
+        imageUrl: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=400&h=400&fit=crop",
         categoryId: insertedCategories[1].id,
         inStock: true,
         stockQuantity: 45,
@@ -140,7 +140,7 @@ export async function seedDatabase() {
         description: "Color-coded cutting boards for preventing cross-contamination. NSF certified.",
         price: "67.99",
         compareAtPrice: "79.99",
-        imageUrl: "/api/placeholder/400/400",
+        imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop",
         categoryId: insertedCategories[2].id,
         inStock: true,
         stockQuantity: 85,
@@ -154,7 +154,7 @@ export async function seedDatabase() {
         description: "High-quality stainless steel knife set for professional kitchens. Includes sharpener.",
         price: "124.99",
         compareAtPrice: "149.99",
-        imageUrl: "/api/placeholder/400/400",
+        imageUrl: "https://images.unsplash.com/photo-1607077662313-289b5e0c2ecf?w=400&h=400&fit=crop",
         categoryId: insertedCategories[2].id,
         inStock: true,
         stockQuantity: 35,
@@ -168,7 +168,7 @@ export async function seedDatabase() {
         description: "Professional grade mixing bowls. Set of 6 different sizes. Dishwasher safe.",
         price: "39.99",
         compareAtPrice: "49.99",
-        imageUrl: "/api/placeholder/400/400",
+        imageUrl: "https://images.unsplash.com/photo-1556909114-d6b1506c39e2?w=400&h=400&fit=crop",
         categoryId: insertedCategories[2].id,
         inStock: true,
         stockQuantity: 95,
@@ -184,7 +184,7 @@ export async function seedDatabase() {
         description: "EPA-approved sanitizer spray for food contact surfaces. 32 oz bottle.",
         price: "16.99",
         compareAtPrice: "19.99",
-        imageUrl: "/api/placeholder/400/400",
+        imageUrl: "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400&h=400&fit=crop",
         categoryId: insertedCategories[3].id,
         inStock: true,
         stockQuantity: 180,
@@ -198,7 +198,7 @@ export async function seedDatabase() {
         description: "Heavy-duty degreaser concentrate. Makes 10 gallons. Commercial grade.",
         price: "28.99",
         compareAtPrice: "34.99",
-        imageUrl: "/api/placeholder/400/400",
+        imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop",
         categoryId: insertedCategories[3].id,
         inStock: true,
         stockQuantity: 120,
@@ -214,7 +214,7 @@ export async function seedDatabase() {
         description: "Airtight food storage containers. Set of 12 with labels. BPA-free.",
         price: "54.99",
         compareAtPrice: "64.99",
-        imageUrl: "/api/placeholder/400/400",
+        imageUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop",
         categoryId: insertedCategories[4].id,
         inStock: true,
         stockQuantity: 75,
@@ -228,7 +228,7 @@ export async function seedDatabase() {
         description: "Large capacity food storage bins with wheels. NSF certified. Set of 3.",
         price: "189.99",
         compareAtPrice: "229.99",
-        imageUrl: "/api/placeholder/400/400",
+        imageUrl: "https://images.unsplash.com/photo-1563220552-5a5b5f3d7b5b?w=400&h=400&fit=crop",
         categoryId: insertedCategories[4].id,
         inStock: true,
         stockQuantity: 25,
