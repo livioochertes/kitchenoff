@@ -62,10 +62,12 @@ export default function Header() {
 
           {/* Header Actions */}
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" className="hidden md:flex">
-              <User className="h-4 w-4 mr-2" />
-              Account
-            </Button>
+            <Link href="/login">
+              <Button variant="ghost" size="sm" className="hidden md:flex">
+                <User className="h-4 w-4 mr-2" />
+                Account
+              </Button>
+            </Link>
             <Link href="/cart">
               <Button variant="ghost" size="sm" className="relative">
                 <ShoppingCart className="h-4 w-4 mr-2" />

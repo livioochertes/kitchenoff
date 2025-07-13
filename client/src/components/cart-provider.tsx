@@ -17,83 +17,154 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [localCart, setLocalCart] = useState<CartItemWithProduct[]>([]);
 
   // Check if user is authenticated
   useEffect(() => {
     const token = localStorage.getItem("token");
     setIsAuthenticated(!!token);
+    
+    // Load cart from localStorage for guest users
+    if (!token) {
+      const savedCart = localStorage.getItem("guestCart");
+      if (savedCart) {
+        setLocalCart(JSON.parse(savedCart));
+      }
+    }
   }, []);
 
-  const { data: cart = [], isLoading } = useQuery({
+  // Load authenticated user's cart from API
+  const { data: apiCart = [], isLoading: apiLoading } = useQuery({
     queryKey: ["/api/cart"],
     enabled: isAuthenticated,
     staleTime: 0,
   });
 
+  // Use API cart for authenticated users, localStorage cart for guests
+  const cart = isAuthenticated ? apiCart : localCart;
+  const isLoading = isAuthenticated ? apiLoading : false;
+
   const addToCartMutation = useMutation({
     mutationFn: async ({ productId, quantity }: { productId: number; quantity: number }) => {
-      const token = localStorage.getItem("token");
-      return apiRequest("POST", "/api/cart", { productId, quantity }, {
-        Authorization: `Bearer ${token}`,
-      });
+      if (isAuthenticated) {
+        const token = localStorage.getItem("token");
+        return apiRequest("POST", "/api/cart", { productId, quantity }, {
+          Authorization: `Bearer ${token}`,
+        });
+      } else {
+        // Guest cart - get product details
+        const response = await fetch(`/api/products/${productId}`);
+        const product = await response.json();
+        return { product, quantity };
+      }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+    onSuccess: (data) => {
+      if (isAuthenticated) {
+        queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      } else {
+        // Update guest cart in localStorage
+        setLocalCart(prev => {
+          const existingItem = prev.find(item => item.productId === data.product.id);
+          let newCart;
+          
+          if (existingItem) {
+            newCart = prev.map(item =>
+              item.productId === data.product.id
+                ? { ...item, quantity: item.quantity + data.quantity }
+                : item
+            );
+          } else {
+            newCart = [...prev, {
+              id: Date.now(), // temporary ID
+              userId: 0, // guest user
+              productId: data.product.id,
+              quantity: data.quantity,
+              createdAt: new Date(),
+              product: data.product
+            }];
+          }
+          
+          localStorage.setItem("guestCart", JSON.stringify(newCart));
+          return newCart;
+        });
+      }
     },
   });
 
   const updateQuantityMutation = useMutation({
     mutationFn: async ({ itemId, quantity }: { itemId: number; quantity: number }) => {
-      const token = localStorage.getItem("token");
-      return apiRequest("PUT", `/api/cart/${itemId}`, { quantity }, {
-        Authorization: `Bearer ${token}`,
-      });
+      if (isAuthenticated) {
+        const token = localStorage.getItem("token");
+        return apiRequest("PUT", `/api/cart/${itemId}`, { quantity }, {
+          Authorization: `Bearer ${token}`,
+        });
+      } else {
+        return { itemId, quantity };
+      }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+    onSuccess: (data) => {
+      if (isAuthenticated) {
+        queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      } else {
+        setLocalCart(prev => {
+          const newCart = prev.map(item =>
+            item.id === data.itemId
+              ? { ...item, quantity: data.quantity }
+              : item
+          );
+          localStorage.setItem("guestCart", JSON.stringify(newCart));
+          return newCart;
+        });
+      }
     },
   });
 
   const removeFromCartMutation = useMutation({
     mutationFn: async (itemId: number) => {
-      const token = localStorage.getItem("token");
-      return apiRequest("DELETE", `/api/cart/${itemId}`, undefined, {
-        Authorization: `Bearer ${token}`,
-      });
+      if (isAuthenticated) {
+        const token = localStorage.getItem("token");
+        return apiRequest("DELETE", `/api/cart/${itemId}`, undefined, {
+          Authorization: `Bearer ${token}`,
+        });
+      } else {
+        return { itemId };
+      }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+    onSuccess: (data) => {
+      if (isAuthenticated) {
+        queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      } else {
+        setLocalCart(prev => {
+          const newCart = prev.filter(item => item.id !== data.itemId);
+          localStorage.setItem("guestCart", JSON.stringify(newCart));
+          return newCart;
+        });
+      }
     },
   });
 
   const clearCartMutation = useMutation({
     mutationFn: async () => {
-      const token = localStorage.getItem("token");
-      return apiRequest("DELETE", "/api/cart", undefined, {
-        Authorization: `Bearer ${token}`,
-      });
+      if (isAuthenticated) {
+        const token = localStorage.getItem("token");
+        return apiRequest("DELETE", "/api/cart", undefined, {
+          Authorization: `Bearer ${token}`,
+        });
+      } else {
+        return {};
+      }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      if (isAuthenticated) {
+        queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      } else {
+        setLocalCart([]);
+        localStorage.removeItem("guestCart");
+      }
     },
   });
 
   const addToCart = (productId: number, quantity: number) => {
-    if (!isAuthenticated) {
-      // Handle guest cart (localStorage)
-      const guestCart = JSON.parse(localStorage.getItem("guestCart") || "[]");
-      const existingItem = guestCart.find((item: any) => item.productId === productId);
-      
-      if (existingItem) {
-        existingItem.quantity += quantity;
-      } else {
-        guestCart.push({ productId, quantity });
-      }
-      
-      localStorage.setItem("guestCart", JSON.stringify(guestCart));
-      return;
-    }
-    
     addToCartMutation.mutate({ productId, quantity });
   };
 
