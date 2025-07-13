@@ -36,12 +36,14 @@ export default function RevolutPayment({
   }, [amount, currency]);
 
   const handleRegularPayment = async () => {
+    console.log("Regular payment button clicked, amount:", amount, "currency:", currency);
     setIsLoading(true);
     setTimeout(() => {
       toast({
         title: "Payment Successful",
         description: "Your payment has been processed successfully.",
       });
+      console.log("Regular payment successful, calling onSuccess");
       onSuccess("regular_payment_" + Date.now());
       setIsLoading(false);
     }, 2000);
@@ -65,12 +67,14 @@ export default function RevolutPayment({
         {/* Apple Pay Button */}
         <Button
           onClick={() => {
+            console.log("Apple Pay button clicked, amount:", amount, "currency:", currency);
             setIsLoading(true);
             setTimeout(() => {
               toast({
                 title: "Payment Successful",
                 description: "Your Apple Pay payment has been processed successfully.",
               });
+              console.log("Apple Pay payment successful, calling onSuccess");
               onSuccess("apple_pay_" + Date.now());
               setIsLoading(false);
             }, 2000);
@@ -84,12 +88,14 @@ export default function RevolutPayment({
         {/* Google Pay Button */}
         <Button
           onClick={() => {
+            console.log("Google Pay button clicked, amount:", amount, "currency:", currency);
             setIsLoading(true);
             setTimeout(() => {
               toast({
                 title: "Payment Successful",
                 description: "Your Google Pay payment has been processed successfully.",
               });
+              console.log("Google Pay payment successful, calling onSuccess");
               onSuccess("google_pay_" + Date.now());
               setIsLoading(false);
             }, 2000);

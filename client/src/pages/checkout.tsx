@@ -560,14 +560,16 @@ export default function Checkout() {
                         amount={total}
                         currency="USD"
                         onSuccess={(paymentId) => {
+                          console.log("Payment successful in checkout:", paymentId);
                           toast({
                             title: "Payment successful!",
                             description: "Your order has been placed successfully.",
                           });
                           clearCart();
-                          navigate("/orders");
+                          navigate("/");
                         }}
                         onError={(error) => {
+                          console.error("Payment failed in checkout:", error);
                           toast({
                             title: "Payment failed",
                             description: error,
