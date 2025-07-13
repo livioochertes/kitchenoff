@@ -5,6 +5,7 @@ import { insertUserSchema, insertCategorySchema, insertProductSchema, insertOrde
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
+import Stripe from "stripe";
 
 // JWT middleware
 interface AuthRequest extends Request {
@@ -417,6 +418,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Stripe Payment Routes
+  app.post("/api/payments/stripe/create-payment-intent", async (req, res) => {
+    try {
+      const { amount, currency } = req.body;
+
+      if (!amount || !currency) {
+        return res.status(400).json({ message: "Amount and currency are required" });
+      }
+
+      // Create payment intent with Stripe
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+        apiVersion: '2023-10-16',
+      });
+      
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount),
+        currency: currency.toLowerCase(),
+        metadata: {
+          source: 'kitchenpro-supply'
+        }
+      });
+
+      res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (error) {
+      console.error("Error creating Stripe payment intent:", error);
+      res.status(500).json({ message: "Failed to create payment intent" });
+    }
+  });
+
   // Revolut Payment Routes
   app.post("/api/payments/revolut/create-order", async (req, res) => {
     try {
@@ -444,6 +474,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${process.env.REVOLUT_API_KEY}`,
+          "Revolut-Api-Version": "2024-12-01",
         },
         body: JSON.stringify(orderData),
       });

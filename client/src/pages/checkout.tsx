@@ -21,6 +21,7 @@ import Header from "@/components/header";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import RevolutPayment from "@/components/revolut-payment";
+import StripePayment from "@/components/stripe-payment";
 
 const addressSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -570,6 +571,31 @@ export default function Checkout() {
                         }}
                         onError={(error) => {
                           console.error("Payment failed in checkout:", error);
+                          toast({
+                            title: "Payment failed",
+                            description: error,
+                            variant: "destructive",
+                          });
+                        }}
+                      />
+                    )}
+
+                    {/* Stripe Payment Component */}
+                    {form.watch("paymentMethod") === "stripe" && (
+                      <StripePayment
+                        amount={total}
+                        currency="USD"
+                        onSuccess={(paymentId) => {
+                          console.log("Stripe payment successful in checkout:", paymentId);
+                          toast({
+                            title: "Payment successful!",
+                            description: "Your order has been placed successfully.",
+                          });
+                          clearCart();
+                          navigate("/");
+                        }}
+                        onError={(error) => {
+                          console.error("Stripe payment failed in checkout:", error);
                           toast({
                             title: "Payment failed",
                             description: error,

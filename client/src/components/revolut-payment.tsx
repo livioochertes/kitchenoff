@@ -137,11 +137,14 @@ export default function RevolutPayment({
         throw new Error("Revolut public key not found");
       }
 
-      // Create a real Revolut card payment
-      const { card } = await RevolutCheckout.payments({
-        locale: "en",
-        publicToken: publicKey,
+      // Create order first
+      console.log("Creating Revolut card order...");
+      const response = await apiRequest("POST", "/api/payments/revolut/create-order", {
+        amount: Math.round(amount * 100),
+        currency: currency.toUpperCase(),
       });
+      const order = await response.json();
+      console.log("Card order created:", order);
 
       // Clear any existing card payment form and show card container
       if (cardContainerRef.current) {
@@ -154,24 +157,14 @@ export default function RevolutPayment({
         paymentContainerRef.current.style.display = 'none';
       }
 
+      // Create a real Revolut card payment
+      const { card } = await RevolutCheckout.payments({
+        locale: "en",
+        publicToken: publicKey,
+      });
+
       const cardInstance = card(cardContainerRef.current, {
-        currency: currency.toUpperCase(),
-        amount: Math.round(amount * 100),
-        createOrder: async () => {
-          try {
-            console.log("Creating Revolut card order...");
-            const response = await apiRequest("POST", "/api/payments/revolut/create-order", {
-              amount: Math.round(amount * 100),
-              currency: currency.toUpperCase(),
-            });
-            const order = await response.json();
-            console.log("Card order created:", order);
-            return { publicId: order.token || order.public_id || order.id };
-          } catch (error) {
-            console.error("Failed to create card order:", error);
-            throw error;
-          }
-        },
+        publicId: order.token || order.public_id || order.id,
         onSuccess: () => {
           console.log("Real card payment successful!");
           toast({
@@ -217,11 +210,19 @@ export default function RevolutPayment({
       cardInstance.render();
     } catch (error) {
       console.error("Failed to initialize card payment:", error);
+      console.error("Card payment error details:", error.message, error.stack);
       toast({
         title: "Payment Error",
-        description: "Failed to initialize payment system.",
+        description: error.message || "Failed to initialize payment system.",
         variant: "destructive",
       });
+      // Reset display state on error
+      if (cardContainerRef.current) {
+        cardContainerRef.current.style.display = 'none';
+      }
+      if (paymentContainerRef.current) {
+        paymentContainerRef.current.style.display = 'block';
+      }
       setIsLoading(false);
     }
   };
