@@ -20,6 +20,7 @@ import { apiRequest } from "@/lib/queryClient";
 import Header from "@/components/header";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
+import RevolutPayment from "@/components/revolut-payment";
 
 const addressSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -517,6 +518,29 @@ export default function Checkout() {
                         />
                       </CardContent>
                     </Card>
+
+                    {/* Revolut Payment Component */}
+                    {form.watch("paymentMethod") === "revolut" && (
+                      <RevolutPayment
+                        amount={totalAmount}
+                        currency="USD"
+                        onSuccess={(paymentId) => {
+                          toast({
+                            title: "Payment successful!",
+                            description: "Your order has been placed successfully.",
+                          });
+                          clearCart();
+                          navigate("/orders");
+                        }}
+                        onError={(error) => {
+                          toast({
+                            title: "Payment failed",
+                            description: error,
+                            variant: "destructive",
+                          });
+                        }}
+                      />
+                    )}
 
                     <Card>
                       <CardHeader>

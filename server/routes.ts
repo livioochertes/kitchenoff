@@ -417,6 +417,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Revolut Payment Routes
+  app.post("/api/payments/revolut/create-order", async (req, res) => {
+    try {
+      const { amount, currency } = req.body;
+
+      if (!amount || !currency) {
+        return res.status(400).json({ message: "Amount and currency are required" });
+      }
+
+      // Create order with Revolut
+      const orderData = {
+        amount: Math.round(amount), // Amount in cents
+        currency: currency.toUpperCase(),
+        description: "KitchenPro Supply Order",
+        capture_mode: "automatic",
+        merchant_order_ext_ref: `order_${Date.now()}`,
+        settlement_currency: "USD",
+      };
+
+      // In a real implementation, you would make an API call to Revolut here
+      // For now, we'll create a mock response for testing
+      const mockOrder = {
+        id: `order_${Date.now()}`,
+        publicId: `pub_${Date.now()}`,
+        state: "pending",
+        amount: orderData.amount,
+        currency: orderData.currency,
+        created_at: new Date().toISOString(),
+      };
+
+      res.json(mockOrder);
+    } catch (error) {
+      console.error("Error creating Revolut order:", error);
+      res.status(500).json({ message: "Failed to create payment order" });
+    }
+  });
+
+  app.post("/api/payments/revolut/webhook", async (req, res) => {
+    try {
+      const { event, data } = req.body;
+
+      console.log("Revolut webhook received:", event, data);
+
+      // Handle different webhook events
+      switch (event) {
+        case "ORDER_PAYMENT_COMPLETED":
+          // Update order status in database
+          console.log("Payment completed for order:", data.merchant_order_ext_ref);
+          break;
+        case "ORDER_PAYMENT_FAILED":
+          // Handle payment failure
+          console.log("Payment failed for order:", data.merchant_order_ext_ref);
+          break;
+        case "ORDER_PAYMENT_CANCELLED":
+          // Handle payment cancellation
+          console.log("Payment cancelled for order:", data.merchant_order_ext_ref);
+          break;
+        default:
+          console.log("Unknown webhook event:", event);
+      }
+
+      res.status(200).json({ message: "Webhook processed" });
+    } catch (error) {
+      console.error("Error processing webhook:", error);
+      res.status(500).json({ message: "Webhook processing failed" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
