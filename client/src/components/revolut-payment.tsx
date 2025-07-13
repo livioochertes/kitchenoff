@@ -28,10 +28,17 @@ export default function RevolutPayment({
   useEffect(() => {
     const initializeRealPayment = async () => {
       try {
+        const publicKey = import.meta.env.VITE_REVOLUT_PUBLIC_KEY;
+        console.log("Initializing with public key:", publicKey?.substring(0, 10) + "...");
+        
+        if (!publicKey) {
+          throw new Error("Revolut public key not found in environment variables");
+        }
+        
         // Initialize Revolut Checkout with real API
         const { paymentRequest } = await RevolutCheckout.payments({
           locale: "en",
-          publicToken: process.env.REVOLUT_API_KEY || import.meta.env.VITE_REVOLUT_PUBLIC_KEY,
+          publicToken: publicKey,
         });
 
         // Create payment request instance for Apple Pay/Google Pay
@@ -91,6 +98,7 @@ export default function RevolutPayment({
         }
       } catch (error) {
         console.error("Failed to initialize real payment:", error);
+        console.error("Error details:", error.message, error.stack);
         setPaymentRequestInstance({ available: false, error: error.message });
       }
     };
@@ -108,7 +116,7 @@ export default function RevolutPayment({
       // Create a real Revolut card payment
       const { card } = await RevolutCheckout.payments({
         locale: "en",
-        publicToken: process.env.REVOLUT_API_KEY || import.meta.env.VITE_REVOLUT_PUBLIC_KEY,
+        publicToken: import.meta.env.VITE_REVOLUT_PUBLIC_KEY,
       });
 
       const cardInstance = card(paymentContainerRef.current, {
