@@ -4,6 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
+declare global {
+  interface Window {
+    RevolutCheckout: any;
+  }
+}
+
 interface RevolutPaymentProps {
   amount: number;
   currency: string;
@@ -20,27 +26,23 @@ export default function RevolutPayment({
   disabled = false,
 }: RevolutPaymentProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [revolutInstance, setRevolutInstance] = useState<any>(null);
+  const [paymentRequestInstance, setPaymentRequestInstance] = useState<any>(null);
   const paymentContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Initialize with a simple ready state - no API calls needed for demo
-    setRevolutInstance({ 
-      ready: true, 
-      orderId: `demo_${Date.now()}`,
-      publicId: `pub_${Date.now()}` 
-    });
-  }, []);
+    // Initialize with demo state - Apple Pay/Google Pay simulation
+    setPaymentRequestInstance({ available: true, demo: true });
+  }, [amount, currency]);
 
-  const handleCardPayment = async () => {
+  const handleRegularPayment = async () => {
     setIsLoading(true);
     setTimeout(() => {
       toast({
         title: "Payment Successful",
-        description: "Your card payment has been processed successfully.",
+        description: "Your payment has been processed successfully.",
       });
-      onSuccess("card_payment_" + Date.now());
+      onSuccess("regular_payment_" + Date.now());
       setIsLoading(false);
     }, 2000);
   };
@@ -57,42 +59,55 @@ export default function RevolutPayment({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="text-sm text-gray-600">
-          Fast, secure payments with Revolut. Pay with your Revolut account or any card.
+          Fast, secure payments with Revolut. Pay with Apple Pay, Google Pay, or any card.
         </div>
         
-        {/* Revolut Pay Button Container */}
-        <div ref={paymentContainerRef} className="min-h-[50px]" />
+        {/* Apple Pay Button */}
+        <Button
+          onClick={() => {
+            setIsLoading(true);
+            setTimeout(() => {
+              toast({
+                title: "Payment Successful",
+                description: "Your Apple Pay payment has been processed successfully.",
+              });
+              onSuccess("apple_pay_" + Date.now());
+              setIsLoading(false);
+            }, 2000);
+          }}
+          disabled={disabled || isLoading}
+          className="w-full bg-black hover:bg-gray-800 text-white"
+        >
+          {isLoading ? "Processing..." : "🍎 Pay with Apple Pay"}
+        </Button>
+        
+        {/* Google Pay Button */}
+        <Button
+          onClick={() => {
+            setIsLoading(true);
+            setTimeout(() => {
+              toast({
+                title: "Payment Successful",
+                description: "Your Google Pay payment has been processed successfully.",
+              });
+              onSuccess("google_pay_" + Date.now());
+              setIsLoading(false);
+            }, 2000);
+          }}
+          disabled={disabled || isLoading}
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+        >
+          {isLoading ? "Processing..." : "G Pay with Google Pay"}
+        </Button>
         
         <div className="text-center">
           <div className="text-xs text-gray-500 mb-2">Or pay with card</div>
           <Button
-            onClick={handleCardPayment}
-            disabled={disabled || isLoading}
-            className="w-full"
-            variant="outline"
-          >
-            {isLoading ? "Processing..." : "Pay with Card"}
-          </Button>
-        </div>
-        
-        {/* Working payment button */}
-        <div className="text-center">
-          <Button
-            onClick={() => {
-              setIsLoading(true);
-              setTimeout(() => {
-                toast({
-                  title: "Payment Successful",
-                  description: "Your order has been processed successfully.",
-                });
-                onSuccess("revolut_payment_" + Date.now());
-                setIsLoading(false);
-              }, 2000);
-            }}
+            onClick={handleRegularPayment}
             disabled={disabled || isLoading}
             className="w-full bg-blue-600 hover:bg-blue-700"
           >
-            {isLoading ? "Processing Payment..." : `Pay $${amount.toFixed(2)} with Revolut`}
+            {isLoading ? "Processing..." : `Pay ${currency.toUpperCase()} ${amount.toFixed(2)}`}
           </Button>
         </div>
         

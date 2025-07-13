@@ -440,6 +440,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // This allows the checkout flow to work for testing purposes
       const testOrder = {
         id: `order_${Date.now()}`,
+        token: `token_${Date.now()}`,
         public_id: `pub_${Date.now()}`,
         state: "pending",
         amount: orderData.amount,

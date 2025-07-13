@@ -1,0 +1,222 @@
+mplement the Payment request button​
+1. Register your domain for Apple Pay​
+The first step to make the payment request button work is to register your website's domain for Apple Pay.
+
+Apple requires this in order to verify that you are accepting payments from an approved website.
+
+To do so, follow these steps:
+
+Download the latest domain validation file.
+
+Upload the domain validation file to your website in the following URI /.well-known/apple-developer-merchantid-domain-association. For example, if your website is example.com, the file should be available on example.com/.well-known/apple-developer-merchantid-domain-association.
+
+Activate your domain using the endpoint to Register a domain for Apple Pay with the following request body, based on our example:
+
+{
+  "domain": "example.com"
+}
+
+note
+Google Pay does not require any extra step.
+
+2. Install Revolut Checkout Widget​
+Before you begin, ensure the Revolut Checkout Widget is installed in your project. This widget is a necessary component to create and configure the payment request button. You can install the widget via your project's package manager.
+
+NPM
+Yarn
+npm install @revolut/checkout
+
+info
+Alternatively, you can add the widget to your code base by adding the embed script to your page directly. To learn more, see: Adding the embed script.
+
+3. Set up an endpoint for creating orders​
+When a customer proceeds to make payment on your website, the widget will call the createOrder callback. You'll need to create an order based on your customer's checkout and return its token using the Merchant API: Create an order endpoint.
+
+This token represents the order and is used to initialise the Payment request button. The process of creating an order and receiving a token will vary based on your backend setup.
+
+See an example response of an order created with minimal required parameters:
+
+{
+  "id": "6516e61c-d279-a454-a837-bc52ce55ed49",
+  "token": "0adc0e3c-ab44-4f33-bcc0-534ded7354ce",
+  "type": "payment",
+  "state": "pending",
+  "created_at": "2023-09-29T14:58:36.079398Z",
+  "updated_at": "2023-09-29T14:58:36.079398Z",
+  "amount": 5,
+  "currency": "GBP",
+  "outstanding_amount": 5,
+  "capture_mode": "automatic",
+  "checkout_url": "https://checkout.revolut.com/payment-link/0adc0e3c-ab44-4f33-bcc0-534ded7354ce",
+  "enforce_challenge": "automatic"
+}
+
+
+4. Initialise widget​
+Use the RevolutCheckout.payments() function's paymentRequest instance with your Merchant API Public key to initialise the widget.
+
+With async await
+Without async await
+my-app.js
+const { paymentRequest } = await RevolutCheckout.payments({
+  locale: "en", // Optional, defaults to "auto"
+  publicToken: "<yourPublicApiKey>", // Merchant public API key 
+})
+
+// Initialisation code will go here
+
+info
+For more information about the RevolutCheckout.payments() function, see: Merchant Web SDKs: The payments object
+
+5. Configure and mount the payment request button​
+In this step, you'll integrate the payment request button into your webpage and set up the necessary event listeners for user interactions. To do this, you need to prepare two things:
+
+HTML structure: adding necessary HTML elements to your page where the payment request button will be rendered
+JavaScript integration: adding necessary configuration to mount the payment request button and set up event listening
+5.1 HTML structure​
+Before initialising the Payment request in JavaScript, you need to prepare your checkout page. You should define a dedicated HTML container where the button will be mounted.
+
+my-shop.html
+<...>
+
+<div id="payment-request"></div>
+
+<...>
+
+The <div> element with id="payment-request" serves as the container for the payment request button on your page. This is where the Apple Pay or Google Pay buttons will be dynamically inserted.
+5.2 JavaScript integration​
+After setting up your HTML, use JavaScript to mount the payment request button into the specified container, configure its behaviour, and add additional settings. Here is an example with minimal required parameters:
+
+With async await
+Without async await
+my-app.js
+const target = document.getElementById("payment-request")
+
+const { paymentRequest } = await RevolutCheckout.payments({
+  locale: "en", // Optional, defaults to "auto"
+  publicToken: "<yourPublicApiKey>", // Merchant public API key 
+})
+
+const paymentRequestInstance = paymentRequest(target, {
+  currency: "USD", // 3-letter currency code
+  amount: 1000, // In lowest denomination e.g., cents
+  createOrder: async () => {
+    // Call your backend here to create an order
+    // For more information, see: https://developer.revolut.com/docs/merchant/create-order
+    const order = await yourServerSideCall()
+    return { publicId: order.token }
+  },
+  onSuccess() {
+    // Do something to handle successful payments
+    window.alert("Thank you!")
+  },
+  onError(error) {
+    // Do something to handle payment errors
+    window.alert(`Something went wrong. ${error}`)
+  }
+})
+
+const method = await paymentRequestInstance.canMakePayment()
+if (method) {
+  paymentRequestInstance.render()
+} else {
+  paymentRequestInstance.destroy()
+}
+
+paymentRequest is a function that creates the payment request instance
+
+createOrder is a function that calls yourServerSideCall(), replace this from the example with a function you defined to call your backend/server. The role of yourServerSideCall() is to pass the order details (e.g., amount, currency, billing_address, etc.) from the frontend to your backend.
+
+When your backend received the order details, it needs to send them as the payload of a request to the Merchant API: Create an order endpoint. The backend will receive the token in the response.
+
+You need to send the token back to your frontend and pass it to our widget. The token is required for initialising a new checkout session on the Payment request widget.
+
+onSuccess is an event handler that triggers when the payment is successful. In this example it shows a "Thank you" alert. It's designed to execute custom actions as specified by the merchant. Any return value is ignored.
+
+For example, onSuccess might be used to redirect customers to a confirmation page or to display a custom success message.
+
+onError is an event handler that triggers in case of an error. In this example it displays an alert with the error message. Similar to the onSuccess, it's intended for implementing custom error handling logic based on the merchant's requirements. Any return value is ignored.
+
+For example, onError might be used to redirect customers to an error-specific page or to display a custom error message.
+
+Finally, the paymentRequestInstance.canMakePayment() method checks which payment option is supported:
+
+If applePay or googlePay is returned, the corresponding button is rendered by the paymentRequestInstance.render() method.
+If neither of them is supported the method returns null, and the payment request instance is terminated by the paymentRequestInstance.destroy() method.
+info
+For more details about the available parameters, see: Merchant Web SDK: Payments.paymentRequest.
+
+By following these steps, you have successfully integrated the Revolut Checkout Widget's Payment request button into your website. This setup allows customers to pay with their Apple Pay or Google Pay accounts securely and handles the transaction process seamlessly.
+
+5.3 Additional settings​
+The paymentRequest function of the Revolut Checkout Widget offers a range of options that allow for enhanced customisation and functionality. Here are some key additional settings you can leverage:
+
+Custom styling:
+
+You can apply custom styles to the payment request button (like border radius, size, color variant, etc.) using the buttonStyle property in the options object. Custom styling ensures that the payment button can seamlessly integrate with your website design and branding.
+Event handlers:
+
+onSuccess, onError, and onCancel are event handlers that you can define to manage the different states of the payment process - from successful transactions, errors, to cancellation.
+
+You can use the validate function to run custom validation checks on your side to ensure the customer is allowed to proceed with the payment.
+
+If the validation fails, you should throw an error. If no error is thrown, the widget considers the validation successful.
+
+Shipping information and customisation:
+
+The requestShipping option indicates if there is shipping information required for the transaction, prompting the user to provide shipping details.
+The shippingOptions option lets you specify a list of shipping options available to the customer, allowing users to choose the method that best suits their needs.
+The onShippingOptionChange and onShippingAddressChange are asynchronous event handlers that allow for dynamic updates based on the user's shipping option and address selection. They can return updated totals and shipping options, handling changes in real-time and providing feedback such as success or failure statuses.
+Dynamic shipping information update​
+The onShippingOptionChange and onShippingAddressChange event handlers help you provide a flexible and responsive checkout experience, by dynamically updating shipping details based on custom validations and calculations. In this section, we explore how to effectively use these event handlers within your integration.
+
+Let's first define an example of the shippingOptions list, representing the initial shipping options available to the customer during the checkout process:
+
+const shippingOptions = [
+  {
+    id: "standard-shipping",
+    label: "Standard shipping",
+    amount: 200,
+    description: "Standard delivery in 5-7 business days"
+  }
+]
+
+The onShippingAddressChange event handler comes into play when the customer updates their shipping address. This can trigger a change in the available shipping options and the total cost. With the initial shipping option in mind, here's an example implementation:
+
+onShippingAddressChange: (selectedShippingAddress) => {
+  // Introduce a new shipping option based on the changed address
+  // This could involve server-side logic to validate the new address, fetch shipping option details, and calculate costs
+  const newShippingOption = {
+    id: "ultra-fast",
+    label: "Ultra-fast shipping",
+    amount: 500, // Additional cost for the new shipping method
+    description: "Ultra-fast delivery in 1-2 business days",
+  };
+
+  return Promise.resolve({
+    status: "success",
+    shippingOptions: [newShippingOption, ...shippingOptions], // Add the new shipping option to the list
+    total: {
+      amount: 777 + newShippingOption.amount, // Recalculate total cost
+    },
+  });
+},
+
+
+Upon the customer's shipping address update, this code introduces an "Ultra-fast shipping" option, recalculates the total to include this new option's cost, and dynamically updates the available shipping options.
+
+When the customer selects a different shipping option, you can use the onShippingOptionChange event handler to update the total cost. Here's how to implement using our initial shipping options:
+
+onShippingOptionChange: (selectedShippingOption) => {
+  // Calculate new total price. This could involve server-side logic to validate and calculate costs
+  return Promise.resolve({
+    status: "success",
+    total: {
+      amount: 777 + selectedShippingOption.amount, // Recalculate total cost
+    },
+  });
+},
+
+
+In this scenario, when the customer chooses a shipping option, the total price is updated accordingly by adding the shipping cost to the base amount.
+
