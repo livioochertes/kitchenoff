@@ -22,11 +22,15 @@ export default function RevolutPayment({
 }: RevolutPaymentProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [paymentRequestInstance, setPaymentRequestInstance] = useState<any>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
   const paymentContainerRef = useRef<HTMLDivElement>(null);
+  const cardContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     const initializeRealPayment = async () => {
+      if (isInitialized) return; // Prevent multiple initializations
+      
       try {
         const publicKey = import.meta.env.VITE_REVOLUT_PUBLIC_KEY;
         console.log("Initializing with public key:", publicKey?.substring(0, 10) + "...");
@@ -90,36 +94,67 @@ export default function RevolutPayment({
         if (method) {
           console.log("Payment method available:", method);
           instance.render();
-          setPaymentRequestInstance({ available: true, method });
+          setPaymentRequestInstance({ available: true, method, instance });
         } else {
           console.log("Apple Pay/Google Pay not available");
           instance.destroy();
           setPaymentRequestInstance({ available: false });
         }
+        
+        setIsInitialized(true);
       } catch (error) {
         console.error("Failed to initialize real payment:", error);
         console.error("Error details:", error.message, error.stack);
         setPaymentRequestInstance({ available: false, error: error.message });
+        setIsInitialized(true);
       }
     };
 
-    if (paymentContainerRef.current && amount > 0) {
+    if (paymentContainerRef.current && amount > 0 && !isInitialized) {
       initializeRealPayment();
     }
-  }, [amount, currency, onSuccess, onError, toast]);
+  }, [amount, currency, onSuccess, onError, toast, isInitialized]);
+
+  // Cleanup function to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (paymentRequestInstance?.instance) {
+        paymentRequestInstance.instance.destroy();
+      }
+    };
+  }, [paymentRequestInstance]);
 
   const handleRegularPayment = async () => {
+    if (isLoading) return; // Prevent multiple clicks
+    
     console.log("Regular payment button clicked, amount:", amount, "currency:", currency);
     setIsLoading(true);
     
     try {
+      const publicKey = import.meta.env.VITE_REVOLUT_PUBLIC_KEY;
+      
+      if (!publicKey) {
+        throw new Error("Revolut public key not found");
+      }
+
       // Create a real Revolut card payment
       const { card } = await RevolutCheckout.payments({
         locale: "en",
-        publicToken: import.meta.env.VITE_REVOLUT_PUBLIC_KEY,
+        publicToken: publicKey,
       });
 
-      const cardInstance = card(paymentContainerRef.current, {
+      // Clear any existing card payment form and show card container
+      if (cardContainerRef.current) {
+        cardContainerRef.current.innerHTML = '';
+        cardContainerRef.current.style.display = 'block';
+      }
+      
+      // Hide payment request buttons when showing card form
+      if (paymentContainerRef.current) {
+        paymentContainerRef.current.style.display = 'none';
+      }
+
+      const cardInstance = card(cardContainerRef.current, {
         currency: currency.toUpperCase(),
         amount: Math.round(amount * 100),
         createOrder: async () => {
@@ -154,6 +189,13 @@ export default function RevolutPayment({
             variant: "destructive",
           });
           onError(error.message || "Payment failed");
+          // Reset display state on error
+          if (cardContainerRef.current) {
+            cardContainerRef.current.style.display = 'none';
+          }
+          if (paymentContainerRef.current) {
+            paymentContainerRef.current.style.display = 'block';
+          }
           setIsLoading(false);
         },
         onCancel: () => {
@@ -161,6 +203,13 @@ export default function RevolutPayment({
             title: "Payment Cancelled",
             description: "Payment was cancelled by user.",
           });
+          // Reset display state
+          if (cardContainerRef.current) {
+            cardContainerRef.current.style.display = 'none';
+          }
+          if (paymentContainerRef.current) {
+            paymentContainerRef.current.style.display = 'block';
+          }
           setIsLoading(false);
         }
       });
@@ -207,6 +256,13 @@ export default function RevolutPayment({
               Loading payment options...
             </div>
           )}
+        </div>
+        
+        {/* Card Payment Container */}
+        <div ref={cardContainerRef} className="min-h-[200px] border-2 border-dashed border-gray-200 rounded-lg p-4" style={{ display: 'none' }}>
+          <div className="text-center text-sm text-gray-500">
+            Card payment form will appear here
+          </div>
         </div>
         
         {/* Real Card Payment */}
