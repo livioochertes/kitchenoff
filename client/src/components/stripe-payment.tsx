@@ -6,6 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
+if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
+  console.error('Missing VITE_STRIPE_PUBLIC_KEY environment variable');
+}
+
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 interface StripePaymentProps {
@@ -24,34 +28,44 @@ function CheckoutForm({ amount, currency, onSuccess, onError, disabled }: Stripe
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    console.log("Stripe payment form submitted");
 
     if (!stripe || !elements || isLoading) {
+      console.log("Stripe not ready:", { stripe: !!stripe, elements: !!elements, isLoading });
       return;
     }
 
     setIsLoading(true);
 
     try {
+      console.log("Creating payment intent for amount:", amount, "currency:", currency);
+      
       // Create payment intent
       const response = await apiRequest("POST", "/api/payments/stripe/create-payment-intent", {
         amount: Math.round(amount * 100),
         currency: currency.toLowerCase(),
       });
       
+      console.log("Payment intent response:", response.status);
       const { clientSecret } = await response.json();
+      console.log("Got client secret:", clientSecret ? "✓" : "✗");
 
       // Confirm payment
       const cardElement = elements.getElement(CardElement);
+      console.log("Card element:", cardElement ? "✓" : "✗");
       
       if (!cardElement) {
         throw new Error('Card element not found');
       }
 
+      console.log("Confirming payment with client secret...");
       const result = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card: cardElement,
         }
       });
+
+      console.log("Payment result:", result);
 
       if (result.error) {
         console.error('Payment error:', result.error);

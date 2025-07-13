@@ -587,12 +587,8 @@ export default function Checkout() {
                         currency="USD"
                         onSuccess={(paymentId) => {
                           console.log("Stripe payment successful in checkout:", paymentId);
-                          toast({
-                            title: "Payment successful!",
-                            description: "Your order has been placed successfully.",
-                          });
-                          clearCart();
-                          navigate("/");
+                          // Create order after successful payment
+                          createOrderMutation.mutate(form.getValues());
                         }}
                         onError={(error) => {
                           console.error("Stripe payment failed in checkout:", error);
@@ -646,13 +642,19 @@ export default function Checkout() {
                         Next
                       </Button>
                     ) : (
-                      <Button
-                        type="submit"
-                        disabled={createOrderMutation.isPending}
-                        className="kitchen-pro-secondary"
-                      >
-                        {createOrderMutation.isPending ? "Processing..." : "Place Order"}
-                      </Button>
+                      form.watch("paymentMethod") === "stripe" ? (
+                        <div className="text-sm text-gray-600">
+                          Use the payment form above to complete your order
+                        </div>
+                      ) : (
+                        <Button
+                          type="submit"
+                          disabled={createOrderMutation.isPending}
+                          className="kitchen-pro-secondary"
+                        >
+                          {createOrderMutation.isPending ? "Processing..." : "Place Order"}
+                        </Button>
+                      )
                     )}
                   </div>
                 </div>
