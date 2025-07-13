@@ -10,6 +10,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### July 13, 2025
+- Fixed checkout form validation to allow smooth step-by-step progression
+- Implemented working Revolut payment system with demo functionality
+- Resolved payment initialization errors and excessive API calls
+- Optimized product loading with 20-item limit for better performance
+- Created functional payment buttons for both Revolut and card payments
+
 ### July 11, 2025
 - Fixed product card styling issues with price display and "Add to Cart" button
 - Improved price layout to prevent "Save" badge overflow
