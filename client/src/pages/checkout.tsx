@@ -132,7 +132,37 @@ export default function Checkout() {
   const total = subtotal + shipping + tax;
 
   const handleNext = async () => {
-    const isValid = await form.trigger();
+    let fieldsToValidate: any[] = [];
+    
+    if (step === 1) {
+      fieldsToValidate = ["email"];
+    } else if (step === 2) {
+      fieldsToValidate = [
+        "shippingAddress.firstName",
+        "shippingAddress.lastName", 
+        "shippingAddress.address",
+        "shippingAddress.city",
+        "shippingAddress.state",
+        "shippingAddress.zipCode",
+        "shippingAddress.country",
+        "shippingAddress.phone"
+      ];
+      
+      if (!sameAsBilling) {
+        fieldsToValidate.push(
+          "billingAddress.firstName",
+          "billingAddress.lastName",
+          "billingAddress.address", 
+          "billingAddress.city",
+          "billingAddress.state",
+          "billingAddress.zipCode",
+          "billingAddress.country",
+          "billingAddress.phone"
+        );
+      }
+    }
+    
+    const isValid = await form.trigger(fieldsToValidate);
     if (isValid) {
       setStep(step + 1);
     }

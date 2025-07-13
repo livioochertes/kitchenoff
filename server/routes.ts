@@ -180,8 +180,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         categoryId: categoryId ? parseInt(categoryId as string) : undefined,
         featured: featured === "true",
         search: search as string,
-        limit: limit ? parseInt(limit as string) : undefined,
-        offset: offset ? parseInt(offset as string) : undefined,
+        limit: limit ? parseInt(limit as string) : 20,  // Default to 20 for better performance
+        offset: offset ? parseInt(offset as string) : 0,
       });
       res.json(products);
     } catch (error) {
