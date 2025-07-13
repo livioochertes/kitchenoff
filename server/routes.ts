@@ -436,20 +436,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         settlement_currency: "USD",
       };
 
-      // For now, use a test implementation until API credentials are properly configured
-      // This allows the checkout flow to work for testing purposes
-      const testOrder = {
-        id: `order_${Date.now()}`,
-        token: `token_${Date.now()}`,
-        public_id: `pub_${Date.now()}`,
-        state: "pending",
-        amount: orderData.amount,
-        currency: orderData.currency,
-        created_at: new Date().toISOString(),
-        merchant_order_ext_ref: orderData.merchant_order_ext_ref,
-      };
+      // Create real Revolut order using the API
+      const revolutApiUrl = "https://merchant.revolut.com/api/1.0/orders";
+      
+      const revolutResponse = await fetch(revolutApiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.REVOLUT_API_KEY}`,
+        },
+        body: JSON.stringify(orderData),
+      });
 
-      res.json(testOrder);
+      if (!revolutResponse.ok) {
+        const errorText = await revolutResponse.text();
+        console.error("Revolut API Error:", revolutResponse.status, errorText);
+        throw new Error(`Revolut API error: ${revolutResponse.status}`);
+      }
+
+      const revolutOrder = await revolutResponse.json();
+      console.log("Revolut order created:", revolutOrder);
+      
+      res.json(revolutOrder);
     } catch (error) {
       console.error("Error creating Revolut order:", error);
       res.status(500).json({ message: "Failed to create payment order" });
