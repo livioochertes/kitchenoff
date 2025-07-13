@@ -23,6 +23,8 @@ Preferred communication style: Simple, everyday language.
 - Implemented dual payment options: Revolut Pay and Stripe Credit Cards
 - Separated payment containers to prevent UI conflicts
 - Added comprehensive error handling and loading states for payments
+- Set Stripe as the default payment method due to Revolut API authentication issues
+- Temporarily disabled Revolut card payments while maintaining Apple Pay/Google Pay functionality
 
 ### July 11, 2025
 - Fixed product card styling issues with price display and "Add to Cart" button

@@ -79,7 +79,7 @@ export default function Checkout() {
         country: "US",
         phone: "",
       },
-      paymentMethod: "revolut",
+      paymentMethod: "stripe",
       sameAsBilling: false,
       notes: "",
     },
@@ -528,16 +528,16 @@ export default function Checkout() {
                                   className="space-y-3"
                                 >
                                   <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                                    <RadioGroupItem value="revolut" id="revolut" />
-                                    <Label htmlFor="revolut" className="flex items-center space-x-2 cursor-pointer">
-                                      <span>Revolut Pay</span>
+                                    <RadioGroupItem value="stripe" id="stripe" />
+                                    <Label htmlFor="stripe" className="flex items-center space-x-2 cursor-pointer">
+                                      <span>Credit/Debit Card</span>
                                       <Badge variant="secondary">Recommended</Badge>
                                     </Label>
                                   </div>
                                   <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                                    <RadioGroupItem value="stripe" id="stripe" />
-                                    <Label htmlFor="stripe" className="cursor-pointer">
-                                      Credit/Debit Card
+                                    <RadioGroupItem value="revolut" id="revolut" />
+                                    <Label htmlFor="revolut" className="cursor-pointer">
+                                      Revolut Pay (Apple Pay/Google Pay)
                                     </Label>
                                   </div>
                                   <div className="flex items-center space-x-2 p-3 border rounded-lg">

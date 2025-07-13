@@ -266,16 +266,18 @@ export default function RevolutPayment({
           </div>
         </div>
         
-        {/* Real Card Payment */}
+        {/* Temporarily disabled card payment due to API issues */}
         <div className="text-center">
-          <div className="text-xs text-gray-500 mb-2">Or pay with credit/debit card</div>
+          <div className="text-xs text-gray-500 mb-2">Card payment temporarily unavailable</div>
           <Button
-            onClick={handleRegularPayment}
-            disabled={disabled || isLoading}
-            className="w-full bg-blue-600 hover:bg-blue-700"
+            disabled={true}
+            className="w-full bg-gray-400 cursor-not-allowed"
           >
-            {isLoading ? "Loading Payment..." : `Pay ${currency.toUpperCase()} ${amount.toFixed(2)} with Card`}
+            Card Payment (Coming Soon)
           </Button>
+          <p className="text-xs text-gray-500 mt-2">
+            Please use Apple Pay/Google Pay above or select "Credit/Debit Card" for Stripe payment
+          </p>
         </div>
         
         <div className="text-xs text-gray-500 text-center">
