@@ -148,6 +148,7 @@ export default function Checkout() {
         "shippingAddress.phone"
       ];
       
+      // Only validate billing address if it's different from shipping
       if (!sameAsBilling) {
         fieldsToValidate.push(
           "billingAddress.firstName",
@@ -163,6 +164,7 @@ export default function Checkout() {
     }
     
     const isValid = await form.trigger(fieldsToValidate);
+    
     if (isValid) {
       setStep(step + 1);
     }
@@ -555,7 +557,7 @@ export default function Checkout() {
                     {/* Revolut Payment Component */}
                     {form.watch("paymentMethod") === "revolut" && (
                       <RevolutPayment
-                        amount={totalAmount}
+                        amount={total}
                         currency="USD"
                         onSuccess={(paymentId) => {
                           toast({
