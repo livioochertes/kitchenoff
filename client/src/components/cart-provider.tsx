@@ -28,7 +28,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (!token) {
       const savedCart = localStorage.getItem("guestCart");
       if (savedCart) {
-        setLocalCart(JSON.parse(savedCart));
+        try {
+          const parsedCart = JSON.parse(savedCart);
+          // Only keep valid items with product data
+          const validItems = parsedCart.filter((item: any) => 
+            item.product && item.product.id && item.product.name && item.product.price
+          );
+          setLocalCart(validItems);
+          // Update localStorage with cleaned cart
+          localStorage.setItem("guestCart", JSON.stringify(validItems));
+        } catch (error) {
+          console.error("Error parsing guest cart:", error);
+          localStorage.removeItem("guestCart");
+          setLocalCart([]);
+        }
       }
     }
   }, []);

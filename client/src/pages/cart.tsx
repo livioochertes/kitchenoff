@@ -12,7 +12,12 @@ export default function Cart() {
   const { cart, updateQuantity, removeFromCart, clearCart, isLoading } = useCart();
   const { toast } = useToast();
 
-  const subtotal = cart.reduce((sum, item) => sum + (parseFloat(item.product.price) * item.quantity), 0);
+  // Filter out items without product data
+  const validCart = cart.filter(item => item.product && item.product.price);
+
+  const subtotal = validCart.reduce((sum, item) => {
+    return sum + (parseFloat(item.product.price) * item.quantity);
+  }, 0);
   const shipping = subtotal > 500 ? 0 : 25;
   const total = subtotal + shipping;
 
@@ -61,14 +66,14 @@ export default function Cart() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-primary">Shopping Cart</h1>
-          {cart.length > 0 && (
+          {validCart.length > 0 && (
             <Button variant="outline" onClick={handleClearCart}>
               Clear Cart
             </Button>
           )}
         </div>
 
-        {cart.length === 0 ? (
+        {validCart.length === 0 ? (
           <Card className="text-center py-16">
             <CardContent>
               <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
@@ -87,22 +92,22 @@ export default function Cart() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-4">
-              {cart.map((item) => (
+              {validCart.map((item) => (
                 <Card key={item.id}>
                   <CardContent className="p-6">
                     <div className="flex items-center space-x-4">
                       <img
-                        src={item.product.imageUrl || "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"}
-                        alt={item.product.name}
+                        src={item.product?.imageUrl || "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"}
+                        alt={item.product?.name || "Product"}
                         className="w-20 h-20 object-cover rounded-lg"
                       />
                       
                       <div className="flex-1">
                         <h3 className="font-semibold text-primary mb-1">
-                          {item.product.name}
+                          {item.product?.name || "Unknown Product"}
                         </h3>
                         <p className="text-sm text-muted-foreground mb-2">
-                          ${parseFloat(item.product.price).toFixed(2)} each
+                          ${item.product?.price ? parseFloat(item.product.price).toFixed(2) : "0.00"} each
                         </p>
                         
                         <div className="flex items-center space-x-4">
@@ -119,7 +124,7 @@ export default function Cart() {
                               variant="outline"
                               size="sm"
                               onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                              disabled={item.quantity >= (item.product.stockQuantity || 0)}
+                              disabled={item.quantity >= (item.product?.stockQuantity || 0)}
                             >
                               <Plus className="h-4 w-4" />
                             </Button>
@@ -127,12 +132,12 @@ export default function Cart() {
                           
                           <div className="flex items-center space-x-2">
                             <span className="font-semibold">
-                              ${(parseFloat(item.product.price) * item.quantity).toFixed(2)}
+                              ${item.product?.price ? (parseFloat(item.product.price) * item.quantity).toFixed(2) : "0.00"}
                             </span>
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleRemoveItem(item.id, item.product.name)}
+                              onClick={() => handleRemoveItem(item.id, item.product?.name || "Unknown Product")}
                               className="text-red-600 hover:text-red-700"
                             >
                               <Trash2 className="h-4 w-4" />
