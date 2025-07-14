@@ -22,8 +22,14 @@ export default function Products() {
   // Update state when URL changes
   useEffect(() => {
     const newSearchParams = new URLSearchParams(location.split("?")[1] || "");
-    setSearchQuery(newSearchParams.get("search") || "");
-    setSelectedCategory(newSearchParams.get("category") || "");
+    const newSearchQuery = newSearchParams.get("search") || "";
+    const newSelectedCategory = newSearchParams.get("category") || "";
+    
+    console.log("URL changed:", location);
+    console.log("New category:", newSelectedCategory);
+    
+    setSearchQuery(newSearchQuery);
+    setSelectedCategory(newSelectedCategory);
   }, [location]);
 
   const { data: categories = [] } = useQuery<Category[]>({
@@ -36,7 +42,17 @@ export default function Products() {
       categorySlug: selectedCategory || undefined,
       limit: 50
     }],
+    enabled: true,
   });
+
+  // Debug logging
+  useEffect(() => {
+    console.log("Query parameters:", {
+      search: searchQuery,
+      categorySlug: selectedCategory || undefined,
+      limit: 50
+    });
+  }, [searchQuery, selectedCategory]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
