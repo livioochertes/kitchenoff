@@ -33,10 +33,10 @@ export default function Products() {
     queryKey: ["/api/products", { 
       search: searchQuery || undefined,
       categorySlug: selectedCategory || undefined,
-      limit: 6
+      limit: 4
     }],
-    staleTime: 1000 * 60 * 10, // 10 minutes
-    gcTime: 1000 * 60 * 20, // 20 minutes
+    staleTime: 1000 * 60 * 15, // 15 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
@@ -200,7 +200,7 @@ export default function Products() {
             {/* Loading State */}
             {isLoading && (
               <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, i) => (
+                {Array.from({ length: 4 }).map((_, i) => (
                   <Card key={i} className="overflow-hidden">
                     <Skeleton className="h-48 w-full" />
                     <CardContent className="p-4">

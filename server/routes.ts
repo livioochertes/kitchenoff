@@ -7,9 +7,9 @@ import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import Stripe from "stripe";
 
-// In-memory cache for frequent queries
+// Aggressive in-memory cache for frequent queries
 const cache = new Map<string, { data: any; timestamp: number }>();
-const CACHE_DURATION = 30000; // 30 seconds
+const CACHE_DURATION = 120000; // 2 minutes
 
 function getCachedData(key: string) {
   const cached = cache.get(key);
@@ -21,6 +21,24 @@ function getCachedData(key: string) {
 
 function setCachedData(key: string, data: any) {
   cache.set(key, { data, timestamp: Date.now() });
+}
+
+// Pre-warm cache for popular categories
+async function preWarmCache() {
+  try {
+    const categories = await storage.getCategories();
+    for (const category of categories) {
+      const cacheKey = `products-{"categorySlug":"${category.slug}","limit":4}`;
+      const products = await storage.getProducts({
+        categoryId: category.id,
+        limit: 4
+      });
+      setCachedData(cacheKey, products);
+    }
+    console.log('Cache pre-warmed for all categories');
+  } catch (error) {
+    console.error('Failed to pre-warm cache:', error);
+  }
 }
 
 // JWT middleware
@@ -219,7 +237,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         categoryId: resolvedCategoryId,
         featured: featured === "true",
         search: search as string,
-        limit: limit ? parseInt(limit as string) : 6,  // Reduced to 6 for better performance
+        limit: limit ? parseInt(limit as string) : 4,  // Reduced to 4 for maximum speed
         offset: offset ? parseInt(offset as string) : 0,
       });
       
@@ -575,5 +593,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+  
+  // Pre-warm cache after server setup
+  setTimeout(preWarmCache, 2000); // Wait 2 seconds for database to be ready
+  
   return httpServer;
 }

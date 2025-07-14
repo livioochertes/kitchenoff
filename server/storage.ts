@@ -129,7 +129,7 @@ export class DatabaseStorage implements IStorage {
 
   // Product operations
   async getProducts(options?: { categoryId?: number; featured?: boolean; search?: string; limit?: number; offset?: number }): Promise<ProductWithCategory[]> {
-    // Ultra-fast minimal query
+    // Super minimal query - only essential fields
     const query = db
       .select({
         id: products.id,
@@ -154,29 +154,20 @@ export class DatabaseStorage implements IStorage {
       .from(products)
       .innerJoin(categories, eq(products.categoryId, categories.id));
 
-    const conditions = [];
+    // Apply filters directly without building conditions array
     if (options?.categoryId) {
-      conditions.push(eq(products.categoryId, options.categoryId));
+      query.where(eq(products.categoryId, options.categoryId));
     }
     if (options?.featured) {
-      conditions.push(eq(products.featured, true));
+      query.where(eq(products.featured, true));
     }
     if (options?.search) {
-      conditions.push(like(products.name, `%${options.search}%`));
+      query.where(like(products.name, `%${options.search}%`));
     }
 
-    if (conditions.length > 0) {
-      query.where(and(...conditions));
-    }
-
-    // Simple ordering for speed
-    query.orderBy(products.id);
-
+    // Remove ordering for maximum speed
     if (options?.limit) {
       query.limit(options.limit);
-    }
-    if (options?.offset) {
-      query.offset(options.offset);
     }
 
     return await query;
