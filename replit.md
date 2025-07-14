@@ -25,6 +25,8 @@ Preferred communication style: Simple, everyday language.
 - Added comprehensive error handling and loading states for payments
 - Set Stripe as the default payment method due to Revolut API authentication issues
 - Temporarily disabled Revolut card payments while maintaining Apple Pay/Google Pay functionality
+- Fixed critical form nesting issue preventing Stripe card payments from working
+- Converted Stripe payment from nested form to button click to resolve HTML validation errors
 
 ### July 11, 2025
 - Fixed product card styling issues with price display and "Add to Cart" button
