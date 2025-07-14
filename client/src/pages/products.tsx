@@ -36,16 +36,16 @@ export default function Products() {
     queryKey: ["/api/products", { 
       search: searchQuery || undefined,
       categorySlug: selectedCategory || undefined,
-      limit: 20
+      limit: 15
     }],
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    gcTime: 1000 * 60 * 5, // 5 minutes
   });
 
   console.log("Query params sent to API:", { 
     search: searchQuery || undefined,
     categorySlug: selectedCategory || undefined,
-    limit: 20
+    limit: 15
   });
 
   const handleSearchSubmit = (e: React.FormEvent) => {

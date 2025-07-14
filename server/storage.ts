@@ -129,6 +129,7 @@ export class DatabaseStorage implements IStorage {
 
   // Product operations
   async getProducts(options?: { categoryId?: number; featured?: boolean; search?: string; limit?: number; offset?: number }): Promise<ProductWithCategory[]> {
+    // Build query with minimal required fields for better performance
     const query = db
       .select({
         id: products.id,
@@ -139,7 +140,6 @@ export class DatabaseStorage implements IStorage {
         compareAtPrice: products.compareAtPrice,
         categoryId: products.categoryId,
         imageUrl: products.imageUrl,
-        images: products.images,
         inStock: products.inStock,
         stockQuantity: products.stockQuantity,
         featured: products.featured,
@@ -174,7 +174,8 @@ export class DatabaseStorage implements IStorage {
       query.where(and(...conditions));
     }
 
-    query.orderBy(desc(products.createdAt));
+    // Order by featured first, then by creation date for better performance
+    query.orderBy(desc(products.featured), desc(products.createdAt));
 
     if (options?.limit) {
       query.limit(options.limit);
