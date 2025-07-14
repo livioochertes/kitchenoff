@@ -101,17 +101,44 @@ export default function Header() {
                       <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     </div>
                   </form>
-                  <Link href="/products">
-                    <Button variant="ghost" className="w-full justify-start">
-                      All Products
-                    </Button>
-                  </Link>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start"
+                    onClick={() => {
+                      console.log("🚀 Mobile All Products button clicked");
+                      const startTime = performance.now();
+                      const targetUrl = `/products`;
+                      console.log("🎯 Navigating to:", targetUrl);
+                      navigate(targetUrl);
+                      console.log("⏱️ Navigation initiated:", performance.now() - startTime, "ms");
+                      console.log("🔗 Current URL after navigation:", window.location.href);
+                      
+                      // Force a re-render by dispatching a custom event
+                      window.dispatchEvent(new CustomEvent('urlchange'));
+                    }}
+                  >
+                    All Products
+                  </Button>
                   {categories?.map((category: any) => (
-                    <Link key={category.id} href={`/products?category=${category.slug}`}>
-                      <Button variant="ghost" className="w-full justify-start">
-                        {category.name}
-                      </Button>
-                    </Link>
+                    <Button 
+                      key={category.id} 
+                      variant="ghost" 
+                      className="w-full justify-start"
+                      onClick={() => {
+                        console.log("🚀 Mobile category button clicked:", category.name);
+                        const startTime = performance.now();
+                        const targetUrl = `/products?category=${category.slug}`;
+                        console.log("🎯 Navigating to:", targetUrl);
+                        navigate(targetUrl);
+                        console.log("⏱️ Navigation initiated:", performance.now() - startTime, "ms");
+                        console.log("🔗 Current URL after navigation:", window.location.href);
+                        
+                        // Force a re-render by dispatching a custom event
+                        window.dispatchEvent(new CustomEvent('urlchange'));
+                      }}
+                    >
+                      {category.name}
+                    </Button>
                   ))}
                   <Button variant="ghost" className="w-full justify-start">
                     <User className="h-4 w-4 mr-2" />
@@ -129,11 +156,24 @@ export default function Header() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-8">
-              <Link href="/products">
-                <Button variant="ghost" className="font-medium">
-                  All Categories
-                </Button>
-              </Link>
+              <Button 
+                variant="ghost" 
+                className="font-medium"
+                onClick={() => {
+                  console.log("🚀 All Categories button clicked");
+                  const startTime = performance.now();
+                  const targetUrl = `/products`;
+                  console.log("🎯 Navigating to:", targetUrl);
+                  navigate(targetUrl);
+                  console.log("⏱️ Navigation initiated:", performance.now() - startTime, "ms");
+                  console.log("🔗 Current URL after navigation:", window.location.href);
+                  
+                  // Force a re-render by dispatching a custom event
+                  window.dispatchEvent(new CustomEvent('urlchange'));
+                }}
+              >
+                All Categories
+              </Button>
               {categories?.slice(0, 4).map((category: any) => (
                 <Button 
                   key={category.id} 

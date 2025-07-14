@@ -185,8 +185,13 @@ export default function Products() {
                         const params = new URLSearchParams();
                         if (searchQuery) params.set("search", searchQuery);
                         const newUrl = `/products${params.toString() ? `?${params.toString()}` : ""}`;
+                        console.log("🎯 Sidebar navigating to:", newUrl);
                         navigate(newUrl);
                         console.log("⏱️ Sidebar navigation initiated:", performance.now() - startTime, "ms");
+                        console.log("🔗 Current URL after navigation:", window.location.href);
+                        
+                        // Force a re-render by dispatching a custom event
+                        window.dispatchEvent(new CustomEvent('urlchange'));
                       }}
                     >
                       All Products
