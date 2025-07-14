@@ -7,6 +7,22 @@ import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import Stripe from "stripe";
 
+// In-memory cache for frequent queries
+const cache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_DURATION = 30000; // 30 seconds
+
+function getCachedData(key: string) {
+  const cached = cache.get(key);
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data;
+  }
+  return null;
+}
+
+function setCachedData(key: string, data: any) {
+  cache.set(key, { data, timestamp: Date.now() });
+}
+
 // JWT middleware
 interface AuthRequest extends Request {
   userId?: number;
@@ -177,6 +193,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/products", async (req, res) => {
     try {
       const { categoryId, categorySlug, featured, search, limit, offset } = req.query;
+      const cacheKey = `products-${JSON.stringify(req.query)}`;
+      
+      // Check cache first
+      const cachedProducts = getCachedData(cacheKey);
+      if (cachedProducts) {
+        res.set({
+          'Cache-Control': 'public, max-age=600', // 10 minutes
+          'ETag': cacheKey
+        });
+        return res.json(cachedProducts);
+      }
       
       let resolvedCategoryId = categoryId ? parseInt(categoryId as string) : undefined;
       
@@ -192,14 +219,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         categoryId: resolvedCategoryId,
         featured: featured === "true",
         search: search as string,
-        limit: limit ? parseInt(limit as string) : 8,  // Reduced to 8 for better performance
+        limit: limit ? parseInt(limit as string) : 6,  // Reduced to 6 for better performance
         offset: offset ? parseInt(offset as string) : 0,
       });
       
+      // Cache the result
+      setCachedData(cacheKey, products);
+      
       // Set cache headers for better performance
       res.set({
-        'Cache-Control': 'public, max-age=300', // 5 minutes
-        'ETag': `products-${JSON.stringify(req.query)}`
+        'Cache-Control': 'public, max-age=600', // 10 minutes
+        'ETag': cacheKey
       });
       
       res.json(products);

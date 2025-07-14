@@ -33,23 +33,19 @@ const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
     : null;
 
   return (
-    <Card className="product-card group cursor-pointer hover:shadow-lg transition-shadow duration-300 h-full">
+    <Card className="product-card group cursor-pointer hover:shadow-md transition-shadow h-full">
       <Link href={`/products/${product.slug}`}>
         <CardContent className="p-0 h-full flex flex-col">
-          <div className="relative overflow-hidden">
+          <div className="relative">
             <img
               src={product.imageUrl || "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300"}
               alt={product.name}
-              className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-48 object-cover"
+              loading="lazy"
             />
             {product.compareAtPrice && (
-              <Badge className="absolute top-2 left-2 bg-red-500 text-white">
+              <Badge className="absolute top-2 left-2 bg-red-500 text-white text-xs">
                 Sale
-              </Badge>
-            )}
-            {product.featured && (
-              <Badge className="absolute top-2 right-2 bg-blue-600 text-white">
-                Featured
               </Badge>
             )}
           </div>
