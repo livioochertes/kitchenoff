@@ -56,14 +56,7 @@ const renderMessageWithLinks = (text: string) => {
 };
 
 export default function AIAssistant() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      text: "Hello! I'm your KitchenOff AI Assistant. I can help you find the perfect kitchen equipment, answer questions about products, and provide expert advice for your professional kitchen needs. How can I assist you today?",
-      sender: "assistant",
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isConnected, setIsConnected] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -81,6 +74,78 @@ export default function AIAssistant() {
     scrollToBottom();
   }, [messages]);
 
+  // Load saved session data on component mount
+  useEffect(() => {
+    const savedIsConnected = localStorage.getItem('aiAssistant_isConnected');
+    const savedSessionId = localStorage.getItem('aiAssistant_sessionId');
+    const savedCapabilities = localStorage.getItem('aiAssistant_capabilities');
+    const savedMessages = localStorage.getItem('aiAssistant_messages');
+
+    if (savedIsConnected === 'true' && savedSessionId) {
+      setIsConnected(true);
+      setSessionId(savedSessionId);
+      
+      if (savedCapabilities) {
+        try {
+          setCapabilities(JSON.parse(savedCapabilities));
+        } catch (e) {
+          console.error('Failed to parse saved capabilities:', e);
+        }
+      }
+    }
+
+    if (savedMessages) {
+      try {
+        const parsedMessages = JSON.parse(savedMessages);
+        // Convert timestamp strings back to Date objects
+        const messagesWithDates = parsedMessages.map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        }));
+        setMessages(messagesWithDates);
+      } catch (e) {
+        console.error('Failed to parse saved messages:', e);
+        // Set default welcome message if parsing fails
+        setMessages([
+          {
+            id: "1",
+            text: "Hello! I'm your KitchenOff AI Assistant. I can help you find the perfect kitchen equipment, answer questions about products, and provide expert advice for your professional kitchen needs. How can I assist you today?",
+            sender: "assistant",
+            timestamp: new Date(),
+          },
+        ]);
+      }
+    } else {
+      // Set default welcome message if no saved messages
+      setMessages([
+        {
+          id: "1",
+          text: "Hello! I'm your KitchenOff AI Assistant. I can help you find the perfect kitchen equipment, answer questions about products, and provide expert advice for your professional kitchen needs. How can I assist you today?",
+          sender: "assistant",
+          timestamp: new Date(),
+        },
+      ]);
+    }
+  }, []);
+
+  // Save session data whenever it changes
+  useEffect(() => {
+    localStorage.setItem('aiAssistant_isConnected', isConnected.toString());
+    if (sessionId) {
+      localStorage.setItem('aiAssistant_sessionId', sessionId);
+    }
+    if (capabilities.length > 0) {
+      localStorage.setItem('aiAssistant_capabilities', JSON.stringify(capabilities));
+    }
+  }, [isConnected, sessionId, capabilities]);
+
+  // Save messages whenever they change
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem('aiAssistant_messages', JSON.stringify(messages));
+    }
+  }, [messages]);
+
   const handleConnect = async () => {
     setIsConnecting(true);
     try {
@@ -94,7 +159,7 @@ export default function AIAssistant() {
         
         toast({
           title: "Connected to AI Assistant",
-          description: "You can now start chatting with the AI Assistant.",
+          description: "Connection will be saved for your session.",
         });
       } else {
         throw new Error(data.message || "Failed to connect");
@@ -109,6 +174,22 @@ export default function AIAssistant() {
     } finally {
       setIsConnecting(false);
     }
+  };
+
+  const handleClearChat = () => {
+    setMessages([
+      {
+        id: "1",
+        text: "Hello! I'm your KitchenOff AI Assistant. I can help you find the perfect kitchen equipment, answer questions about products, and provide expert advice for your professional kitchen needs. How can I assist you today?",
+        sender: "assistant",
+        timestamp: new Date(),
+      },
+    ]);
+    localStorage.removeItem('aiAssistant_messages');
+    toast({
+      title: "Chat Cleared",
+      description: "Your chat history has been cleared.",
+    });
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -215,6 +296,15 @@ export default function AIAssistant() {
                       ) : (
                         "Connect to AI Assistant"
                       )}
+                    </Button>
+                  )}
+                  {isConnected && (
+                    <Button 
+                      onClick={handleClearChat} 
+                      variant="outline" 
+                      className="w-full h-8 text-xs"
+                    >
+                      Clear Chat History
                     </Button>
                   )}
                 </CardContent>
