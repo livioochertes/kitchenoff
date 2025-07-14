@@ -45,6 +45,7 @@ async function loadAllDataIntoMemory() {
     allProductsData = await storage.getProducts({});
     
     console.log('✅ All data loaded into permanent memory - database queries eliminated');
+    console.log(`📊 Memory data loaded: ${allProductsData.length} total products`);
   } catch (error) {
     console.error('Failed to load data into memory:', error);
   }
@@ -254,9 +255,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Apply limit - for "All Products" show all, otherwise limit to 20
       const limitNum = parseInt(limit as string) || 20;
+      console.log(`📊 Before limit: ${products.length} products, limit: ${limitNum}`);
       if (limitNum > 0) {
         products = products.slice(0, limitNum);
       }
+      console.log(`📊 After limit: ${products.length} products being returned`);
       
       res.set({
         'Cache-Control': 'public, max-age=3600', // 1 hour
