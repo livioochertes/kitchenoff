@@ -136,7 +136,7 @@ export default function AIAssistant() {
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: data.response,
+        text: data.response || data.message || "I'm temporarily unavailable. Please try again.",
         sender: "assistant",
         timestamp: new Date(),
       };
@@ -144,9 +144,20 @@ export default function AIAssistant() {
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
       console.error("Chat error:", error);
+      
+      // Add error message to chat instead of just toast
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "I'm having trouble connecting right now. Please try again in a moment.",
+        sender: "assistant",
+        timestamp: new Date(),
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+      
       toast({
-        title: "Chat Error",
-        description: "Failed to send message. Please try again.",
+        title: "Connection Issue",
+        description: "Having trouble connecting to AI service. Please try again.",
         variant: "destructive",
       });
     } finally {

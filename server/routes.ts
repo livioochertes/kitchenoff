@@ -562,16 +562,21 @@ For example: [Digital Food Thermometer](/products/digital-food-thermometer)
 
 Always be helpful, professional, and focus on practical solutions. When recommending products, mention specific items from our catalog when relevant and provide direct links. Keep responses concise but informative.`;
 
-      // Call OpenAI ChatGPT API
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: message }
-        ],
-        max_tokens: 500,
-        temperature: 0.7,
-      });
+      // Call OpenAI ChatGPT API with timeout and error handling
+      const completion = await Promise.race([
+        openai.chat.completions.create({
+          model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: message }
+          ],
+          max_tokens: 500,
+          temperature: 0.7,
+        }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('OpenAI API timeout')), 30000)
+        )
+      ]);
 
       const response = completion.choices[0].message.content || "I'm here to help with your kitchen equipment needs! How can I assist you today?";
 
@@ -588,7 +593,22 @@ Always be helpful, professional, and focus on practical solutions. When recommen
       });
     } catch (error) {
       console.error("AI chat error:", error);
-      res.status(500).json({ message: "Failed to process AI chat. Please try again." });
+      
+      // Provide specific error messages based on error type
+      let errorMessage = "I'm temporarily unavailable. Please try again in a moment.";
+      
+      if (error.message?.includes('timeout')) {
+        errorMessage = "The AI service is taking too long to respond. Please try again with a shorter question.";
+      } else if (error.message?.includes('rate limit')) {
+        errorMessage = "Too many requests. Please wait a moment and try again.";
+      } else if (error.message?.includes('API key')) {
+        errorMessage = "AI service configuration issue. Please contact support.";
+      }
+      
+      res.status(500).json({ 
+        message: errorMessage,
+        response: errorMessage
+      });
     }
   });
 
