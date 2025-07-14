@@ -16,10 +16,21 @@ import type { Category, ProductWithCategory } from "@shared/schema";
 export default function Products() {
   const [location, navigate] = useLocation();
   
-  // Parse URL parameters using window.location for reliability
-  const urlParams = new URLSearchParams(window.location.search);
-  const searchQuery = urlParams.get("search") || "";
-  const selectedCategory = urlParams.get("category") || "";
+  // Parse URL parameters and track location changes to force re-render
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  
+  // Update URL parameters when location changes
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const newSearchQuery = urlParams.get("search") || "";
+    const newSelectedCategory = urlParams.get("category") || "";
+    
+    console.log("📍 Location changed:", location, "Search:", newSearchQuery, "Category:", newSelectedCategory);
+    
+    setSearchQuery(newSearchQuery);
+    setSelectedCategory(newSelectedCategory);
+  }, [location]);
   
   console.log("🔍 Products component render:", {
     location,
