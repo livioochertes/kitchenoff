@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Search, ShoppingCart, User, Menu, X } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, X, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -65,6 +65,12 @@ export default function Header() {
 
           {/* Header Actions */}
           <div className="flex items-center space-x-4">
+            <Link href="/ai-assistant">
+              <Button variant="ghost" size="sm" className="hidden md:flex">
+                <Bot className="h-4 w-4 mr-2" />
+                AI Assistant
+              </Button>
+            </Link>
             <Link href="/login">
               <Button variant="ghost" size="sm" className="hidden md:flex">
                 <User className="h-4 w-4 mr-2" />
@@ -143,10 +149,18 @@ export default function Header() {
                       {category.name}
                     </Button>
                   ))}
-                  <Button variant="ghost" className="w-full justify-start">
-                    <User className="h-4 w-4 mr-2" />
-                    Account
-                  </Button>
+                  <Link href="/ai-assistant">
+                    <Button variant="ghost" className="w-full justify-start">
+                      <Bot className="h-4 w-4 mr-2" />
+                      AI Assistant
+                    </Button>
+                  </Link>
+                  <Link href="/login">
+                    <Button variant="ghost" className="w-full justify-start">
+                      <User className="h-4 w-4 mr-2" />
+                      Account
+                    </Button>
+                  </Link>
                 </div>
               </SheetContent>
             </Sheet>

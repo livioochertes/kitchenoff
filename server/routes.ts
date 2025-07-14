@@ -504,6 +504,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Assistant routes
+  app.post("/api/ai/connect", async (req, res) => {
+    try {
+      // Simulate AI connection process
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      res.json({ 
+        success: true, 
+        message: "Connected to AI Assistant",
+        sessionId: `ai_session_${Date.now()}`,
+        capabilities: [
+          "Product recommendations",
+          "Kitchen setup advice", 
+          "HACCP compliance help",
+          "Equipment comparisons"
+        ]
+      });
+    } catch (error) {
+      console.error("AI connect error:", error);
+      res.status(500).json({ message: "Failed to connect to AI Assistant" });
+    }
+  });
+
+  app.post("/api/ai/chat", async (req, res) => {
+    try {
+      const { message, sessionId } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ message: "Message is required" });
+      }
+
+      // Simulate AI processing
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      // Generate contextual responses based on message content
+      let response = "";
+      const lowerMessage = message.toLowerCase();
+
+      if (lowerMessage.includes("cleaning") || lowerMessage.includes("sanitiz")) {
+        response = "For professional cleaning and sanitizing, I recommend our Food-Safe Sanitizer Spray and All-Purpose Cleaner. These products meet all commercial kitchen standards and are EPA-approved for food contact surfaces.";
+      } else if (lowerMessage.includes("thermometer") || lowerMessage.includes("temperature")) {
+        response = "Our Digital Food Thermometer is perfect for HACCP compliance. It features instant readings, calibration alerts, and meets FDA requirements. Would you like me to show you the complete temperature monitoring system?";
+      } else if (lowerMessage.includes("haccp") || lowerMessage.includes("complian")) {
+        response = "For HACCP compliance, you'll need our complete monitoring system: Digital Food Thermometer, Temperature Log Books, and proper food labeling. I can help you create a custom compliance package for your kitchen.";
+      } else if (lowerMessage.includes("label") || lowerMessage.includes("food label")) {
+        response = "Our food labeling system includes Expiration Date Labels, Day of the Week Labels, and Custom Food Labels. These help maintain proper inventory rotation and meet health department requirements.";
+      } else if (lowerMessage.includes("best") || lowerMessage.includes("recommend")) {
+        response = "Based on our professional kitchen expertise, I recommend starting with our essentials: Digital Food Thermometer, Food-Safe Sanitizer Spray, and proper labeling system. These cover the most critical safety requirements.";
+      } else {
+        response = "I'm here to help with your kitchen equipment needs! I can provide detailed information about our products, suggest equipment based on your specific requirements, and help ensure your kitchen meets all safety standards. What would you like to know more about?";
+      }
+
+      res.json({
+        response,
+        sessionId,
+        timestamp: new Date().toISOString(),
+        suggestedActions: [
+          "View recommended products",
+          "Get compliance checklist",
+          "Compare equipment options",
+          "Schedule consultation"
+        ]
+      });
+    } catch (error) {
+      console.error("AI chat error:", error);
+      res.status(500).json({ message: "Failed to process AI chat" });
+    }
+  });
+
   // Stripe Payment Routes
   app.post("/api/payments/stripe/create-payment-intent", async (req, res) => {
     try {

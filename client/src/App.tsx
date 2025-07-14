@@ -11,6 +11,7 @@ import Cart from "@/pages/cart";
 import Checkout from "@/pages/checkout";
 import Admin from "@/pages/admin";
 import Login from "@/pages/login";
+import AIAssistant from "@/pages/ai-assistant";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -23,6 +24,7 @@ function Router() {
       <Route path="/checkout" component={Checkout} />
       <Route path="/admin" component={Admin} />
       <Route path="/login" component={Login} />
+      <Route path="/ai-assistant" component={AIAssistant} />
       <Route component={NotFound} />
     </Switch>
   );
