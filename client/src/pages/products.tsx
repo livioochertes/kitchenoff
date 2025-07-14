@@ -136,6 +136,9 @@ export default function Products() {
                         }}
                       >
                         {category.name}
+                        {selectedCategory === category.slug && isLoading && (
+                          <div className="ml-2 h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
+                        )}
                       </Button>
                     ))}
                   </div>
@@ -166,13 +169,16 @@ export default function Products() {
             {/* Results Header */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-4">
-                <h1 className="text-2xl font-bold text-primary">
+                <h1 className="text-2xl font-bold text-primary flex items-center">
                   {selectedCategory
                     ? categories.find(c => c.slug === selectedCategory)?.name || "Products"
                     : searchQuery
                     ? `Search Results for "${searchQuery}"`
                     : "All Products"
                   }
+                  {isLoading && (
+                    <div className="ml-3 h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-primary"></div>
+                  )}
                 </h1>
                 <Badge variant="secondary">
                   {sortedProducts.length} products
