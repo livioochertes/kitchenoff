@@ -23,13 +23,16 @@ export default function Products() {
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   
+  // Keep previous products state to prevent white page
+  const [displayProducts, setDisplayProducts] = useState<ProductWithCategory[]>([]);
+  
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
     staleTime: 1000 * 60 * 10, // 10 minutes
     gcTime: 1000 * 60 * 20, // 20 minutes
   });
 
-  const { data: products = [], isLoading, isFetching } = useQuery<ProductWithCategory[]>({
+  const { data: products = [], isLoading, isFetching, isPlaceholderData } = useQuery<ProductWithCategory[]>({
     queryKey: ["/api/products", { 
       search: searchQuery || undefined,
       categorySlug: selectedCategory || undefined,
@@ -40,8 +43,15 @@ export default function Products() {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
-    keepPreviousData: true, // This prevents white page during navigation
+    placeholderData: (previousData) => previousData, // Keep previous data while fetching new
   });
+
+  // Update display products when new data arrives
+  useEffect(() => {
+    if (products && products.length > 0) {
+      setDisplayProducts(products);
+    }
+  }, [products]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -164,7 +174,7 @@ export default function Products() {
                   )}
                 </h1>
                 <Badge variant="secondary">
-                  {products.length} products
+                  {displayProducts.length} products
                 </Badge>
               </div>
 
@@ -187,7 +197,7 @@ export default function Products() {
             </div>
 
             {/* Loading State - Only show when no previous data */}
-            {isLoading && !products.length && (
+            {isLoading && !displayProducts.length && (
               <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <Card key={i} className="overflow-hidden">
@@ -203,7 +213,7 @@ export default function Products() {
             )}
 
             {/* No Results */}
-            {!isLoading && !isFetching && products.length === 0 && (
+            {!isLoading && !isFetching && displayProducts.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-muted-foreground mb-4">No products found matching your criteria.</p>
                 <Button onClick={() => { window.location.href = "/products"; }}>
@@ -213,13 +223,13 @@ export default function Products() {
             )}
 
             {/* Products Grid */}
-            {products.length > 0 && (
+            {displayProducts.length > 0 && (
               <div className={`grid gap-6 ${
                 viewMode === "grid" 
                   ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" 
                   : "grid-cols-1"
               }`}>
-                {products.map((product) => (
+                {displayProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
