@@ -19,14 +19,15 @@ export default function Products() {
   // Parse URL parameters and track location changes to force re-render
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [urlChangeCounter, setUrlChangeCounter] = useState(0);
   
-  // Update URL parameters when location changes
+  // Update URL parameters when location changes OR when URL changes via navigation
   useEffect(() => {
-    const urlParams = new URLSearchParams(location.split('?')[1] || '');
+    const urlParams = new URLSearchParams(window.location.search);
     const newSearchQuery = urlParams.get("search") || "";
     const newSelectedCategory = urlParams.get("category") || "";
     
-    console.log("📍 Location changed:", location, "Search:", newSearchQuery, "Category:", newSelectedCategory);
+    console.log("📍 Location changed:", window.location.href, "Search:", newSearchQuery, "Category:", newSelectedCategory);
     
     // Always update to ensure sync
     setSearchQuery(newSearchQuery);
@@ -37,7 +38,35 @@ export default function Products() {
       queryKey: ["/api/products"],
       exact: false 
     });
-  }, [location]);
+  }, [location, urlChangeCounter]);
+
+  // Also listen for URL changes via popstate (back/forward buttons) and custom events
+  useEffect(() => {
+    const handleUrlChange = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const newSearchQuery = urlParams.get("search") || "";
+      const newSelectedCategory = urlParams.get("category") || "";
+      
+      console.log("🔄 URL event - URL changed:", window.location.href);
+      
+      setSearchQuery(newSearchQuery);
+      setSelectedCategory(newSelectedCategory);
+      setUrlChangeCounter(prev => prev + 1);
+      
+      queryClient.invalidateQueries({ 
+        queryKey: ["/api/products"],
+        exact: false 
+      });
+    };
+
+    window.addEventListener('popstate', handleUrlChange);
+    window.addEventListener('urlchange', handleUrlChange);
+    
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      window.removeEventListener('urlchange', handleUrlChange);
+    };
+  }, []);
   
   console.log("🔍 Products component render:", {
     location,
@@ -178,6 +207,9 @@ export default function Products() {
                           navigate(newUrl);
                           console.log("⏱️ Sidebar navigation initiated:", performance.now() - startTime, "ms");
                           console.log("🔗 Current URL after navigation:", window.location.href);
+                          
+                          // Force a re-render by dispatching a custom event
+                          window.dispatchEvent(new CustomEvent('urlchange'));
                         }}
                       >
                         {category.name}

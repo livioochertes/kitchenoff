@@ -147,6 +147,9 @@ export default function Header() {
                     navigate(targetUrl);
                     console.log("⏱️ Navigation initiated:", performance.now() - startTime, "ms");
                     console.log("🔗 Current URL after navigation:", window.location.href);
+                    
+                    // Force a re-render by dispatching a custom event
+                    window.dispatchEvent(new CustomEvent('urlchange'));
                   }}
                 >
                   {category.name}
