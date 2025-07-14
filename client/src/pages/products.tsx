@@ -22,24 +22,22 @@ export default function Products() {
   
   // Update URL parameters when location changes
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(location.split('?')[1] || '');
     const newSearchQuery = urlParams.get("search") || "";
     const newSelectedCategory = urlParams.get("category") || "";
     
     console.log("📍 Location changed:", location, "Search:", newSearchQuery, "Category:", newSelectedCategory);
     
-    // Only update if values actually changed
-    if (newSearchQuery !== searchQuery || newSelectedCategory !== selectedCategory) {
-      setSearchQuery(newSearchQuery);
-      setSelectedCategory(newSelectedCategory);
-      
-      // Force query to refresh by invalidating cache
-      queryClient.invalidateQueries({ 
-        queryKey: ["/api/products"],
-        exact: false 
-      });
-    }
-  }, [location, searchQuery, selectedCategory]);
+    // Always update to ensure sync
+    setSearchQuery(newSearchQuery);
+    setSelectedCategory(newSelectedCategory);
+    
+    // Force query to refresh by invalidating cache
+    queryClient.invalidateQueries({ 
+      queryKey: ["/api/products"],
+      exact: false 
+    });
+  }, [location]);
   
   console.log("🔍 Products component render:", {
     location,
@@ -89,6 +87,7 @@ export default function Products() {
       productsLength: products?.length || 0,
       isLoading,
       isFetching,
+      products: products?.slice(0, 2).map(p => ({ id: p.id, name: p.name })) || [],
       timestamp: new Date().toISOString()
     });
   }, [products, isLoading, isFetching]);
@@ -281,7 +280,7 @@ export default function Products() {
                   : "grid-cols-1"
               }`}>
                 {products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard key={`${product.id}-${selectedCategory}-${searchQuery}`} product={product} />
                 ))}
               </div>
             )}
