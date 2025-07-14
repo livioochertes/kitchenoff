@@ -47,6 +47,8 @@ async function loadAllDataIntoMemory() {
     console.log('✅ All data loaded into permanent memory - database queries eliminated');
     console.log(`📊 Memory data loaded: ${allProductsData.length} total products`);
     console.log(`📊 First 5 products in memory:`, allProductsData.slice(0, 5).map(p => ({ id: p.id, name: p.name })));
+    console.log(`📊 All products data variable type:`, typeof allProductsData);
+    console.log(`📊 All products data is array:`, Array.isArray(allProductsData));
   } catch (error) {
     console.error('Failed to load data into memory:', error);
   }
@@ -241,11 +243,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get from memory - no database queries
       if (categorySlug) {
         products = productsByCategory.get(categorySlug as string) || [];
+        console.log(`📊 Category lookup: ${products.length} products found for category: ${categorySlug}`);
       } else {
         products = allProductsData;
+        console.log(`📊 All products lookup: ${products.length} products found from allProductsData`);
+        console.log(`📊 allProductsData type: ${typeof allProductsData}, isArray: ${Array.isArray(allProductsData)}`);
+        if (products.length > 0) {
+          console.log(`📊 First 3 products IDs: ${products.slice(0, 3).map(p => p.id).join(', ')}`);
+        }
       }
-      
-      console.log(`📊 Memory lookup: ${products.length} products found for categorySlug: ${categorySlug || 'all'}`);
       
       // Apply search filter if needed
       if (search) {
@@ -256,17 +262,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
       }
       
-      // Apply limit - for "All Products" show all, otherwise limit to 20
+      // Apply limit
       const limitNum = parseInt(limit as string) || 20;
-      console.log(`📊 Before limit: ${products.length} products, limit: ${limitNum}`);
+      console.log(`📊 Before limit: ${products.length} products, applying limit: ${limitNum}`);
       if (limitNum > 0) {
         products = products.slice(0, limitNum);
       }
       console.log(`📊 After limit: ${products.length} products being returned`);
       
+      // Remove caching headers to ensure fresh data
       res.set({
-        'Cache-Control': 'public, max-age=3600', // 1 hour
-        'ETag': `products-memory-${categorySlug || 'all'}`
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
       });
       
       res.json(products);
