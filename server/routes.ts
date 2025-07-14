@@ -33,25 +33,16 @@ async function loadAllDataIntoMemory() {
     categoriesData = await storage.getCategories();
     setCachedData('categories-all', categoriesData);
     
-    // Load products for each category
+    // Load products for each category (all products, no limit)
     for (const category of categoriesData) {
       const products = await storage.getProducts({
-        categoryId: category.id,
-        limit: 4
+        categoryId: category.id
       });
       productsByCategory.set(category.slug, products);
-      
-      // Cache with exact query format
-      const queryObj = { categorySlug: category.slug, limit: "4" };
-      const cacheKey = `products-${JSON.stringify(queryObj)}`;
-      setCachedData(cacheKey, products);
     }
     
-    // Load all products (no filter)
-    allProductsData = await storage.getProducts({ limit: 4 });
-    const allProductsQuery = { limit: "4" };
-    const allProductsCacheKey = `products-${JSON.stringify(allProductsQuery)}`;
-    setCachedData(allProductsCacheKey, allProductsData);
+    // Load all products (no filter, no limit)
+    allProductsData = await storage.getProducts({});
     
     console.log('✅ All data loaded into permanent memory - database queries eliminated');
   } catch (error) {
