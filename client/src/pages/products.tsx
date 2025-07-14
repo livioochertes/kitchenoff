@@ -98,7 +98,13 @@ export default function Products() {
                     <Button
                       variant={selectedCategory === "" ? "default" : "ghost"}
                       className="w-full justify-start"
-                      onClick={() => setSelectedCategory("")}
+                      onClick={() => {
+                        setSelectedCategory("");
+                        const params = new URLSearchParams();
+                        if (searchQuery) params.set("search", searchQuery);
+                        const newUrl = `/products${params.toString() ? `?${params.toString()}` : ""}`;
+                        window.history.pushState({}, "", newUrl);
+                      }}
                     >
                       All Products
                     </Button>
@@ -107,7 +113,14 @@ export default function Products() {
                         key={category.id}
                         variant={selectedCategory === category.slug ? "default" : "ghost"}
                         className="w-full justify-start"
-                        onClick={() => setSelectedCategory(category.slug)}
+                        onClick={() => {
+                          setSelectedCategory(category.slug);
+                          const params = new URLSearchParams();
+                          if (searchQuery) params.set("search", searchQuery);
+                          params.set("category", category.slug);
+                          const newUrl = `/products?${params.toString()}`;
+                          window.history.pushState({}, "", newUrl);
+                        }}
                       >
                         {category.name}
                       </Button>
