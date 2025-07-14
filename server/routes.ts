@@ -6,10 +6,16 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import Stripe from "stripe";
+import OpenAI from "openai";
 
 // Ultra-aggressive permanent in-memory cache
 const cache = new Map<string, any>();
 const CACHE_REFRESH_INTERVAL = 300000; // 5 minutes
+
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 function getCachedData(key: string) {
   return cache.get(key) || null;
@@ -535,26 +541,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Message is required" });
       }
 
-      // Simulate AI processing
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Get current products for context
+      const products = allProductsData.slice(0, 10); // Use first 10 products for context
+      const productList = products.map(p => `${p.name} - $${p.price}`).join(', ');
 
-      // Generate contextual responses based on message content
-      let response = "";
-      const lowerMessage = message.toLowerCase();
+      // Create system prompt with KitchenOff context
+      const systemPrompt = `You are an AI assistant for KitchenOff, a professional kitchen equipment and supplies company. You help customers with:
 
-      if (lowerMessage.includes("cleaning") || lowerMessage.includes("sanitiz")) {
-        response = "For professional cleaning and sanitizing, I recommend our Food-Safe Sanitizer Spray and All-Purpose Cleaner. These products meet all commercial kitchen standards and are EPA-approved for food contact surfaces.";
-      } else if (lowerMessage.includes("thermometer") || lowerMessage.includes("temperature")) {
-        response = "Our Digital Food Thermometer is perfect for HACCP compliance. It features instant readings, calibration alerts, and meets FDA requirements. Would you like me to show you the complete temperature monitoring system?";
-      } else if (lowerMessage.includes("haccp") || lowerMessage.includes("complian")) {
-        response = "For HACCP compliance, you'll need our complete monitoring system: Digital Food Thermometer, Temperature Log Books, and proper food labeling. I can help you create a custom compliance package for your kitchen.";
-      } else if (lowerMessage.includes("label") || lowerMessage.includes("food label")) {
-        response = "Our food labeling system includes Expiration Date Labels, Day of the Week Labels, and Custom Food Labels. These help maintain proper inventory rotation and meet health department requirements.";
-      } else if (lowerMessage.includes("best") || lowerMessage.includes("recommend")) {
-        response = "Based on our professional kitchen expertise, I recommend starting with our essentials: Digital Food Thermometer, Food-Safe Sanitizer Spray, and proper labeling system. These cover the most critical safety requirements.";
-      } else {
-        response = "I'm here to help with your kitchen equipment needs! I can provide detailed information about our products, suggest equipment based on your specific requirements, and help ensure your kitchen meets all safety standards. What would you like to know more about?";
-      }
+1. Product recommendations from our catalog
+2. Kitchen setup advice for commercial and home kitchens
+3. HACCP compliance and food safety guidance
+4. Equipment comparisons and technical specifications
+
+Our current featured products include: ${productList}
+
+Always be helpful, professional, and focus on practical solutions. When recommending products, mention specific items from our catalog when relevant. Keep responses concise but informative.`;
+
+      // Call OpenAI ChatGPT API
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: message }
+        ],
+        max_tokens: 500,
+        temperature: 0.7,
+      });
+
+      const response = completion.choices[0].message.content || "I'm here to help with your kitchen equipment needs! How can I assist you today?";
 
       res.json({
         response,
@@ -569,7 +583,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("AI chat error:", error);
-      res.status(500).json({ message: "Failed to process AI chat" });
+      res.status(500).json({ message: "Failed to process AI chat. Please try again." });
     }
   });
 
