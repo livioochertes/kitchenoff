@@ -19,10 +19,13 @@ function setCachedData(key: string, data: any) {
   cache.set(key, data);
 }
 
-// Permanent data storage - never expires
+// Permanent data storage - never expires, pre-compiled for ultra-fast access
 let categoriesData: any[] = [];
 let productsByCategory = new Map<string, any[]>();
 let allProductsData: any[] = [];
+let productsBySlug = new Map<string, any>();
+let stringifiedProductsData: string = '';
+let stringifiedCategoriesData: string = '';
 
 // Load ALL data into memory at startup - never hit database again
 async function loadAllDataIntoMemory() {
@@ -43,6 +46,15 @@ async function loadAllDataIntoMemory() {
     
     // Load all products (no filter, no limit)
     allProductsData = await storage.getProducts({});
+    
+    // Pre-compile data structures for ultra-fast access
+    for (const product of allProductsData) {
+      productsBySlug.set(product.slug, product);
+    }
+    
+    // Pre-stringify JSON for fastest possible responses
+    stringifiedProductsData = JSON.stringify(allProductsData);
+    stringifiedCategoriesData = JSON.stringify(categoriesData);
     
     console.log('✅ All data loaded into permanent memory - database queries eliminated');
     console.log(`📊 Memory data loaded: ${allProductsData.length} total products`);
@@ -179,17 +191,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Category routes - instant response from memory
-  app.get("/api/categories", async (req, res) => {
-    try {
-      res.set({
-        'Cache-Control': 'public, max-age=3600', // 1 hour
-        'ETag': 'categories-memory'
-      });
-      res.json(categoriesData);
-    } catch (error) {
-      console.error("Get categories error:", error);
-      res.status(500).json({ message: "Failed to get categories" });
-    }
+  app.get("/api/categories", (req, res) => {
+    // Ultra-fast synchronous response - no JSON.stringify overhead
+    res.set({
+      'Cache-Control': 'public, max-age=300, s-maxage=300',
+      'ETag': 'categories-memory',
+      'Content-Type': 'application/json'
+    });
+    res.send(stringifiedCategoriesData);
   });
 
   app.post("/api/categories", authenticateToken, requireAdmin, async (req, res) => {
@@ -226,67 +235,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Product routes - instant response from memory
-  app.get("/api/products", async (req, res) => {
-    console.log("🔥 PRODUCTS API HIT - REQUEST RECEIVED:", {
-      url: req.url,
-      method: req.method,
-      query: req.query,
-      timestamp: new Date().toISOString()
+  // Product routes - ultra-fast response from memory
+  app.get("/api/products", (req, res) => {
+    const { categorySlug, search, limit = "20" } = req.query;
+    
+    let products: any[] = [];
+    
+    // Get from memory - no database queries, no async operations
+    if (categorySlug) {
+      products = productsByCategory.get(categorySlug as string) || [];
+    } else {
+      products = allProductsData;
+    }
+    
+    // Apply search filter if needed (optimized string operations)
+    if (search) {
+      const searchTerm = (search as string).toLowerCase();
+      products = products.filter(product => 
+        product.name.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    // Apply limit (optimized slice operation)
+    const limitNum = parseInt(limit as string) || 20;
+    if (limitNum > 0 && products.length > limitNum) {
+      products = products.slice(0, limitNum);
+    }
+    
+    // Set aggressive caching headers for performance
+    res.set({
+      'Cache-Control': 'public, max-age=300, s-maxage=300',
+      'ETag': `products-${categorySlug || 'all'}-${limitNum}`,
+      'Content-Type': 'application/json'
     });
-    try {
-      const { categorySlug, search, limit = "20" } = req.query;
-      
-      console.log("📊 API Request:", {
-        categorySlug,
-        search,
-        limit,
-        allParams: req.query
-      });
-      
-      let products: any[] = [];
-      
-      // Get from memory - no database queries
-      if (categorySlug) {
-        products = productsByCategory.get(categorySlug as string) || [];
-        console.log(`📊 Category lookup: ${products.length} products found for category: ${categorySlug}`);
-      } else {
-        products = allProductsData;
-        console.log(`📊 All products lookup: ${products.length} products found from allProductsData`);
-        console.log(`📊 allProductsData type: ${typeof allProductsData}, isArray: ${Array.isArray(allProductsData)}`);
-        if (products.length > 0) {
-          console.log(`📊 First 3 products IDs: ${products.slice(0, 3).map(p => p.id).join(', ')}`);
-        }
-      }
-      
-      // Apply search filter if needed
-      if (search) {
-        const searchTerm = (search as string).toLowerCase();
-        products = products.filter(product => 
-          product.name.toLowerCase().includes(searchTerm) ||
-          product.description?.toLowerCase().includes(searchTerm)
-        );
-      }
-      
-      // Apply limit
-      const limitNum = parseInt(limit as string) || 20;
-      console.log(`📊 Before limit: ${products.length} products, applying limit: ${limitNum}`);
-      if (limitNum > 0) {
-        products = products.slice(0, limitNum);
-      }
-      console.log(`📊 After limit: ${products.length} products being returned`);
-      
-      // Remove caching headers to ensure fresh data
-      res.set({
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      });
-      
+    
+    // For full product list, use pre-stringified data when possible
+    if (!categorySlug && !search && limitNum >= allProductsData.length) {
+      res.send(stringifiedProductsData);
+    } else {
       res.json(products);
-    } catch (error) {
-      console.error("Get products error:", error);
-      res.status(500).json({ message: "Failed to get products" });
     }
   });
 

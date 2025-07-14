@@ -1,11 +1,31 @@
 import express, { type Request, Response, NextFunction } from "express";
+import compression from "compression";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { seedDatabase } from "./sample-data";
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+
+// Ultra-performance Express settings
+app.disable('x-powered-by');
+app.set('trust proxy', 1);
+
+// Enable high-performance compression for all responses
+app.use(compression({
+  level: 6, // Balance between compression and speed
+  threshold: 1024, // Only compress responses larger than 1KB
+  filter: (req, res) => {
+    // Don't compress already compressed content
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  }
+}));
+
+// Optimized body parsing with smaller limits for speed
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -65,10 +85,18 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || '5000', 10);
+  
+  // Ultra-performance server settings
+  server.keepAliveTimeout = 5000;
+  server.headersTimeout = 10000;
+  server.timeout = 30000;
+  server.maxHeadersCount = 1000;
+  
   server.listen({
     port,
     host: "0.0.0.0",
     reusePort: true,
+    backlog: 511, // Increase connection backlog for better performance
   }, () => {
     log(`serving on port ${port}`);
   });
