@@ -46,14 +46,7 @@ export default function AIAssistant() {
   const handleConnect = async () => {
     setIsConnecting(true);
     try {
-      const response = await apiRequest("/api/ai/connect", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({}),
-      });
-
+      const response = await apiRequest("POST", "/api/ai/connect", {});
       const data = await response.json();
       
       if (data.success) {
@@ -96,15 +89,9 @@ export default function AIAssistant() {
     setIsTyping(true);
 
     try {
-      const response = await apiRequest("/api/ai/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: userMessage.text,
-          sessionId,
-        }),
+      const response = await apiRequest("POST", "/api/ai/chat", {
+        message: userMessage.text,
+        sessionId,
       });
 
       const data = await response.json();
