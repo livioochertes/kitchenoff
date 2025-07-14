@@ -1,0 +1,66 @@
+🚀 Category button clicked: Food Labels
+VM133 eruda.js:2 ⏱️ Navigation initiated: 0.599999999627471 ms
+VM133 eruda.js:2 🔍 Products component render: {location: '/products', searchQuery: '', selectedCategory: 'food-labels', timestamp: '2025-07-14T13:21:48.874Z'}
+VM133 eruda.js:2 🔄 Products data: {productsLength: 0, isLoading: true, isFetching: true, timestamp: '2025-07-14T13:21:48.897Z'}
+VM133 eruda.js:2 🔍 Products component render: {location: '/products', searchQuery: '', selectedCategory: 'food-labels', timestamp: '2025-07-14T13:21:48.938Z'}
+VM133 eruda.js:2 🔄 Products data: {productsLength: 3, isLoading: false, isFetching: false, timestamp: '2025-07-14T13:21:48.952Z'}
+_app-7ba85678f8f4b618.js:38  POST https://replit.com/graphql 520
+(anonymous) @ _app-7ba85678f8f4b618.js:38
+(anonymous) @ _app-7ba85678f8f4b618.js:25
+e @ _app-7ba85678f8f4b618.js:14
+t.subscribe @ _app-7ba85678f8f4b618.js:14
+e.consumeQueue @ _app-7ba85678f8f4b618.js:25
+(anonymous) @ _app-7ba85678f8f4b618.js:25
+n @ _app-7ba85678f8f4b618.js:38
+setTimeout
+(anonymous) @ _app-7ba85678f8f4b618.js:38
+e.scheduleQueueConsumption @ _app-7ba85678f8f4b618.js:25
+(anonymous) @ _app-7ba85678f8f4b618.js:25
+e @ _app-7ba85678f8f4b618.js:14
+t.subscribe @ _app-7ba85678f8f4b618.js:14
+(anonymous) @ _app-7ba85678f8f4b618.js:25
+e @ _app-7ba85678f8f4b618.js:14
+t.subscribe @ _app-7ba85678f8f4b618.js:14
+e.try @ _app-7ba85678f8f4b618.js:25
+e.start @ _app-7ba85678f8f4b618.js:25
+t.request @ _app-7ba85678f8f4b618.js:25
+(anonymous) @ _app-7ba85678f8f4b618.js:14
+(anonymous) @ _app-7ba85678f8f4b618.js:14
+(anonymous) @ _app-7ba85678f8f4b618.js:25
+(anonymous) @ _app-7ba85678f8f4b618.js:14
+e.execute @ _app-7ba85678f8f4b618.js:14
+e.getObservableFromLink @ _app-7ba85678f8f4b618.js:11
+(anonymous) @ _app-7ba85678f8f4b618.js:11
+(anonymous) @ _app-7ba85678f8f4b618.js:11
+(anonymous) @ _app-7ba85678f8f4b618.js:11
+(anonymous) @ _app-7ba85678f8f4b618.js:11
+s @ _app-7ba85678f8f4b618.js:11
+e.mutate @ _app-7ba85678f8f4b618.js:11
+e.mutate @ _app-7ba85678f8f4b618.js:11
+(anonymous) @ _app-7ba85678f8f4b618.js:14
+(anonymous) @ 4021-bc4b0622bd0896aa.js:1
+(anonymous) @ main-a4e4334e471663cd.js:1
+n @ main-a4e4334e471663cd.js:1
+u @ main-a4e4334e471663cd.js:1
+(anonymous) @ main-a4e4334e471663cd.js:1
+(anonymous) @ main-a4e4334e471663cd.js:1
+(anonymous) @ 4021-bc4b0622bd0896aa.js:1
+oO @ framework-b257afd8a9a4fc10.js:1
+uB @ framework-b257afd8a9a4fc10.js:1
+u_ @ framework-b257afd8a9a4fc10.js:1
+r6 @ framework-b257afd8a9a4fc10.js:1
+(anonymous) @ framework-b257afd8a9a4fc10.js:1
+uO @ framework-b257afd8a9a4fc10.js:1
+uS @ framework-b257afd8a9a4fc10.js:1
+C @ framework-b257afd8a9a4fc10.js:1
+z @ framework-b257afd8a9a4fc10.js:1Understand this error
+VM133 eruda.js:2 🚀 Category button clicked: Cleaning & Sanitizing
+VM133 eruda.js:2 ⏱️ Navigation initiated: 0.40000000037252903 ms
+VM133 eruda.js:2 🚀 Category button clicked: Cleaning & Sanitizing
+VM133 eruda.js:2 ⏱️ Navigation initiated: 0.40000000037252903 ms
+VM133 eruda.js:2 🚀 Category button clicked: Kitchen Supplies
+VM133 eruda.js:2 ⏱️ Navigation initiated: 0.40000000037252903 ms
+Console.js:61 🔍 Products component render: {location: '/products', searchQuery: '', selectedCategory: 'haccp-equipment', timestamp: '2025-07-14T13:22:15.052Z'}
+Console.js:61 🔄 Products data: {productsLength: 0, isLoading: true, isFetching: true, timestamp: '2025-07-14T13:22:15.075Z'}
+Console.js:61 🔍 Products component render: {location: '/products', searchQuery: '', selectedCategory: 'haccp-equipment', timestamp: '2025-07-14T13:22:15.110Z'}
+Console.js:61 🔄 Products data: {productsLength: 3, isLoading: false, isFetching: false, timestamp: '2025-07-14T13:22:15.124Z'}
