@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Filter, Grid, List, Search } from "lucide-react";
@@ -18,6 +18,13 @@ export default function Products() {
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "");
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+  // Update state when URL changes
+  useEffect(() => {
+    const newSearchParams = new URLSearchParams(location.split("?")[1] || "");
+    setSearchQuery(newSearchParams.get("search") || "");
+    setSelectedCategory(newSearchParams.get("category") || "");
+  }, [location]);
 
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
