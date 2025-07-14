@@ -11,10 +11,15 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### July 14, 2025
-- Identified category navigation issue: header navigation buttons lose URL parameters immediately after navigation
-- Header navigation briefly sets categorySlug but gets reset to undefined
-- Sidebar category buttons work correctly
-- Issue appears to be related to URL parameter handling in wouter router or state management
+- FIXED: Category navigation issue that was causing header navigation buttons to lose URL parameters
+- Fixed URL parameter parsing by switching from wouter location to window.location.search for reliability
+- Resolved state management conflicts between URL parameters and component state
+- Header navigation now properly filters products by category (food-labels, cleaning-sanitizing, etc.)
+- Sidebar category buttons continue to work correctly and synchronize with header navigation
+- Optimized product loading performance by reducing limit from 50 to 20 products
+- Added loading skeleton components for better user experience during API calls
+- Implemented query caching with 5-minute stale time to improve performance
+- Both header and sidebar navigation now work seamlessly with proper URL parameter handling
 
 ### July 13, 2025
 - Fixed checkout form validation to allow smooth step-by-step progression

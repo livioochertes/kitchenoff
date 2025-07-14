@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import Header from "@/components/header";
 import ProductCard from "@/components/product-card";
 import type { Category, ProductWithCategory } from "@shared/schema";
@@ -35,14 +36,16 @@ export default function Products() {
     queryKey: ["/api/products", { 
       search: searchQuery || undefined,
       categorySlug: selectedCategory || undefined,
-      limit: 50
+      limit: 20
     }],
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 10, // 10 minutes
   });
 
   console.log("Query params sent to API:", { 
     search: searchQuery || undefined,
     categorySlug: selectedCategory || undefined,
-    limit: 50
+    limit: 20
   });
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -196,9 +199,17 @@ export default function Products() {
 
             {/* Loading State */}
             {isLoading && (
-              <div className="text-center py-12">
-                <div className="loading-spinner mx-auto mb-4"></div>
-                <p className="text-muted-foreground">Loading products...</p>
+              <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Card key={i} className="overflow-hidden">
+                    <Skeleton className="h-48 w-full" />
+                    <CardContent className="p-4">
+                      <Skeleton className="h-4 w-3/4 mb-2" />
+                      <Skeleton className="h-4 w-1/2 mb-4" />
+                      <Skeleton className="h-6 w-1/4" />
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             )}
 
@@ -206,7 +217,7 @@ export default function Products() {
             {!isLoading && sortedProducts.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-muted-foreground mb-4">No products found matching your criteria.</p>
-                <Button onClick={() => { setSearchQuery(""); setSelectedCategory(""); }}>
+                <Button onClick={() => { window.location.href = "/products"; }}>
                   Clear Filters
                 </Button>
               </div>
