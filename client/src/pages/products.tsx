@@ -174,8 +174,10 @@ export default function Products() {
                           if (searchQuery) params.set("search", searchQuery);
                           params.set("category", category.slug);
                           const newUrl = `/products?${params.toString()}`;
+                          console.log("🎯 Sidebar navigating to:", newUrl);
                           navigate(newUrl);
                           console.log("⏱️ Sidebar navigation initiated:", performance.now() - startTime, "ms");
+                          console.log("🔗 Current URL after navigation:", window.location.href);
                         }}
                       >
                         {category.name}

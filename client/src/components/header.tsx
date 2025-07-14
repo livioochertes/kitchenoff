@@ -142,8 +142,11 @@ export default function Header() {
                   onClick={() => {
                     console.log("🚀 Category button clicked:", category.name);
                     const startTime = performance.now();
-                    navigate(`/products?category=${category.slug}`);
+                    const targetUrl = `/products?category=${category.slug}`;
+                    console.log("🎯 Navigating to:", targetUrl);
+                    navigate(targetUrl);
                     console.log("⏱️ Navigation initiated:", performance.now() - startTime, "ms");
+                    console.log("🔗 Current URL after navigation:", window.location.href);
                   }}
                 >
                   {category.name}
