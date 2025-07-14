@@ -97,7 +97,7 @@ export default function Products() {
     queryKey: ["/api/products", { 
       search: searchQuery || undefined,
       categorySlug: selectedCategory || undefined,
-      limit: 4
+      limit: selectedCategory ? 20 : 100 // Show more products for "All Products"
     }],
     staleTime: 1000 * 60 * 5, // 5 minutes - allow some staleness for performance
     gcTime: 1000 * 60 * 30, // 30 minutes - keep in memory longer

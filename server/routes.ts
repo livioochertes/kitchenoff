@@ -234,7 +234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Product routes - instant response from memory
   app.get("/api/products", async (req, res) => {
     try {
-      const { categorySlug, search, limit = "4" } = req.query;
+      const { categorySlug, search, limit = "20" } = req.query;
       
       let products: any[] = [];
       
@@ -254,9 +254,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
       }
       
-      // Apply limit
-      const limitNum = parseInt(limit as string) || 4;
-      products = products.slice(0, limitNum);
+      // Apply limit - for "All Products" show all, otherwise limit to 20
+      const limitNum = parseInt(limit as string) || 20;
+      if (limitNum > 0) {
+        products = products.slice(0, limitNum);
+      }
       
       res.set({
         'Cache-Control': 'public, max-age=3600', // 1 hour
