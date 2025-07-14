@@ -33,15 +33,8 @@ export default function Products() {
     setSearchQuery(newSearchQuery);
     setSelectedCategory(newSelectedCategory);
     
-    // Force query to refresh by invalidating cache and removing from cache
-    queryClient.removeQueries({ 
-      queryKey: ["/api/products"],
-      exact: false 
-    });
-    queryClient.invalidateQueries({ 
-      queryKey: ["/api/products"],
-      exact: false 
-    });
+    // Force query to refresh by completely clearing cache
+    queryClient.clear();
   }, [location, urlChangeCounter]);
 
   // Also listen for URL changes via popstate (back/forward buttons) and custom events
@@ -57,14 +50,7 @@ export default function Products() {
       setSelectedCategory(newSelectedCategory);
       setUrlChangeCounter(prev => prev + 1);
       
-      queryClient.removeQueries({ 
-        queryKey: ["/api/products"],
-        exact: false 
-      });
-      queryClient.invalidateQueries({ 
-        queryKey: ["/api/products"],
-        exact: false 
-      });
+      queryClient.clear();
     };
 
     window.addEventListener('popstate', handleUrlChange);
@@ -108,7 +94,7 @@ export default function Products() {
       limit: selectedCategory ? 20 : 100 // Show more products for "All Products"
     }],
     staleTime: 0, // Always fresh data
-    gcTime: 1000 * 60 * 5, // 5 minutes in memory
+    gcTime: 0, // Don't cache at all
     refetchOnWindowFocus: false,
     refetchOnMount: true,
     refetchOnReconnect: false,
