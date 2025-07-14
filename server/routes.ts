@@ -236,6 +236,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { categorySlug, search, limit = "20" } = req.query;
       
+      console.log("📊 API Request:", {
+        categorySlug,
+        search,
+        limit,
+        allParams: req.query
+      });
+      
       let products: any[] = [];
       
       // Get from memory - no database queries
