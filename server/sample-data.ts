@@ -9,6 +9,8 @@ export async function seedDatabase() {
     await db.delete(categories);
     await db.delete(users);
 
+
+
     // Create categories
     const insertedCategories = await db.insert(categories).values([
       {
@@ -460,16 +462,24 @@ export async function seedDatabase() {
 
     await db.insert(products).values(sampleProducts);
 
-    // Create admin user
-    const hashedPassword = await bcrypt.hash("admin123", 10);
+    // Create users
+    const adminPassword = await bcrypt.hash("admin123", 10);
+    const testPassword = await bcrypt.hash("123456", 10);
+    
     await db.insert(users).values([
       {
         email: "admin@kitchenpro.com",
-        username: "admin",
-        password: hashedPassword,
-        role: "admin",
+        password: adminPassword,
         firstName: "Admin",
-        lastName: "User"
+        lastName: "User",
+        isAdmin: true
+      },
+      {
+        email: "liviu.chertes@gmail.com",
+        password: testPassword,
+        firstName: "Liviu",
+        lastName: "Chertes",
+        isAdmin: false
       }
     ]);
 
