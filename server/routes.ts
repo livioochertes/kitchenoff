@@ -46,6 +46,7 @@ async function loadAllDataIntoMemory() {
     
     console.log('✅ All data loaded into permanent memory - database queries eliminated');
     console.log(`📊 Memory data loaded: ${allProductsData.length} total products`);
+    console.log(`📊 First 5 products in memory:`, allProductsData.slice(0, 5).map(p => ({ id: p.id, name: p.name })));
   } catch (error) {
     console.error('Failed to load data into memory:', error);
   }
