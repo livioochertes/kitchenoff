@@ -20,6 +20,13 @@ export default function Products() {
   const searchQuery = urlParams.get("search") || "";
   const selectedCategory = urlParams.get("category") || "";
   
+  console.log("🔍 Products component render:", {
+    location,
+    searchQuery,
+    selectedCategory,
+    timestamp: new Date().toISOString()
+  });
+  
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   
@@ -30,6 +37,9 @@ export default function Products() {
     queryKey: ["/api/categories"],
     staleTime: 1000 * 60 * 10, // 10 minutes
     gcTime: 1000 * 60 * 20, // 20 minutes
+    onSuccess: (data) => {
+      console.log("✅ Categories loaded:", data?.length || 0);
+    }
   });
 
   const { data: products = [], isLoading, isFetching, isPlaceholderData } = useQuery<ProductWithCategory[]>({
@@ -44,14 +54,37 @@ export default function Products() {
     refetchOnMount: false,
     refetchOnReconnect: false,
     placeholderData: (previousData) => previousData, // Keep previous data while fetching new
+    onSuccess: (data) => {
+      const endTime = performance.now();
+      console.log("✅ Products loaded:", {
+        count: data?.length || 0,
+        category: selectedCategory,
+        search: searchQuery,
+        isPlaceholder: isPlaceholderData,
+        timestamp: new Date().toISOString()
+      });
+    },
+    onError: (error) => {
+      console.error("❌ Products query failed:", error);
+    }
   });
 
   // Update display products when new data arrives
   useEffect(() => {
+    console.log("🔄 Products effect triggered:", {
+      productsLength: products?.length || 0,
+      displayProductsLength: displayProducts.length,
+      isLoading,
+      isFetching,
+      isPlaceholderData,
+      timestamp: new Date().toISOString()
+    });
+    
     if (products && products.length > 0) {
+      console.log("✅ Updating display products:", products.length);
       setDisplayProducts(products);
     }
-  }, [products]);
+  }, [products, isLoading, isFetching, isPlaceholderData]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();

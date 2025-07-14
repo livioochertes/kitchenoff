@@ -140,7 +140,10 @@ export default function Header() {
                   variant="ghost" 
                   className="font-medium hidden lg:block" 
                   onClick={() => {
-                    window.location.href = `/products?category=${category.slug}`;
+                    console.log("🚀 Category button clicked:", category.name);
+                    const startTime = performance.now();
+                    navigate(`/products?category=${category.slug}`);
+                    console.log("⏱️ Navigation initiated:", performance.now() - startTime, "ms");
                   }}
                 >
                   {category.name}
