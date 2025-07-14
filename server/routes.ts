@@ -227,6 +227,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/auth/invoice", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const {
+        companyName,
+        vatNumber,
+        registrationNumber,
+        taxId,
+        companyAddress,
+        companyCity,
+        companyState,
+        companyZip,
+        companyCountry,
+        billingEmail,
+        billingPhone,
+        deliveryAddress,
+        deliveryCity,
+        deliveryState,
+        deliveryZip,
+        deliveryCountry,
+        deliveryInstructions,
+      } = req.body;
+
+      const updatedUser = await storage.updateUser(req.userId!, {
+        companyName,
+        vatNumber,
+        registrationNumber,
+        taxId,
+        companyAddress,
+        companyCity,
+        companyState,
+        companyZip,
+        companyCountry,
+        billingEmail,
+        billingPhone,
+        deliveryAddress,
+        deliveryCity,
+        deliveryState,
+        deliveryZip,
+        deliveryCountry,
+        deliveryInstructions,
+      });
+
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating invoice settings:", error);
+      res.status(500).json({ message: "Failed to update invoice settings" });
+    }
+  });
+
   // Category routes - instant response from memory
   app.get("/api/categories", (req, res) => {
     // Ultra-fast synchronous response - no JSON.stringify overhead

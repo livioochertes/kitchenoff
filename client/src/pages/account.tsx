@@ -24,7 +24,28 @@ const profileSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
 
+const invoiceSchema = z.object({
+  companyName: z.string().optional(),
+  vatNumber: z.string().optional(),
+  registrationNumber: z.string().optional(),
+  taxId: z.string().optional(),
+  companyAddress: z.string().optional(),
+  companyCity: z.string().optional(),
+  companyState: z.string().optional(),
+  companyZip: z.string().optional(),
+  companyCountry: z.string().optional(),
+  billingEmail: z.string().email("Invalid email address").optional().or(z.literal("")),
+  billingPhone: z.string().optional(),
+  deliveryAddress: z.string().optional(),
+  deliveryCity: z.string().optional(),
+  deliveryState: z.string().optional(),
+  deliveryZip: z.string().optional(),
+  deliveryCountry: z.string().optional(),
+  deliveryInstructions: z.string().optional(),
+});
+
 type ProfileFormData = z.infer<typeof profileSchema>;
+type InvoiceFormData = z.infer<typeof invoiceSchema>;
 
 export default function Account() {
   const [activeTab, setActiveTab] = useState("profile");
@@ -39,6 +60,29 @@ export default function Account() {
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
       email: user?.email || "",
+    },
+  });
+
+  const invoiceForm = useForm<InvoiceFormData>({
+    resolver: zodResolver(invoiceSchema),
+    defaultValues: {
+      companyName: user?.companyName || "",
+      vatNumber: user?.vatNumber || "",
+      registrationNumber: user?.registrationNumber || "",
+      taxId: user?.taxId || "",
+      companyAddress: user?.companyAddress || "",
+      companyCity: user?.companyCity || "",
+      companyState: user?.companyState || "",
+      companyZip: user?.companyZip || "",
+      companyCountry: user?.companyCountry || "",
+      billingEmail: user?.billingEmail || "",
+      billingPhone: user?.billingPhone || "",
+      deliveryAddress: user?.deliveryAddress || "",
+      deliveryCity: user?.deliveryCity || "",
+      deliveryState: user?.deliveryState || "",
+      deliveryZip: user?.deliveryZip || "",
+      deliveryCountry: user?.deliveryCountry || "",
+      deliveryInstructions: user?.deliveryInstructions || "",
     },
   });
 
@@ -76,8 +120,34 @@ export default function Account() {
     },
   });
 
+  // Update invoice details mutation
+  const updateInvoiceMutation = useMutation({
+    mutationFn: async (data: InvoiceFormData) => {
+      const response = await apiRequest("PUT", "/api/auth/invoice", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Invoice details updated",
+        description: "Your invoice details have been updated successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Update failed",
+        description: error.message || "Failed to update invoice details.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleProfileSubmit = (data: ProfileFormData) => {
     updateProfileMutation.mutate(data);
+  };
+
+  const handleInvoiceSubmit = (data: InvoiceFormData) => {
+    updateInvoiceMutation.mutate(data);
   };
 
   const getOrderStatusColor = (status: string) => {
@@ -133,7 +203,7 @@ export default function Account() {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="profile" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
                 Profile
@@ -145,6 +215,10 @@ export default function Account() {
               <TabsTrigger value="invoices" className="flex items-center gap-2">
                 <CreditCard className="h-4 w-4" />
                 Invoices
+              </TabsTrigger>
+              <TabsTrigger value="invoice-settings" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Invoice Settings
               </TabsTrigger>
               <TabsTrigger value="alerts" className="flex items-center gap-2">
                 <Bell className="h-4 w-4" />
@@ -365,6 +439,290 @@ export default function Account() {
                         ))
                     )}
                   </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="invoice-settings" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="h-5 w-5" />
+                    Invoice Details & Company Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Form {...invoiceForm}>
+                    <form onSubmit={invoiceForm.handleSubmit(handleInvoiceSubmit)} className="space-y-6">
+                      
+                      {/* Company Information Section */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold text-gray-900">Company Information</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={invoiceForm.control}
+                            name="companyName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Company Name</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="Your Company Ltd." {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={invoiceForm.control}
+                            name="vatNumber"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>VAT Number</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="GB123456789" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={invoiceForm.control}
+                            name="registrationNumber"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Company Registration Number</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="12345678" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={invoiceForm.control}
+                            name="taxId"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Tax ID</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="123-45-6789" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Company Address Section */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold text-gray-900">Company Address</h3>
+                        <div className="grid grid-cols-1 gap-4">
+                          <FormField
+                            control={invoiceForm.control}
+                            name="companyAddress"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Street Address</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="123 Business Street" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <FormField
+                              control={invoiceForm.control}
+                              name="companyCity"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>City</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="London" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={invoiceForm.control}
+                              name="companyState"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>State/Province</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="England" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={invoiceForm.control}
+                              name="companyZip"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>ZIP/Postal Code</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="SW1A 1AA" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <FormField
+                            control={invoiceForm.control}
+                            name="companyCountry"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Country</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="United Kingdom" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Contact Information Section */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold text-gray-900">Billing Contact Information</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={invoiceForm.control}
+                            name="billingEmail"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Billing Email</FormLabel>
+                                <FormControl>
+                                  <Input type="email" placeholder="billing@company.com" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={invoiceForm.control}
+                            name="billingPhone"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Billing Phone</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="+44 20 7123 4567" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Delivery Address Section */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold text-gray-900">Delivery Address (if different from company address)</h3>
+                        <div className="grid grid-cols-1 gap-4">
+                          <FormField
+                            control={invoiceForm.control}
+                            name="deliveryAddress"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Delivery Street Address</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="456 Delivery Street" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <FormField
+                              control={invoiceForm.control}
+                              name="deliveryCity"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>City</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="London" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={invoiceForm.control}
+                              name="deliveryState"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>State/Province</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="England" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={invoiceForm.control}
+                              name="deliveryZip"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>ZIP/Postal Code</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="SW1A 1AA" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <FormField
+                            control={invoiceForm.control}
+                            name="deliveryCountry"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Country</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="United Kingdom" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={invoiceForm.control}
+                            name="deliveryInstructions"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Delivery Instructions</FormLabel>
+                                <FormControl>
+                                  <textarea 
+                                    className="flex min-h-[60px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    placeholder="Please ring the bell at the main entrance. Loading dock is at the back of the building."
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end pt-4">
+                        <Button 
+                          type="submit" 
+                          disabled={updateInvoiceMutation.isPending}
+                          className="min-w-[120px]"
+                        >
+                          {updateInvoiceMutation.isPending ? "Updating..." : "Update Invoice Settings"}
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
                 </CardContent>
               </Card>
             </TabsContent>
