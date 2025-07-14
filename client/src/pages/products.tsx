@@ -28,9 +28,18 @@ export default function Products() {
     
     console.log("📍 Location changed:", location, "Search:", newSearchQuery, "Category:", newSelectedCategory);
     
-    setSearchQuery(newSearchQuery);
-    setSelectedCategory(newSelectedCategory);
-  }, [location]);
+    // Only update if values actually changed
+    if (newSearchQuery !== searchQuery || newSelectedCategory !== selectedCategory) {
+      setSearchQuery(newSearchQuery);
+      setSelectedCategory(newSelectedCategory);
+      
+      // Force query to refresh by invalidating cache
+      queryClient.invalidateQueries({ 
+        queryKey: ["/api/products"],
+        exact: false 
+      });
+    }
+  }, [location, searchQuery, selectedCategory]);
   
   console.log("🔍 Products component render:", {
     location,
@@ -63,14 +72,14 @@ export default function Products() {
       categorySlug: selectedCategory || undefined,
       limit: 4
     }],
-    staleTime: Infinity, // Never consider data stale - use cached data forever
-    gcTime: Infinity, // Never garbage collect - keep in memory forever
+    staleTime: 1000 * 60 * 5, // 5 minutes - allow some staleness for performance
+    gcTime: 1000 * 60 * 30, // 30 minutes - keep in memory longer
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
     refetchInterval: false,
     refetchIntervalInBackground: false,
-    networkMode: 'offlineFirst', // Prefer cached data
+    enabled: true, // Always enabled to ensure queries run
 
   });
 
