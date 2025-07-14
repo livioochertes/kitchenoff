@@ -228,6 +228,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Product routes - instant response from memory
   app.get("/api/products", async (req, res) => {
+    console.log("🔥 PRODUCTS API HIT - REQUEST RECEIVED:", {
+      url: req.url,
+      method: req.method,
+      query: req.query,
+      timestamp: new Date().toISOString()
+    });
     try {
       const { categorySlug, search, limit = "20" } = req.query;
       
