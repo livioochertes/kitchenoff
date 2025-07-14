@@ -556,9 +556,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 Our current featured products include: ${productList}
 
 IMPORTANT: When recommending specific products from our catalog, always format them as clickable links using this exact format:
-[Product Name](/product/product-slug)
+[Product Name](/products/product-slug)
 
-For example: [Digital Food Thermometer](/product/digital-food-thermometer)
+For example: [Digital Food Thermometer](/products/digital-food-thermometer)
 
 Always be helpful, professional, and focus on practical solutions. When recommending products, mention specific items from our catalog when relevant and provide direct links. Keep responses concise but informative.`;
 

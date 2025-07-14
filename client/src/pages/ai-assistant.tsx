@@ -38,7 +38,7 @@ const renderMessageWithLinks = (text: string) => {
       <Link 
         key={match.index} 
         href={linkUrl} 
-        className="text-blue-600 hover:text-blue-800 underline cursor-pointer"
+        className="text-blue-600 hover:text-blue-800 underline cursor-pointer font-medium"
       >
         {linkText}
       </Link>
