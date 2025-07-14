@@ -32,6 +32,7 @@ export default function Products() {
     // Always update to ensure sync
     setSearchQuery(newSearchQuery);
     setSelectedCategory(newSelectedCategory);
+    setCurrentLimit(20); // Reset limit when category changes
     
     // Force query to refresh by completely clearing cache
     queryClient.clear();
@@ -48,6 +49,7 @@ export default function Products() {
       
       setSearchQuery(newSearchQuery);
       setSelectedCategory(newSelectedCategory);
+      setCurrentLimit(20); // Reset limit when URL changes
       setUrlChangeCounter(prev => prev + 1);
       
       queryClient.clear();
@@ -87,11 +89,13 @@ export default function Products() {
 
   // Server-side caching handles prefetching, no need for client-side prefetch
 
+  const [currentLimit, setCurrentLimit] = useState(20);
+  
   const { data: products = [], isLoading, isFetching, isPlaceholderData } = useQuery<ProductWithCategory[]>({
     queryKey: ["/api/products", { 
       search: searchQuery || undefined,
       categorySlug: selectedCategory || undefined,
-      limit: selectedCategory ? 20 : 100 // Show more products for "All Products"
+      limit: currentLimit
     }],
     staleTime: 0, // Always fresh data
     gcTime: 0, // Don't cache at all
@@ -114,6 +118,13 @@ export default function Products() {
       timestamp: new Date().toISOString()
     });
   }, [products, isLoading, isFetching]);
+
+  // Check if there are more products to load
+  const hasMoreProducts = products.length >= currentLimit;
+  
+  const handleLoadMore = () => {
+    setCurrentLimit(prev => prev + 20);
+  };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -307,15 +318,38 @@ export default function Products() {
 
             {/* Products Grid */}
             {products.length > 0 && (
-              <div className={`grid gap-6 ${
-                viewMode === "grid" 
-                  ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" 
-                  : "grid-cols-1"
-              }`}>
-                {products.map((product) => (
-                  <ProductCard key={`${product.id}-${selectedCategory}-${searchQuery}`} product={product} />
-                ))}
-              </div>
+              <>
+                <div className={`grid gap-6 ${
+                  viewMode === "grid" 
+                    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" 
+                    : "grid-cols-1"
+                }`}>
+                  {products.map((product) => (
+                    <ProductCard key={`${product.id}-${selectedCategory}-${searchQuery}`} product={product} />
+                  ))}
+                </div>
+                
+                {/* Load More Button */}
+                {hasMoreProducts && (
+                  <div className="flex justify-center mt-8">
+                    <Button 
+                      onClick={handleLoadMore} 
+                      disabled={isFetching}
+                      size="lg"
+                      className="px-8"
+                    >
+                      {isFetching ? (
+                        <>
+                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-white"></div>
+                          Loading more...
+                        </>
+                      ) : (
+                        <>Load More Products</>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

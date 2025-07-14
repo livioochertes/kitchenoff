@@ -235,6 +235,226 @@ export async function seedDatabase() {
         featured: false,
         rating: "4.6",
         reviewCount: 12
+      },
+      
+      // Additional Food Labels
+      {
+        name: "Allergen Warning Labels - 1000 pack",
+        slug: "allergen-warning-labels-1000",
+        description: "Bright yellow allergen warning labels. Contains common allergens list. 1000 pack.",
+        price: "34.99",
+        compareAtPrice: "39.99",
+        imageUrl: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop",
+        categoryId: insertedCategories[0].id,
+        inStock: true,
+        stockQuantity: 200,
+        featured: true,
+        rating: "4.9",
+        reviewCount: 32
+      },
+      {
+        name: "Temperature Control Labels",
+        slug: "temperature-control-labels",
+        description: "Color-changing temperature labels for monitoring food safety. 500 pack.",
+        price: "29.99",
+        compareAtPrice: "34.99",
+        imageUrl: "https://images.unsplash.com/photo-1543362906-acfc16c67564?w=400&h=400&fit=crop",
+        categoryId: insertedCategories[0].id,
+        inStock: true,
+        stockQuantity: 150,
+        featured: false,
+        rating: "4.7",
+        reviewCount: 28
+      },
+      {
+        name: "Prep Date Labels - Roll",
+        slug: "prep-date-labels-roll",
+        description: "Preparation date labels on convenient roll. 2000 labels per roll.",
+        price: "22.99",
+        compareAtPrice: "26.99",
+        imageUrl: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop",
+        categoryId: insertedCategories[0].id,
+        inStock: true,
+        stockQuantity: 300,
+        featured: false,
+        rating: "4.6",
+        reviewCount: 15
+      },
+      
+      // Additional HACCP Equipment
+      {
+        name: "Wireless Temperature Monitoring System",
+        slug: "wireless-temperature-monitoring",
+        description: "WiFi-enabled temperature monitoring with alerts. Includes 4 sensors.",
+        price: "299.99",
+        compareAtPrice: "349.99",
+        imageUrl: "https://images.unsplash.com/photo-1584308972272-9e4e7685e80f?w=400&h=400&fit=crop",
+        categoryId: insertedCategories[1].id,
+        inStock: true,
+        stockQuantity: 40,
+        featured: true,
+        rating: "4.8",
+        reviewCount: 67
+      },
+      {
+        name: "HACCP Compliance Chart Set",
+        slug: "haccp-compliance-chart-set",
+        description: "Laminated HACCP compliance charts for kitchen display. Set of 12.",
+        price: "45.99",
+        compareAtPrice: "54.99",
+        imageUrl: "https://images.unsplash.com/photo-1584308972272-9e4e7685e80f?w=400&h=400&fit=crop",
+        categoryId: insertedCategories[1].id,
+        inStock: true,
+        stockQuantity: 85,
+        featured: false,
+        rating: "4.5",
+        reviewCount: 23
+      },
+      {
+        name: "Food Safety Inspection Kit",
+        slug: "food-safety-inspection-kit",
+        description: "Complete food safety inspection kit with thermometer, pH strips, and more.",
+        price: "89.99",
+        compareAtPrice: "109.99",
+        imageUrl: "https://images.unsplash.com/photo-1584308972272-9e4e7685e80f?w=400&h=400&fit=crop",
+        categoryId: insertedCategories[1].id,
+        inStock: true,
+        stockQuantity: 60,
+        featured: true,
+        rating: "4.7",
+        reviewCount: 45
+      },
+      
+      // Additional Kitchen Supplies
+      {
+        name: "Stainless Steel Prep Tables",
+        slug: "stainless-steel-prep-tables",
+        description: "Commercial grade stainless steel prep table. 48\" x 24\" with undershelf.",
+        price: "349.99",
+        compareAtPrice: "399.99",
+        imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop",
+        categoryId: insertedCategories[2].id,
+        inStock: true,
+        stockQuantity: 15,
+        featured: true,
+        rating: "4.9",
+        reviewCount: 89
+      },
+      {
+        name: "Professional Can Opener Set",
+        slug: "professional-can-opener-set",
+        description: "Heavy-duty can opener set for commercial use. Includes table mount.",
+        price: "79.99",
+        compareAtPrice: "94.99",
+        imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop",
+        categoryId: insertedCategories[2].id,
+        inStock: true,
+        stockQuantity: 35,
+        featured: false,
+        rating: "4.6",
+        reviewCount: 34
+      },
+      {
+        name: "Commercial Mixing Bowls Set",
+        slug: "commercial-mixing-bowls-set",
+        description: "Stainless steel mixing bowls set. 6 bowls from 1 qt to 8 qt capacity.",
+        price: "124.99",
+        compareAtPrice: "144.99",
+        imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop",
+        categoryId: insertedCategories[2].id,
+        inStock: true,
+        stockQuantity: 50,
+        featured: false,
+        rating: "4.8",
+        reviewCount: 56
+      },
+      
+      // Additional Cleaning & Sanitizing
+      {
+        name: "All-Purpose Cleaner - Gallon",
+        slug: "all-purpose-cleaner-gallon",
+        description: "Commercial all-purpose cleaner. EPA registered. 1 gallon concentrate.",
+        price: "24.99",
+        compareAtPrice: "29.99",
+        imageUrl: "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400&h=400&fit=crop",
+        categoryId: insertedCategories[3].id,
+        inStock: true,
+        stockQuantity: 100,
+        featured: false,
+        rating: "4.4",
+        reviewCount: 67
+      },
+      {
+        name: "Sanitizing Wipes - 12 Pack",
+        slug: "sanitizing-wipes-12-pack",
+        description: "Food-safe sanitizing wipes. 12 canister pack. 80 wipes per canister.",
+        price: "89.99",
+        compareAtPrice: "104.99",
+        imageUrl: "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400&h=400&fit=crop",
+        categoryId: insertedCategories[3].id,
+        inStock: true,
+        stockQuantity: 75,
+        featured: true,
+        rating: "4.7",
+        reviewCount: 43
+      },
+      {
+        name: "Floor Sanitizer Concentrate",
+        slug: "floor-sanitizer-concentrate",
+        description: "Heavy-duty floor sanitizer concentrate. Makes 50 gallons. Non-slip formula.",
+        price: "39.99",
+        compareAtPrice: "49.99",
+        imageUrl: "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400&h=400&fit=crop",
+        categoryId: insertedCategories[3].id,
+        inStock: true,
+        stockQuantity: 60,
+        featured: false,
+        rating: "4.6",
+        reviewCount: 29
+      },
+      
+      // Additional Storage Solutions
+      {
+        name: "Vacuum Storage Bags - 50 Pack",
+        slug: "vacuum-storage-bags-50-pack",
+        description: "Commercial vacuum storage bags. Various sizes. 50 pack with pump.",
+        price: "49.99",
+        compareAtPrice: "59.99",
+        imageUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop",
+        categoryId: insertedCategories[4].id,
+        inStock: true,
+        stockQuantity: 120,
+        featured: false,
+        rating: "4.5",
+        reviewCount: 38
+      },
+      {
+        name: "Ingredient Dispensers Set",
+        slug: "ingredient-dispensers-set",
+        description: "Gravity-fed ingredient dispensers. Set of 6 with portion control.",
+        price: "149.99",
+        compareAtPrice: "179.99",
+        imageUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop",
+        categoryId: insertedCategories[4].id,
+        inStock: true,
+        stockQuantity: 45,
+        featured: true,
+        rating: "4.8",
+        reviewCount: 52
+      },
+      {
+        name: "Mobile Storage Racks",
+        slug: "mobile-storage-racks",
+        description: "Heavy-duty mobile storage racks with locking wheels. Set of 2.",
+        price: "199.99",
+        compareAtPrice: "239.99",
+        imageUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop",
+        categoryId: insertedCategories[4].id,
+        inStock: true,
+        stockQuantity: 30,
+        featured: false,
+        rating: "4.7",
+        reviewCount: 41
       }
     ];
 
