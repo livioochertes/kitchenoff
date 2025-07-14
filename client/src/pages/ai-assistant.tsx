@@ -236,15 +236,15 @@ export default function AIAssistant() {
             {/* Chat Interface */}
             <div className="lg:col-span-3">
               <Card className="h-[600px] flex flex-col">
-                <CardHeader>
+                <CardHeader className="flex-shrink-0">
                   <CardTitle>Chat with AI Assistant</CardTitle>
                   <CardDescription>
                     Ask questions about products, get recommendations, or seek expert advice
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="flex-1 flex flex-col">
-                  <ScrollArea className="flex-1 pr-4 mb-4">
-                    <div className="space-y-4">
+                <CardContent className="flex-1 flex flex-col min-h-0">
+                  <ScrollArea className="flex-1 pr-4 mb-4 min-h-0">
+                    <div className="space-y-4 p-2">
                       {messages.map((message) => (
                         <div
                           key={message.id}
@@ -253,24 +253,24 @@ export default function AIAssistant() {
                           }`}
                         >
                           {message.sender === "assistant" && (
-                            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
                               <Bot className="h-4 w-4 text-white" />
                             </div>
                           )}
                           <div
-                            className={`max-w-[70%] p-3 rounded-lg ${
+                            className={`max-w-[70%] p-3 rounded-lg break-words ${
                               message.sender === "user"
                                 ? "bg-primary text-white"
                                 : "bg-muted"
                             }`}
                           >
-                            <p className="text-sm">{message.text}</p>
+                            <p className="text-sm whitespace-pre-wrap">{message.text}</p>
                             <p className="text-xs opacity-70 mt-1">
                               {message.timestamp.toLocaleTimeString()}
                             </p>
                           </div>
                           {message.sender === "user" && (
-                            <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
+                            <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center flex-shrink-0">
                               <User className="h-4 w-4 text-white" />
                             </div>
                           )}
@@ -278,7 +278,7 @@ export default function AIAssistant() {
                       ))}
                       {isTyping && (
                         <div className="flex gap-3 justify-start">
-                          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
                             <Bot className="h-4 w-4 text-white" />
                           </div>
                           <div className="bg-muted p-3 rounded-lg">
@@ -294,9 +294,9 @@ export default function AIAssistant() {
                     <div ref={messagesEndRef} />
                   </ScrollArea>
                   
-                  <Separator className="mb-4" />
+                  <Separator className="mb-4 flex-shrink-0" />
                   
-                  <form onSubmit={handleSendMessage} className="flex gap-2">
+                  <form onSubmit={handleSendMessage} className="flex gap-2 flex-shrink-0">
                     <Input
                       value={inputMessage}
                       onChange={(e) => setInputMessage(e.target.value)}
