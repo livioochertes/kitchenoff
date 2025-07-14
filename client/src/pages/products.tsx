@@ -33,7 +33,11 @@ export default function Products() {
     setSearchQuery(newSearchQuery);
     setSelectedCategory(newSelectedCategory);
     
-    // Force query to refresh by invalidating cache
+    // Force query to refresh by invalidating cache and removing from cache
+    queryClient.removeQueries({ 
+      queryKey: ["/api/products"],
+      exact: false 
+    });
     queryClient.invalidateQueries({ 
       queryKey: ["/api/products"],
       exact: false 
@@ -53,6 +57,10 @@ export default function Products() {
       setSelectedCategory(newSelectedCategory);
       setUrlChangeCounter(prev => prev + 1);
       
+      queryClient.removeQueries({ 
+        queryKey: ["/api/products"],
+        exact: false 
+      });
       queryClient.invalidateQueries({ 
         queryKey: ["/api/products"],
         exact: false 
@@ -99,10 +107,10 @@ export default function Products() {
       categorySlug: selectedCategory || undefined,
       limit: selectedCategory ? 20 : 100 // Show more products for "All Products"
     }],
-    staleTime: 1000 * 60 * 5, // 5 minutes - allow some staleness for performance
-    gcTime: 1000 * 60 * 30, // 30 minutes - keep in memory longer
+    staleTime: 0, // Always fresh data
+    gcTime: 1000 * 60 * 5, // 5 minutes in memory
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnMount: true,
     refetchOnReconnect: false,
     refetchInterval: false,
     refetchIntervalInBackground: false,
