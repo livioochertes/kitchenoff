@@ -176,9 +176,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Product routes
   app.get("/api/products", async (req, res) => {
     try {
-      const { categoryId, featured, search, limit, offset } = req.query;
+      const { categoryId, categorySlug, featured, search, limit, offset } = req.query;
+      
+      let resolvedCategoryId = categoryId ? parseInt(categoryId as string) : undefined;
+      
+      // If categorySlug is provided, convert it to categoryId
+      if (categorySlug && !resolvedCategoryId) {
+        const category = await storage.getCategoryBySlug(categorySlug as string);
+        if (category) {
+          resolvedCategoryId = category.id;
+        }
+      }
+      
       const products = await storage.getProducts({
-        categoryId: categoryId ? parseInt(categoryId as string) : undefined,
+        categoryId: resolvedCategoryId,
         featured: featured === "true",
         search: search as string,
         limit: limit ? parseInt(limit as string) : 20,  // Default to 20 for better performance
