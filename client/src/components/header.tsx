@@ -141,7 +141,7 @@ export default function Header() {
                   className="font-medium hidden lg:block" 
                   onClick={() => {
                     console.log('Header button clicked:', category.slug);
-                    window.location.href = `/products?category=${category.slug}`;
+                    navigate(`/products?category=${category.slug}`);
                   }}
                 >
                   {category.name}
