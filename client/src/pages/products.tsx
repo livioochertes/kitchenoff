@@ -30,16 +30,15 @@ export default function Products() {
 
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
+    staleTime: 1000 * 60 * 15, // 15 minutes - categories don't change often
+    gcTime: 1000 * 60 * 30, // 30 minutes
   });
 
-  const { data: products = [], isLoading } = useQuery<ProductWithCategory[]>({
-    queryKey: ["/api/products", { 
-      search: searchQuery || undefined,
-      categorySlug: selectedCategory || undefined,
-      limit: 20
-    }],
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 10, // 10 minutes
+  const { data: products = [], isLoading, isFetching } = useQuery<ProductWithCategory[]>({
+    queryKey: ["/api/products", searchQuery, selectedCategory, 20],
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    gcTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false, // Prevent unnecessary refetches
   });
 
   console.log("Query params sent to API:", { 
@@ -198,7 +197,7 @@ export default function Products() {
             </div>
 
             {/* Loading State */}
-            {isLoading && (
+            {(isLoading || isFetching) && (
               <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <Card key={i} className="overflow-hidden">
@@ -214,7 +213,7 @@ export default function Products() {
             )}
 
             {/* No Results */}
-            {!isLoading && sortedProducts.length === 0 && (
+            {!isLoading && !isFetching && sortedProducts.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-muted-foreground mb-4">No products found matching your criteria.</p>
                 <Button onClick={() => { window.location.href = "/products"; }}>
@@ -224,7 +223,7 @@ export default function Products() {
             )}
 
             {/* Products Grid */}
-            {!isLoading && sortedProducts.length > 0 && (
+            {!isLoading && !isFetching && sortedProducts.length > 0 && (
               <div className={`grid gap-6 ${
                 viewMode === "grid" 
                   ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" 

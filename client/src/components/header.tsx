@@ -6,16 +6,27 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useCart } from "@/hooks/use-cart";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [, navigate] = useLocation();
   const { cart } = useCart();
 
+  const queryClient = useQueryClient();
+  
   const { data: categories } = useQuery({
     queryKey: ["/api/categories"],
+    staleTime: 1000 * 60 * 15, // 15 minutes
   });
+
+  // Prefetch function for category products
+  const prefetchCategoryProducts = (categorySlug: string) => {
+    queryClient.prefetchQuery({
+      queryKey: ["/api/products", "", categorySlug, 20],
+      staleTime: 1000 * 60 * 2, // 2 minutes
+    });
+  };
 
   const cartItemCount = cart?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
@@ -139,6 +150,7 @@ export default function Header() {
                   key={category.id} 
                   variant="ghost" 
                   className="font-medium hidden lg:block" 
+                  onMouseEnter={() => prefetchCategoryProducts(category.slug)}
                   onClick={() => {
                     window.location.href = `/products?category=${category.slug}`;
                   }}
