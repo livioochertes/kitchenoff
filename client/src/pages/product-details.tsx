@@ -18,7 +18,7 @@ export default function ProductDetails() {
   const { toast } = useToast();
 
   const { data: product, isLoading } = useQuery<ProductWithCategory>({
-    queryKey: ["/api/products/slug", params?.slug],
+    queryKey: [`/api/products/slug/${params?.slug}`],
     enabled: !!params?.slug,
   });
 
