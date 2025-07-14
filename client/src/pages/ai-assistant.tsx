@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import Header from "@/components/header";
+import { Link } from "wouter";
 
 interface Message {
   id: string;
@@ -16,6 +17,43 @@ interface Message {
   sender: "user" | "assistant";
   timestamp: Date;
 }
+
+// Function to render markdown links as clickable components
+const renderMessageWithLinks = (text: string) => {
+  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = linkRegex.exec(text)) !== null) {
+    // Add text before the link
+    if (match.index > lastIndex) {
+      parts.push(text.substring(lastIndex, match.index));
+    }
+    
+    // Add the link component
+    const linkText = match[1];
+    const linkUrl = match[2];
+    parts.push(
+      <Link 
+        key={match.index} 
+        href={linkUrl} 
+        className="text-blue-600 hover:text-blue-800 underline cursor-pointer"
+      >
+        {linkText}
+      </Link>
+    );
+    
+    lastIndex = match.index + match[0].length;
+  }
+  
+  // Add any remaining text
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex));
+  }
+  
+  return parts.length > 0 ? parts : text;
+};
 
 export default function AIAssistant() {
   const [messages, setMessages] = useState<Message[]>([
@@ -264,7 +302,12 @@ export default function AIAssistant() {
                                 : "bg-muted"
                             }`}
                           >
-                            <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                            <div className="text-sm whitespace-pre-wrap">
+                              {message.sender === "assistant" 
+                                ? renderMessageWithLinks(message.text)
+                                : message.text
+                              }
+                            </div>
                             <p className="text-xs opacity-70 mt-1">
                               {message.timestamp.toLocaleTimeString()}
                             </p>

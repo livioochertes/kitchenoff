@@ -542,8 +542,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get current products for context
-      const products = allProductsData.slice(0, 10); // Use first 10 products for context
-      const productList = products.map(p => `${p.name} - $${p.price}`).join(', ');
+      const products = allProductsData.slice(0, 15); // Use first 15 products for context
+      const productList = products.map(p => `${p.name} - $${p.price} (ID: ${p.id}, Slug: ${p.slug})`).join(', ');
 
       // Create system prompt with KitchenOff context
       const systemPrompt = `You are an AI assistant for KitchenOff, a professional kitchen equipment and supplies company. You help customers with:
@@ -555,7 +555,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 Our current featured products include: ${productList}
 
-Always be helpful, professional, and focus on practical solutions. When recommending products, mention specific items from our catalog when relevant. Keep responses concise but informative.`;
+IMPORTANT: When recommending specific products from our catalog, always format them as clickable links using this exact format:
+[Product Name](/product/product-slug)
+
+For example: [Digital Food Thermometer](/product/digital-food-thermometer)
+
+Always be helpful, professional, and focus on practical solutions. When recommending products, mention specific items from our catalog when relevant and provide direct links. Keep responses concise but informative.`;
 
       // Call OpenAI ChatGPT API
       const completion = await openai.chat.completions.create({
