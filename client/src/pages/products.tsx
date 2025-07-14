@@ -14,7 +14,7 @@ import ProductCard from "@/components/product-card";
 import type { Category, ProductWithCategory } from "@shared/schema";
 
 export default function Products() {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   
   // Parse URL parameters using window.location for reliability
   const urlParams = new URLSearchParams(window.location.search);
@@ -35,8 +35,12 @@ export default function Products() {
   
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
-    staleTime: 1000 * 60 * 10, // 10 minutes
-    gcTime: 1000 * 60 * 20, // 20 minutes
+    staleTime: Infinity, // Never consider data stale
+    gcTime: Infinity, // Never garbage collect
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    networkMode: 'offlineFirst', // Prefer cached data
 
   });
 
@@ -48,13 +52,14 @@ export default function Products() {
       categorySlug: selectedCategory || undefined,
       limit: 4
     }],
-    staleTime: 1000 * 60 * 30, // 30 minutes - much longer for category data
-    gcTime: 1000 * 60 * 60, // 1 hour
+    staleTime: Infinity, // Never consider data stale - use cached data forever
+    gcTime: Infinity, // Never garbage collect - keep in memory forever
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
-    refetchInterval: false, // Disable automatic refetching
+    refetchInterval: false,
     refetchIntervalInBackground: false,
+    networkMode: 'offlineFirst', // Prefer cached data
 
   });
 
@@ -73,12 +78,17 @@ export default function Products() {
     const formData = new FormData(e.target as HTMLFormElement);
     const newSearch = formData.get("search") as string;
     
+    console.log("🔍 Search form submitted:", newSearch);
+    const startTime = performance.now();
+    
     // Update URL with search params
     const params = new URLSearchParams();
     if (newSearch) params.set("search", newSearch);
     if (selectedCategory) params.set("category", selectedCategory);
     const newUrl = `/products${params.toString() ? `?${params.toString()}` : ""}`;
-    window.location.href = newUrl;
+    navigate(newUrl);
+    
+    console.log("⏱️ Search navigation initiated:", performance.now() - startTime, "ms");
   };
 
   // Removed client-side sorting for better performance - server should handle this
@@ -122,10 +132,13 @@ export default function Products() {
                       variant={selectedCategory === "" ? "default" : "ghost"}
                       className="w-full justify-start"
                       onClick={() => {
+                        console.log("🚀 Sidebar All Products clicked");
+                        const startTime = performance.now();
                         const params = new URLSearchParams();
                         if (searchQuery) params.set("search", searchQuery);
                         const newUrl = `/products${params.toString() ? `?${params.toString()}` : ""}`;
-                        window.location.href = newUrl;
+                        navigate(newUrl);
+                        console.log("⏱️ Sidebar navigation initiated:", performance.now() - startTime, "ms");
                       }}
                     >
                       All Products
@@ -136,11 +149,14 @@ export default function Products() {
                         variant={selectedCategory === category.slug ? "default" : "ghost"}
                         className="w-full justify-start"
                         onClick={() => {
+                          console.log("🚀 Sidebar category clicked:", category.name);
+                          const startTime = performance.now();
                           const params = new URLSearchParams();
                           if (searchQuery) params.set("search", searchQuery);
                           params.set("category", category.slug);
                           const newUrl = `/products?${params.toString()}`;
-                          window.location.href = newUrl;
+                          navigate(newUrl);
+                          console.log("⏱️ Sidebar navigation initiated:", performance.now() - startTime, "ms");
                         }}
                       >
                         {category.name}
