@@ -7,53 +7,60 @@ import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import Stripe from "stripe";
 
-// Aggressive in-memory cache for frequent queries
-const cache = new Map<string, { data: any; timestamp: number }>();
-const CACHE_DURATION = 120000; // 2 minutes
+// Ultra-aggressive permanent in-memory cache
+const cache = new Map<string, any>();
+const CACHE_REFRESH_INTERVAL = 300000; // 5 minutes
 
 function getCachedData(key: string) {
-  const cached = cache.get(key);
-  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-    return cached.data;
-  }
-  return null;
+  return cache.get(key) || null;
 }
 
 function setCachedData(key: string, data: any) {
-  cache.set(key, { data, timestamp: Date.now() });
+  cache.set(key, data);
 }
 
-// Pre-warm cache for popular categories
-async function preWarmCache() {
+// Permanent data storage - never expires
+let categoriesData: any[] = [];
+let productsByCategory = new Map<string, any[]>();
+let allProductsData: any[] = [];
+
+// Load ALL data into memory at startup - never hit database again
+async function loadAllDataIntoMemory() {
   try {
-    const categories = await storage.getCategories();
+    console.log('Loading all data into permanent memory...');
     
-    // Pre-warm categories cache
-    const categoriesCacheKey = 'categories-all';
-    setCachedData(categoriesCacheKey, categories);
+    // Load categories
+    categoriesData = await storage.getCategories();
+    setCachedData('categories-all', categoriesData);
     
-    // Pre-warm cache for each category
-    for (const category of categories) {
-      const queryObj = { categorySlug: category.slug, limit: "4" };
-      const cacheKey = `products-${JSON.stringify(queryObj)}`;
+    // Load products for each category
+    for (const category of categoriesData) {
       const products = await storage.getProducts({
         categoryId: category.id,
         limit: 4
       });
+      productsByCategory.set(category.slug, products);
+      
+      // Cache with exact query format
+      const queryObj = { categorySlug: category.slug, limit: "4" };
+      const cacheKey = `products-${JSON.stringify(queryObj)}`;
       setCachedData(cacheKey, products);
     }
     
-    // Pre-warm cache for all products (no category filter)
+    // Load all products (no filter)
+    allProductsData = await storage.getProducts({ limit: 4 });
     const allProductsQuery = { limit: "4" };
     const allProductsCacheKey = `products-${JSON.stringify(allProductsQuery)}`;
-    const allProducts = await storage.getProducts({ limit: 4 });
-    setCachedData(allProductsCacheKey, allProducts);
+    setCachedData(allProductsCacheKey, allProductsData);
     
-    console.log('Cache pre-warmed for all categories and products');
+    console.log('✅ All data loaded into permanent memory - database queries eliminated');
   } catch (error) {
-    console.error('Failed to pre-warm cache:', error);
+    console.error('Failed to load data into memory:', error);
   }
 }
+
+// Refresh data periodically
+setInterval(loadAllDataIntoMemory, CACHE_REFRESH_INTERVAL);
 
 // JWT middleware
 interface AuthRequest extends Request {
@@ -176,33 +183,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Category routes
+  // Category routes - instant response from memory
   app.get("/api/categories", async (req, res) => {
     try {
-      const cacheKey = 'categories-all';
-      
-      // Check cache first
-      const cachedCategories = getCachedData(cacheKey);
-      if (cachedCategories) {
-        res.set({
-          'Cache-Control': 'public, max-age=1800', // 30 minutes
-          'ETag': cacheKey
-        });
-        return res.json(cachedCategories);
-      }
-      
-      const categories = await storage.getCategories();
-      
-      // Cache the result
-      setCachedData(cacheKey, categories);
-      
-      // Set cache headers for better performance
       res.set({
-        'Cache-Control': 'public, max-age=1800', // 30 minutes
-        'ETag': cacheKey
+        'Cache-Control': 'public, max-age=3600', // 1 hour
+        'ETag': 'categories-memory'
       });
-      
-      res.json(categories);
+      res.json(categoriesData);
     } catch (error) {
       console.error("Get categories error:", error);
       res.status(500).json({ message: "Failed to get categories" });
@@ -243,47 +231,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Product routes
+  // Product routes - instant response from memory
   app.get("/api/products", async (req, res) => {
     try {
-      const { categoryId, categorySlug, featured, search, limit, offset } = req.query;
-      const cacheKey = `products-${JSON.stringify(req.query)}`;
+      const { categorySlug, search, limit = "4" } = req.query;
       
-      // Check cache first
-      const cachedProducts = getCachedData(cacheKey);
-      if (cachedProducts) {
-        res.set({
-          'Cache-Control': 'public, max-age=600', // 10 minutes
-          'ETag': cacheKey
-        });
-        return res.json(cachedProducts);
+      let products: any[] = [];
+      
+      // Get from memory - no database queries
+      if (categorySlug) {
+        products = productsByCategory.get(categorySlug as string) || [];
+      } else {
+        products = allProductsData;
       }
       
-      let resolvedCategoryId = categoryId ? parseInt(categoryId as string) : undefined;
-      
-      // If categorySlug is provided, convert it to categoryId
-      if (categorySlug && !resolvedCategoryId) {
-        const category = await storage.getCategoryBySlug(categorySlug as string);
-        if (category) {
-          resolvedCategoryId = category.id;
-        }
+      // Apply search filter if needed
+      if (search) {
+        const searchTerm = (search as string).toLowerCase();
+        products = products.filter(product => 
+          product.name.toLowerCase().includes(searchTerm) ||
+          product.description?.toLowerCase().includes(searchTerm)
+        );
       }
       
-      const products = await storage.getProducts({
-        categoryId: resolvedCategoryId,
-        featured: featured === "true",
-        search: search as string,
-        limit: limit ? parseInt(limit as string) : 4,  // Reduced to 4 for maximum speed
-        offset: offset ? parseInt(offset as string) : 0,
-      });
+      // Apply limit
+      const limitNum = parseInt(limit as string) || 4;
+      products = products.slice(0, limitNum);
       
-      // Cache the result
-      setCachedData(cacheKey, products);
-      
-      // Set cache headers for better performance
       res.set({
-        'Cache-Control': 'public, max-age=600', // 10 minutes
-        'ETag': cacheKey
+        'Cache-Control': 'public, max-age=3600', // 1 hour
+        'ETag': `products-memory-${categorySlug || 'all'}`
       });
       
       res.json(products);
@@ -630,8 +607,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
   
-  // Pre-warm cache after server setup
-  setTimeout(preWarmCache, 2000); // Wait 2 seconds for database to be ready
+  // Load all data into memory after server setup
+  setTimeout(loadAllDataIntoMemory, 2000); // Wait 2 seconds for database to be ready
   
   return httpServer;
 }
