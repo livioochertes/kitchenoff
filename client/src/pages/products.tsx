@@ -23,29 +23,23 @@ export default function Products() {
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  console.log("Products page rendered with:", { location, searchQuery, selectedCategory });
-  console.log("Window location search:", window.location.search);
-  console.log("URL search params:", urlParams.toString());
-  console.log("All URL params:", Object.fromEntries(urlParams.entries()));
-
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
+    staleTime: 1000 * 60 * 10, // 10 minutes
+    gcTime: 1000 * 60 * 20, // 20 minutes
   });
 
   const { data: products = [], isLoading } = useQuery<ProductWithCategory[]>({
     queryKey: ["/api/products", { 
       search: searchQuery || undefined,
       categorySlug: selectedCategory || undefined,
-      limit: 10
+      limit: 8
     }],
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 10, // 10 minutes
-  });
-
-  console.log("Query params sent to API:", { 
-    search: searchQuery || undefined,
-    categorySlug: selectedCategory || undefined,
-    limit: 10
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
   });
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -206,7 +200,7 @@ export default function Products() {
             {/* Loading State */}
             {isLoading && (
               <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, i) => (
+                {Array.from({ length: 3 }).map((_, i) => (
                   <Card key={i} className="overflow-hidden">
                     <Skeleton className="h-48 w-full" />
                     <CardContent className="p-4">

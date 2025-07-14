@@ -6,12 +6,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import type { ProductWithCategory } from "@shared/schema";
+import { memo } from "react";
 
 interface ProductCardProps {
   product: ProductWithCategory;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
   const { toast } = useToast();
 
@@ -26,16 +27,10 @@ export default function ProductCard({ product }: ProductCardProps) {
     });
   };
 
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`h-4 w-4 ${
-          i < Math.floor(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-        }`}
-      />
-    ));
-  };
+  const rating = parseFloat(product.rating || "0");
+  const discount = product.compareAtPrice 
+    ? (parseFloat(product.compareAtPrice) - parseFloat(product.price)).toFixed(2)
+    : null;
 
   return (
     <Card className="product-card group cursor-pointer hover:shadow-lg transition-shadow duration-300 h-full">
@@ -70,8 +65,9 @@ export default function ProductCard({ product }: ProductCardProps) {
               )}
               
               <div className="flex items-center mb-4">
-                <div className="flex text-yellow-400 mr-2">
-                  {renderStars(parseFloat(product.rating || "0"))}
+                <div className="flex items-center text-yellow-400 mr-2">
+                  <Star className="h-4 w-4 fill-current" />
+                  <span className="ml-1 text-sm font-medium text-gray-900">{rating.toFixed(1)}</span>
                 </div>
                 <span className="text-sm text-gray-500">
                   ({product.reviewCount || 0} reviews)
@@ -118,4 +114,6 @@ export default function ProductCard({ product }: ProductCardProps) {
       </Link>
     </Card>
   );
-}
+});
+
+export default ProductCard;

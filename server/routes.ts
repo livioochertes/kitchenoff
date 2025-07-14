@@ -192,7 +192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         categoryId: resolvedCategoryId,
         featured: featured === "true",
         search: search as string,
-        limit: limit ? parseInt(limit as string) : 10,  // Reduced to 10 for better performance
+        limit: limit ? parseInt(limit as string) : 8,  // Reduced to 8 for better performance
         offset: offset ? parseInt(offset as string) : 0,
       });
       

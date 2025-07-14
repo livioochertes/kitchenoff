@@ -38,14 +38,12 @@ export default function ProductDetails() {
   };
 
   const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`h-4 w-4 ${
-          i < Math.floor(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-        }`}
-      />
-    ));
+    return (
+      <div className="flex items-center">
+        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+        <span className="ml-1 text-sm font-medium">{rating.toFixed(1)}</span>
+      </div>
+    );
   };
 
   if (isLoading) {
