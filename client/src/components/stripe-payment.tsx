@@ -26,9 +26,8 @@ function CheckoutForm({ amount, currency, onSuccess, onError, disabled }: Stripe
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    console.log("Stripe payment form submitted");
+  const handleSubmit = async () => {
+    console.log("Stripe payment button clicked");
 
     if (!stripe || !elements || isLoading) {
       console.log("Stripe not ready:", { stripe: !!stripe, elements: !!elements, isLoading });
@@ -97,7 +96,7 @@ function CheckoutForm({ amount, currency, onSuccess, onError, disabled }: Stripe
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-4">
       <div className="p-4 border rounded-lg">
         <CardElement
           options={{
@@ -117,13 +116,14 @@ function CheckoutForm({ amount, currency, onSuccess, onError, disabled }: Stripe
         />
       </div>
       <Button
-        type="submit"
+        type="button"
+        onClick={handleSubmit}
         disabled={!stripe || isLoading || disabled}
         className="w-full"
       >
         {isLoading ? 'Processing...' : `Pay $${amount.toFixed(2)}`}
       </Button>
-    </form>
+    </div>
   );
 }
 
