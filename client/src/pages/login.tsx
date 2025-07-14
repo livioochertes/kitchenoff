@@ -11,6 +11,7 @@ import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/header";
 
 const loginSchema = z.object({
@@ -32,6 +33,7 @@ export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -57,7 +59,7 @@ export default function Login() {
       return response.json();
     },
     onSuccess: (data) => {
-      localStorage.setItem("token", data.token);
+      login(data.token, data.user);
       toast({
         title: "Welcome back!",
         description: "You have been successfully logged in.",
@@ -79,7 +81,7 @@ export default function Login() {
       return response.json();
     },
     onSuccess: (data) => {
-      localStorage.setItem("token", data.token);
+      login(data.token, data.user);
       toast({
         title: "Account created!",
         description: "Your account has been created successfully.",

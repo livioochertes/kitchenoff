@@ -1,18 +1,21 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Search, ShoppingCart, User, Menu, X, Bot } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, X, Bot, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useCart } from "@/hooks/use-cart";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 import kitchenOffLogo from "@assets/KitchenOff_Logo_Background_Removed_1752520997429.png";
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [, navigate] = useLocation();
   const { cart } = useCart();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const { data: categories } = useQuery({
     queryKey: ["/api/categories"],
@@ -71,12 +74,29 @@ export default function Header() {
                 AI Assistant
               </Button>
             </Link>
-            <Link href="/login">
-              <Button variant="ghost" size="sm" className="hidden md:flex">
-                <User className="h-4 w-4 mr-2" />
-                Account
-              </Button>
-            </Link>
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="hidden md:flex">
+                    <User className="h-4 w-4 mr-2" />
+                    {user?.firstName || "Account"}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={logout}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link href="/login">
+                <Button variant="ghost" size="sm" className="hidden md:flex">
+                  <User className="h-4 w-4 mr-2" />
+                  Login
+                </Button>
+              </Link>
+            )}
             <Link href="/cart">
               <Button variant="ghost" size="sm" className="relative">
                 <ShoppingCart className="h-4 w-4 mr-2" />

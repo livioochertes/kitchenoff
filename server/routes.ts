@@ -131,7 +131,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const token = jwt.sign(
-        { id: user.id, email: user.email },
+        { userId: user.id, email: user.email },
         process.env.JWT_SECRET || "your-secret-key",
         { expiresIn: "24h" }
       );
@@ -161,7 +161,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const token = jwt.sign(
-        { id: user.id, email: user.email },
+        { userId: user.id, email: user.email },
         process.env.JWT_SECRET || "your-secret-key",
         { expiresIn: "24h" }
       );
