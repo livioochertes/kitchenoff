@@ -33,7 +33,7 @@ export default function Products() {
   const { data: products = [], isLoading } = useQuery<ProductWithCategory[]>({
     queryKey: ["/api/products", { 
       search: searchQuery,
-      categorySlug: selectedCategory,
+      categorySlug: selectedCategory || undefined,
       limit: 50
     }],
   });
@@ -48,13 +48,8 @@ export default function Products() {
     window.history.pushState({}, "", newUrl);
   };
 
-  const filteredProducts = products.filter(product => {
-    if (selectedCategory && product.category?.slug !== selectedCategory) return false;
-    if (searchQuery && !product.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    return true;
-  });
-
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
+  // No need for client-side filtering since server handles it
+  const sortedProducts = [...products].sort((a, b) => {
     switch (sortBy) {
       case "price-asc":
         return parseFloat(a.price) - parseFloat(b.price);
