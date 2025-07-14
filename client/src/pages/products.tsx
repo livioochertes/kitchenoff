@@ -30,16 +30,13 @@ export default function Products() {
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   
-  // Keep previous products state to prevent white page
-  const [displayProducts, setDisplayProducts] = useState<ProductWithCategory[]>([]);
+  // Remove local state - use React Query caching directly
   
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
     staleTime: 1000 * 60 * 10, // 10 minutes
     gcTime: 1000 * 60 * 20, // 20 minutes
-    onSuccess: (data) => {
-      console.log("✅ Categories loaded:", data?.length || 0);
-    }
+
   });
 
   const { data: products = [], isLoading, isFetching, isPlaceholderData } = useQuery<ProductWithCategory[]>({
@@ -53,38 +50,18 @@ export default function Products() {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
-    placeholderData: (previousData) => previousData, // Keep previous data while fetching new
-    onSuccess: (data) => {
-      const endTime = performance.now();
-      console.log("✅ Products loaded:", {
-        count: data?.length || 0,
-        category: selectedCategory,
-        search: searchQuery,
-        isPlaceholder: isPlaceholderData,
-        timestamp: new Date().toISOString()
-      });
-    },
-    onError: (error) => {
-      console.error("❌ Products query failed:", error);
-    }
+
   });
 
-  // Update display products when new data arrives
+  // Log products data for debugging
   useEffect(() => {
-    console.log("🔄 Products effect triggered:", {
+    console.log("🔄 Products data:", {
       productsLength: products?.length || 0,
-      displayProductsLength: displayProducts.length,
       isLoading,
       isFetching,
-      isPlaceholderData,
       timestamp: new Date().toISOString()
     });
-    
-    if (products && products.length > 0) {
-      console.log("✅ Updating display products:", products.length);
-      setDisplayProducts(products);
-    }
-  }, [products, isLoading, isFetching, isPlaceholderData]);
+  }, [products, isLoading, isFetching]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -207,7 +184,7 @@ export default function Products() {
                   )}
                 </h1>
                 <Badge variant="secondary">
-                  {displayProducts.length} products
+                  {products.length} products
                 </Badge>
               </div>
 
@@ -230,7 +207,7 @@ export default function Products() {
             </div>
 
             {/* Loading State - Only show when no previous data */}
-            {isLoading && !displayProducts.length && (
+            {isLoading && !products.length && (
               <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <Card key={i} className="overflow-hidden">
@@ -246,7 +223,7 @@ export default function Products() {
             )}
 
             {/* No Results */}
-            {!isLoading && !isFetching && displayProducts.length === 0 && (
+            {!isLoading && !isFetching && products.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-muted-foreground mb-4">No products found matching your criteria.</p>
                 <Button onClick={() => { window.location.href = "/products"; }}>
@@ -256,13 +233,13 @@ export default function Products() {
             )}
 
             {/* Products Grid */}
-            {displayProducts.length > 0 && (
+            {products.length > 0 && (
               <div className={`grid gap-6 ${
                 viewMode === "grid" 
                   ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" 
                   : "grid-cols-1"
               }`}>
-                {displayProducts.map((product) => (
+                {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
