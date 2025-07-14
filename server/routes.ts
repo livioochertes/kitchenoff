@@ -196,6 +196,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/auth/profile", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { firstName, lastName, email } = req.body;
+      
+      // Check if email is already taken by another user
+      if (email) {
+        const existingUser = await storage.getUserByEmail(email);
+        if (existingUser && existingUser.id !== req.userId) {
+          return res.status(400).json({ message: "Email already in use" });
+        }
+      }
+
+      const updatedUser = await storage.updateUser(req.userId!, {
+        firstName,
+        lastName,
+        email,
+      });
+
+      res.json({ 
+        id: updatedUser.id, 
+        email: updatedUser.email, 
+        firstName: updatedUser.firstName, 
+        lastName: updatedUser.lastName, 
+        isAdmin: updatedUser.isAdmin 
+      });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
   // Category routes - instant response from memory
   app.get("/api/categories", (req, res) => {
     // Ultra-fast synchronous response - no JSON.stringify overhead

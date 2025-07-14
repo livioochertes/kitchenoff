@@ -35,7 +35,7 @@ export function useAuth() {
         const user = await response.json();
         setAuthState({ user, isLoading: false, isAuthenticated: true });
       } catch (error) {
-        console.error('Auth check failed:', error);
+        // Auth check failed, remove token and set unauthenticated
         localStorage.removeItem('token');
         setAuthState({ user: null, isLoading: false, isAuthenticated: false });
       }
@@ -54,9 +54,14 @@ export function useAuth() {
     setAuthState({ user: null, isLoading: false, isAuthenticated: false });
   };
 
+  const updateUser = (updatedUser: User) => {
+    setAuthState(prev => ({ ...prev, user: updatedUser }));
+  };
+
   return {
     ...authState,
     login,
     logout,
+    updateUser,
   };
 }

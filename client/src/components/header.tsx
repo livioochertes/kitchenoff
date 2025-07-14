@@ -83,6 +83,10 @@ export default function Header() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => navigate("/account")}>
+                    <User className="h-4 w-4 mr-2" />
+                    My Account
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={logout}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Logout
