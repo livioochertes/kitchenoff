@@ -37,11 +37,12 @@ export default function ProductDetails() {
     });
   };
 
-  const renderStars = (rating: number) => {
+  const renderStars = (rating: string | number) => {
+    const numRating = typeof rating === 'string' ? parseFloat(rating) : rating;
     return (
       <div className="flex items-center">
         <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-        <span className="ml-1 text-sm font-medium">{rating.toFixed(1)}</span>
+        <span className="ml-1 text-sm font-medium">{numRating.toFixed(1)}</span>
       </div>
     );
   };
