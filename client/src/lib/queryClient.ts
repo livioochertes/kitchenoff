@@ -42,6 +42,9 @@ export const getQueryFn: <T>(options: {
         }
       }
       
+      // Add cache-busting parameter
+      params.append('_t', Date.now().toString());
+      
       if (params.toString()) {
         url += `?${params.toString()}`;
       }
@@ -50,6 +53,12 @@ export const getQueryFn: <T>(options: {
     console.log("🌐 Making API request:", url);
     const res = await fetch(url, {
       credentials: "include",
+      cache: "no-cache",
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0"
+      }
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
