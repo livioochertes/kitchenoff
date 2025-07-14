@@ -524,7 +524,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "Product recommendations",
           "Kitchen setup advice", 
           "HACCP compliance help",
-          "Equipment comparisons"
+          "Equipment comparisons",
+          "Order status & invoices"
         ]
       });
     } catch (error) {
@@ -533,7 +534,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/ai/chat", async (req, res) => {
+  app.post("/api/ai/chat", async (req: AuthRequest, res) => {
     try {
       const { message, sessionId } = req.body;
       
@@ -545,6 +546,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const products = allProductsData.slice(0, 15); // Use first 15 products for context
       const productList = products.map(p => `${p.name} - $${p.price} (ID: ${p.id}, Slug: ${p.slug})`).join(', ');
 
+      // Extract user ID from JWT token if present (optional authentication)
+      let userId = null;
+      const authHeader = req.headers.authorization;
+      if (authHeader?.startsWith('Bearer ')) {
+        try {
+          const token = authHeader.substring(7);
+          const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+          userId = decoded.userId;
+        } catch (error) {
+          // Token is invalid or expired, continue without authentication
+          console.log("Invalid or expired token, continuing as guest");
+        }
+      }
+
+      // Check if user is authenticated for order-related queries
+      let userContext = "";
+      let userOrders: any[] = [];
+      
+      if (userId) {
+        try {
+          userOrders = await storage.getOrders(userId);
+          userContext = `\n\nUser is logged in. Available user services:
+- Order Status: User has ${userOrders.length} order(s) in their account
+- Invoice Information: Can provide invoice details for completed orders
+- Order History: Can show past purchases and order tracking
+
+When user asks about orders, invoices, or order status, provide specific information from their order history.`;
+        } catch (error) {
+          console.error("Error fetching user orders:", error);
+        }
+      } else {
+        userContext = `\n\nUser is not logged in. For order status and invoice information, they need to sign in to their account first.`;
+      }
+
       // Create system prompt with KitchenOff context
       const systemPrompt = `You are an AI assistant for KitchenOff, a professional kitchen equipment and supplies company. You help customers with:
 
@@ -552,8 +587,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 2. Kitchen setup advice for commercial and home kitchens
 3. HACCP compliance and food safety guidance
 4. Equipment comparisons and technical specifications
+5. Order status and invoice information (for signed-in users)
 
-Our current featured products include: ${productList}
+Our current featured products include: ${productList}${userContext}
 
 IMPORTANT: When recommending specific products from our catalog, always format them as clickable links using this exact format:
 [Product Name](/products/product-slug)
@@ -562,13 +598,31 @@ For example: [Digital Food Thermometer](/products/digital-food-thermometer)
 
 Always be helpful, professional, and focus on practical solutions. When recommending products, mention specific items from our catalog when relevant and provide direct links. Keep responses concise but informative.`;
 
+      // Prepare user message with order context if relevant
+      let enhancedMessage = message;
+      
+      // If user is asking about orders and is logged in, add order details
+      if (userId && userOrders.length > 0 && (
+        message.toLowerCase().includes('order') || 
+        message.toLowerCase().includes('invoice') || 
+        message.toLowerCase().includes('status') ||
+        message.toLowerCase().includes('purchase')
+      )) {
+        const orderDetails = userOrders.map(order => {
+          const orderTotal = order.items.reduce((sum: number, item: any) => sum + (parseFloat(item.product.price) * item.quantity), 0);
+          return `Order #${order.id} - Status: ${order.status} - Total: $${orderTotal.toFixed(2)} - Date: ${new Date(order.createdAt).toLocaleDateString()} - Items: ${order.items.length}`;
+        }).join('\n');
+        
+        enhancedMessage = `${message}\n\nUser's Order History:\n${orderDetails}`;
+      }
+
       // Call OpenAI ChatGPT API with timeout and error handling
       const completion = await Promise.race([
         openai.chat.completions.create({
           model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
           messages: [
             { role: "system", content: systemPrompt },
-            { role: "user", content: message }
+            { role: "user", content: enhancedMessage }
           ],
           max_tokens: 500,
           temperature: 0.7,

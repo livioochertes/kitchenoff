@@ -31,6 +31,9 @@ Preferred communication style: Simple, everyday language.
 - COMPLETED: Automatic session restoration on page load to maintain AI connection throughout user session
 - COMPLETED: Chat history persistence across page reloads and browser sessions
 - COMPLETED: Clear chat history button for users to start fresh conversations
+- COMPLETED: AI Assistant order status and invoice support for signed-in users
+- COMPLETED: Enhanced AI context with user order history for personalized support
+- COMPLETED: Order-related query handling with detailed order information and status
 - VERIFIED: Product links navigate correctly to product detail pages without crashes
 - VERIFIED: AI Assistant connection and chat history automatically restored on page reload
 - VERIFIED: Session persistence works across all browsing activities while maintaining connection

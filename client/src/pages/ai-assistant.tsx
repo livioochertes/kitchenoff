@@ -251,6 +251,8 @@ export default function AIAssistant() {
     "Recommend a food thermometer",
     "HACCP equipment needed?",
     "Show best-selling products",
+    "What's my order status?",
+    "Show my recent invoices",
   ];
 
   return (
@@ -338,6 +340,9 @@ export default function AIAssistant() {
                         </Badge>
                         <Badge variant="outline" className="w-full justify-start text-xs py-1">
                           Equipment Comparisons
+                        </Badge>
+                        <Badge variant="outline" className="w-full justify-start text-xs py-1">
+                          Order Status & Invoices
                         </Badge>
                       </>
                     )}
