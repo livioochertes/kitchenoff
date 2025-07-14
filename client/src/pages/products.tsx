@@ -14,17 +14,18 @@ import type { Category, ProductWithCategory } from "@shared/schema";
 export default function Products() {
   const [location] = useLocation();
   
-  // Parse URL parameters directly in component
-  const searchParams = new URLSearchParams(location.split("?")[1] || "");
-  const searchQuery = searchParams.get("search") || "";
-  const selectedCategory = searchParams.get("category") || "";
+  // Parse URL parameters using window.location for reliability
+  const urlParams = new URLSearchParams(window.location.search);
+  const searchQuery = urlParams.get("search") || "";
+  const selectedCategory = urlParams.get("category") || "";
   
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   console.log("Products page rendered with:", { location, searchQuery, selectedCategory });
-  console.log("URL search params:", searchParams.toString());
-  console.log("All URL params:", Object.fromEntries(searchParams.entries()));
+  console.log("Window location search:", window.location.search);
+  console.log("URL search params:", urlParams.toString());
+  console.log("All URL params:", Object.fromEntries(urlParams.entries()));
 
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
@@ -32,10 +33,16 @@ export default function Products() {
 
   const { data: products = [], isLoading } = useQuery<ProductWithCategory[]>({
     queryKey: ["/api/products", { 
-      search: searchQuery,
+      search: searchQuery || undefined,
       categorySlug: selectedCategory || undefined,
       limit: 50
     }],
+  });
+
+  console.log("Query params sent to API:", { 
+    search: searchQuery || undefined,
+    categorySlug: selectedCategory || undefined,
+    limit: 50
   });
 
   const handleSearchSubmit = (e: React.FormEvent) => {
