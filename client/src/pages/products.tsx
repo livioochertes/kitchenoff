@@ -36,6 +36,8 @@ export default function Products() {
     
     // Force query to refresh by completely clearing cache
     queryClient.clear();
+    // Also remove any React Query cache
+    queryClient.removeQueries({ queryKey: ["/api/products"] });
   }, [location, urlChangeCounter]);
 
   // Also listen for URL changes via popstate (back/forward buttons) and custom events
@@ -114,7 +116,8 @@ export default function Products() {
       productsLength: products?.length || 0,
       isLoading,
       isFetching,
-      products: products?.slice(0, 2).map(p => ({ id: p.id, name: p.name })) || [],
+      products: products?.slice(0, 5).map(p => ({ id: p.id, name: p.name })) || [],
+      actualArrayLength: Array.isArray(products) ? products.length : 0,
       timestamp: new Date().toISOString()
     });
   }, [products, isLoading, isFetching]);
