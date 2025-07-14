@@ -117,10 +117,10 @@ export default function AIAssistant() {
   };
 
   const suggestedQuestions = [
-    "What cleaning supplies do I need for my restaurant?",
-    "Help me find the best food thermometer",
-    "What HACCP equipment do you recommend?",
-    "Show me your best-selling products",
+    "Best cleaning supplies for restaurants?",
+    "Recommend a food thermometer",
+    "HACCP equipment needed?",
+    "Show best-selling products",
   ];
 
   return (
@@ -139,28 +139,28 @@ export default function AIAssistant() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Connection Status & Features */}
-            <div className="space-y-4">
+            <div className="space-y-4 lg:col-span-1">
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MessageCircle className="h-5 w-5" />
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <MessageCircle className="h-4 w-4" />
                     Connection Status
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-gray-400'}`} />
-                    <span className="text-sm font-medium">
+                <CardContent className="pt-0">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-gray-400'}`} />
+                    <span className="text-xs font-medium">
                       {isConnected ? 'Connected' : 'Disconnected'}
                     </span>
                   </div>
                   {!isConnected && (
-                    <Button onClick={handleConnect} className="w-full" disabled={isConnecting}>
+                    <Button onClick={handleConnect} className="w-full h-8 text-xs" disabled={isConnecting}>
                       {isConnecting ? (
                         <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                           Connecting...
                         </>
                       ) : (
@@ -172,32 +172,32 @@ export default function AIAssistant() {
               </Card>
 
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5" />
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <Sparkles className="h-4 w-4" />
                     AI Features
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
+                <CardContent className="pt-0">
+                  <div className="space-y-1">
                     {capabilities.length > 0 ? (
                       capabilities.map((capability, index) => (
-                        <Badge key={index} variant="secondary" className="w-full justify-start">
+                        <Badge key={index} variant="secondary" className="w-full justify-start text-xs py-1">
                           {capability}
                         </Badge>
                       ))
                     ) : (
                       <>
-                        <Badge variant="outline" className="w-full justify-start">
+                        <Badge variant="outline" className="w-full justify-start text-xs py-1">
                           Product Recommendations
                         </Badge>
-                        <Badge variant="outline" className="w-full justify-start">
+                        <Badge variant="outline" className="w-full justify-start text-xs py-1">
                           Kitchen Setup Advice
                         </Badge>
-                        <Badge variant="outline" className="w-full justify-start">
+                        <Badge variant="outline" className="w-full justify-start text-xs py-1">
                           HACCP Compliance Help
                         </Badge>
-                        <Badge variant="outline" className="w-full justify-start">
+                        <Badge variant="outline" className="w-full justify-start text-xs py-1">
                           Equipment Comparisons
                         </Badge>
                       </>
@@ -207,17 +207,17 @@ export default function AIAssistant() {
               </Card>
 
               <Card>
-                <CardHeader>
-                  <CardTitle>Suggested Questions</CardTitle>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm">Quick Questions</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
+                <CardContent className="pt-0">
+                  <div className="space-y-1">
                     {suggestedQuestions.map((question, index) => (
                       <Button
                         key={index}
                         variant="outline"
                         size="sm"
-                        className="w-full justify-start text-left h-auto p-2"
+                        className="w-full justify-start text-left h-auto p-2 text-xs leading-normal whitespace-normal min-h-[2rem]"
                         onClick={() => {
                           if (isConnected) {
                             setInputMessage(question);
@@ -225,7 +225,7 @@ export default function AIAssistant() {
                         }}
                         disabled={!isConnected}
                       >
-                        {question}
+                        <span className="block break-words">{question}</span>
                       </Button>
                     ))}
                   </div>
@@ -234,7 +234,7 @@ export default function AIAssistant() {
             </div>
 
             {/* Chat Interface */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-3">
               <Card className="h-[600px] flex flex-col">
                 <CardHeader>
                   <CardTitle>Chat with AI Assistant</CardTitle>
