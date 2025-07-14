@@ -31,7 +31,7 @@ export default function Home() {
       name: "Sarah Johnson",
       role: "Restaurant Manager",
       rating: 5,
-      comment: "Excellent quality labels and fast shipping. Our restaurant has been using KitchenPro for over 2 years now. Highly recommended!",
+      comment: "Excellent quality labels and fast shipping. Our restaurant has been using KitchenOff for over 2 years now. Highly recommended!",
     },
     {
       name: "Mike Chen",
