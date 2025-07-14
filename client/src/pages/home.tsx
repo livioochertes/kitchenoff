@@ -277,11 +277,11 @@ export default function Home() {
             {/* Company Info */}
             <div>
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-14 h-14 bg-white rounded-lg p-2 flex items-center justify-center">
+                <div className="w-16 h-16 bg-white rounded-lg p-1 flex items-center justify-center">
                   <img 
                     src={kitchenOffLogo} 
                     alt="KitchenOff Logo" 
-                    className="w-10 h-10 object-contain"
+                    className="w-14 h-14 object-contain"
                   />
                 </div>
                 <span className="text-xl font-bold text-white">KitchenOff</span>
