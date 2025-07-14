@@ -27,6 +27,7 @@ export default function Products() {
     
     console.log("URL changed:", location);
     console.log("New category:", newSelectedCategory);
+    console.log("Full URL params:", Object.fromEntries(newSearchParams));
     
     setSearchQuery(newSearchQuery);
     setSelectedCategory(newSelectedCategory);

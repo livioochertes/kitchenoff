@@ -139,9 +139,11 @@ export default function Header() {
                   key={category.id} 
                   variant="ghost" 
                   className="font-medium hidden lg:block" 
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
                     console.log('Header button clicked:', category.slug);
-                    navigate(`/products?category=${category.slug}`);
+                    console.log('Navigating to:', `/products?category=${category.slug}`);
+                    navigate(`/products?category=${category.slug}`, { replace: true });
                   }}
                 >
                   {category.name}
