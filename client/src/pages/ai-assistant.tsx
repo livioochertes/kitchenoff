@@ -132,6 +132,19 @@ export default function AIAssistant() {
     }
   }, []);
 
+  // Update welcome message when language changes
+  useEffect(() => {
+    if (messages.length > 0 && messages[0].id === "1" && messages[0].sender === "assistant") {
+      setMessages(prevMessages => [
+        {
+          ...prevMessages[0],
+          text: t('ai.welcome'),
+        },
+        ...prevMessages.slice(1)
+      ]);
+    }
+  }, [t]);
+
   // Save session data whenever it changes
   useEffect(() => {
     localStorage.setItem('aiAssistant_isConnected', isConnected.toString());

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/hooks/useTranslation";
 import type { ProductWithCategory } from "@shared/schema";
 import { memo } from "react";
 
@@ -15,6 +16,7 @@ interface ProductCardProps {
 const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -85,7 +87,7 @@ const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
                 </div>
                 {product.compareAtPrice && (
                   <Badge variant="destructive" className="text-xs w-fit">
-                    Save ${(parseFloat(product.compareAtPrice) - parseFloat(product.price)).toFixed(2)}
+{t('products.save')} ${(parseFloat(product.compareAtPrice) - parseFloat(product.price)).toFixed(2)}
                   </Badge>
                 )}
               </div>
@@ -96,12 +98,12 @@ const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
               >
                 <ShoppingCart className="h-4 w-4 mr-2" />
-                Add to Cart
+{t('products.addToCart')}
               </Button>
               
               {!product.inStock && (
                 <Badge variant="destructive" className="w-full text-center">
-                  Out of Stock
+{t('products.outOfStock')}
                 </Badge>
               )}
             </div>

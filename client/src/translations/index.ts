@@ -209,6 +209,7 @@ const translations: Record<Language, TranslationKeys> = {
     'cart.checkout': 'Checkout',
     'cart.continueShopping': 'Continue Shopping',
     'cart.clear': 'Clear Cart',
+    'cart.clearCart': 'Clear Cart',
     
     // Checkout
     'checkout.title': 'Checkout',

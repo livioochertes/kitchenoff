@@ -68,7 +68,7 @@ export default function Cart() {
           <h1 className="text-3xl font-bold text-primary">Shopping Cart</h1>
           {validCart.length > 0 && (
             <Button variant="outline" onClick={handleClearCart}>
-              Clear Cart
+{t('cart.clear')}
             </Button>
           )}
         </div>
@@ -83,7 +83,7 @@ export default function Cart() {
               </p>
               <Link href="/products">
                 <Button size="lg" className="kitchen-pro-secondary">
-                  Continue Shopping
+                  {t('cart.continueShopping')}
                 </Button>
               </Link>
             </CardContent>
@@ -189,7 +189,7 @@ export default function Cart() {
                   
                   <Link href="/checkout">
                     <Button size="lg" className="w-full kitchen-pro-secondary">
-                      Proceed to Checkout
+                      {t('cart.checkout')}
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
