@@ -202,6 +202,7 @@ export default function Login() {
                         <FormLabel>Email</FormLabel>
                         <FormControl>
                           <Input 
+                            key="register-email"
                             type="email" 
                             placeholder="your@email.com" 
                             autoComplete="email"
