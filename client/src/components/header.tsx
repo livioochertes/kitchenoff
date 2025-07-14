@@ -135,16 +135,15 @@ export default function Header() {
                 </Button>
               </Link>
               {categories?.slice(0, 4).map((category: any) => (
-                <Button 
+                <a 
                   key={category.id} 
-                  variant="ghost" 
-                  className="font-medium hidden lg:block" 
-                  onClick={() => {
-                    window.location.href = `/products?category=${category.slug}`;
-                  }}
+                  href={`/products?category=${category.slug}`}
+                  className="hidden lg:block"
                 >
-                  {category.name}
-                </Button>
+                  <Button variant="ghost" className="font-medium">
+                    {category.name}
+                  </Button>
+                </a>
               ))}
             </div>
             <div className="hidden lg:flex items-center space-x-4">
