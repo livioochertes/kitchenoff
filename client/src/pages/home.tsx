@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import Header from "@/components/header";
 import ProductCard from "@/components/product-card";
 import type { Category, ProductWithCategory } from "@shared/schema";
+import kitchenOffLogo from "@assets/KitchenOff_Logo_Background_Removed_1752520997429.png";
 
 export default function Home() {
   const { data: categories = [] } = useQuery<Category[]>({
@@ -275,11 +276,13 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Company Info */}
             <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 kitchen-pro-secondary rounded flex items-center justify-center">
-                  <span className="text-white font-bold">K</span>
-                </div>
-                <span className="text-xl font-bold text-white">KitchenPro Supply</span>
+              <div className="flex items-center space-x-3 mb-4">
+                <img 
+                  src={kitchenOffLogo} 
+                  alt="KitchenOff Logo" 
+                  className="w-12 h-12 object-contain"
+                />
+                <span className="text-xl font-bold text-white">KitchenOff</span>
               </div>
               <p className="text-slate-300 mb-4">
                 Professional kitchen equipment and safety solutions for food service businesses.
