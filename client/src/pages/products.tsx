@@ -13,25 +13,16 @@ import type { Category, ProductWithCategory } from "@shared/schema";
 
 export default function Products() {
   const [location] = useLocation();
+  
+  // Parse URL parameters directly in component
   const searchParams = new URLSearchParams(location.split("?")[1] || "");
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "");
+  const searchQuery = searchParams.get("search") || "";
+  const selectedCategory = searchParams.get("category") || "";
+  
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  // Update state when URL changes
-  useEffect(() => {
-    const newSearchParams = new URLSearchParams(location.split("?")[1] || "");
-    const newSearchQuery = newSearchParams.get("search") || "";
-    const newSelectedCategory = newSearchParams.get("category") || "";
-    
-    console.log("URL changed:", location);
-    console.log("New category:", newSelectedCategory);
-    console.log("Full URL params:", Object.fromEntries(newSearchParams));
-    
-    setSearchQuery(newSearchQuery);
-    setSelectedCategory(newSelectedCategory);
-  }, [location]);
+  console.log("Products page rendered with:", { location, searchQuery, selectedCategory });
 
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
@@ -43,17 +34,7 @@ export default function Products() {
       categorySlug: selectedCategory || undefined,
       limit: 50
     }],
-    enabled: true,
   });
-
-  // Debug logging
-  useEffect(() => {
-    console.log("Query parameters:", {
-      search: searchQuery,
-      categorySlug: selectedCategory || undefined,
-      limit: 50
-    });
-  }, [searchQuery, selectedCategory]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,11 +99,10 @@ export default function Products() {
                       variant={selectedCategory === "" ? "default" : "ghost"}
                       className="w-full justify-start"
                       onClick={() => {
-                        setSelectedCategory("");
                         const params = new URLSearchParams();
                         if (searchQuery) params.set("search", searchQuery);
                         const newUrl = `/products${params.toString() ? `?${params.toString()}` : ""}`;
-                        window.history.pushState({}, "", newUrl);
+                        window.location.href = newUrl;
                       }}
                     >
                       All Products
@@ -133,12 +113,11 @@ export default function Products() {
                         variant={selectedCategory === category.slug ? "default" : "ghost"}
                         className="w-full justify-start"
                         onClick={() => {
-                          setSelectedCategory(category.slug);
                           const params = new URLSearchParams();
                           if (searchQuery) params.set("search", searchQuery);
                           params.set("category", category.slug);
                           const newUrl = `/products?${params.toString()}`;
-                          window.history.pushState({}, "", newUrl);
+                          window.location.href = newUrl;
                         }}
                       >
                         {category.name}

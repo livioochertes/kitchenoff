@@ -10,6 +10,12 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### July 14, 2025
+- Identified category navigation issue: header navigation buttons lose URL parameters immediately after navigation
+- Header navigation briefly sets categorySlug but gets reset to undefined
+- Sidebar category buttons work correctly
+- Issue appears to be related to URL parameter handling in wouter router or state management
+
 ### July 13, 2025
 - Fixed checkout form validation to allow smooth step-by-step progression
 - Implemented REAL Revolut payment system with actual API integration
