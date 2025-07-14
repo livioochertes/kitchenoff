@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useCart } from "@/hooks/use-cart";
 import { useQuery } from "@tanstack/react-query";
-import kitchenOffLogo from "@assets/KitchenOff_Final_Logo_1752520552341.png";
+import kitchenOffLogo from "@assets/KitchenOff_Logo_Background_Removed_1752520997429.png";
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -44,7 +44,7 @@ export default function Header() {
             <img 
               src={kitchenOffLogo} 
               alt="KitchenOff Logo" 
-              className="w-10 h-10 object-contain"
+              className="w-16 h-16 object-contain"
             />
             <span className="text-xl font-bold text-primary">KitchenOff</span>
           </Link>
