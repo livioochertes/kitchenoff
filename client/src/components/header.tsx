@@ -135,11 +135,17 @@ export default function Header() {
                 </Button>
               </Link>
               {categories?.slice(0, 4).map((category: any) => (
-                <Link key={category.id} href={`/products?category=${category.slug}`} className="hidden lg:block">
-                  <Button variant="ghost" className="font-medium">
-                    {category.name}
-                  </Button>
-                </Link>
+                <Button 
+                  key={category.id} 
+                  variant="ghost" 
+                  className="font-medium hidden lg:block" 
+                  onClick={() => {
+                    console.log('Header button clicked:', category.slug);
+                    window.location.href = `/products?category=${category.slug}`;
+                  }}
+                >
+                  {category.name}
+                </Button>
               ))}
             </div>
             <div className="hidden lg:flex items-center space-x-4">
