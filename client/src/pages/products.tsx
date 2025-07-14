@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { Filter, Grid, List, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,17 +40,34 @@ export default function Products() {
 
   });
 
+  // Prefetch products for all categories to eliminate loading delays
+  useEffect(() => {
+    if (categories.length > 0) {
+      categories.forEach(category => {
+        queryClient.prefetchQuery({
+          queryKey: ["/api/products", { 
+            categorySlug: category.slug,
+            limit: 4
+          }],
+          staleTime: 1000 * 60 * 30, // 30 minutes
+        });
+      });
+    }
+  }, [categories]);
+
   const { data: products = [], isLoading, isFetching, isPlaceholderData } = useQuery<ProductWithCategory[]>({
     queryKey: ["/api/products", { 
       search: searchQuery || undefined,
       categorySlug: selectedCategory || undefined,
       limit: 4
     }],
-    staleTime: 1000 * 60 * 15, // 15 minutes
-    gcTime: 1000 * 60 * 30, // 30 minutes
+    staleTime: 1000 * 60 * 30, // 30 minutes - much longer for category data
+    gcTime: 1000 * 60 * 60, // 1 hour
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
+    refetchInterval: false, // Disable automatic refetching
+    refetchIntervalInBackground: false,
 
   });
 

@@ -27,14 +27,24 @@ function setCachedData(key: string, data: any) {
 async function preWarmCache() {
   try {
     const categories = await storage.getCategories();
+    
+    // Pre-warm cache for each category
     for (const category of categories) {
-      const cacheKey = `products-{"categorySlug":"${category.slug}","limit":4}`;
+      const queryObj = { categorySlug: category.slug, limit: "4" };
+      const cacheKey = `products-${JSON.stringify(queryObj)}`;
       const products = await storage.getProducts({
         categoryId: category.id,
         limit: 4
       });
       setCachedData(cacheKey, products);
     }
+    
+    // Pre-warm cache for all products (no category filter)
+    const allProductsQuery = { limit: "4" };
+    const allProductsCacheKey = `products-${JSON.stringify(allProductsQuery)}`;
+    const allProducts = await storage.getProducts({ limit: 4 });
+    setCachedData(allProductsCacheKey, allProducts);
+    
     console.log('Cache pre-warmed for all categories');
   } catch (error) {
     console.error('Failed to pre-warm cache:', error);
