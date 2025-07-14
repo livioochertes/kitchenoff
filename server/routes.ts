@@ -616,7 +616,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/ai/chat", async (req: AuthRequest, res) => {
     try {
-      const { message, sessionId } = req.body;
+      const { message, sessionId, language } = req.body;
       
       if (!message) {
         return res.status(400).json({ message: "Message is required" });
@@ -660,6 +660,25 @@ When user asks about orders, invoices, or order status, provide specific informa
         userContext = `\n\nUser is not logged in. For order status and invoice information, they need to sign in to their account first.`;
       }
 
+      // Language context for multilingual support
+      const languageMap = {
+        'en': 'English',
+        'es': 'Spanish',
+        'fr': 'French', 
+        'de': 'German',
+        'it': 'Italian',
+        'pt': 'Portuguese',
+        'zh': 'Chinese',
+        'ja': 'Japanese',
+        'ko': 'Korean',
+        'ar': 'Arabic'
+      };
+      
+      const userLanguage = languageMap[language] || 'English';
+      const languageInstruction = language && language !== 'en' 
+        ? `\n\nIMPORTANT: Respond in ${userLanguage} language. The user interface is in ${userLanguage}, so provide your response in the same language to ensure consistency.`
+        : '';
+
       // Create system prompt with KitchenOff context
       const systemPrompt = `You are an AI assistant for KitchenOff, a professional kitchen equipment and supplies company. You help customers with:
 
@@ -676,7 +695,7 @@ IMPORTANT: When recommending specific products from our catalog, always format t
 
 For example: [Digital Food Thermometer](/products/digital-food-thermometer)
 
-Always be helpful, professional, and focus on practical solutions. When recommending products, mention specific items from our catalog when relevant and provide direct links. Keep responses concise but informative.`;
+Always be helpful, professional, and focus on practical solutions. When recommending products, mention specific items from our catalog when relevant and provide direct links. Keep responses concise but informative.${languageInstruction}`;
 
       // Prepare user message with order context if relevant
       let enhancedMessage = message;

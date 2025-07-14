@@ -9,6 +9,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useCart } from "@/hooks/use-cart";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "@/hooks/useTranslation";
+import LanguageSwitcher from "@/components/language-switcher";
 import kitchenOffLogo from "@assets/KitchenOff_Logo_Background_Removed_1752520997429.png";
 
 export default function Header() {
@@ -16,6 +18,7 @@ export default function Header() {
   const [, navigate] = useLocation();
   const { cart } = useCart();
   const { user, isAuthenticated, logout } = useAuth();
+  const { t } = useTranslation();
 
   const { data: categories } = useQuery({
     queryKey: ["/api/categories"],
@@ -35,7 +38,7 @@ export default function Header() {
       {/* Top Banner */}
       <div className="kitchen-pro-primary py-2">
         <div className="container mx-auto px-4 text-center text-sm">
-          <span>Free shipping on orders over $500 • Professional support available</span>
+          <span>{t('footer.freeShipping')} • {t('footer.professionalSupport')}</span>
         </div>
       </div>
 
@@ -57,7 +60,7 @@ export default function Header() {
             <div className="relative w-full">
               <Input
                 type="text"
-                placeholder="Search products..."
+                placeholder={t('search.placeholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10"
@@ -68,10 +71,11 @@ export default function Header() {
 
           {/* Header Actions */}
           <div className="flex items-center space-x-4">
+            <LanguageSwitcher />
             <Link href="/ai-assistant">
               <Button variant="ghost" size="sm" className="hidden md:flex">
                 <Bot className="h-4 w-4 mr-2" />
-                AI Assistant
+                {t('nav.aiAssistant')}
               </Button>
             </Link>
             {isAuthenticated ? (
@@ -85,11 +89,11 @@ export default function Header() {
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => navigate("/account")}>
                     <User className="h-4 w-4 mr-2" />
-                    My Account
+                    {t('nav.account')}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={logout}>
                     <LogOut className="h-4 w-4 mr-2" />
-                    Logout
+                    {t('nav.logout')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -97,14 +101,14 @@ export default function Header() {
               <Link href="/login">
                 <Button variant="ghost" size="sm" className="hidden md:flex">
                   <User className="h-4 w-4 mr-2" />
-                  Login
+                  {t('nav.login')}
                 </Button>
               </Link>
             )}
             <Link href="/cart">
               <Button variant="ghost" size="sm" className="relative">
                 <ShoppingCart className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Cart</span>
+                <span className="hidden sm:inline">{t('nav.cart')}</span>
                 {cartItemCount > 0 && (
                   <Badge variant="secondary" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
                     {cartItemCount}
@@ -126,7 +130,7 @@ export default function Header() {
                     <div className="relative w-full">
                       <Input
                         type="text"
-                        placeholder="Search products..."
+                        placeholder={t('search.placeholder')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full pl-10"
@@ -150,7 +154,7 @@ export default function Header() {
                       window.dispatchEvent(new CustomEvent('urlchange'));
                     }}
                   >
-                    All Products
+                    {t('nav.products')}
                   </Button>
                   {categories?.map((category: any) => (
                     <Button 
@@ -176,13 +180,13 @@ export default function Header() {
                   <Link href="/ai-assistant">
                     <Button variant="ghost" className="w-full justify-start">
                       <Bot className="h-4 w-4 mr-2" />
-                      AI Assistant
+                      {t('nav.aiAssistant')}
                     </Button>
                   </Link>
                   <Link href="/login">
                     <Button variant="ghost" className="w-full justify-start">
                       <User className="h-4 w-4 mr-2" />
-                      Account
+                      {t('nav.account')}
                     </Button>
                   </Link>
                 </div>
@@ -213,7 +217,7 @@ export default function Header() {
                   window.dispatchEvent(new CustomEvent('urlchange'));
                 }}
               >
-                All Categories
+                {t('nav.allCategories')}
               </Button>
               {categories?.slice(0, 4).map((category: any) => (
                 <Button 
@@ -238,9 +242,9 @@ export default function Header() {
               ))}
             </div>
             <div className="hidden lg:flex items-center space-x-4">
-              <span className="text-sm text-muted-foreground">Need help?</span>
+              <span className="text-sm text-muted-foreground">{t('footer.needHelp')}</span>
               <a href="tel:+1234567890" className="text-sm text-secondary font-medium">
-                Call: +1 (234) 567-8900
+                {t('footer.call')} +1 (234) 567-8900
               </a>
             </div>
           </div>

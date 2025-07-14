@@ -8,6 +8,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/contexts/language-context";
 import Header from "@/components/header";
 import { Link } from "wouter";
 
@@ -65,6 +67,8 @@ export default function AIAssistant() {
   const [capabilities, setCapabilities] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { t } = useTranslation();
+  const { language } = useLanguage();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -109,7 +113,7 @@ export default function AIAssistant() {
         setMessages([
           {
             id: "1",
-            text: "Hello! I'm your KitchenOff AI Assistant. I can help you find the perfect kitchen equipment, answer questions about products, and provide expert advice for your professional kitchen needs. How can I assist you today?",
+            text: t('ai.welcome'),
             sender: "assistant",
             timestamp: new Date(),
           },
@@ -120,7 +124,7 @@ export default function AIAssistant() {
       setMessages([
         {
           id: "1",
-          text: "Hello! I'm your KitchenOff AI Assistant. I can help you find the perfect kitchen equipment, answer questions about products, and provide expert advice for your professional kitchen needs. How can I assist you today?",
+          text: t('ai.welcome'),
           sender: "assistant",
           timestamp: new Date(),
         },
@@ -158,8 +162,8 @@ export default function AIAssistant() {
         setCapabilities(data.capabilities || []);
         
         toast({
-          title: "Connected to AI Assistant",
-          description: "Connection will be saved for your session.",
+          title: t('ai.connectionSuccess'),
+          description: t('ai.connectionSuccessDesc'),
         });
       } else {
         throw new Error(data.message || "Failed to connect");
@@ -167,8 +171,8 @@ export default function AIAssistant() {
     } catch (error) {
       console.error("Connection error:", error);
       toast({
-        title: "Connection Failed",
-        description: "Unable to connect to AI Assistant. Please try again.",
+        title: t('ai.connectionFailed'),
+        description: t('ai.connectionFailedDesc'),
         variant: "destructive",
       });
     } finally {
@@ -180,15 +184,15 @@ export default function AIAssistant() {
     setMessages([
       {
         id: "1",
-        text: "Hello! I'm your KitchenOff AI Assistant. I can help you find the perfect kitchen equipment, answer questions about products, and provide expert advice for your professional kitchen needs. How can I assist you today?",
+        text: t('ai.welcome'),
         sender: "assistant",
         timestamp: new Date(),
       },
     ]);
     localStorage.removeItem('aiAssistant_messages');
     toast({
-      title: "Chat Cleared",
-      description: "Your chat history has been cleared.",
+      title: t('ai.chatCleared'),
+      description: t('ai.chatClearedDesc'),
     });
   };
 
@@ -211,13 +215,14 @@ export default function AIAssistant() {
       const response = await apiRequest("POST", "/api/ai/chat", {
         message: userMessage.text,
         sessionId,
+        language: language,
       });
 
       const data = await response.json();
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: data.response || data.message || "I'm temporarily unavailable. Please try again.",
+        text: data.response || data.message || t('ai.error'),
         sender: "assistant",
         timestamp: new Date(),
       };
@@ -229,7 +234,7 @@ export default function AIAssistant() {
       // Add error message to chat instead of just toast
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: "I'm having trouble connecting right now. Please try again in a moment.",
+        text: t('ai.error'),
         sender: "assistant",
         timestamp: new Date(),
       };
@@ -237,8 +242,8 @@ export default function AIAssistant() {
       setMessages(prev => [...prev, errorMessage]);
       
       toast({
-        title: "Connection Issue",
-        description: "Having trouble connecting to AI service. Please try again.",
+        title: t('ai.connectionIssue'),
+        description: t('ai.connectionIssueDesc'),
         variant: "destructive",
       });
     } finally {
@@ -247,12 +252,12 @@ export default function AIAssistant() {
   };
 
   const suggestedQuestions = [
-    "Best cleaning supplies for restaurants?",
-    "Recommend a food thermometer",
-    "HACCP equipment needed?",
-    "Show best-selling products",
-    "What's my order status?",
-    "Show my recent invoices",
+    t('ai.suggestions.cleaning'),
+    t('ai.suggestions.thermometer'),
+    t('ai.suggestions.haccp'),
+    t('ai.suggestions.bestsellers'),
+    t('ai.suggestions.orderStatus'),
+    t('ai.suggestions.invoices'),
   ];
 
   return (
@@ -264,10 +269,10 @@ export default function AIAssistant() {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-4 flex items-center justify-center gap-2">
               <Bot className="h-8 w-8 text-primary" />
-              AI Assistant
+              {t('ai.title')}
             </h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Get instant help with product recommendations, kitchen setup advice, and expert guidance for your professional kitchen needs.
+              {t('ai.placeholder')}
             </p>
           </div>
 
@@ -278,14 +283,14 @@ export default function AIAssistant() {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-sm">
                     <MessageCircle className="h-4 w-4" />
-                    Connection Status
+                    {t('ai.connectionStatus')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
                   <div className="flex items-center gap-2 mb-3">
                     <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-gray-400'}`} />
                     <span className="text-xs font-medium">
-                      {isConnected ? 'Connected' : 'Disconnected'}
+                      {isConnected ? t('ai.connected') : t('ai.disconnected')}
                     </span>
                   </div>
                   {!isConnected && (
@@ -293,10 +298,10 @@ export default function AIAssistant() {
                       {isConnecting ? (
                         <>
                           <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                          Connecting...
+                          {t('ai.connecting')}
                         </>
                       ) : (
-                        "Connect to AI Assistant"
+                        t('ai.connect')
                       )}
                     </Button>
                   )}
@@ -306,7 +311,7 @@ export default function AIAssistant() {
                       variant="outline" 
                       className="w-full h-8 text-xs"
                     >
-                      Clear Chat History
+                      {t('ai.clearChat')}
                     </Button>
                   )}
                 </CardContent>
@@ -316,7 +321,7 @@ export default function AIAssistant() {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-sm">
                     <Sparkles className="h-4 w-4" />
-                    AI Features
+                    {t('ai.features')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
@@ -330,19 +335,19 @@ export default function AIAssistant() {
                     ) : (
                       <>
                         <Badge variant="outline" className="w-full justify-start text-xs py-1">
-                          Product Recommendations
+                          {t('ai.capabilities.productRecommendations')}
                         </Badge>
                         <Badge variant="outline" className="w-full justify-start text-xs py-1">
-                          Kitchen Setup Advice
+                          {t('ai.capabilities.kitchenSetup')}
                         </Badge>
                         <Badge variant="outline" className="w-full justify-start text-xs py-1">
-                          HACCP Compliance Help
+                          {t('ai.capabilities.haccp')}
                         </Badge>
                         <Badge variant="outline" className="w-full justify-start text-xs py-1">
-                          Equipment Comparisons
+                          {t('ai.capabilities.equipmentComparison')}
                         </Badge>
                         <Badge variant="outline" className="w-full justify-start text-xs py-1">
-                          Order Status & Invoices
+                          {t('ai.capabilities.orderStatus')}
                         </Badge>
                       </>
                     )}
@@ -352,7 +357,7 @@ export default function AIAssistant() {
 
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Quick Questions</CardTitle>
+                  <CardTitle className="text-sm">{t('ai.quickQuestions')}</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
                   <div className="space-y-1">
@@ -381,9 +386,9 @@ export default function AIAssistant() {
             <div className="lg:col-span-3">
               <Card className="h-[600px] flex flex-col">
                 <CardHeader className="flex-shrink-0">
-                  <CardTitle>Chat with AI Assistant</CardTitle>
+                  <CardTitle>{t('ai.chatTitle')}</CardTitle>
                   <CardDescription>
-                    Ask questions about products, get recommendations, or seek expert advice
+                    {t('ai.chatDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col min-h-0">
@@ -451,8 +456,8 @@ export default function AIAssistant() {
                       onChange={(e) => setInputMessage(e.target.value)}
                       placeholder={
                         isConnected
-                          ? "Ask me anything about kitchen equipment..."
-                          : "Connect to AI Assistant to start chatting..."
+                          ? t('ai.inputPlaceholder')
+                          : t('ai.inputPlaceholderDisconnected')
                       }
                       disabled={!isConnected}
                       className="flex-1"

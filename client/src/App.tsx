@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "@/components/cart-provider";
+import { LanguageProvider } from "@/contexts/language-context";
 import Home from "@/pages/home";
 import Products from "@/pages/products";
 import ProductDetails from "@/pages/product-details";
@@ -35,12 +36,14 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <CartProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </CartProvider>
+      <LanguageProvider>
+        <CartProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </CartProvider>
+      </LanguageProvider>
     </QueryClientProvider>
   );
 }
