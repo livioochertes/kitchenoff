@@ -245,6 +245,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         products = allProductsData;
       }
       
+      console.log(`📊 Memory lookup: ${products.length} products found for categorySlug: ${categorySlug || 'all'}`);
+      
       // Apply search filter if needed
       if (search) {
         const searchTerm = (search as string).toLowerCase();
