@@ -12,9 +12,16 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
+  const token = localStorage.getItem('token');
+  const headers: Record<string, string> = data ? { "Content-Type": "application/json" } : {};
+  
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   const res = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers,
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
@@ -51,14 +58,21 @@ export const getQueryFn: <T>(options: {
     }
     
     console.log("🌐 Making API request:", url);
+    const token = localStorage.getItem('token');
+    const headers: Record<string, string> = {
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0"
+    };
+    
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    
     const res = await fetch(url, {
       credentials: "include",
       cache: "no-cache",
-      headers: {
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-        "Pragma": "no-cache",
-        "Expires": "0"
-      }
+      headers
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
