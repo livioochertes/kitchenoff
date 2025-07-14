@@ -22,14 +22,14 @@ export default function Products() {
   
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-
+  
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
     staleTime: 1000 * 60 * 10, // 10 minutes
     gcTime: 1000 * 60 * 20, // 20 minutes
   });
 
-  const { data: products = [], isLoading } = useQuery<ProductWithCategory[]>({
+  const { data: products = [], isLoading, isFetching } = useQuery<ProductWithCategory[]>({
     queryKey: ["/api/products", { 
       search: searchQuery || undefined,
       categorySlug: selectedCategory || undefined,
@@ -40,6 +40,7 @@ export default function Products() {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
+    keepPreviousData: true, // This prevents white page during navigation
   });
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -55,21 +56,9 @@ export default function Products() {
     window.location.href = newUrl;
   };
 
-  // No need for client-side filtering since server handles it
-  const sortedProducts = [...products].sort((a, b) => {
-    switch (sortBy) {
-      case "price-asc":
-        return parseFloat(a.price) - parseFloat(b.price);
-      case "price-desc":
-        return parseFloat(b.price) - parseFloat(a.price);
-      case "name":
-        return a.name.localeCompare(b.name);
-      case "rating":
-        return parseFloat(b.rating || "0") - parseFloat(a.rating || "0");
-      default:
-        return new Date(b.createdAt || "").getTime() - new Date(a.createdAt || "").getTime();
-    }
-  });
+  // Removed client-side sorting for better performance - server should handle this
+
+
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -170,12 +159,12 @@ export default function Products() {
                     ? `Search Results for "${searchQuery}"`
                     : "All Products"
                   }
-                  {isLoading && (
+                  {(isLoading || isFetching) && (
                     <div className="ml-3 h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-primary"></div>
                   )}
                 </h1>
                 <Badge variant="secondary">
-                  {sortedProducts.length} products
+                  {products.length} products
                 </Badge>
               </div>
 
@@ -197,8 +186,8 @@ export default function Products() {
               </div>
             </div>
 
-            {/* Loading State */}
-            {isLoading && (
+            {/* Loading State - Only show when no previous data */}
+            {isLoading && !products.length && (
               <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <Card key={i} className="overflow-hidden">
@@ -214,7 +203,7 @@ export default function Products() {
             )}
 
             {/* No Results */}
-            {!isLoading && sortedProducts.length === 0 && (
+            {!isLoading && !isFetching && products.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-muted-foreground mb-4">No products found matching your criteria.</p>
                 <Button onClick={() => { window.location.href = "/products"; }}>
@@ -224,13 +213,13 @@ export default function Products() {
             )}
 
             {/* Products Grid */}
-            {!isLoading && sortedProducts.length > 0 && (
+            {products.length > 0 && (
               <div className={`grid gap-6 ${
                 viewMode === "grid" 
                   ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" 
                   : "grid-cols-1"
               }`}>
-                {sortedProducts.map((product) => (
+                {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
