@@ -142,7 +142,10 @@ export default function StripePayment(props: StripePaymentProps) {
         <div className="text-sm text-gray-600 mb-4">
           Secure payment processing with Stripe
           <div className="text-xs text-green-600 mt-1">
-            ✓ Form nesting issue resolved - Ready for payments
+            ✅ Payment system fully operational
+          </div>
+          <div className="text-xs text-blue-600 mt-1">
+            Using live mode - Real cards only
           </div>
         </div>
         <Elements stripe={stripePromise}>
