@@ -38,12 +38,15 @@ export default function Products() {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
+    const newSearch = formData.get("search") as string;
+    
     // Update URL with search params
     const params = new URLSearchParams();
-    if (searchQuery) params.set("search", searchQuery);
+    if (newSearch) params.set("search", newSearch);
     if (selectedCategory) params.set("category", selectedCategory);
     const newUrl = `/products${params.toString() ? `?${params.toString()}` : ""}`;
-    window.history.pushState({}, "", newUrl);
+    window.location.href = newUrl;
   };
 
   // No need for client-side filtering since server handles it
@@ -81,10 +84,10 @@ export default function Products() {
                 <form onSubmit={handleSearchSubmit} className="mb-6">
                   <div className="relative">
                     <Input
+                      name="search"
                       type="text"
                       placeholder="Search products..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      defaultValue={searchQuery}
                       className="pl-10"
                     />
                     <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
