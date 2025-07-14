@@ -23,6 +23,8 @@ export default function Products() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   console.log("Products page rendered with:", { location, searchQuery, selectedCategory });
+  console.log("URL search params:", searchParams.toString());
+  console.log("All URL params:", Object.fromEntries(searchParams.entries()));
 
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
