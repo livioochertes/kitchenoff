@@ -129,7 +129,7 @@ export class DatabaseStorage implements IStorage {
 
   // Product operations
   async getProducts(options?: { categoryId?: number; featured?: boolean; search?: string; limit?: number; offset?: number }): Promise<ProductWithCategory[]> {
-    // Build query with minimal required fields for better performance
+    // Optimized query with only essential fields
     const query = db
       .select({
         id: products.id,
@@ -157,7 +157,7 @@ export class DatabaseStorage implements IStorage {
         },
       })
       .from(products)
-      .leftJoin(categories, eq(products.categoryId, categories.id));
+      .innerJoin(categories, eq(products.categoryId, categories.id));
 
     const conditions = [];
     if (options?.categoryId) {

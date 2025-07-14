@@ -192,13 +192,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         categoryId: resolvedCategoryId,
         featured: featured === "true",
         search: search as string,
-        limit: limit ? parseInt(limit as string) : 15,  // Reduced to 15 for better performance
+        limit: limit ? parseInt(limit as string) : 10,  // Reduced to 10 for better performance
         offset: offset ? parseInt(offset as string) : 0,
       });
       
       // Set cache headers for better performance
       res.set({
-        'Cache-Control': 'public, max-age=120', // 2 minutes
+        'Cache-Control': 'public, max-age=300', // 5 minutes
         'ETag': `products-${JSON.stringify(req.query)}`
       });
       
