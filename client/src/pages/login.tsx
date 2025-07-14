@@ -35,6 +35,13 @@ export default function Login() {
   const { toast } = useToast();
   const { login } = useAuth();
 
+  const toggleForm = () => {
+    setIsLogin(!isLogin);
+    // Reset forms when switching
+    loginForm.reset();
+    registerForm.reset();
+  };
+
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -102,6 +109,7 @@ export default function Login() {
   };
 
   const handleRegisterSubmit = (data: RegisterFormData) => {
+    console.log("Registration form data:", data);
     registerMutation.mutate(data);
   };
 
@@ -193,7 +201,12 @@ export default function Login() {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="your@email.com" {...field} />
+                          <Input 
+                            type="email" 
+                            placeholder="your@email.com" 
+                            autoComplete="email"
+                            {...field} 
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -225,7 +238,7 @@ export default function Login() {
             
             <div className="mt-6 text-center">
               <button
-                onClick={() => setIsLogin(!isLogin)}
+                onClick={toggleForm}
                 className="text-blue-600 hover:text-blue-800"
               >
                 {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
