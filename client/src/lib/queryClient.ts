@@ -47,6 +47,7 @@ export const getQueryFn: <T>(options: {
       }
     }
     
+    console.log("🌐 Making API request:", url);
     const res = await fetch(url, {
       credentials: "include",
     });
@@ -56,7 +57,13 @@ export const getQueryFn: <T>(options: {
     }
 
     await throwIfResNotOk(res);
-    return await res.json();
+    const data = await res.json();
+    console.log("🌐 API response received:", {
+      url,
+      dataLength: Array.isArray(data) ? data.length : "not array",
+      firstTwo: Array.isArray(data) ? data.slice(0, 2).map(p => ({ id: p.id, name: p.name })) : "not array"
+    });
+    return data;
   };
 
 export const queryClient = new QueryClient({
