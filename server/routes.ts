@@ -28,6 +28,10 @@ async function preWarmCache() {
   try {
     const categories = await storage.getCategories();
     
+    // Pre-warm categories cache
+    const categoriesCacheKey = 'categories-all';
+    setCachedData(categoriesCacheKey, categories);
+    
     // Pre-warm cache for each category
     for (const category of categories) {
       const queryObj = { categorySlug: category.slug, limit: "4" };
@@ -45,7 +49,7 @@ async function preWarmCache() {
     const allProducts = await storage.getProducts({ limit: 4 });
     setCachedData(allProductsCacheKey, allProducts);
     
-    console.log('Cache pre-warmed for all categories');
+    console.log('Cache pre-warmed for all categories and products');
   } catch (error) {
     console.error('Failed to pre-warm cache:', error);
   }
@@ -175,7 +179,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Category routes
   app.get("/api/categories", async (req, res) => {
     try {
+      const cacheKey = 'categories-all';
+      
+      // Check cache first
+      const cachedCategories = getCachedData(cacheKey);
+      if (cachedCategories) {
+        res.set({
+          'Cache-Control': 'public, max-age=1800', // 30 minutes
+          'ETag': cacheKey
+        });
+        return res.json(cachedCategories);
+      }
+      
       const categories = await storage.getCategories();
+      
+      // Cache the result
+      setCachedData(cacheKey, categories);
+      
+      // Set cache headers for better performance
+      res.set({
+        'Cache-Control': 'public, max-age=1800', // 30 minutes
+        'ETag': cacheKey
+      });
+      
       res.json(categories);
     } catch (error) {
       console.error("Get categories error:", error);

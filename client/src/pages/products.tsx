@@ -40,20 +40,7 @@ export default function Products() {
 
   });
 
-  // Prefetch products for all categories to eliminate loading delays
-  useEffect(() => {
-    if (categories.length > 0) {
-      categories.forEach(category => {
-        queryClient.prefetchQuery({
-          queryKey: ["/api/products", { 
-            categorySlug: category.slug,
-            limit: 4
-          }],
-          staleTime: 1000 * 60 * 30, // 30 minutes
-        });
-      });
-    }
-  }, [categories]);
+  // Server-side caching handles prefetching, no need for client-side prefetch
 
   const { data: products = [], isLoading, isFetching, isPlaceholderData } = useQuery<ProductWithCategory[]>({
     queryKey: ["/api/products", { 
