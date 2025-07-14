@@ -166,6 +166,10 @@ export default function Login() {
             ) : (
               <Form {...registerForm}>
                 <form onSubmit={registerForm.handleSubmit(handleRegisterSubmit)} className="space-y-4">
+                  {/* Debug form state */}
+                  <div className="text-xs text-gray-500 p-2 bg-gray-50 rounded">
+                    Debug: Form values = {JSON.stringify(registerForm.watch())}
+                  </div>
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={registerForm.control}
@@ -250,6 +254,18 @@ export default function Login() {
                 Continue as guest
               </Link>
             </div>
+            
+            {/* Debug: Test direct input */}
+            {!isLogin && (
+              <div className="mt-4 p-4 bg-gray-100 rounded">
+                <p className="text-sm text-gray-600 mb-2">Debug: Direct input test</p>
+                <Input 
+                  type="email" 
+                  placeholder="Test email input directly" 
+                  onChange={(e) => console.log("Direct input:", e.target.value)}
+                />
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
