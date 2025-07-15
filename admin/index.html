@@ -291,6 +291,10 @@
       const [loading, setLoading] = useState(true);
       const [error, setError] = useState('');
       const [showTwoFactor, setShowTwoFactor] = useState(false);
+      const [activeView, setActiveView] = useState('dashboard');
+      const [orders, setOrders] = useState([]);
+      const [users, setUsers] = useState([]);
+      const [products, setProducts] = useState([]);
       
       useEffect(() => {
         fetchStats();
@@ -315,6 +319,55 @@
           setError('Network error. Please try again.');
         } finally {
           setLoading(false);
+        }
+      };
+
+      const fetchOrders = async () => {
+        try {
+          const response = await fetch('/api/orders', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            setOrders(data);
+          } else {
+            console.error('Failed to fetch orders:', data.message);
+          }
+        } catch (err) {
+          console.error('Network error fetching orders:', err);
+        }
+      };
+
+      const fetchProducts = async () => {
+        try {
+          const response = await fetch('/api/products', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            setProducts(data);
+          } else {
+            console.error('Failed to fetch products:', data.message);
+          }
+        } catch (err) {
+          console.error('Network error fetching products:', err);
+        }
+      };
+
+      const handleViewChange = (view) => {
+        setActiveView(view);
+        if (view === 'orders' && orders.length === 0) {
+          fetchOrders();
+        } else if (view === 'products' && products.length === 0) {
+          fetchProducts();
         }
       };
       
