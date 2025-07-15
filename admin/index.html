@@ -18,7 +18,8 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       line-height: 1.6;
       color: #333;
-      background: #f5f5f5;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
     }
     
     .container {
@@ -28,58 +29,139 @@
     }
     
     .login-container {
-      max-width: 400px;
-      margin: 50px auto;
-      background: white;
-      padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      max-width: 450px;
+      margin: 80px auto;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 50px;
+      border-radius: 20px;
+      box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .login-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .login-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .login-logo img {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+    }
+    
+    .login-title {
+      font-size: 28px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    
+    .login-subtitle {
+      color: #666;
+      font-size: 16px;
     }
     
     .admin-header {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 20px 30px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
     
     .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
       font-size: 24px;
       font-weight: bold;
       color: #667eea;
     }
     
+    .logo img {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+    }
+    
     .dashboard-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      margin-bottom: 35px;
     }
     
     .stat-card {
-      background: white;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 35px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
       text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
     }
     
     .stat-number {
-      font-size: 36px;
+      font-size: 42px;
       font-weight: bold;
       color: #667eea;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
     .stat-label {
       color: #666;
       font-size: 14px;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
+      font-weight: 500;
+    }
+    
+    .content-area {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      overflow: hidden;
+    }
+    
+    .content-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 25px 30px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .content-title {
+      font-size: 22px;
+      font-weight: 600;
+      margin: 0;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .content-body {
+      padding: 30px;
     }
     
     .form-group {
@@ -108,20 +190,74 @@
     }
     
     .btn {
-      background: #667eea;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      padding: 12px 24px;
+      padding: 14px 28px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       font-size: 16px;
-      font-weight: 500;
-      transition: background-color 0.3s;
+      font-weight: 600;
+      transition: all 0.3s ease;
       width: 100%;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      position: relative;
+      overflow: hidden;
     }
     
     .btn:hover {
-      background: #5a6fd8;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      box-shadow: 0 4px 15px rgba(108, 117, 125, 0.4);
+    }
+    
+    .btn-secondary:hover {
+      background: #5a6268;
+      box-shadow: 0 8px 25px rgba(108, 117, 125, 0.6);
+    }
+    
+    .nav-tabs {
+      display: flex;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 8px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .nav-tab {
+      flex: 1;
+      padding: 12px 20px;
+      text-align: center;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .nav-tab.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .nav-tab:hover:not(.active) {
+      background: rgba(102, 126, 234, 0.1);
+      color: #667eea;
     }
     
     .btn:disabled {
@@ -239,8 +375,13 @@
       
       return (
         <div className="login-container">
-          <div className="text-center mb-30">
-            <div className="logo">🍴 KitchenOff Admin</div>
+          <div className="login-header">
+            <div className="login-logo">
+              <img src="https://cdn.replit.com/agent/bootstrap_agent_uploads/25715950-2fa9-4a78-81ff-1654b5b8ff1c/KitchenOff-logo.png" alt="KitchenOff Logo" />
+              <span>KitchenOff</span>
+            </div>
+            <h1 className="login-title">Admin Panel</h1>
+            <p className="login-subtitle">Welcome back! Please sign in to continue.</p>
           </div>
           
           {error && <div className="error-message">{error}</div>}
@@ -1519,19 +1660,57 @@
       return (
         <div className="container">
           <div className="admin-header">
-            <div className="logo">🍴 KitchenOff Admin</div>
+            <div className="logo">
+              <img src="https://cdn.replit.com/agent/bootstrap_agent_uploads/25715950-2fa9-4a78-81ff-1654b5b8ff1c/KitchenOff-logo.png" alt="KitchenOff Logo" />
+              <span>KitchenOff Admin</span>
+            </div>
             <div>
-              <span>Welcome, {admin?.firstName || 'Admin'}</span>
-              <button onClick={() => setActiveView('dashboard')} className="btn btn-secondary" style={{marginLeft: '10px', marginRight: '10px'}}>
+              <span style={{marginRight: '20px', fontSize: '14px', color: '#666'}}>Welcome, {admin?.firstName || 'Admin'}</span>
+              <button onClick={() => setActiveView('dashboard')} className="btn btn-secondary" style={{marginLeft: '10px', marginRight: '10px', padding: '8px 16px', fontSize: '14px'}}>
                 🏠 Dashboard
               </button>
-              <button onClick={handleLogout} className="btn btn-secondary">
+              <button onClick={handleLogout} className="btn btn-secondary" style={{padding: '8px 16px', fontSize: '14px'}}>
                 Logout
               </button>
             </div>
           </div>
           
-          {renderContent()}
+          <div className="nav-tabs">
+            <button 
+              className={`nav-tab ${activeView === 'dashboard' ? 'active' : ''}`}
+              onClick={() => handleViewChange('dashboard')}
+            >
+              📊 Dashboard
+            </button>
+            <button 
+              className={`nav-tab ${activeView === 'orders' ? 'active' : ''}`}
+              onClick={() => handleViewChange('orders')}
+            >
+              📋 Orders
+            </button>
+            <button 
+              className={`nav-tab ${activeView === 'users' ? 'active' : ''}`}
+              onClick={() => handleViewChange('users')}
+            >
+              👥 Users
+            </button>
+            <button 
+              className={`nav-tab ${activeView === 'products' ? 'active' : ''}`}
+              onClick={() => handleViewChange('products')}
+            >
+              📦 Products
+            </button>
+            <button 
+              className={`nav-tab ${activeView === 'settings' ? 'active' : ''}`}
+              onClick={() => handleViewChange('settings')}
+            >
+              ⚙️ Settings
+            </button>
+          </div>
+          
+          <div className="content-area">
+            {renderContent()}
+          </div>
           <ModalsComponent />
         </div>
       );
