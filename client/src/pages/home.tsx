@@ -166,18 +166,17 @@ export default function Home() {
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
-                <h2 className="text-3xl font-bold text-primary mb-6">Business Solutions</h2>
+                <h2 className="text-3xl font-bold text-primary mb-6">{t('home.business.title')}</h2>
                 <p className="text-slate-600 mb-8">
-                  Get wholesale pricing and dedicated support for your restaurant, cafe, or food service business. 
-                  We offer bulk discounts, custom solutions, and priority shipping.
+                  {t('home.business.description')}
                 </p>
 
                 <div className="space-y-4 mb-8">
                   {[
-                    "Wholesale pricing on bulk orders",
-                    "Dedicated account manager",
-                    "Priority shipping and support",
-                    "Custom labeling and packaging",
+                    t('home.business.wholesale'),
+                    t('home.business.accountManager'),
+                    t('home.business.priorityShipping'),
+                    t('home.business.customLabeling'),
                   ].map((feature, index) => (
                     <div key={index} className="flex items-center space-x-3">
                       <div className="w-5 h-5 rounded-full kitchen-pro-accent flex items-center justify-center">
@@ -190,10 +189,10 @@ export default function Home() {
 
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Button className="kitchen-pro-secondary">
-                    Get B2B Quote
+                    {t('home.business.getQuote')}
                   </Button>
                   <Button variant="outline" className="border-secondary text-secondary hover:bg-secondary hover:text-white">
-                    Contact Sales
+                    {t('home.business.contactSales')}
                   </Button>
                 </div>
               </div>
@@ -229,8 +228,8 @@ export default function Home() {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-primary mb-4">What Our Customers Say</h2>
-            <p className="text-slate-600">Trusted by food service professionals across the country</p>
+            <h2 className="text-3xl font-bold text-primary mb-4">{t('home.testimonials.title')}</h2>
+            <p className="text-slate-600">{t('home.testimonials.subtitle')}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

@@ -205,6 +205,19 @@ export interface TranslationKeys {
   'home.newsletter.placeholder': string;
   'home.newsletter.subscribe': string;
   
+  // Business Solutions section
+  'home.business.title': string;
+  'home.business.description': string;
+  'home.business.wholesale': string;
+  'home.business.accountManager': string;
+  'home.business.priorityShipping': string;
+  'home.business.customLabeling': string;
+  'home.business.getQuote': string;
+  'home.business.contactSales': string;
+  
+  // Testimonials section
+  'home.testimonials.subtitle': string;
+  
   // Footer additions
   'footer.company.description': string;
   'footer.quickLinks': string;
@@ -454,6 +467,19 @@ const translations: Record<Language, TranslationKeys> = {
     'home.newsletter.subtitle': 'Get the latest updates on new products and special offers',
     'home.newsletter.placeholder': 'Enter your email address',
     'home.newsletter.subscribe': 'Subscribe',
+    
+    // Business Solutions section
+    'home.business.title': 'Business Solutions',
+    'home.business.description': 'Get wholesale pricing and dedicated support for your restaurant, cafe, or food service business. We offer bulk discounts, custom solutions, and priority shipping.',
+    'home.business.wholesale': 'Wholesale pricing on bulk orders',
+    'home.business.accountManager': 'Dedicated account manager',
+    'home.business.priorityShipping': 'Priority shipping and support',
+    'home.business.customLabeling': 'Custom labeling and packaging',
+    'home.business.getQuote': 'Get B2B Quote',
+    'home.business.contactSales': 'Contact Sales',
+    
+    // Testimonials section
+    'home.testimonials.subtitle': 'Trusted by food service professionals across the country',
     
     // Footer additions
     'footer.company.description': 'Professional kitchen equipment and safety solutions for food service businesses.',
@@ -904,6 +930,19 @@ const translations: Record<Language, TranslationKeys> = {
     'home.newsletter.placeholder': 'Entrez votre adresse email',
     'home.newsletter.subscribe': 'S\'abonner',
     
+    // Business Solutions section
+    'home.business.title': 'Solutions B2B',
+    'home.business.description': 'Obtenez des prix de gros et un support dédié pour votre restaurant, café ou entreprise de service alimentaire. Nous offrons des remises en volume, des solutions personnalisées et une livraison prioritaire.',
+    'home.business.wholesale': 'Prix de gros sur commandes en volume',
+    'home.business.accountManager': 'Gestionnaire de compte dédié',
+    'home.business.priorityShipping': 'Livraison et support prioritaires',
+    'home.business.customLabeling': 'Étiquetage et emballage personnalisés',
+    'home.business.getQuote': 'Demander un Devis B2B',
+    'home.business.contactSales': 'Contacter les Ventes',
+    
+    // Testimonials section
+    'home.testimonials.subtitle': 'Approuvé par les professionnels de la restauration à travers le pays',
+    
     // Footer additions
     'footer.company.description': 'Équipements de cuisine professionnels et solutions de sécurité pour les entreprises de services alimentaires.',
     'footer.quickLinks': 'Liens Rapides',
@@ -1104,6 +1143,50 @@ const translations: Record<Language, TranslationKeys> = {
     'categories.kitchen-supplies.description': 'Professionelle Küchengeräte und Zubehör für gewerbliche Nutzung',
     'categories.cleaning-sanitizing.description': 'Professionelle Reinigungs- und Desinfektionsprodukte für Foodservices',
     'categories.storage-solutions.description': 'Lebensmittelaufbewahrungsbehälter und Organisationssysteme',
+    
+    // Home page sections
+    'home.hero.title': 'Professionelle Küchenausstattung und Sicherheitslösungen',
+    'home.hero.subtitle': 'Vertrauen von Restaurants, Cafés und Foodservice-Profis weltweit. Von Verfallsdatum-Etiketten bis zu HACCP-Compliance-Materialien.',
+    'home.hero.shopNow': 'Jetzt Einkaufen',
+    'home.hero.quote': 'B2B-Angebot Anfordern',
+    'home.features.title': 'Warum KitchenOff wählen?',
+    'home.features.shipping': 'Kostenloser Versand über 500$',
+    'home.features.compliant': 'FDA-konforme Produkte',
+    'home.features.certified': 'Industriezertifiziert',
+    'home.features.support': '24/7 Support',
+    'home.features.customers': 'Über 10.000 zufriedene Kunden',
+    'home.categories.title': 'Nach Kategorie Einkaufen',
+    'home.categories.subtitle': 'Finden Sie die perfekte Ausstattung für Ihre Küche',
+    'home.categories.viewAll': 'Alle Anzeigen',
+    'home.categories.products': 'Produkte',
+    'home.products.title': 'Empfohlene Produkte',
+    'home.products.subtitle': 'Entdecken Sie unsere beliebtesten Artikel',
+    'home.testimonials.title': 'Was Unsere Kunden Sagen',
+    'home.testimonials.subtitle': 'Vertrauen von Foodservice-Profis im ganzen Land',
+    'home.newsletter.title': 'Bleiben Sie auf dem Laufenden',
+    'home.newsletter.subtitle': 'Erhalten Sie die neuesten Updates zu neuen Produkten und Sonderangeboten',
+    'home.newsletter.placeholder': 'Geben Sie Ihre E-Mail-Adresse ein',
+    'home.newsletter.subscribe': 'Abonnieren',
+    
+    // Business Solutions section
+    'home.business.title': 'Business-Lösungen',
+    'home.business.description': 'Erhalten Sie Großhandelspreise und dedizierten Support für Ihr Restaurant, Café oder Foodservice-Unternehmen. Wir bieten Mengenrabatte, maßgeschneiderte Lösungen und Prioritätsversand.',
+    'home.business.wholesale': 'Großhandelspreise bei Mengenbestellungen',
+    'home.business.accountManager': 'Dedizierter Kundenbetreuer',
+    'home.business.priorityShipping': 'Prioritätsversand und Support',
+    'home.business.customLabeling': 'Individuelle Etikettierung und Verpackung',
+    'home.business.getQuote': 'B2B-Angebot Erhalten',
+    'home.business.contactSales': 'Vertrieb Kontaktieren',
+    
+    // Footer additions
+    'footer.company.description': 'Professionelle Küchenausstattung und Sicherheitslösungen für Foodservice-Unternehmen.',
+    'footer.quickLinks': 'Schnelllinks',
+    'footer.aboutUs': 'Über Uns',
+    'footer.products': 'Produkte',
+    'footer.b2bSolutions': 'B2B-Lösungen',
+    'footer.contact': 'Kontakt',
+    'footer.categories': 'Kategorien',
+    'footer.newsletter': 'Newsletter',
   } as TranslationKeys,
   
   // Romanian translations
@@ -1344,6 +1427,19 @@ const translations: Record<Language, TranslationKeys> = {
     'home.newsletter.placeholder': 'Introdu adresa ta de email',
     'home.newsletter.subscribe': 'Abonează-te',
     
+    // Business Solutions section
+    'home.business.title': 'Soluții Business',
+    'home.business.description': 'Obțineți prețuri en-gros și suport dedicat pentru restaurantul, cafeneaua sau afacerea dumneavoastră de servicii alimentare. Oferim reduceri în volum, soluții personalizate și livrare cu prioritate.',
+    'home.business.wholesale': 'Prețuri en-gros pentru comenzi în volum',
+    'home.business.accountManager': 'Manager de cont dedicat',
+    'home.business.priorityShipping': 'Livrare și suport cu prioritate',
+    'home.business.customLabeling': 'Etichetare și ambalare personalizată',
+    'home.business.getQuote': 'Solicită Ofertă B2B',
+    'home.business.contactSales': 'Contactează Vânzările',
+    
+    // Testimonials section
+    'home.testimonials.subtitle': 'Încredere din partea profesioniștilor din industria alimentară din întreaga țară',
+    
     // Footer additions
     'footer.company.description': 'Echipamente de bucătărie profesionale și soluții de siguranță pentru afaceri din industria alimentară.',
     'footer.quickLinks': 'Linkuri Rapide',
@@ -1402,6 +1498,19 @@ const translations: Record<Language, TranslationKeys> = {
     'categories.kitchen-supplies.description': 'Strumenti e forniture da cucina professionali per uso commerciale',
     'categories.cleaning-sanitizing.description': 'Prodotti professionali per pulizia e sanificazione per servizi alimentari',
     'categories.storage-solutions.description': 'Contenitori per conservazione alimentari e sistemi di organizzazione',
+    
+    // Business Solutions section
+    'home.business.title': 'Soluzioni Business',
+    'home.business.description': 'Ottieni prezzi all\'ingrosso e supporto dedicato per il tuo ristorante, caffetteria o attività di servizi alimentari. Offriamo sconti sui volumi, soluzioni personalizzate e spedizione prioritaria.',
+    'home.business.wholesale': 'Prezzi all\'ingrosso per ordini in volume',
+    'home.business.accountManager': 'Account manager dedicato',
+    'home.business.priorityShipping': 'Spedizione e supporto prioritari',
+    'home.business.customLabeling': 'Etichettatura e confezionamento personalizzati',
+    'home.business.getQuote': 'Ottieni Preventivo B2B',
+    'home.business.contactSales': 'Contatta Vendite',
+    
+    // Testimonials section
+    'home.testimonials.subtitle': 'Fidato dai professionisti del settore alimentare in tutto il paese',
   } as TranslationKeys,
   pt: {
     'nav.home': 'Início',
@@ -1449,6 +1558,19 @@ const translations: Record<Language, TranslationKeys> = {
     'categories.kitchen-supplies.description': 'Ferramentas e utensílios de cozinha profissionais para uso comercial',
     'categories.cleaning-sanitizing.description': 'Produtos profissionais de limpeza e higienização para serviços alimentares',
     'categories.storage-solutions.description': 'Recipientes para armazenamento de alimentos e sistemas de organização',
+    
+    // Business Solutions section
+    'home.business.title': 'Soluções Empresariais',
+    'home.business.description': 'Obtenha preços no atacado e suporte dedicado para seu restaurante, café ou negócio de serviços alimentares. Oferecemos descontos em volume, soluções personalizadas e entrega prioritária.',
+    'home.business.wholesale': 'Preços no atacado para pedidos em volume',
+    'home.business.accountManager': 'Gerente de conta dedicado',
+    'home.business.priorityShipping': 'Entrega e suporte prioritários',
+    'home.business.customLabeling': 'Rotulagem e embalagem personalizadas',
+    'home.business.getQuote': 'Obter Orçamento B2B',
+    'home.business.contactSales': 'Contatar Vendas',
+    
+    // Testimonials section
+    'home.testimonials.subtitle': 'Confiável por profissionais de serviços alimentares em todo o país',
   } as TranslationKeys,
   zh: {
     'nav.home': '首页',
@@ -1496,6 +1618,19 @@ const translations: Record<Language, TranslationKeys> = {
     'categories.kitchen-supplies.description': '商业用途的专业厨房工具和用品',
     'categories.cleaning-sanitizing.description': '食品服务专业清洁和消毒产品',
     'categories.storage-solutions.description': '食品储存容器和组织系统',
+    
+    // Business Solutions section
+    'home.business.title': '企业解决方案',
+    'home.business.description': '为您的餐厅、咖啡馆或食品服务业务获得批发价格和专门支持。我们提供批量折扣、定制解决方案和优先配送。',
+    'home.business.wholesale': '批量订单的批发价格',
+    'home.business.accountManager': '专门的客户经理',
+    'home.business.priorityShipping': '优先配送和支持',
+    'home.business.customLabeling': '定制标签和包装',
+    'home.business.getQuote': '获取B2B报价',
+    'home.business.contactSales': '联系销售',
+    
+    // Testimonials section
+    'home.testimonials.subtitle': '受到全国食品服务专业人士的信赖',
   } as TranslationKeys,
   ja: {
     'nav.home': 'ホーム',
@@ -1543,6 +1678,19 @@ const translations: Record<Language, TranslationKeys> = {
     'categories.kitchen-supplies.description': '商業用途の専門的なキッチンツールと用品',
     'categories.cleaning-sanitizing.description': 'フードサービス向けの専門的な清掃・消毒製品',
     'categories.storage-solutions.description': '食品保存容器と整理システム',
+    
+    // Business Solutions section
+    'home.business.title': 'ビジネスソリューション',
+    'home.business.description': 'レストラン、カフェ、フードサービス事業向けの卸売価格と専門サポートを提供。ボリューム割引、カスタムソリューション、優先配送をご提供します。',
+    'home.business.wholesale': 'ボリューム注文の卸売価格',
+    'home.business.accountManager': '専任アカウントマネージャー',
+    'home.business.priorityShipping': '優先配送とサポート',
+    'home.business.customLabeling': 'カスタムラベルとパッケージング',
+    'home.business.getQuote': 'B2B見積もり取得',
+    'home.business.contactSales': '営業担当者に連絡',
+    
+    // Testimonials section
+    'home.testimonials.subtitle': '全国のフードサービス専門家から信頼されています',
   } as TranslationKeys,
   ko: {
     'nav.home': '홈',
@@ -1590,6 +1738,19 @@ const translations: Record<Language, TranslationKeys> = {
     'categories.kitchen-supplies.description': '상업용 전문 주방 도구 및 용품',
     'categories.cleaning-sanitizing.description': '식품 서비스를 위한 전문 청소 및 위생 제품',
     'categories.storage-solutions.description': '식품 보관 용기 및 정리 시스템',
+    
+    // Business Solutions section
+    'home.business.title': '비즈니스 솔루션',
+    'home.business.description': '레스토랑, 카페 또는 식품 서비스 비즈니스를 위한 도매 가격과 전담 지원을 받으세요. 대량 할인, 맞춤형 솔루션, 우선 배송을 제공합니다.',
+    'home.business.wholesale': '대량 주문 시 도매 가격',
+    'home.business.accountManager': '전담 계정 매니저',
+    'home.business.priorityShipping': '우선 배송 및 지원',
+    'home.business.customLabeling': '맞춤형 라벨링 및 포장',
+    'home.business.getQuote': 'B2B 견적 받기',
+    'home.business.contactSales': '영업팀 연락',
+    
+    // Testimonials section
+    'home.testimonials.subtitle': '전국의 식품 서비스 전문가들이 신뢰하는',
   } as TranslationKeys,
   ar: {
     'nav.home': 'الرئيسية',
@@ -1637,6 +1798,19 @@ const translations: Record<Language, TranslationKeys> = {
     'categories.kitchen-supplies.description': 'أدوات ولوازم المطبخ المهنية للاستخدام التجاري',
     'categories.cleaning-sanitizing.description': 'منتجات التنظيف والتطهير المهنية لخدمات الطعام',
     'categories.storage-solutions.description': 'حاويات تخزين الطعام وأنظمة التنظيم',
+    
+    // Business Solutions section
+    'home.business.title': 'الحلول التجارية',
+    'home.business.description': 'احصل على أسعار الجملة والدعم المخصص لمطعمك أو مقهاك أو أعمال الخدمات الغذائية. نوفر خصومات الكمية والحلول المخصصة والشحن ذو الأولوية.',
+    'home.business.wholesale': 'أسعار الجملة للطلبات المجمعة',
+    'home.business.accountManager': 'مدير حساب مخصص',
+    'home.business.priorityShipping': 'شحن ودعم ذو أولوية',
+    'home.business.customLabeling': 'ملصقات وتغليف مخصص',
+    'home.business.getQuote': 'احصل على عرض سعر B2B',
+    'home.business.contactSales': 'اتصل بالمبيعات',
+    
+    // Testimonials section
+    'home.testimonials.subtitle': 'موثوق به من قبل محترفي الخدمات الغذائية في جميع أنحاء البلاد',
   } as TranslationKeys,
 };
 
