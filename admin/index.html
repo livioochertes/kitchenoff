@@ -1305,6 +1305,293 @@
                 </div>
               </>
             );
+          
+          case 'settings':
+            return (
+              <div>
+                <div className="content-header">
+                  <h2 className="content-title">⚙️ Admin Settings</h2>
+                </div>
+                
+                <div className="content-body">
+                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '25px'}}>
+                    {/* Profile Settings */}
+                    <div className="stat-card">
+                      <h3 style={{marginBottom: '20px', color: '#333', fontSize: '18px'}}>👤 Profile Settings</h3>
+                      <div style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: '#f8f9fa', borderRadius: '8px'}}>
+                          <div>
+                            <strong>Name:</strong> {admin?.firstName || 'Admin'} {admin?.lastName || ''}
+                          </div>
+                        </div>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: '#f8f9fa', borderRadius: '8px'}}>
+                          <div>
+                            <strong>Email:</strong> {admin?.email || 'admin@kitchen-off.com'}
+                          </div>
+                        </div>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: '#f8f9fa', borderRadius: '8px'}}>
+                          <div>
+                            <strong>Role:</strong> Administrator
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Two-Factor Authentication */}
+                    <div className="stat-card">
+                      <h3 style={{marginBottom: '20px', color: '#333', fontSize: '18px'}}>🔐 Two-Factor Authentication</h3>
+                      <div style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: '#f8f9fa', borderRadius: '8px'}}>
+                          <div>
+                            <strong>Status:</strong> 
+                            <span style={{
+                              marginLeft: '10px',
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              fontSize: '12px',
+                              fontWeight: 'bold',
+                              backgroundColor: admin?.twoFactorEnabled ? '#d4edda' : '#f8d7da',
+                              color: admin?.twoFactorEnabled ? '#155724' : '#721c24'
+                            }}>
+                              {admin?.twoFactorEnabled ? 'Enabled' : 'Disabled'}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+                          {!admin?.twoFactorEnabled ? (
+                            <button 
+                              className="btn"
+                              style={{
+                                background: 'linear-gradient(135deg, #28a745 0%, #1e7e34 100%)',
+                                width: '100%',
+                                padding: '12px 15px',
+                                fontSize: '14px',
+                                fontWeight: '500'
+                              }}
+                              onClick={() => setShowTwoFactor(true)}
+                            >
+                              🔒 Enable Two-Factor Authentication
+                            </button>
+                          ) : (
+                            <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+                              <div style={{padding: '12px', background: '#e8f5e8', borderRadius: '6px', border: '1px solid #d4edda'}}>
+                                <div style={{display: 'flex', alignItems: 'center', marginBottom: '8px'}}>
+                                  <span style={{fontSize: '16px', marginRight: '8px'}}>✅</span>
+                                  <strong style={{color: '#155724'}}>2FA is Active</strong>
+                                </div>
+                                <p style={{fontSize: '14px', color: '#155724', margin: 0}}>
+                                  Your account is protected with Two-Factor Authentication using an authenticator app.
+                                </p>
+                              </div>
+                              
+                              <button 
+                                className="btn"
+                                style={{
+                                  background: 'linear-gradient(135deg, #ffc107 0%, #e0a800 100%)',
+                                  width: '100%',
+                                  padding: '10px 15px',
+                                  fontSize: '14px',
+                                  fontWeight: '500'
+                                }}
+                                onClick={() => setShowTwoFactor(true)}
+                              >
+                                🔄 Regenerate Backup Codes
+                              </button>
+                              
+                              <button 
+                                className="btn"
+                                style={{
+                                  background: 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)',
+                                  width: '100%',
+                                  padding: '10px 15px',
+                                  fontSize: '14px',
+                                  fontWeight: '500'
+                                }}
+                                onClick={() => setShowTwoFactor(true)}
+                              >
+                                🔓 Disable Two-Factor Authentication
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div style={{padding: '12px', background: '#fff3cd', borderRadius: '6px', border: '1px solid #ffeaa7'}}>
+                          <div style={{display: 'flex', alignItems: 'center', marginBottom: '8px'}}>
+                            <span style={{fontSize: '16px', marginRight: '8px'}}>💡</span>
+                            <strong style={{color: '#856404'}}>Security Tip</strong>
+                          </div>
+                          <p style={{fontSize: '14px', color: '#856404', margin: 0}}>
+                            Two-Factor Authentication adds an extra layer of security to your admin account. 
+                            Use apps like Google Authenticator or Authy for the best security.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* System Information */}
+                    <div className="stat-card">
+                      <h3 style={{marginBottom: '20px', color: '#333', fontSize: '18px'}}>🔧 System Information</h3>
+                      <div style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: '#f8f9fa', borderRadius: '8px'}}>
+                          <span style={{fontSize: '14px', color: '#666', fontWeight: '500'}}>Platform</span>
+                          <span style={{color: '#007bff', fontWeight: 'bold', fontSize: '14px'}}>KitchenOff Admin v1.0</span>
+                        </div>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: '#f8f9fa', borderRadius: '8px'}}>
+                          <span style={{fontSize: '14px', color: '#666', fontWeight: '500'}}>Last Login</span>
+                          <span style={{color: '#28a745', fontWeight: 'bold', fontSize: '14px'}}>Just now</span>
+                        </div>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: '#f8f9fa', borderRadius: '8px'}}>
+                          <span style={{fontSize: '14px', color: '#666', fontWeight: '500'}}>Session</span>
+                          <span style={{color: '#28a745', fontWeight: 'bold', fontSize: '14px'}}>Active</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Security Actions */}
+                    <div className="stat-card">
+                      <h3 style={{marginBottom: '20px', color: '#333', fontSize: '18px'}}>🛡️ Security Actions</h3>
+                      <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
+                        <button 
+                          className="btn"
+                          style={{
+                            background: 'linear-gradient(135deg, #007bff 0%, #0056b3 100%)',
+                            width: '100%',
+                            padding: '12px 15px',
+                            fontSize: '14px',
+                            fontWeight: '500'
+                          }}
+                          onClick={() => alert('Password change functionality:\n\n• Current password verification\n• New password requirements\n• Secure password update\n• Session refresh')}
+                        >
+                          🔑 Change Password
+                        </button>
+                        
+                        <button 
+                          className="btn"
+                          style={{
+                            background: 'linear-gradient(135deg, #6c757d 0%, #545b62 100%)',
+                            width: '100%',
+                            padding: '12px 15px',
+                            fontSize: '14px',
+                            fontWeight: '500'
+                          }}
+                          onClick={() => alert('Session management:\n\n• View active sessions\n• Terminate other sessions\n• Session timeout settings\n• Device management')}
+                        >
+                          📱 Manage Sessions
+                        </button>
+                        
+                        <button 
+                          className="btn"
+                          style={{
+                            background: 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)',
+                            width: '100%',
+                            padding: '12px 15px',
+                            fontSize: '14px',
+                            fontWeight: '500'
+                          }}
+                          onClick={handleLogout}
+                        >
+                          🚪 Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+            
+          default:
+            return (
+              <div>
+                <div className="content-header">
+                  <h2 className="content-title">📊 Dashboard Overview</h2>
+                </div>
+                
+                <div className="content-body">
+                  {stats && (
+                    <div className="dashboard-grid">
+                      <div className="stat-card">
+                        <div className="stat-number">{stats.totalUsers}</div>
+                        <div className="stat-label">Total Users</div>
+                      </div>
+                      <div className="stat-card">
+                        <div className="stat-number">{stats.totalOrders}</div>
+                        <div className="stat-label">Total Orders</div>
+                      </div>
+                      <div className="stat-card">
+                        <div className="stat-number">{stats.totalProducts}</div>
+                        <div className="stat-label">Total Products</div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '25px', marginTop: '30px'}}>
+                    <div className="stat-card">
+                      <h3 style={{marginBottom: '20px', color: '#333', fontSize: '18px'}}>🎯 Quick Actions</h3>
+                      <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
+                        <button 
+                          onClick={() => handleViewChange('orders')}
+                          className="btn"
+                          style={{
+                            background: 'linear-gradient(135deg, #007bff 0%, #0056b3 100%)',
+                            width: '100%',
+                            padding: '12px 15px',
+                            fontSize: '14px',
+                            fontWeight: '500'
+                          }}
+                        >
+                          📋 Manage Orders
+                        </button>
+                        <button 
+                          onClick={() => handleViewChange('users')}
+                          className="btn"
+                          style={{
+                            background: 'linear-gradient(135deg, #28a745 0%, #1e7e34 100%)',
+                            width: '100%',
+                            padding: '12px 15px',
+                            fontSize: '14px',
+                            fontWeight: '500'
+                          }}
+                        >
+                          👥 Manage Users
+                        </button>
+                        <button 
+                          onClick={() => handleViewChange('products')}
+                          className="btn"
+                          style={{
+                            background: 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)',
+                            width: '100%',
+                            padding: '12px 15px',
+                            fontSize: '14px',
+                            fontWeight: '500'
+                          }}
+                        >
+                          📦 Manage Products
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="stat-card">
+                      <h3 style={{marginBottom: '20px', color: '#333', fontSize: '18px'}}>🔧 System Status</h3>
+                      <div style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', background: '#f8f9fa', borderRadius: '6px'}}>
+                          <span style={{fontSize: '14px', color: '#666', fontWeight: '500'}}>Database</span>
+                          <span style={{color: '#28a745', fontWeight: 'bold', fontSize: '14px'}}>✅ Online</span>
+                        </div>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', background: '#f8f9fa', borderRadius: '6px'}}>
+                          <span style={{fontSize: '14px', color: '#666', fontWeight: '500'}}>API Server</span>
+                          <span style={{color: '#28a745', fontWeight: 'bold', fontSize: '14px'}}>✅ Running</span>
+                        </div>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', background: '#f8f9fa', borderRadius: '6px'}}>
+                          <span style={{fontSize: '14px', color: '#666', fontWeight: '500'}}>Memory Usage</span>
+                          <span style={{color: '#ffc107', fontWeight: 'bold', fontSize: '14px'}}>⚠️ 45%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
         }
       };
 
