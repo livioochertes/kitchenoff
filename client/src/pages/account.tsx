@@ -17,6 +17,7 @@ import { User, Package, CreditCard, Bell, Settings, Download, Eye } from "lucide
 import { format } from "date-fns";
 import Header from "@/components/header";
 import { useLocation } from "wouter";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const profileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -53,6 +54,7 @@ export default function Account() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const profileForm = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -196,7 +198,7 @@ export default function Account() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">My Account</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{t('account.title')}</h1>
             <p className="text-gray-600 mt-2">
               Welcome back, {user?.firstName}! Manage your account and orders.
             </p>
@@ -206,23 +208,23 @@ export default function Account() {
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="profile" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
-                Profile
+                {t('account.profile')}
               </TabsTrigger>
               <TabsTrigger value="orders" className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
-                Orders
+                {t('account.orders')}
               </TabsTrigger>
               <TabsTrigger value="invoices" className="flex items-center gap-2">
                 <CreditCard className="h-4 w-4" />
-                Invoices
+                {t('account.invoices')}
               </TabsTrigger>
               <TabsTrigger value="invoice-settings" className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
-                Invoice Settings
+                {t('account.settings')}
               </TabsTrigger>
               <TabsTrigger value="alerts" className="flex items-center gap-2">
                 <Bell className="h-4 w-4" />
-                Alerts
+                {t('account.alerts')}
               </TabsTrigger>
             </TabsList>
 
@@ -231,7 +233,7 @@ export default function Account() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <User className="h-5 w-5" />
-                    Profile Information
+                    {t('account.personalInfo')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -243,7 +245,7 @@ export default function Account() {
                           name="firstName"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>First Name</FormLabel>
+                              <FormLabel>{t('account.firstName')}</FormLabel>
                               <FormControl>
                                 <Input placeholder="John" {...field} />
                               </FormControl>
@@ -256,7 +258,7 @@ export default function Account() {
                           name="lastName"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Last Name</FormLabel>
+                              <FormLabel>{t('account.lastName')}</FormLabel>
                               <FormControl>
                                 <Input placeholder="Doe" {...field} />
                               </FormControl>
@@ -270,7 +272,7 @@ export default function Account() {
                         name="email"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Email</FormLabel>
+                            <FormLabel>{t('account.email')}</FormLabel>
                             <FormControl>
                               <Input type="email" placeholder="your@email.com" {...field} />
                             </FormControl>
@@ -283,7 +285,7 @@ export default function Account() {
                         disabled={updateProfileMutation.isPending}
                         className="w-full md:w-auto"
                       >
-                        {updateProfileMutation.isPending ? "Updating..." : "Update Profile"}
+                        {updateProfileMutation.isPending ? "Updating..." : t('account.save')}
                       </Button>
                     </form>
                   </Form>
@@ -327,7 +329,7 @@ export default function Account() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Package className="h-5 w-5" />
-                    Order History
+                    {t('account.orderHistory')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
