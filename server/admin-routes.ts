@@ -498,6 +498,166 @@ export async function registerAdminRoutes(app: Express) {
     }
   });
 
+  // Bulk update order status
+  app.put("/admin/api/orders/bulk/status", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { orderIds, status } = req.body;
+      
+      if (!Array.isArray(orderIds) || orderIds.length === 0) {
+        return res.status(400).json({ message: "Order IDs array is required" });
+      }
+      
+      if (!status || !['pending', 'processing', 'shipped', 'delivered', 'cancelled'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+      
+      const results = [];
+      for (const orderId of orderIds) {
+        try {
+          const order = await storage.updateOrderStatus(parseInt(orderId), status);
+          results.push({ orderId, success: true, order });
+        } catch (error) {
+          results.push({ orderId, success: false, error: error.message });
+        }
+      }
+      
+      res.json({ 
+        message: `Bulk status update completed`,
+        results,
+        successCount: results.filter(r => r.success).length,
+        failureCount: results.filter(r => !r.success).length
+      });
+    } catch (error) {
+      console.error("Bulk update order status error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Generate shipping labels (simulation)
+  app.post("/admin/api/orders/bulk/shipping-labels", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { orderIds } = req.body;
+      
+      if (!Array.isArray(orderIds) || orderIds.length === 0) {
+        return res.status(400).json({ message: "Order IDs array is required" });
+      }
+      
+      const results = [];
+      for (const orderId of orderIds) {
+        try {
+          const order = await storage.getOrder(parseInt(orderId));
+          if (order) {
+            results.push({ 
+              orderId, 
+              success: true, 
+              trackingNumber: `KO${Date.now()}${orderId}`,
+              shippingLabel: `shipping_label_${orderId}.pdf`
+            });
+          } else {
+            results.push({ orderId, success: false, error: "Order not found" });
+          }
+        } catch (error) {
+          results.push({ orderId, success: false, error: error.message });
+        }
+      }
+      
+      res.json({ 
+        message: `Shipping labels generated`,
+        results,
+        successCount: results.filter(r => r.success).length
+      });
+    } catch (error) {
+      console.error("Generate shipping labels error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Send bulk notifications (simulation)
+  app.post("/admin/api/orders/bulk/notifications", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { orderIds, notificationType, message } = req.body;
+      
+      if (!Array.isArray(orderIds) || orderIds.length === 0) {
+        return res.status(400).json({ message: "Order IDs array is required" });
+      }
+      
+      if (!notificationType || !['order_update', 'shipping_notification', 'delivery_confirmation'].includes(notificationType)) {
+        return res.status(400).json({ message: "Invalid notification type" });
+      }
+      
+      const results = [];
+      for (const orderId of orderIds) {
+        try {
+          const order = await storage.getOrder(parseInt(orderId));
+          if (order) {
+            results.push({ 
+              orderId, 
+              success: true, 
+              notificationType,
+              sentTo: `user_${order.userId}@example.com`,
+              message: message || `Your order #${orderId} has been updated.`
+            });
+          } else {
+            results.push({ orderId, success: false, error: "Order not found" });
+          }
+        } catch (error) {
+          results.push({ orderId, success: false, error: error.message });
+        }
+      }
+      
+      res.json({ 
+        message: `Bulk notifications sent`,
+        results,
+        successCount: results.filter(r => r.success).length
+      });
+    } catch (error) {
+      console.error("Send bulk notifications error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Process bulk refunds (simulation)
+  app.post("/admin/api/orders/bulk/refunds", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { orderIds, refundAmount, reason } = req.body;
+      
+      if (!Array.isArray(orderIds) || orderIds.length === 0) {
+        return res.status(400).json({ message: "Order IDs array is required" });
+      }
+      
+      const results = [];
+      for (const orderId of orderIds) {
+        try {
+          const order = await storage.getOrder(parseInt(orderId));
+          if (order) {
+            const refundAmt = refundAmount || order.totalAmount;
+            results.push({ 
+              orderId, 
+              success: true, 
+              refundAmount: refundAmt,
+              reason: reason || "Admin initiated refund",
+              transactionId: `REF${Date.now()}${orderId}`
+            });
+          } else {
+            results.push({ orderId, success: false, error: "Order not found" });
+          }
+        } catch (error) {
+          results.push({ orderId, success: false, error: error.message });
+        }
+      }
+      
+      res.json({ 
+        message: `Bulk refunds processed`,
+        results,
+        successCount: results.filter(r => r.success).length,
+        totalRefunded: results.filter(r => r.success).reduce((sum, r) => sum + parseFloat(r.refundAmount), 0)
+      });
+    } catch (error) {
+      console.error("Process bulk refunds error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Admin Product Management Routes
   app.get("/admin/api/products", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
     try {

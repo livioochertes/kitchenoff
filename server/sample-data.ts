@@ -1,10 +1,12 @@
 import { db } from "./db";
-import { categories, products, users } from "../shared/schema";
+import { categories, products, users, orders, orderItems } from "../shared/schema";
 import bcrypt from "bcrypt";
 
 export async function seedDatabase() {
   try {
     // Clear existing data
+    await db.delete(orderItems);
+    await db.delete(orders);
     await db.delete(products);
     await db.delete(categories);
     await db.delete(users);
@@ -460,13 +462,13 @@ export async function seedDatabase() {
       }
     ];
 
-    await db.insert(products).values(sampleProducts);
+    const insertedProducts = await db.insert(products).values(sampleProducts).returning();
 
     // Create users
     const adminPassword = await bcrypt.hash("admin123", 10);
     const testPassword = await bcrypt.hash("123456", 10);
     
-    await db.insert(users).values([
+    const insertedUsers = await db.insert(users).values([
       {
         email: "admin@kitchen-off.com",
         password: adminPassword,
@@ -481,7 +483,200 @@ export async function seedDatabase() {
         lastName: "Chertes",
         isAdmin: false
       }
-    ]);
+    ]).returning();
+
+    // Create sample orders
+    const sampleOrders = [
+      {
+        userId: insertedUsers[1].id,
+        status: "pending",
+        totalAmount: "94.97",
+        shippingAddress: {
+          name: "Liviu Chertes",
+          street: "Calea Mosilor 158",
+          city: "Bucharest",
+          state: "Bucharest",
+          zipCode: "020883",
+          country: "Romania"
+        },
+        billingAddress: {
+          name: "Liviu Chertes",
+          street: "Calea Mosilor 158",
+          city: "Bucharest",
+          state: "Bucharest",
+          zipCode: "020883",
+          country: "Romania"
+        },
+        paymentMethod: "credit_card",
+        paymentStatus: "pending",
+        notes: "Please deliver during business hours"
+      },
+      {
+        userId: insertedUsers[1].id,
+        status: "processing",
+        totalAmount: "349.99",
+        shippingAddress: {
+          name: "Restaurant Luna",
+          street: "Strada Republicii 25",
+          city: "Cluj-Napoca",
+          state: "Cluj",
+          zipCode: "400015",
+          country: "Romania"
+        },
+        billingAddress: {
+          name: "Restaurant Luna SRL",
+          street: "Strada Republicii 25",
+          city: "Cluj-Napoca",
+          state: "Cluj",
+          zipCode: "400015",
+          country: "Romania"
+        },
+        paymentMethod: "bank_transfer",
+        paymentStatus: "paid",
+        notes: "Urgent order - needed for health inspection"
+      },
+      {
+        userId: insertedUsers[1].id,
+        status: "shipped",
+        totalAmount: "189.97",
+        shippingAddress: {
+          name: "Bistro Central",
+          street: "Bulevardul Unirii 12",
+          city: "Iași",
+          state: "Iași",
+          zipCode: "700056",
+          country: "Romania"
+        },
+        billingAddress: {
+          name: "Bistro Central SRL",
+          street: "Bulevardul Unirii 12",  
+          city: "Iași",
+          state: "Iași",
+          zipCode: "700056",
+          country: "Romania"
+        },
+        paymentMethod: "credit_card",
+        paymentStatus: "paid",
+        notes: "Standard delivery"
+      },
+      {
+        userId: insertedUsers[1].id,
+        status: "delivered",
+        totalAmount: "124.98",
+        shippingAddress: {
+          name: "Pizzeria Napoli",
+          street: "Strada Lipscani 45",
+          city: "Bucharest",
+          state: "Bucharest",
+          zipCode: "030167",
+          country: "Romania"
+        },
+        billingAddress: {
+          name: "Pizzeria Napoli SRL",
+          street: "Strada Lipscani 45",
+          city: "Bucharest", 
+          state: "Bucharest",
+          zipCode: "030167",
+          country: "Romania"
+        },
+        paymentMethod: "credit_card",
+        paymentStatus: "paid",
+        notes: "Delivered successfully"
+      },
+      {
+        userId: insertedUsers[1].id,
+        status: "cancelled",
+        totalAmount: "79.99",
+        shippingAddress: {
+          name: "Café Aroma",
+          street: "Piața Sfatului 10",
+          city: "Brașov",
+          state: "Brașov",
+          zipCode: "500025",
+          country: "Romania"
+        },
+        billingAddress: {
+          name: "Café Aroma SRL",
+          street: "Piața Sfatului 10",
+          city: "Brașov",
+          state: "Brașov", 
+          zipCode: "500025",
+          country: "Romania"
+        },
+        paymentMethod: "credit_card",
+        paymentStatus: "refunded",
+        notes: "Customer cancelled - refund processed"
+      }
+    ];
+
+    const insertedOrders = await db.insert(orders).values(sampleOrders).returning();
+
+    // Create sample order items
+    const sampleOrderItems = [
+      // Order 1 items
+      {
+        orderId: insertedOrders[0].id,
+        productId: insertedProducts[0].id, // Expiration Date Labels
+        quantity: 2,
+        price: "24.99",
+        totalPrice: "49.98"
+      },
+      {
+        orderId: insertedOrders[0].id,
+        productId: insertedProducts[1].id, // Day of Week Labels
+        quantity: 1,
+        price: "19.99",
+        totalPrice: "19.99"
+      },
+      {
+        orderId: insertedOrders[0].id,
+        productId: insertedProducts[2].id, // Custom Food Labels
+        quantity: 1,
+        price: "25.00",
+        totalPrice: "25.00"
+      },
+      // Order 2 items
+      {
+        orderId: insertedOrders[1].id,
+        productId: insertedProducts[20].id, // Stainless Steel Prep Tables
+        quantity: 1,
+        price: "349.99",
+        totalPrice: "349.99"
+      },
+      // Order 3 items
+      {
+        orderId: insertedOrders[2].id,
+        productId: insertedProducts[11].id, // Food Storage Container Set
+        quantity: 2,
+        price: "54.99",
+        totalPrice: "109.98"
+      },
+      {
+        orderId: insertedOrders[2].id,
+        productId: insertedProducts[21].id, // Professional Can Opener Set
+        quantity: 1,
+        price: "79.99",
+        totalPrice: "79.99"
+      },
+      // Order 4 items
+      {
+        orderId: insertedOrders[3].id,
+        productId: insertedProducts[22].id, // Commercial Mixing Bowls Set
+        quantity: 1,
+        price: "124.99",
+        totalPrice: "124.99"
+      },
+      // Order 5 items
+      {
+        orderId: insertedOrders[4].id,
+        productId: insertedProducts[21].id, // Professional Can Opener Set
+        quantity: 1,
+        price: "79.99",
+        totalPrice: "79.99"
+      }
+    ];
+
+    await db.insert(orderItems).values(sampleOrderItems);
 
     console.log("Database seeded successfully!");
   } catch (error) {

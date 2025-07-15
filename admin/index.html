@@ -443,6 +443,10 @@
       const [editingUser, setEditingUser] = useState(null);
       const [editingProduct, setEditingProduct] = useState(null);
       const [editingCategory, setEditingCategory] = useState(null);
+      const [selectedOrders, setSelectedOrders] = useState([]);
+      const [showBulkModal, setShowBulkModal] = useState(false);
+      const [bulkOperation, setBulkOperation] = useState('');
+      const [bulkResults, setBulkResults] = useState(null);
       
       useEffect(() => {
         fetchStats();
@@ -807,14 +811,28 @@
                     <button 
                       className="btn" 
                       style={{background: '#28a745', width: 'auto', padding: '8px 16px'}}
-                      onClick={() => alert('Bulk order operations:\n\n• Update order status\n• Generate shipping labels\n• Send notifications\n• Print invoices\n• Mark as fulfilled')}
+                      onClick={() => {
+                        if (selectedOrders.length === 0) {
+                          alert('Please select orders first by checking the checkboxes.');
+                          return;
+                        }
+                        setBulkOperation('status');
+                        setShowBulkModal(true);
+                      }}
                     >
                       🔄 Bulk Operations
                     </button>
                     <button 
                       className="btn" 
                       style={{background: '#dc3545', width: 'auto', padding: '8px 16px'}}
-                      onClick={() => alert('Order management tools:\n\n• Process refunds\n• Handle disputes\n• Customer communication\n• Inventory adjustments\n• Shipping management')}
+                      onClick={() => {
+                        if (selectedOrders.length === 0) {
+                          alert('Please select orders first by checking the checkboxes.');
+                          return;
+                        }
+                        setBulkOperation('tools');
+                        setShowBulkModal(true);
+                      }}
                     >
                       🛠️ Order Tools
                     </button>
@@ -826,6 +844,21 @@
                     <table style={{width: '100%', borderCollapse: 'collapse'}}>
                       <thead>
                         <tr style={{backgroundColor: '#f5f5f5'}}>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>
+                            <input 
+                              type="checkbox" 
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedOrders(orders.map(order => order.id));
+                                } else {
+                                  setSelectedOrders([]);
+                                }
+                              }}
+                              checked={selectedOrders.length === orders.length && orders.length > 0}
+                              style={{marginRight: '8px'}}
+                            />
+                            Select
+                          </th>
                           <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Order ID</th>
                           <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Customer</th>
                           <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Amount</th>
@@ -837,6 +870,19 @@
                       <tbody>
                         {orders.slice(0, 10).map((order, index) => (
                           <tr key={index} style={{borderBottom: '1px solid #eee'}}>
+                            <td style={{padding: '12px'}}>
+                              <input 
+                                type="checkbox" 
+                                checked={selectedOrders.includes(order.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedOrders([...selectedOrders, order.id]);
+                                  } else {
+                                    setSelectedOrders(selectedOrders.filter(id => id !== order.id));
+                                  }
+                                }}
+                              />
+                            </td>
                             <td style={{padding: '12px', fontWeight: '500'}}>#{order.id}</td>
                             <td style={{padding: '12px'}}>User #{order.userId}</td>
                             <td style={{padding: '12px', color: '#28a745', fontWeight: 'bold'}}>${order.totalAmount}</td>
