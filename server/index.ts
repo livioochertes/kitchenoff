@@ -83,7 +83,12 @@ app.use((req, res, next) => {
   const server = await registerRoutes(app);
   
   // Seed database with sample data
-  await seedDatabase();
+  try {
+    await seedDatabase();
+  } catch (error) {
+    console.error('Database seeding failed:', error);
+    log('Database seeding failed, continuing without seeding');
+  }
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

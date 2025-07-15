@@ -376,4 +376,268 @@ export async function registerAdminRoutes(app: Express) {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+
+  // Admin User Management Routes
+  app.get("/admin/api/users", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.post("/admin/api/users", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { email, password, firstName, lastName, isAdmin = false } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "User already exists" });
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 10);
+      
+      const newUser = await storage.createUser({
+        email,
+        password: hashedPassword,
+        firstName,
+        lastName,
+        isAdmin
+      });
+
+      res.json({ message: "User created successfully", user: { id: newUser.id, email: newUser.email } });
+    } catch (error) {
+      console.error("Error creating user:", error);
+      res.status(500).json({ message: "Failed to create user" });
+    }
+  });
+
+  app.put("/admin/api/users/:id", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const { email, firstName, lastName, isAdmin } = req.body;
+      
+      const updatedUser = await storage.updateUser(userId, {
+        email,
+        firstName,
+        lastName,
+        isAdmin
+      });
+
+      res.json({ message: "User updated successfully", user: updatedUser });
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
+  app.delete("/admin/api/users/:id", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const userId = parseInt(req.params.id);
+      
+      // Don't allow deleting own account
+      if (userId === req.adminId) {
+        return res.status(400).json({ message: "Cannot delete your own account" });
+      }
+
+      await storage.deleteUser(userId);
+      res.json({ message: "User deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
+  // Admin Order Management Routes
+  app.get("/admin/api/orders", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { status, limit = 50, offset = 0 } = req.query;
+      
+      const orders = await storage.getOrders();
+      
+      let filteredOrders = orders;
+      if (status) {
+        filteredOrders = orders.filter(order => order.status === status);
+      }
+      
+      const paginatedOrders = filteredOrders.slice(
+        parseInt(offset as string),
+        parseInt(offset as string) + parseInt(limit as string)
+      );
+
+      res.json(paginatedOrders);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  app.put("/admin/api/orders/:id/status", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      const updatedOrder = await storage.updateOrderStatus(orderId, status);
+      res.json({ message: "Order status updated successfully", order: updatedOrder });
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      res.status(500).json({ message: "Failed to update order status" });
+    }
+  });
+
+  // Admin Product Management Routes
+  app.get("/admin/api/products", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { search, categoryId, featured, limit = 50, offset = 0 } = req.query;
+      
+      const products = await storage.getProducts({
+        search: search as string,
+        categoryId: categoryId ? parseInt(categoryId as string) : undefined,
+        featured: featured === 'true',
+        limit: parseInt(limit as string),
+        offset: parseInt(offset as string)
+      });
+
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      res.status(500).json({ message: "Failed to fetch products" });
+    }
+  });
+
+  app.post("/admin/api/products", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const productData = req.body;
+      
+      if (!productData.name || !productData.price) {
+        return res.status(400).json({ message: "Name and price are required" });
+      }
+
+      // Generate slug from name
+      const slug = productData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      
+      const newProduct = await storage.createProduct({
+        ...productData,
+        slug,
+        price: parseFloat(productData.price),
+        compareAtPrice: productData.compareAtPrice ? parseFloat(productData.compareAtPrice) : undefined,
+        stockQuantity: parseInt(productData.stockQuantity || 0)
+      });
+
+      res.json({ message: "Product created successfully", product: newProduct });
+    } catch (error) {
+      console.error("Error creating product:", error);
+      res.status(500).json({ message: "Failed to create product" });
+    }
+  });
+
+  app.put("/admin/api/products/:id", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const productId = parseInt(req.params.id);
+      const productData = req.body;
+      
+      const updatedProduct = await storage.updateProduct(productId, {
+        ...productData,
+        price: productData.price ? parseFloat(productData.price) : undefined,
+        compareAtPrice: productData.compareAtPrice ? parseFloat(productData.compareAtPrice) : undefined,
+        stockQuantity: productData.stockQuantity ? parseInt(productData.stockQuantity) : undefined
+      });
+
+      res.json({ message: "Product updated successfully", product: updatedProduct });
+    } catch (error) {
+      console.error("Error updating product:", error);
+      res.status(500).json({ message: "Failed to update product" });
+    }
+  });
+
+  app.delete("/admin/api/products/:id", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const productId = parseInt(req.params.id);
+      
+      await storage.deleteProduct(productId);
+      res.json({ message: "Product deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      res.status(500).json({ message: "Failed to delete product" });
+    }
+  });
+
+  // Admin Category Management Routes
+  app.get("/admin/api/categories", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const categories = await storage.getCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      res.status(500).json({ message: "Failed to fetch categories" });
+    }
+  });
+
+  app.post("/admin/api/categories", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { name, description, imageUrl } = req.body;
+      
+      if (!name) {
+        return res.status(400).json({ message: "Category name is required" });
+      }
+
+      // Generate slug from name
+      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      
+      const newCategory = await storage.createCategory({
+        name,
+        slug,
+        description,
+        imageUrl
+      });
+
+      res.json({ message: "Category created successfully", category: newCategory });
+    } catch (error) {
+      console.error("Error creating category:", error);
+      res.status(500).json({ message: "Failed to create category" });
+    }
+  });
+
+  app.put("/admin/api/categories/:id", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const categoryId = parseInt(req.params.id);
+      const { name, description, imageUrl } = req.body;
+      
+      const updatedCategory = await storage.updateCategory(categoryId, {
+        name,
+        description,
+        imageUrl
+      });
+
+      res.json({ message: "Category updated successfully", category: updatedCategory });
+    } catch (error) {
+      console.error("Error updating category:", error);
+      res.status(500).json({ message: "Failed to update category" });
+    }
+  });
+
+  app.delete("/admin/api/categories/:id", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const categoryId = parseInt(req.params.id);
+      
+      await storage.deleteCategory(categoryId);
+      res.json({ message: "Category deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      res.status(500).json({ message: "Failed to delete category" });
+    }
+  });
 }

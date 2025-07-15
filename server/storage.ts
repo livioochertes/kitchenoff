@@ -31,8 +31,10 @@ export interface IStorage {
   // User operations
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<InsertUser>): Promise<User>;
+  deleteUser(id: number): Promise<void>;
 
   // Category operations
   getCategories(): Promise<Category[]>;
@@ -91,6 +93,10 @@ export class DatabaseStorage implements IStorage {
     return newUser;
   }
 
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(users.createdAt);
+  }
+
   async updateUser(id: number, user: Partial<InsertUser>): Promise<User> {
     const [updatedUser] = await db
       .update(users)
@@ -98,6 +104,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return updatedUser;
+  }
+
+  async deleteUser(id: number): Promise<void> {
+    await db.delete(users).where(eq(users.id, id));
   }
 
   // Category operations

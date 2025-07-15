@@ -295,6 +295,13 @@
       const [orders, setOrders] = useState([]);
       const [users, setUsers] = useState([]);
       const [products, setProducts] = useState([]);
+      const [categories, setCategories] = useState([]);
+      const [showAddUserModal, setShowAddUserModal] = useState(false);
+      const [showAddProductModal, setShowAddProductModal] = useState(false);
+      const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+      const [editingUser, setEditingUser] = useState(null);
+      const [editingProduct, setEditingProduct] = useState(null);
+      const [editingCategory, setEditingCategory] = useState(null);
       
       useEffect(() => {
         fetchStats();
@@ -322,9 +329,29 @@
         }
       };
 
+      const fetchUsers = async () => {
+        try {
+          const response = await fetch('/admin/api/users', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            setUsers(data);
+          } else {
+            console.error('Failed to fetch users:', data.message);
+          }
+        } catch (err) {
+          console.error('Network error fetching users:', err);
+        }
+      };
+
       const fetchOrders = async () => {
         try {
-          const response = await fetch('/api/orders', {
+          const response = await fetch('/admin/api/orders', {
             headers: {
               'Authorization': `Bearer ${token}`
             }
@@ -344,7 +371,7 @@
 
       const fetchProducts = async () => {
         try {
-          const response = await fetch('/api/products', {
+          const response = await fetch('/admin/api/products', {
             headers: {
               'Authorization': `Bearer ${token}`
             }
@@ -362,12 +389,201 @@
         }
       };
 
+      const fetchCategories = async () => {
+        try {
+          const response = await fetch('/admin/api/categories', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            setCategories(data);
+          } else {
+            console.error('Failed to fetch categories:', data.message);
+          }
+        } catch (err) {
+          console.error('Network error fetching categories:', err);
+        }
+      };
+
+      // CRUD Operations
+      const createUser = async (userData) => {
+        try {
+          const response = await fetch('/admin/api/users', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(userData)
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            fetchUsers(); // Refresh user list
+            return { success: true, message: data.message };
+          } else {
+            return { success: false, message: data.message };
+          }
+        } catch (err) {
+          return { success: false, message: 'Network error' };
+        }
+      };
+
+      const updateUser = async (userId, userData) => {
+        try {
+          const response = await fetch(`/admin/api/users/${userId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(userData)
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            fetchUsers(); // Refresh user list
+            return { success: true, message: data.message };
+          } else {
+            return { success: false, message: data.message };
+          }
+        } catch (err) {
+          return { success: false, message: 'Network error' };
+        }
+      };
+
+      const deleteUser = async (userId) => {
+        try {
+          const response = await fetch(`/admin/api/users/${userId}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            fetchUsers(); // Refresh user list
+            return { success: true, message: data.message };
+          } else {
+            return { success: false, message: data.message };
+          }
+        } catch (err) {
+          return { success: false, message: 'Network error' };
+        }
+      };
+
+      const createProduct = async (productData) => {
+        try {
+          const response = await fetch('/admin/api/products', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(productData)
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            fetchProducts(); // Refresh product list
+            return { success: true, message: data.message };
+          } else {
+            return { success: false, message: data.message };
+          }
+        } catch (err) {
+          return { success: false, message: 'Network error' };
+        }
+      };
+
+      const updateProduct = async (productId, productData) => {
+        try {
+          const response = await fetch(`/admin/api/products/${productId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(productData)
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            fetchProducts(); // Refresh product list
+            return { success: true, message: data.message };
+          } else {
+            return { success: false, message: data.message };
+          }
+        } catch (err) {
+          return { success: false, message: 'Network error' };
+        }
+      };
+
+      const deleteProduct = async (productId) => {
+        try {
+          const response = await fetch(`/admin/api/products/${productId}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            fetchProducts(); // Refresh product list
+            return { success: true, message: data.message };
+          } else {
+            return { success: false, message: data.message };
+          }
+        } catch (err) {
+          return { success: false, message: 'Network error' };
+        }
+      };
+
+      const updateOrderStatus = async (orderId, status) => {
+        try {
+          const response = await fetch(`/admin/api/orders/${orderId}/status`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ status })
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            fetchOrders(); // Refresh order list
+            return { success: true, message: data.message };
+          } else {
+            return { success: false, message: data.message };
+          }
+        } catch (err) {
+          return { success: false, message: 'Network error' };
+        }
+      };
+
       const handleViewChange = (view) => {
         setActiveView(view);
-        if (view === 'orders' && orders.length === 0) {
+        if (view === 'users' && users.length === 0) {
+          fetchUsers();
+        } else if (view === 'orders' && orders.length === 0) {
           fetchOrders();
         } else if (view === 'products' && products.length === 0) {
           fetchProducts();
+        } else if (view === 'categories' && categories.length === 0) {
+          fetchCategories();
         }
       };
       
@@ -518,7 +734,19 @@
                                     cursor: 'pointer',
                                     fontSize: '12px'
                                   }}
-                                  onClick={() => alert(`Update order status for Order #${order.id}:\n\n• Change to Processing\n• Mark as Shipped\n• Complete order\n• Cancel order\n• Request refund`)}
+                                  onClick={async () => {
+                                    const newStatus = prompt(`Update order status for Order #${order.id}:\n\nCurrent status: ${order.status}\n\nEnter new status (pending, processing, shipped, delivered, cancelled):`);
+                                    if (newStatus && ['pending', 'processing', 'shipped', 'delivered', 'cancelled'].includes(newStatus.toLowerCase())) {
+                                      const result = await updateOrderStatus(order.id, newStatus.toLowerCase());
+                                      if (result.success) {
+                                        alert('Order status updated successfully');
+                                      } else {
+                                        alert('Error: ' + result.message);
+                                      }
+                                    } else if (newStatus) {
+                                      alert('Invalid status. Please use: pending, processing, shipped, delivered, or cancelled');
+                                    }
+                                  }}
                                 >
                                   ✏️ Update
                                 </button>
@@ -553,64 +781,114 @@
                   <button 
                     className="btn" 
                     style={{background: '#28a745', width: 'auto', padding: '8px 16px'}}
-                    onClick={() => alert('Create new user functionality will be implemented. This would include:\n\n• User registration form\n• Email validation\n• Password setup\n• Role assignment (Admin/User)\n• Profile information\n• Account activation')}
+                    onClick={() => setShowAddUserModal(true)}
                   >
                     ➕ Add New User
                   </button>
                 </div>
                 
-                <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '30px'}}>
+                <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '20px'}}>
                   <div style={{padding: '20px', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6'}}>
                     <h4 style={{marginBottom: '10px', color: '#495057'}}>Total Users</h4>
                     <p style={{fontSize: '24px', fontWeight: 'bold', color: '#007bff', margin: '0'}}>{stats?.totalUsers || '0'}</p>
                   </div>
                   <div style={{padding: '20px', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6'}}>
-                    <h4 style={{marginBottom: '10px', color: '#495057'}}>Active Users</h4>
-                    <p style={{fontSize: '24px', fontWeight: 'bold', color: '#28a745', margin: '0'}}>2</p>
+                    <h4 style={{marginBottom: '10px', color: '#495057'}}>Regular Users</h4>
+                    <p style={{fontSize: '24px', fontWeight: 'bold', color: '#28a745', margin: '0'}}>{users.filter(u => !u.isAdmin).length}</p>
                   </div>
                   <div style={{padding: '20px', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6'}}>
                     <h4 style={{marginBottom: '10px', color: '#495057'}}>Admin Users</h4>
-                    <p style={{fontSize: '24px', fontWeight: 'bold', color: '#dc3545', margin: '0'}}>1</p>
+                    <p style={{fontSize: '24px', fontWeight: 'bold', color: '#dc3545', margin: '0'}}>{users.filter(u => u.isAdmin).length}</p>
                   </div>
                 </div>
                 
-                <div style={{marginBottom: '20px'}}>
-                  <h4 style={{color: '#333', marginBottom: '15px'}}>User Actions</h4>
-                  <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                {users.length > 0 ? (
+                  <div style={{overflowX: 'auto'}}>
+                    <table style={{width: '100%', borderCollapse: 'collapse'}}>
+                      <thead>
+                        <tr style={{backgroundColor: '#f5f5f5'}}>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>User ID</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Name</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Email</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Role</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {users.map((user, index) => (
+                          <tr key={index} style={{borderBottom: '1px solid #eee'}}>
+                            <td style={{padding: '12px'}}>#{user.id}</td>
+                            <td style={{padding: '12px', fontWeight: '500'}}>{user.firstName} {user.lastName}</td>
+                            <td style={{padding: '12px'}}>{user.email}</td>
+                            <td style={{padding: '12px'}}>
+                              <span style={{
+                                padding: '4px 8px', 
+                                borderRadius: '4px', 
+                                backgroundColor: user.isAdmin ? '#f8d7da' : '#d4edda',
+                                color: user.isAdmin ? '#721c24' : '#155724'
+                              }}>
+                                {user.isAdmin ? 'Admin' : 'User'}
+                              </span>
+                            </td>
+                            <td style={{padding: '12px'}}>
+                              <div style={{display: 'flex', gap: '5px'}}>
+                                <button 
+                                  style={{
+                                    padding: '4px 8px', 
+                                    border: 'none', 
+                                    borderRadius: '3px', 
+                                    backgroundColor: '#007bff', 
+                                    color: 'white', 
+                                    cursor: 'pointer',
+                                    fontSize: '12px'
+                                  }}
+                                  onClick={() => setEditingUser(user)}
+                                >
+                                  ✏️ Edit
+                                </button>
+                                <button 
+                                  style={{
+                                    padding: '4px 8px', 
+                                    border: 'none', 
+                                    borderRadius: '3px', 
+                                    backgroundColor: '#dc3545', 
+                                    color: 'white', 
+                                    cursor: 'pointer',
+                                    fontSize: '12px'
+                                  }}
+                                  onClick={async () => {
+                                    if (confirm(`Delete user "${user.firstName} ${user.lastName}"?\n\nThis action cannot be undone.`)) {
+                                      const result = await deleteUser(user.id);
+                                      if (result.success) {
+                                        alert('User deleted successfully');
+                                      } else {
+                                        alert('Error: ' + result.message);
+                                      }
+                                    }
+                                  }}
+                                >
+                                  🗑️ Delete
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div style={{padding: '40px', textAlign: 'center', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6'}}>
+                    <p style={{color: '#666', fontSize: '18px', marginBottom: '15px'}}>No users found</p>
+                    <p style={{color: '#6c757d', marginBottom: '20px'}}>Create your first user to get started with user management.</p>
                     <button 
                       className="btn" 
-                      style={{background: '#007bff', width: 'auto', padding: '8px 16px'}}
-                      onClick={() => alert('View all users functionality:\n\n• Complete user list with profile details\n• Search and filter users\n• Sort by registration date, activity\n• User status indicators\n• Quick actions menu')}
+                      style={{background: '#28a745', width: 'auto', padding: '12px 24px'}}
+                      onClick={() => setShowAddUserModal(true)}
                     >
-                      📋 View All Users
-                    </button>
-                    <button 
-                      className="btn" 
-                      style={{background: '#17a2b8', width: 'auto', padding: '8px 16px'}}
-                      onClick={() => alert('User search functionality:\n\n• Search by name, email, or ID\n• Advanced filter options\n• Activity date ranges\n• Role-based filtering\n• Export search results')}
-                    >
-                      🔍 Search Users
-                    </button>
-                    <button 
-                      className="btn" 
-                      style={{background: '#6c757d', width: 'auto', padding: '8px 16px'}}
-                      onClick={() => alert('User management tools:\n\n• Bulk user operations\n• Role assignment\n• Account activation/deactivation\n• Password reset\n• Email notifications')}
-                    >
-                      🛠️ User Tools
+                      ➕ Add Your First User
                     </button>
                   </div>
-                </div>
-                
-                <div style={{padding: '20px', background: '#e7f3ff', borderRadius: '6px', border: '1px solid #b3d9ff'}}>
-                  <h4 style={{color: '#0c5460', marginBottom: '10px'}}>💡 User Management Features</h4>
-                  <ul style={{color: '#6c757d', margin: '0', paddingLeft: '20px'}}>
-                    <li>Create and manage user accounts with role-based permissions</li>
-                    <li>View user activity, order history, and account statistics</li>
-                    <li>Send notifications and manage user communications</li>
-                    <li>Handle account verification and password reset requests</li>
-                    <li>Export user data and generate reports</li>
-                  </ul>
-                </div>
+                )}
               </div>
             );
           
@@ -622,7 +900,10 @@
                   <button 
                     className="btn" 
                     style={{background: '#28a745', width: 'auto', padding: '8px 16px'}}
-                    onClick={() => alert('Add new product functionality will be implemented. This includes:\n\n• Product information form\n• Image upload\n• Category selection\n• Pricing and inventory\n• SEO optimization\n• Product variants')}
+                    onClick={() => {
+                      fetchCategories();
+                      setShowAddProductModal(true);
+                    }}
                   >
                     ➕ Add New Product
                   </button>
@@ -697,7 +978,10 @@
                                     cursor: 'pointer',
                                     fontSize: '12px'
                                   }}
-                                  onClick={() => alert(`Edit product functionality for "${product.name}":\n\n• Update product details\n• Change pricing\n• Modify inventory\n• Update images\n• SEO settings`)}
+                                  onClick={() => {
+                                    fetchCategories();
+                                    setEditingProduct(product);
+                                  }}
                                 >
                                   ✏️ Edit
                                 </button>
@@ -711,7 +995,16 @@
                                     cursor: 'pointer',
                                     fontSize: '12px'
                                   }}
-                                  onClick={() => alert(`Delete product "${product.name}"?\n\nThis action cannot be undone. The product will be permanently removed from:\n• Product catalog\n• Search results\n• Customer wishlists\n• Related orders history`)}
+                                  onClick={async () => {
+                                    if (confirm(`Delete product "${product.name}"?\n\nThis action cannot be undone.`)) {
+                                      const result = await deleteProduct(product.id);
+                                      if (result.success) {
+                                        alert('Product deleted successfully');
+                                      } else {
+                                        alert('Error: ' + result.message);
+                                      }
+                                    }
+                                  }}
                                 >
                                   🗑️ Delete
                                 </button>
@@ -874,6 +1167,355 @@
         }
       };
 
+      // Modal Forms Component
+      const ModalsComponent = () => {
+        const [userFormData, setUserFormData] = useState({
+          email: '',
+          password: '',
+          firstName: '',
+          lastName: '',
+          isAdmin: false
+        });
+        
+        const [productFormData, setProductFormData] = useState({
+          name: '',
+          description: '',
+          price: '',
+          compareAtPrice: '',
+          categoryId: '',
+          imageUrl: '',
+          stockQuantity: '',
+          featured: false
+        });
+        
+        const handleUserSubmit = async (e) => {
+          e.preventDefault();
+          
+          const result = editingUser 
+            ? await updateUser(editingUser.id, userFormData)
+            : await createUser(userFormData);
+          
+          if (result.success) {
+            alert(result.message);
+            setShowAddUserModal(false);
+            setEditingUser(null);
+            setUserFormData({
+              email: '',
+              password: '',
+              firstName: '',
+              lastName: '',
+              isAdmin: false
+            });
+          } else {
+            alert('Error: ' + result.message);
+          }
+        };
+        
+        const handleProductSubmit = async (e) => {
+          e.preventDefault();
+          
+          const result = editingProduct 
+            ? await updateProduct(editingProduct.id, productFormData)
+            : await createProduct(productFormData);
+          
+          if (result.success) {
+            alert(result.message);
+            setShowAddProductModal(false);
+            setEditingProduct(null);
+            setProductFormData({
+              name: '',
+              description: '',
+              price: '',
+              compareAtPrice: '',
+              categoryId: '',
+              imageUrl: '',
+              stockQuantity: '',
+              featured: false
+            });
+          } else {
+            alert('Error: ' + result.message);
+          }
+        };
+        
+        // Set form data when editing
+        React.useEffect(() => {
+          if (editingUser) {
+            setUserFormData({
+              email: editingUser.email || '',
+              password: '',
+              firstName: editingUser.firstName || '',
+              lastName: editingUser.lastName || '',
+              isAdmin: editingUser.isAdmin || false
+            });
+            setShowAddUserModal(true);
+          }
+        }, [editingUser]);
+        
+        React.useEffect(() => {
+          if (editingProduct) {
+            setProductFormData({
+              name: editingProduct.name || '',
+              description: editingProduct.description || '',
+              price: editingProduct.price || '',
+              compareAtPrice: editingProduct.compareAtPrice || '',
+              categoryId: editingProduct.categoryId || '',
+              imageUrl: editingProduct.imageUrl || '',
+              stockQuantity: editingProduct.stockQuantity || '',
+              featured: editingProduct.featured || false
+            });
+            setShowAddProductModal(true);
+          }
+        }, [editingProduct]);
+        
+        return (
+          <>
+            {/* Add/Edit User Modal */}
+            {showAddUserModal && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1000
+              }}>
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '30px',
+                  borderRadius: '8px',
+                  width: '90%',
+                  maxWidth: '500px',
+                  maxHeight: '80vh',
+                  overflow: 'auto'
+                }}>
+                  <h3 style={{marginBottom: '20px', color: '#333'}}>
+                    {editingUser ? 'Edit User' : 'Add New User'}
+                  </h3>
+                  <form onSubmit={handleUserSubmit}>
+                    <div className="form-group">
+                      <label className="form-label">Email</label>
+                      <input
+                        type="email"
+                        className="form-input"
+                        value={userFormData.email}
+                        onChange={(e) => setUserFormData({...userFormData, email: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Password {editingUser && '(leave empty to keep current)'}</label>
+                      <input
+                        type="password"
+                        className="form-input"
+                        value={userFormData.password}
+                        onChange={(e) => setUserFormData({...userFormData, password: e.target.value})}
+                        required={!editingUser}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">First Name</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={userFormData.firstName}
+                        onChange={(e) => setUserFormData({...userFormData, firstName: e.target.value})}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Last Name</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={userFormData.lastName}
+                        onChange={(e) => setUserFormData({...userFormData, lastName: e.target.value})}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                        <input
+                          type="checkbox"
+                          checked={userFormData.isAdmin}
+                          onChange={(e) => setUserFormData({...userFormData, isAdmin: e.target.checked})}
+                        />
+                        Admin User
+                      </label>
+                    </div>
+                    <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
+                      <button type="submit" className="btn" style={{background: '#28a745'}}>
+                        {editingUser ? 'Update User' : 'Create User'}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn"
+                        style={{background: '#6c757d'}}
+                        onClick={() => {
+                          setShowAddUserModal(false);
+                          setEditingUser(null);
+                          setUserFormData({
+                            email: '',
+                            password: '',
+                            firstName: '',
+                            lastName: '',
+                            isAdmin: false
+                          });
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+            
+            {/* Add/Edit Product Modal */}
+            {showAddProductModal && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1000
+              }}>
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '30px',
+                  borderRadius: '8px',
+                  width: '90%',
+                  maxWidth: '600px',
+                  maxHeight: '80vh',
+                  overflow: 'auto'
+                }}>
+                  <h3 style={{marginBottom: '20px', color: '#333'}}>
+                    {editingProduct ? 'Edit Product' : 'Add New Product'}
+                  </h3>
+                  <form onSubmit={handleProductSubmit}>
+                    <div className="form-group">
+                      <label className="form-label">Product Name</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={productFormData.name}
+                        onChange={(e) => setProductFormData({...productFormData, name: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Description</label>
+                      <textarea
+                        className="form-input"
+                        value={productFormData.description}
+                        onChange={(e) => setProductFormData({...productFormData, description: e.target.value})}
+                        rows="3"
+                      />
+                    </div>
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px'}}>
+                      <div className="form-group">
+                        <label className="form-label">Price</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          className="form-input"
+                          value={productFormData.price}
+                          onChange={(e) => setProductFormData({...productFormData, price: e.target.value})}
+                          required
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Compare At Price</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          className="form-input"
+                          value={productFormData.compareAtPrice}
+                          onChange={(e) => setProductFormData({...productFormData, compareAtPrice: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Category</label>
+                      <select
+                        className="form-input"
+                        value={productFormData.categoryId}
+                        onChange={(e) => setProductFormData({...productFormData, categoryId: e.target.value})}
+                      >
+                        <option value="">Select Category</option>
+                        {categories.map(category => (
+                          <option key={category.id} value={category.id}>{category.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Image URL</label>
+                      <input
+                        type="url"
+                        className="form-input"
+                        value={productFormData.imageUrl}
+                        onChange={(e) => setProductFormData({...productFormData, imageUrl: e.target.value})}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Stock Quantity</label>
+                      <input
+                        type="number"
+                        className="form-input"
+                        value={productFormData.stockQuantity}
+                        onChange={(e) => setProductFormData({...productFormData, stockQuantity: e.target.value})}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                        <input
+                          type="checkbox"
+                          checked={productFormData.featured}
+                          onChange={(e) => setProductFormData({...productFormData, featured: e.target.checked})}
+                        />
+                        Featured Product
+                      </label>
+                    </div>
+                    <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
+                      <button type="submit" className="btn" style={{background: '#28a745'}}>
+                        {editingProduct ? 'Update Product' : 'Create Product'}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn"
+                        style={{background: '#6c757d'}}
+                        onClick={() => {
+                          setShowAddProductModal(false);
+                          setEditingProduct(null);
+                          setProductFormData({
+                            name: '',
+                            description: '',
+                            price: '',
+                            compareAtPrice: '',
+                            categoryId: '',
+                            imageUrl: '',
+                            stockQuantity: '',
+                            featured: false
+                          });
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </>
+        );
+      };
+
       return (
         <div className="container">
           <div className="admin-header">
@@ -890,6 +1532,7 @@
           </div>
           
           {renderContent()}
+          <ModalsComponent />
         </div>
       );
     }
