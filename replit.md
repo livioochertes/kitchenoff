@@ -39,6 +39,8 @@ Preferred communication style: Simple, everyday language.
 - COMPLETED: Translated invoice section: billing info, company details, download functionality
 - COMPLETED: Translated profile settings: email notifications, password change, configuration options
 - COMPLETED: All account page hardcoded text converted to translation keys for complete multilingual support
+- FIXED: Category filter crash when clicking "Shop now" then selecting a category - added null safety check to getCategoryName function
+- FIXED: Products page error "Cannot read properties of undefined (reading 'slug')" - improved error handling for category data
 
 ### July 14, 2025
 - COMPLETED: Comprehensive multilingual system with 11 language support (English, Spanish, French, German, Italian, Portuguese, Chinese, Japanese, Korean, Arabic, Romanian)

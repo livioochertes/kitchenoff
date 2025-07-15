@@ -79,7 +79,8 @@ export default function Products() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   
   // Function to get translated category name
-  const getCategoryName = (category: Category) => {
+  const getCategoryName = (category: Category | null | undefined) => {
+    if (!category || !category.slug) return category?.name || '';
     const key = `categories.${category.slug}` as keyof typeof t;
     return t(key) || category.name;
   };
