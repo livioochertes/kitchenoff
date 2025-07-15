@@ -72,6 +72,9 @@ function serveAdminApp(req: Request, res: Response, next: NextFunction) {
   try {
     // Try different possible paths for admin index.html
     const possiblePaths = [
+      path.resolve('./admin/index.html'),
+      path.join(__dirname, '..', 'admin', 'index.html'),
+      path.join(process.cwd(), 'admin', 'index.html'),
       path.resolve('./client/admin/index.html'),
       path.join(__dirname, '..', 'client', 'admin', 'index.html'),
       path.join(process.cwd(), 'client', 'admin', 'index.html'),

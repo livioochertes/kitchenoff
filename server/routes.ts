@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import Stripe from "stripe";
 import OpenAI from "openai";
+import path from "path";
 
 // Ultra-aggressive permanent in-memory cache
 const cache = new Map<string, any>();
@@ -111,6 +112,18 @@ const requireAdmin = async (req: AuthRequest, res: Response, next: NextFunction)
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Admin interface route
+  app.get("/admin", (req, res) => {
+    try {
+      const adminPath = path.resolve('./admin/index.html');
+      console.log('Serving admin interface from:', adminPath);
+      res.sendFile(adminPath);
+    } catch (error) {
+      console.error('Error serving admin interface:', error);
+      res.status(500).send('Admin interface not available');
+    }
+  });
+
   // Auth routes
   app.post("/api/auth/register", async (req, res) => {
     try {
