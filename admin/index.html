@@ -447,10 +447,34 @@
       const [showBulkModal, setShowBulkModal] = useState(false);
       const [bulkOperation, setBulkOperation] = useState('');
       const [bulkResults, setBulkResults] = useState(null);
+      const [searchTerm, setSearchTerm] = useState('');
+      const [statusFilter, setStatusFilter] = useState('all');
+      const [showSearchFilter, setShowSearchFilter] = useState(false);
+      const [filteredOrders, setFilteredOrders] = useState([]);
       
       useEffect(() => {
         fetchStats();
       }, []);
+      
+      // Filter orders based on search and status
+      useEffect(() => {
+        let filtered = orders;
+        
+        if (searchTerm) {
+          filtered = filtered.filter(order => 
+            order.id.toString().includes(searchTerm) ||
+            order.shippingAddress.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            order.shippingAddress.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            order.status.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+        }
+        
+        if (statusFilter !== 'all') {
+          filtered = filtered.filter(order => order.status === statusFilter);
+        }
+        
+        setFilteredOrders(filtered);
+      }, [orders, searchTerm, statusFilter]);
       
       const fetchStats = async () => {
         try {
@@ -719,6 +743,50 @@
         }
       };
 
+      const performBulkOperation = async (operation, orderIds, data = {}) => {
+        try {
+          let endpoint = '';
+          let payload = { orderIds, ...data };
+          
+          switch (operation) {
+            case 'status':
+              endpoint = '/admin/api/orders/bulk/status';
+              break;
+            case 'shipping':
+              endpoint = '/admin/api/orders/bulk/shipping-labels';
+              break;
+            case 'notifications':
+              endpoint = '/admin/api/orders/bulk/notifications';
+              break;
+            case 'refunds':
+              endpoint = '/admin/api/orders/bulk/refunds';
+              break;
+            default:
+              return { success: false, message: 'Invalid operation' };
+          }
+          
+          const response = await fetch(endpoint, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+          });
+          
+          const result = await response.json();
+          
+          if (response.ok) {
+            fetchOrders(); // Refresh order list
+            return { success: true, message: result.message, results: result.results };
+          } else {
+            return { success: false, message: result.message };
+          }
+        } catch (err) {
+          return { success: false, message: 'Network error' };
+        }
+      };
+
       const handleViewChange = (view) => {
         setActiveView(view);
         if (view === 'users' && users.length === 0) {
@@ -804,7 +872,7 @@
                     <button 
                       className="btn" 
                       style={{background: '#007bff', width: 'auto', padding: '8px 16px'}}
-                      onClick={() => alert('Order search and filter:\n\n• Search by order ID, customer\n• Filter by status, date range\n• Sort by amount, date\n• Payment method filter\n• Advanced search options')}
+                      onClick={() => setShowSearchFilter(!showSearchFilter)}
                     >
                       🔍 Search & Filter
                     </button>
@@ -839,6 +907,62 @@
                   </div>
                 </div>
                 
+                {showSearchFilter && (
+                  <div style={{background: '#f8f9fa', padding: '20px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #dee2e6'}}>
+                    <h4 style={{color: '#333', marginBottom: '15px'}}>🔍 Search & Filter Orders</h4>
+                    <div style={{display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'center'}}>
+                      <div style={{flex: '1', minWidth: '200px'}}>
+                        <input
+                          type="text"
+                          placeholder="Search by order ID, customer name, or city..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          style={{
+                            width: '100%',
+                            padding: '10px',
+                            borderRadius: '4px',
+                            border: '1px solid #ddd',
+                            fontSize: '14px'
+                          }}
+                        />
+                      </div>
+                      <div style={{minWidth: '150px'}}>
+                        <select
+                          value={statusFilter}
+                          onChange={(e) => setStatusFilter(e.target.value)}
+                          style={{
+                            width: '100%',
+                            padding: '10px',
+                            borderRadius: '4px',
+                            border: '1px solid #ddd',
+                            fontSize: '14px'
+                          }}
+                        >
+                          <option value="all">All Status</option>
+                          <option value="pending">Pending</option>
+                          <option value="processing">Processing</option>
+                          <option value="shipped">Shipped</option>
+                          <option value="delivered">Delivered</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
+                      </div>
+                      <button
+                        className="btn"
+                        style={{background: '#6c757d', width: 'auto', padding: '8px 16px'}}
+                        onClick={() => {
+                          setSearchTerm('');
+                          setStatusFilter('all');
+                        }}
+                      >
+                        Clear
+                      </button>
+                    </div>
+                    <div style={{marginTop: '10px', color: '#666', fontSize: '14px'}}>
+                      Showing {filteredOrders.length} of {orders.length} orders
+                    </div>
+                  </div>
+                )}
+                
                 {orders.length > 0 ? (
                   <div style={{overflowX: 'auto'}}>
                     <table style={{width: '100%', borderCollapse: 'collapse'}}>
@@ -849,12 +973,12 @@
                               type="checkbox" 
                               onChange={(e) => {
                                 if (e.target.checked) {
-                                  setSelectedOrders(orders.map(order => order.id));
+                                  setSelectedOrders(filteredOrders.map(order => order.id));
                                 } else {
                                   setSelectedOrders([]);
                                 }
                               }}
-                              checked={selectedOrders.length === orders.length && orders.length > 0}
+                              checked={selectedOrders.length === filteredOrders.length && filteredOrders.length > 0}
                               style={{marginRight: '8px'}}
                             />
                             Select
@@ -868,7 +992,7 @@
                         </tr>
                       </thead>
                       <tbody>
-                        {orders.slice(0, 10).map((order, index) => (
+                        {filteredOrders.slice(0, 10).map((order, index) => (
                           <tr key={index} style={{borderBottom: '1px solid #eee'}}>
                             <td style={{padding: '12px'}}>
                               <input 
@@ -1356,6 +1480,151 @@
         }
       };
 
+      // Bulk Operations Components
+      const BulkStatusComponent = () => {
+        const [newStatus, setNewStatus] = useState('');
+        const [isProcessing, setIsProcessing] = useState(false);
+        
+        const handleStatusUpdate = async () => {
+          if (!newStatus) {
+            alert('Please select a status');
+            return;
+          }
+          
+          setIsProcessing(true);
+          const result = await performBulkOperation('status', selectedOrders, { status: newStatus });
+          
+          if (result.success) {
+            alert(`Status updated successfully for ${selectedOrders.length} orders`);
+            setSelectedOrders([]);
+            setShowBulkModal(false);
+            setBulkOperation('');
+          } else {
+            alert('Error: ' + result.message);
+          }
+          setIsProcessing(false);
+        };
+        
+        return (
+          <div>
+            <div className="form-group">
+              <label className="form-label">Select New Status</label>
+              <select
+                className="form-input"
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value)}
+              >
+                <option value="">Choose Status...</option>
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+            <button
+              className="btn"
+              style={{background: '#28a745'}}
+              onClick={handleStatusUpdate}
+              disabled={isProcessing}
+            >
+              {isProcessing ? 'Updating...' : 'Update Status'}
+            </button>
+          </div>
+        );
+      };
+      
+      const BulkToolsComponent = () => {
+        const [selectedTool, setSelectedTool] = useState('');
+        const [isProcessing, setIsProcessing] = useState(false);
+        const [notificationMessage, setNotificationMessage] = useState('');
+        
+        const handleToolOperation = async (operation) => {
+          setIsProcessing(true);
+          let result;
+          
+          switch (operation) {
+            case 'shipping':
+              result = await performBulkOperation('shipping', selectedOrders);
+              break;
+            case 'notifications':
+              result = await performBulkOperation('notifications', selectedOrders, { message: notificationMessage });
+              break;
+            case 'refunds':
+              result = await performBulkOperation('refunds', selectedOrders);
+              break;
+            default:
+              result = { success: false, message: 'Invalid operation' };
+          }
+          
+          if (result.success) {
+            alert(`${operation} operation completed successfully for ${selectedOrders.length} orders`);
+            setSelectedOrders([]);
+            setShowBulkModal(false);
+            setBulkOperation('');
+          } else {
+            alert('Error: ' + result.message);
+          }
+          setIsProcessing(false);
+        };
+        
+        return (
+          <div>
+            <div style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
+              <button
+                className="btn"
+                style={{background: '#17a2b8'}}
+                onClick={() => handleToolOperation('shipping')}
+                disabled={isProcessing}
+              >
+                📦 Generate Shipping Labels
+              </button>
+              
+              <div>
+                <div className="form-group">
+                  <label className="form-label">Custom Notification Message</label>
+                  <textarea
+                    className="form-input"
+                    value={notificationMessage}
+                    onChange={(e) => setNotificationMessage(e.target.value)}
+                    placeholder="Enter custom notification message..."
+                    rows="3"
+                  />
+                </div>
+                <button
+                  className="btn"
+                  style={{background: '#ffc107'}}
+                  onClick={() => handleToolOperation('notifications')}
+                  disabled={isProcessing}
+                >
+                  📧 Send Notifications
+                </button>
+              </div>
+              
+              <button
+                className="btn"
+                style={{background: '#dc3545'}}
+                onClick={() => {
+                  if (confirm('Are you sure you want to process refunds for the selected orders? This action cannot be undone.')) {
+                    handleToolOperation('refunds');
+                  }
+                }}
+                disabled={isProcessing}
+              >
+                💸 Process Refunds
+              </button>
+            </div>
+            
+            {isProcessing && (
+              <div style={{textAlign: 'center', marginTop: '20px'}}>
+                <div className="loading"></div>
+                <p>Processing operation...</p>
+              </div>
+            )}
+          </div>
+        );
+      };
+      
       // Modal Forms Component
       const ModalsComponent = () => {
         const [userFormData, setUserFormData] = useState({
@@ -1698,6 +1967,62 @@
                       </button>
                     </div>
                   </form>
+                </div>
+              </div>
+            )}
+            
+            {/* Bulk Operations Modal */}
+            {showBulkModal && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1000
+              }}>
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '30px',
+                  borderRadius: '8px',
+                  width: '90%',
+                  maxWidth: '600px',
+                  maxHeight: '80vh',
+                  overflow: 'auto'
+                }}>
+                  <h3 style={{marginBottom: '20px', color: '#333'}}>
+                    {bulkOperation === 'status' ? '🔄 Bulk Status Update' : '🛠️ Bulk Order Tools'}
+                  </h3>
+                  <p style={{marginBottom: '20px', color: '#666'}}>
+                    Selected {selectedOrders.length} orders for bulk operation.
+                  </p>
+                  
+                  {bulkOperation === 'status' && (
+                    <BulkStatusComponent />
+                  )}
+                  
+                  {bulkOperation === 'tools' && (
+                    <BulkToolsComponent />
+                  )}
+                  
+                  <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
+                    <button
+                      type="button"
+                      className="btn"
+                      style={{background: '#6c757d'}}
+                      onClick={() => {
+                        setShowBulkModal(false);
+                        setBulkOperation('');
+                        setBulkResults(null);
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
