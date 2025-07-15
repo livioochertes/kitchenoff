@@ -41,6 +41,9 @@ Preferred communication style: Simple, everyday language.
 - COMPLETED: All account page hardcoded text converted to translation keys for complete multilingual support
 - FIXED: Category filter crash when clicking "Shop now" then selecting a category - added null safety check to getCategoryName function
 - FIXED: Products page error "Cannot read properties of undefined (reading 'slug')" - improved error handling for category data
+- FIXED: AI Assistant scrolling issue - page was auto-scrolling to bottom preventing users from scrolling up to read previous messages
+- FIXED: AI Assistant scroll behavior - now only auto-scrolls for new messages, not when loading existing chat history from localStorage
+- IMPROVED: AI Assistant chat interface layout with better flex structure and overflow handling for proper scrolling
 
 ### July 14, 2025
 - COMPLETED: Comprehensive multilingual system with 11 language support (English, Spanish, French, German, Italian, Portuguese, Chinese, Japanese, Korean, Arabic, Romanian)

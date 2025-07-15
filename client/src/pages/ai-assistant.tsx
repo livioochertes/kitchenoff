@@ -65,7 +65,9 @@ export default function AIAssistant() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [capabilities, setCapabilities] = useState<string[]>([]);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { t } = useTranslation();
   const { language } = useLanguage();
@@ -74,9 +76,17 @@ export default function AIAssistant() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Only auto-scroll for new messages (not when loading from localStorage)
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (messages.length > 0 && shouldAutoScroll) {
+      const lastMessage = messages[messages.length - 1];
+      const isRecentMessage = Date.now() - lastMessage.timestamp.getTime() < 1000;
+      
+      if (isRecentMessage) {
+        setTimeout(() => scrollToBottom(), 100);
+      }
+    }
+  }, [messages, shouldAutoScroll]);
 
   // Load saved session data on component mount
   useEffect(() => {
@@ -107,6 +117,10 @@ export default function AIAssistant() {
           timestamp: new Date(msg.timestamp)
         }));
         setMessages(messagesWithDates);
+        // Disable auto-scroll when loading existing messages
+        setShouldAutoScroll(false);
+        // Re-enable after a short delay
+        setTimeout(() => setShouldAutoScroll(true), 1000);
       } catch (e) {
         console.error('Failed to parse saved messages:', e);
         // Set default welcome message if parsing fails
