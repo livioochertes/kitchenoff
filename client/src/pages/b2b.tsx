@@ -3,6 +3,7 @@ import { Card, CardContent } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Link } from "wouter";
+import ContactModal from "../components/contact-modal";
 import { 
   Building2, 
   Users, 
@@ -226,11 +227,11 @@ export default function B2B() {
               {t('b2b.cta.description')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/ai-assistant">
+              <ContactModal>
                 <Button className="bg-white text-secondary hover:bg-slate-100 px-8 py-3 text-lg">
                   {t('b2b.cta.getQuote')}
                 </Button>
-              </Link>
+              </ContactModal>
               <Link href="/products">
                 <Button 
                   variant="outline" 

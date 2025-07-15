@@ -189,11 +189,11 @@ export default function Home() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Link href="/b2b">
+                  <ContactModal>
                     <Button className="kitchen-pro-secondary">
                       {t('home.business.getQuote')}
                     </Button>
-                  </Link>
+                  </ContactModal>
                   <Link href="/ai-assistant">
                     <Button variant="outline" className="border-secondary text-secondary hover:bg-secondary hover:text-white">
                       {t('home.business.contactSales')}
