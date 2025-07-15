@@ -390,7 +390,7 @@ export default function Home() {
 
           <div className="border-t border-slate-700 mt-8 pt-8 text-center">
             <p className="text-slate-300">
-              &copy; 2024 KitchenPro Supply. All rights reserved. | 
+              &copy; 2025 KitchenOff. All rights reserved. | 
               <a href="#" className="hover:text-white ml-2">Privacy Policy</a> | 
               <Link href="/terms" className="hover:text-white ml-2">Terms & Conditions</Link>
             </p>
