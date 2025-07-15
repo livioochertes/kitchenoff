@@ -739,9 +739,11 @@
         } catch (err) {
           console.error('Logout error:', err);
         } finally {
+          // Clear all admin session data
           localStorage.removeItem('adminToken');
           localStorage.removeItem('adminUser');
-          onLogout();
+          // Force page reload to ensure clean state
+          window.location.reload();
         }
       };
       
@@ -1744,6 +1746,11 @@
       };
       
       const handleLogout = () => {
+        // Clear localStorage
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        
+        // Clear state
         setToken(null);
         setAdmin(null);
         setIsAuthenticated(false);
