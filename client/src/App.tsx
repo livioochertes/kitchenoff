@@ -17,6 +17,7 @@ import AIAssistant from "@/pages/ai-assistant";
 import About from "@/pages/about";
 import B2B from "@/pages/b2b";
 import Terms from "@/pages/terms";
+import Privacy from "@/pages/privacy";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -34,6 +35,7 @@ function Router() {
       <Route path="/about" component={About} />
       <Route path="/b2b" component={B2B} />
       <Route path="/terms" component={Terms} />
+      <Route path="/privacy" component={Privacy} />
       <Route component={NotFound} />
     </Switch>
   );

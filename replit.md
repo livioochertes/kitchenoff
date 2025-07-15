@@ -67,6 +67,15 @@ Preferred communication style: Simple, everyday language.
 - COMPLETED: Updated all email addresses from "help@..." to "info@..." in Terms and Conditions translations
 - COMPLETED: Updated company information section in Terms page to display "NAMARTE" instead of "NAMARTE CCL"
 - COMPLETED: Fixed Terms and Conditions page to use consistent company branding (NAMARTE) and email addresses (info@kitchen-off.com)
+- COMPLETED: Created comprehensive Privacy Policy page based on user-provided GDPR-compliant document
+- COMPLETED: Added Privacy Policy route to App.tsx and linked from footer
+- COMPLETED: Updated Privacy Policy content to use consistent "NAMARTE" branding and "info@kitchen-off.com" email
+- COMPLETED: Structured Privacy Policy with 8 sections including data processing, legal grounds, retention, and user rights
+- COMPLETED: Added company contact information and GDPR compliance notice to Privacy Policy
+- COMPLETED: Privacy Policy now accessible at /privacy with proper navigation and footer links
+- COMPLETED: Removed "Terms & Conditions" from Quick Links section in footer for cleaner navigation
+- COMPLETED: Renamed "Terms of Service" to "Terms & Conditions" in footer copyright section
+- COMPLETED: Updated footer copyright to "© 2025 KitchenOff. All rights reserved."
 
 ### July 14, 2025
 - COMPLETED: Comprehensive multilingual system with 11 language support (English, Spanish, French, German, Italian, Portuguese, Chinese, Japanese, Korean, Arabic, Romanian)
