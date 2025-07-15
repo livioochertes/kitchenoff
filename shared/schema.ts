@@ -11,6 +11,10 @@ export const users = pgTable("users", {
   firstName: varchar("first_name", { length: 100 }),
   lastName: varchar("last_name", { length: 100 }),
   isAdmin: boolean("is_admin").default(false),
+  // 2FA fields
+  twoFactorEnabled: boolean("two_factor_enabled").default(false),
+  twoFactorSecret: text("two_factor_secret"),
+  twoFactorBackupCodes: jsonb("two_factor_backup_codes").default([]),
   // Invoice details fields
   companyName: varchar("company_name", { length: 255 }),
   vatNumber: varchar("vat_number", { length: 50 }),

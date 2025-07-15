@@ -468,7 +468,7 @@ export async function seedDatabase() {
     
     await db.insert(users).values([
       {
-        email: "admin@kitchenpro.com",
+        email: "admin@kitchen-off.com",
         password: adminPassword,
         firstName: "Admin",
         lastName: "User",

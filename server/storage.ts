@@ -66,6 +66,12 @@ export interface IStorage {
   // Review operations
   getProductReviews(productId: number): Promise<Review[]>;
   createReview(review: InsertReview): Promise<Review>;
+
+  // Admin stats operations
+  getTotalUsers(): Promise<number>;
+  getTotalOrders(): Promise<number>;
+  getTotalProducts(): Promise<number>;
+  getRecentOrders(limit: number): Promise<OrderWithItems[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -462,6 +468,87 @@ export class DatabaseStorage implements IStorage {
       .where(eq(products.id, review.productId!));
     
     return newReview;
+  }
+
+  // Admin stats operations
+  async getTotalUsers(): Promise<number> {
+    const [result] = await db.select({ count: sql<number>`count(*)` }).from(users);
+    return result.count;
+  }
+
+  async getTotalOrders(): Promise<number> {
+    const [result] = await db.select({ count: sql<number>`count(*)` }).from(orders);
+    return result.count;
+  }
+
+  async getTotalProducts(): Promise<number> {
+    const [result] = await db.select({ count: sql<number>`count(*)` }).from(products);
+    return result.count;
+  }
+
+  async getRecentOrders(limit: number): Promise<OrderWithItems[]> {
+    const ordersWithItems = await db.select({
+      id: orders.id,
+      userId: orders.userId,
+      status: orders.status,
+      totalAmount: orders.totalAmount,
+      shippingAddress: orders.shippingAddress,
+      billingAddress: orders.billingAddress,
+      paymentMethod: orders.paymentMethod,
+      paymentStatus: orders.paymentStatus,
+      notes: orders.notes,
+      createdAt: orders.createdAt,
+      updatedAt: orders.updatedAt,
+    }).from(orders)
+      .orderBy(desc(orders.createdAt))
+      .limit(limit);
+
+    const result: OrderWithItems[] = [];
+    for (const order of ordersWithItems) {
+      const items = await db.select({
+        id: orderItems.id,
+        orderId: orderItems.orderId,
+        productId: orderItems.productId,
+        quantity: orderItems.quantity,
+        price: orderItems.price,
+        totalPrice: orderItems.totalPrice,
+        product: {
+          id: products.id,
+          name: products.name,
+          slug: products.slug,
+          description: products.description,
+          price: products.price,
+          compareAtPrice: products.compareAtPrice,
+          categoryId: products.categoryId,
+          imageUrl: products.imageUrl,
+          images: products.images,
+          inStock: products.inStock,
+          stockQuantity: products.stockQuantity,
+          featured: products.featured,
+          rating: products.rating,
+          reviewCount: products.reviewCount,
+          createdAt: products.createdAt,
+          updatedAt: products.updatedAt,
+        }
+      }).from(orderItems)
+        .innerJoin(products, eq(orderItems.productId, products.id))
+        .where(eq(orderItems.orderId, order.id));
+
+      result.push({
+        ...order,
+        items: items.map(item => ({
+          id: item.id,
+          orderId: item.orderId,
+          productId: item.productId,
+          quantity: item.quantity,
+          price: item.price,
+          totalPrice: item.totalPrice,
+          product: item.product
+        }))
+      });
+    }
+
+    return result;
   }
 }
 

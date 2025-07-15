@@ -1,6 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
 import compression from "compression";
 import { registerRoutes } from "./routes";
+import { registerAdminRoutes } from "./admin-routes";
+import { subdomainMiddleware, adminSubdomainHandler } from "./subdomain-middleware";
 import { setupVite, serveStatic, log } from "./vite";
 import { seedDatabase } from "./sample-data";
 
@@ -26,6 +28,12 @@ app.use(compression({
 // Optimized body parsing with smaller limits for speed
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+
+// Subdomain detection middleware
+app.use(subdomainMiddleware);
+
+// Admin subdomain handler (must come before main routes)
+app.use(adminSubdomainHandler);
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -59,6 +67,9 @@ app.use((req, res, next) => {
 
 (async () => {
   const server = await registerRoutes(app);
+  
+  // Register admin routes
+  await registerAdminRoutes(app);
   
   // Seed database with sample data
   await seedDatabase();
