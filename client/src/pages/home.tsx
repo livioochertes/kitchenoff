@@ -393,7 +393,7 @@ export default function Home() {
             <p className="text-slate-300">
               &copy; 2024 KitchenPro Supply. All rights reserved. | 
               <a href="#" className="hover:text-white ml-2">Privacy Policy</a> | 
-              <a href="#" className="hover:text-white ml-2">Terms of Service</a>
+              <Link href="/terms" className="hover:text-white ml-2">Terms of Service</Link>
             </p>
           </div>
         </div>
