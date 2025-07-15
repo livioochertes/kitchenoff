@@ -285,7 +285,7 @@ export default function Account() {
                         disabled={updateProfileMutation.isPending}
                         className="w-full md:w-auto"
                       >
-                        {updateProfileMutation.isPending ? "Updating..." : t('account.save')}
+                        {updateProfileMutation.isPending ? t('common.loading') : t('account.save')}
                       </Button>
                     </form>
                   </Form>
@@ -296,27 +296,27 @@ export default function Account() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Settings className="h-5 w-5" />
-                    Account Settings
+                    {t('account.accountSettings')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 border rounded-lg">
                       <div>
-                        <h3 className="font-medium">Email Notifications</h3>
-                        <p className="text-sm text-gray-600">Receive updates about your orders</p>
+                        <h3 className="font-medium">{t('account.emailNotifications')}</h3>
+                        <p className="text-sm text-gray-600">{t('account.emailNotificationsDesc')}</p>
                       </div>
                       <Button variant="outline" size="sm">
-                        Configure
+                        {t('account.configure')}
                       </Button>
                     </div>
                     <div className="flex items-center justify-between p-4 border rounded-lg">
                       <div>
-                        <h3 className="font-medium">Password</h3>
-                        <p className="text-sm text-gray-600">Change your account password</p>
+                        <h3 className="font-medium">{t('account.password')}</h3>
+                        <p className="text-sm text-gray-600">{t('account.passwordDesc')}</p>
                       </div>
                       <Button variant="outline" size="sm">
-                        Change
+                        {t('account.change')}
                       </Button>
                     </div>
                   </div>
@@ -336,17 +336,17 @@ export default function Account() {
                   {ordersLoading ? (
                     <div className="text-center py-8">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                      <p className="text-gray-600">Loading orders...</p>
+                      <p className="text-gray-600">{t('account.loadingOrders')}</p>
                     </div>
                   ) : orders.length === 0 ? (
                     <div className="text-center py-8">
                       <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600">No orders yet</p>
+                      <p className="text-gray-600">{t('account.noOrders')}</p>
                       <Button 
                         onClick={() => navigate("/products")}
                         className="mt-4"
                       >
-                        Start Shopping
+                        {t('account.startShopping')}
                       </Button>
                     </div>
                   ) : (
@@ -356,7 +356,7 @@ export default function Account() {
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-4">
                               <div>
-                                <h3 className="font-medium">Order #{order.id}</h3>
+                                <h3 className="font-medium">{t('account.orderNumber')}{order.id}</h3>
                                 <p className="text-sm text-gray-600">
                                   {format(new Date(order.createdAt), "PPP")}
                                 </p>
@@ -368,7 +368,7 @@ export default function Account() {
                             <div className="text-right">
                               <p className="font-medium">${order.total}</p>
                               <p className="text-sm text-gray-600">
-                                {order.items?.length || 0} items
+                                {order.items?.length || 0} {t('account.items')}
                               </p>
                             </div>
                           </div>
@@ -376,7 +376,7 @@ export default function Account() {
                           <div className="flex items-center gap-2">
                             <Button variant="outline" size="sm">
                               <Eye className="h-4 w-4 mr-2" />
-                              View Details
+                              {t('account.viewDetails')}
                             </Button>
                             <Button 
                               variant="outline" 
@@ -384,11 +384,11 @@ export default function Account() {
                               onClick={() => downloadInvoice(order.id)}
                             >
                               <Download className="h-4 w-4 mr-2" />
-                              Invoice
+                              {t('account.invoice')}
                             </Button>
                             {order.status.toLowerCase() === "delivered" && (
                               <Button variant="outline" size="sm">
-                                Reorder
+                                {t('account.reorder')}
                               </Button>
                             )}
                           </div>
@@ -405,7 +405,7 @@ export default function Account() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <CreditCard className="h-5 w-5" />
-                    Invoices & Billing
+                    {t('account.invoicesBilling')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -413,7 +413,7 @@ export default function Account() {
                     {orders.filter((order: any) => order.status === "delivered").length === 0 ? (
                       <div className="text-center py-8">
                         <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-600">No invoices available</p>
+                        <p className="text-gray-600">{t('account.noInvoices')}</p>
                       </div>
                     ) : (
                       orders
@@ -421,7 +421,7 @@ export default function Account() {
                         .map((order: any) => (
                           <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
                             <div>
-                              <h3 className="font-medium">Invoice #{order.id}</h3>
+                              <h3 className="font-medium">{t('account.invoiceNumber')}{order.id}</h3>
                               <p className="text-sm text-gray-600">
                                 {format(new Date(order.createdAt), "PPP")}
                               </p>
@@ -434,7 +434,7 @@ export default function Account() {
                                 onClick={() => downloadInvoice(order.id)}
                               >
                                 <Download className="h-4 w-4 mr-2" />
-                                Download
+                                {t('account.download')}
                               </Button>
                             </div>
                           </div>
@@ -450,7 +450,7 @@ export default function Account() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Settings className="h-5 w-5" />
-                    Invoice Details & Company Information
+                    {t('account.invoiceDetails')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -459,14 +459,14 @@ export default function Account() {
                       
                       {/* Company Information Section */}
                       <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-900">Company Information</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">{t('account.companyInfo')}</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <FormField
                             control={invoiceForm.control}
                             name="companyName"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Company Name</FormLabel>
+                                <FormLabel>{t('account.companyName')}</FormLabel>
                                 <FormControl>
                                   <Input placeholder="Your Company Ltd." {...field} />
                                 </FormControl>
