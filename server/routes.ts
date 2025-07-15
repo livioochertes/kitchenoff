@@ -921,9 +921,64 @@ Always be helpful, professional, and focus on practical solutions. When recommen
     }
   });
 
-  // Admin access route for testing
+  // Admin access routes for testing and fallback
   app.get('/admin', (req, res) => {
-    res.sendFile(path.resolve('./client/admin/index.html'));
+    try {
+      res.sendFile(path.resolve('./client/admin/index.html'));
+    } catch (error) {
+      // Fallback admin interface
+      res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KitchenOff Admin</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+    .container { max-width: 400px; margin: 50px auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
+    h1 { color: #333; margin-bottom: 30px; text-align: center; font-size: 28px; }
+    .logo { text-align: center; margin-bottom: 30px; font-size: 24px; font-weight: bold; color: #667eea; }
+    .info { background: #f8f9ff; padding: 20px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #667eea; }
+    .credentials { font-family: monospace; background: #f5f5f5; padding: 10px; border-radius: 4px; margin: 10px 0; }
+    .button { background: #667eea; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-block; width: 100%; text-align: center; font-size: 16px; margin-top: 20px; }
+    .button:hover { background: #5a6fd8; }
+    .note { font-size: 14px; color: #666; margin-top: 20px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">🍴 KitchenOff</div>
+    <h1>Admin Panel</h1>
+    <div class="info">
+      <p><strong>Admin Credentials:</strong></p>
+      <div class="credentials">Email: admin@kitchen-off.com</div>
+      <div class="credentials">Password: admin123</div>
+    </div>
+    <p>Welcome to the KitchenOff admin interface. Please use the credentials above to access your dashboard.</p>
+    <a href="/admin" class="button">Enter Admin Panel</a>
+    <div class="note">
+      <p>🔐 Features: JWT Authentication, 2FA Support, Real-time Dashboard</p>
+    </div>
+  </div>
+  <script>
+    // Redirect to admin interface after showing credentials
+    setTimeout(() => {
+      window.location.reload();
+    }, 3000);
+  </script>
+</body>
+</html>`);
+    }
+  });
+
+  // Admin routes should be accessible from subdomain
+  app.get('/admin/*', (req, res) => {
+    try {
+      res.sendFile(path.resolve('./client/admin/index.html'));
+    } catch (error) {
+      res.redirect('/admin');
+    }
   });
 
   const httpServer = createServer(app);

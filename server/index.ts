@@ -35,6 +35,17 @@ app.use(subdomainMiddleware);
 // Admin subdomain handler (must come before main routes)
 app.use(adminSubdomainHandler);
 
+// Catch-all for admin subdomain when subdomain detection fails
+app.use((req, res, next) => {
+  const host = req.get('host');
+  if (host && host.startsWith('admin.')) {
+    // Force admin subdomain handling
+    (req as any).subdomain = 'admin';
+    return adminSubdomainHandler(req, res, next);
+  }
+  next();
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
