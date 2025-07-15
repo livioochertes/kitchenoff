@@ -9,12 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "@/hooks/useTranslation";
 import Header from "@/components/header";
 import ProductCard from "@/components/product-card";
 import type { Category, ProductWithCategory } from "@shared/schema";
 
 export default function Products() {
   const [location, navigate] = useLocation();
+  const { t } = useTranslation();
   
   // Parse URL parameters and track location changes to force re-render
   const [searchQuery, setSearchQuery] = useState("");
@@ -75,6 +77,12 @@ export default function Products() {
   
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  
+  // Function to get translated category name
+  const getCategoryName = (category: Category) => {
+    const key = `categories.${category.slug}` as keyof typeof t;
+    return t(key) || category.name;
+  };
   
   // Remove local state - use React Query caching directly
   
@@ -163,7 +171,7 @@ export default function Products() {
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold mb-4 flex items-center">
                   <Filter className="h-5 w-5 mr-2" />
-                  Filters
+                  {t('common.filters')}
                 </h3>
 
                 {/* Search */}
@@ -172,7 +180,7 @@ export default function Products() {
                     <Input
                       name="search"
                       type="text"
-                      placeholder="Search products..."
+                      placeholder={t('search.placeholder')}
                       defaultValue={searchQuery}
                       className="pl-10"
                     />
@@ -182,7 +190,7 @@ export default function Products() {
 
                 {/* Categories */}
                 <div className="mb-6">
-                  <h4 className="font-medium mb-3">Categories</h4>
+                  <h4 className="font-medium mb-3">{t('nav.categories')}</h4>
                   <div className="space-y-2">
                     <Button
                       variant={selectedCategory === "" ? "default" : "ghost"}
@@ -202,7 +210,7 @@ export default function Products() {
                         window.dispatchEvent(new CustomEvent('urlchange'));
                       }}
                     >
-                      All Products
+                      {t('nav.products')}
                     </Button>
                     {categories.map((category) => (
                       <Button
@@ -225,7 +233,7 @@ export default function Products() {
                           window.dispatchEvent(new CustomEvent('urlchange'));
                         }}
                       >
-                        {category.name}
+                        {getCategoryName(category)}
                         {selectedCategory === category.slug && isLoading && (
                           <div className="ml-2 h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
                         )}
@@ -236,17 +244,17 @@ export default function Products() {
 
                 {/* Sort */}
                 <div>
-                  <h4 className="font-medium mb-3">Sort By</h4>
+                  <h4 className="font-medium mb-3">{t('common.sortBy')}</h4>
                   <Select value={sortBy} onValueChange={setSortBy}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="newest">Newest First</SelectItem>
-                      <SelectItem value="price-asc">Price: Low to High</SelectItem>
-                      <SelectItem value="price-desc">Price: High to Low</SelectItem>
-                      <SelectItem value="name">Name A-Z</SelectItem>
-                      <SelectItem value="rating">Highest Rated</SelectItem>
+                      <SelectItem value="newest">{t('products.sortNewest')}</SelectItem>
+                      <SelectItem value="price-asc">{t('products.sortPriceAsc')}</SelectItem>
+                      <SelectItem value="price-desc">{t('products.sortPriceDesc')}</SelectItem>
+                      <SelectItem value="name">{t('products.sortName')}</SelectItem>
+                      <SelectItem value="rating">{t('products.sortRating')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -261,17 +269,17 @@ export default function Products() {
               <div className="flex items-center gap-4">
                 <h1 className="text-2xl font-bold text-primary flex items-center">
                   {selectedCategory
-                    ? categories.find(c => c.slug === selectedCategory)?.name || "Products"
+                    ? getCategoryName(categories.find(c => c.slug === selectedCategory)) || t('nav.products')
                     : searchQuery
-                    ? `Search Results for "${searchQuery}"`
-                    : "All Products"
+                    ? `${t('search.results')} "${searchQuery}"`
+                    : t('nav.products')
                   }
                   {(isLoading || isFetching) && (
                     <div className="ml-3 h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-primary"></div>
                   )}
                 </h1>
                 <Badge variant="secondary">
-                  {products.length} products
+                  {products.length} {t('nav.products').toLowerCase()}
                 </Badge>
               </div>
 
@@ -312,9 +320,9 @@ export default function Products() {
             {/* No Results */}
             {!isLoading && !isFetching && products.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-muted-foreground mb-4">No products found matching your criteria.</p>
+                <p className="text-muted-foreground mb-4">{t('products.noProducts')}</p>
                 <Button onClick={() => { window.location.href = "/products"; }}>
-                  Clear Filters
+                  {t('products.clearFilters')}
                 </Button>
               </div>
             )}

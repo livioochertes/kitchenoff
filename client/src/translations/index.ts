@@ -33,6 +33,12 @@ export interface TranslationKeys {
   'products.writeReview': string;
   'products.loadMore': string;
   'products.noProducts': string;
+  'products.clearFilters': string;
+  'products.sortNewest': string;
+  'products.sortPriceAsc': string;
+  'products.sortPriceDesc': string;
+  'products.sortName': string;
+  'products.sortRating': string;
   
   // Cart
   'cart.title': string;
@@ -138,6 +144,8 @@ export interface TranslationKeys {
   'common.date': string;
   'common.status': string;
   'common.actions': string;
+  'common.filters': string;
+  'common.sortBy': string;
   
   // Messages
   'messages.addedToCart': string;
@@ -242,6 +250,12 @@ const translations: Record<Language, TranslationKeys> = {
     'products.writeReview': 'Write a Review',
     'products.loadMore': 'Load More',
     'products.noProducts': 'No products found.',
+    'products.clearFilters': 'Clear Filters',
+    'products.sortNewest': 'Newest First',
+    'products.sortPriceAsc': 'Price: Low to High',
+    'products.sortPriceDesc': 'Price: High to Low',
+    'products.sortName': 'Name A-Z',
+    'products.sortRating': 'Highest Rated',
     
     // Cart
     'cart.title': 'Shopping Cart',
@@ -380,6 +394,8 @@ const translations: Record<Language, TranslationKeys> = {
     'common.date': 'Date',
     'common.status': 'Status',
     'common.actions': 'Actions',
+    'common.filters': 'Filters',
+    'common.sortBy': 'Sort By',
     
     // Messages
     'messages.addedToCart': 'Added to cart',
@@ -483,6 +499,12 @@ const translations: Record<Language, TranslationKeys> = {
     'products.writeReview': 'Escribir una Reseña',
     'products.loadMore': 'Cargar Más',
     'products.noProducts': 'No se encontraron productos.',
+    'products.clearFilters': 'Limpiar Filtros',
+    'products.sortNewest': 'Más Recientes',
+    'products.sortPriceAsc': 'Precio: Menor a Mayor',
+    'products.sortPriceDesc': 'Precio: Mayor a Menor',
+    'products.sortName': 'Nombre A-Z',
+    'products.sortRating': 'Mejor Calificados',
     
     // Cart
     'cart.title': 'Carrito de Compras',
@@ -588,6 +610,8 @@ const translations: Record<Language, TranslationKeys> = {
     'common.date': 'Fecha',
     'common.status': 'Estado',
     'common.actions': 'Acciones',
+    'common.filters': 'Filtros',
+    'common.sortBy': 'Ordenar Por',
     
     // Messages
     'messages.addedToCart': 'Agregado al carrito',
@@ -691,6 +715,12 @@ const translations: Record<Language, TranslationKeys> = {
     'products.writeReview': 'Écrire un Avis',
     'products.loadMore': 'Charger Plus',
     'products.noProducts': 'Aucun produit trouvé.',
+    'products.clearFilters': 'Effacer les Filtres',
+    'products.sortNewest': 'Plus Récents',
+    'products.sortPriceAsc': 'Prix: Croissant',
+    'products.sortPriceDesc': 'Prix: Décroissant',
+    'products.sortName': 'Nom A-Z',
+    'products.sortRating': 'Mieux Notés',
     
     // Cart
     'cart.title': 'Panier',
@@ -813,6 +843,8 @@ const translations: Record<Language, TranslationKeys> = {
     'common.date': 'Date',
     'common.status': 'Statut',
     'common.actions': 'Actions',
+    'common.filters': 'Filtres',
+    'common.sortBy': 'Trier Par',
     
     // Messages
     'messages.addedToCart': 'Ajouté au panier',
@@ -1088,6 +1120,12 @@ const translations: Record<Language, TranslationKeys> = {
     'products.writeReview': 'Scrie o Recenzie',
     'products.loadMore': 'Încarcă Mai Mult',
     'products.noProducts': 'Nu au fost găsite produse.',
+    'products.clearFilters': 'Șterge Filtrele',
+    'products.sortNewest': 'Cel Mai Noi',
+    'products.sortPriceAsc': 'Preț: Mic la Mare',
+    'products.sortPriceDesc': 'Preț: Mare la Mic',
+    'products.sortName': 'Nume A-Z',
+    'products.sortRating': 'Cel Mai Bine Cotate',
     
     // Cart
     'cart.title': 'Coș de Cumpărături',
@@ -1225,6 +1263,8 @@ const translations: Record<Language, TranslationKeys> = {
     'common.date': 'Data',
     'common.status': 'Status',
     'common.actions': 'Acțiuni',
+    'common.filters': 'Filtre',
+    'common.sortBy': 'Sortează După',
     
     // Messages
     'messages.addedToCart': 'Adăugat în coș',
