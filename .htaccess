@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Redirect admin subdomain to main admin panel
+RewriteCond %{HTTP_HOST} ^admin\.kitchen-off\.com$ [NC]
+RewriteRule ^(.*)$ https://kitchen-off.com/admin [R=301,L]
+
+# Alternative: Redirect to Replit if main domain fails
+# RewriteCond %{HTTP_HOST} ^admin\.kitchen-off\.com$ [NC]
+# RewriteRule ^(.*)$ https://kitchen-off.replit.app/admin [R=301,L]
