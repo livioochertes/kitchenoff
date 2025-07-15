@@ -356,9 +356,12 @@ export default function Home() {
                   <i className="fas fa-envelope text-secondary"></i>
                   <span className="text-slate-300">info@kitchen-off.com</span>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <i className="fas fa-map-marker-alt text-secondary"></i>
-                  <span className="text-slate-300">Calea Mosilor 158, 020883 Bucharest, Romania</span>
+                <div className="flex items-start space-x-2">
+                  <i className="fas fa-map-marker-alt text-secondary mt-1"></i>
+                  <div className="text-slate-300">
+                    <div>Calea Mosilor 158, Bucharest</div>
+                    <div>020883 Romania</div>
+                  </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <i className="fas fa-clock text-secondary"></i>

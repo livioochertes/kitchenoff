@@ -51,7 +51,7 @@ Preferred communication style: Simple, everyday language.
 - COMPLETED: Updated all translation keys from "footer.call" to "footer.chat" across all 11 languages
 - COMPLETED: Added complete footer.chat translations for all supported languages (English, Spanish, French, German, Italian, Portuguese, Chinese, Japanese, Korean, Arabic, Romanian)
 - COMPLETED: Updated contact email address to info@kitchen-off.com in footer contact section
-- COMPLETED: Updated business address to Calea Mosilor 158, 020883 Bucharest, Romania
+- COMPLETED: Updated business address to Calea Mosilor 158, Bucharest (first line) and 020883 Romania (second line)
 - COMPLETED: Updated opening hours to Mon-Fri: 9AM-5PM EET
 
 ### July 14, 2025
