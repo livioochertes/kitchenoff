@@ -358,11 +358,11 @@ export default function Home() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <i className="fas fa-map-marker-alt text-secondary"></i>
-                  <span className="text-slate-300">123 Business Ave, Suite 100</span>
+                  <span className="text-slate-300">Calea Mosilor 158, 020883 Bucharest, Romania</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <i className="fas fa-clock text-secondary"></i>
-                  <span className="text-slate-300">Mon-Fri: 8AM-6PM EST</span>
+                  <span className="text-slate-300">Mon-Fri: 9AM-5PM EET</span>
                 </div>
               </div>
             </div>
