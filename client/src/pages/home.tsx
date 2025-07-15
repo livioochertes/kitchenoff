@@ -333,7 +333,11 @@ export default function Home() {
                     </button>
                   </ContactModal>
                 </li>
-                <li><a href="#" className="text-slate-300 hover:text-white transition-colors">{t('footer.support')}</a></li>
+                <li>
+                  <Link href="/ai-assistant" className="text-slate-300 hover:text-white transition-colors">
+                    {t('footer.support')}
+                  </Link>
+                </li>
               </ul>
             </div>
 
@@ -353,11 +357,13 @@ export default function Home() {
 
             {/* Contact Info */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Contact Info</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">{t('footer.support')}</h3>
               <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <MessageSquare className="h-4 w-4 text-secondary" />
-                  <Link href="/ai-assistant" className="text-slate-300 hover:text-white transition-colors">Live Chat Support</Link>
+                <div className="flex items-center space-x-2 p-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors">
+                  <MessageSquare className="h-5 w-5 text-secondary" />
+                  <Link href="/ai-assistant" className="text-white hover:text-secondary transition-colors font-medium">
+                    {t('footer.needHelp')} {t('footer.chat')}
+                  </Link>
                 </div>
                 <div className="flex items-center space-x-2">
                   <i className="fas fa-envelope text-secondary"></i>
