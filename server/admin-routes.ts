@@ -480,25 +480,7 @@ export async function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.put("/admin/api/orders/:id/status", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
-    try {
-      const orderId = parseInt(req.params.id);
-      const { status } = req.body;
-      
-      const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
-      if (!validStatuses.includes(status)) {
-        return res.status(400).json({ message: "Invalid status" });
-      }
-
-      const updatedOrder = await storage.updateOrderStatus(orderId, status);
-      res.json({ message: "Order status updated successfully", order: updatedOrder });
-    } catch (error) {
-      console.error("Error updating order status:", error);
-      res.status(500).json({ message: "Failed to update order status" });
-    }
-  });
-
-  // Bulk update order status
+  // Bulk update order status (must come before individual endpoint)
   app.put("/admin/api/orders/bulk/status", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
     try {
       const { orderIds, status } = req.body;
@@ -514,7 +496,12 @@ export async function registerAdminRoutes(app: Express) {
       const results = [];
       for (const orderId of orderIds) {
         try {
-          const order = await storage.updateOrderStatus(parseInt(orderId), status);
+          const parsedOrderId = parseInt(orderId);
+          if (isNaN(parsedOrderId)) {
+            results.push({ orderId, success: false, error: "Invalid order ID" });
+            continue;
+          }
+          const order = await storage.updateOrderStatus(parsedOrderId, status);
           results.push({ orderId, success: true, order });
         } catch (error) {
           results.push({ orderId, success: false, error: error.message });
@@ -533,6 +520,25 @@ export async function registerAdminRoutes(app: Express) {
     }
   });
 
+  // Individual order status update
+  app.put("/admin/api/orders/:id/status", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      const updatedOrder = await storage.updateOrderStatus(orderId, status);
+      res.json({ message: "Order status updated successfully", order: updatedOrder });
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      res.status(500).json({ message: "Failed to update order status" });
+    }
+  });
+
   // Generate shipping labels (simulation)
   app.post("/admin/api/orders/bulk/shipping-labels", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
     try {
@@ -545,7 +551,12 @@ export async function registerAdminRoutes(app: Express) {
       const results = [];
       for (const orderId of orderIds) {
         try {
-          const order = await storage.getOrder(parseInt(orderId));
+          const parsedOrderId = parseInt(orderId);
+          if (isNaN(parsedOrderId)) {
+            results.push({ orderId, success: false, error: "Invalid order ID" });
+            continue;
+          }
+          const order = await storage.getOrder(parsedOrderId);
           if (order) {
             results.push({ 
               orderId, 
@@ -588,7 +599,12 @@ export async function registerAdminRoutes(app: Express) {
       const results = [];
       for (const orderId of orderIds) {
         try {
-          const order = await storage.getOrder(parseInt(orderId));
+          const parsedOrderId = parseInt(orderId);
+          if (isNaN(parsedOrderId)) {
+            results.push({ orderId, success: false, error: "Invalid order ID" });
+            continue;
+          }
+          const order = await storage.getOrder(parsedOrderId);
           if (order) {
             results.push({ 
               orderId, 
@@ -628,7 +644,12 @@ export async function registerAdminRoutes(app: Express) {
       const results = [];
       for (const orderId of orderIds) {
         try {
-          const order = await storage.getOrder(parseInt(orderId));
+          const parsedOrderId = parseInt(orderId);
+          if (isNaN(parsedOrderId)) {
+            results.push({ orderId, success: false, error: "Invalid order ID" });
+            continue;
+          }
+          const order = await storage.getOrder(parsedOrderId);
           if (order) {
             const refundAmt = refundAmount || order.totalAmount;
             results.push({ 
