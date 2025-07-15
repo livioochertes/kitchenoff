@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/useTranslation";
 import Header from "@/components/header";
 import ProductCard from "@/components/product-card";
 import type { Category, ProductWithCategory } from "@shared/schema";
 import kitchenOffLogo from "@assets/KitchenOff_Logo_Background_Removed_1752520997429.png";
 
 export default function Home() {
+  const { t } = useTranslation();
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
   });
@@ -19,12 +21,24 @@ export default function Home() {
     queryKey: ["/api/products", { featured: true, limit: 4 }],
   });
 
+  // Function to get translated category name
+  const getCategoryName = (category: Category) => {
+    const key = `categories.${category.slug}` as keyof typeof t;
+    return t(key) || category.name;
+  };
+
+  // Function to get translated category description
+  const getCategoryDescription = (category: Category) => {
+    const key = `categories.${category.slug}.description` as keyof typeof t;
+    return t(key) || category.description;
+  };
+
   const trustIndicators = [
-    { icon: Truck, text: "Free Shipping Over $500" },
-    { icon: Shield, text: "FDA Compliant Products" },
-    { icon: Award, text: "Industry Certified" },
-    { icon: Phone, text: "24/7 Support" },
-    { icon: Users, text: "10,000+ Happy Customers" },
+    { icon: Truck, text: t('home.features.shipping') },
+    { icon: Shield, text: t('home.features.compliant') },
+    { icon: Award, text: t('home.features.certified') },
+    { icon: Phone, text: t('home.features.support') },
+    { icon: Users, text: t('home.features.customers') },
   ];
 
   const testimonials = [
@@ -57,19 +71,19 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Professional Kitchen Equipment & Safety Solutions
+              {t('home.hero.title')}
             </h1>
             <p className="text-xl text-slate-300 mb-8">
-              Trusted by restaurants, cafes, and food service professionals worldwide. From expiration labels to HACCP compliance materials.
+              {t('home.hero.subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/products">
                 <Button size="lg" className="kitchen-pro-secondary">
-                  Shop Now
+                  {t('home.hero.shopNow')}
                 </Button>
               </Link>
               <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
-                Request B2B Quote
+                {t('home.hero.quote')}
               </Button>
             </div>
           </div>
@@ -94,9 +108,9 @@ export default function Home() {
       <section className="py-16 bg-slate-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-primary mb-4">Shop by Category</h2>
+            <h2 className="text-3xl font-bold text-primary mb-4">{t('home.categories.title')}</h2>
             <p className="text-slate-600 max-w-2xl mx-auto">
-              Professional-grade kitchen supplies and safety equipment for restaurants, cafes, and food service businesses.
+              {t('home.categories.subtitle')}
             </p>
           </div>
 
@@ -113,12 +127,12 @@ export default function Home() {
                       />
                     </div>
                     <div className="p-6">
-                      <h3 className="text-xl font-semibold text-primary mb-2">{category.name}</h3>
-                      <p className="text-slate-600 mb-4">{category.description}</p>
+                      <h3 className="text-xl font-semibold text-primary mb-2">{getCategoryName(category)}</h3>
+                      <p className="text-slate-600 mb-4">{getCategoryDescription(category)}</p>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-slate-500">50+ Products</span>
+                        <span className="text-sm text-slate-500">50+ {t('home.categories.products')}</span>
                         <Button variant="ghost" className="text-secondary hover:text-blue-600 p-0">
-                          View All <ArrowRight className="ml-1 h-4 w-4" />
+                          {t('home.categories.viewAll')} <ArrowRight className="ml-1 h-4 w-4" />
                         </Button>
                       </div>
                     </div>
@@ -134,8 +148,8 @@ export default function Home() {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-primary mb-4">Featured Products</h2>
-            <p className="text-slate-600">Best-selling products trusted by food service professionals</p>
+            <h2 className="text-3xl font-bold text-primary mb-4">{t('home.products.title')}</h2>
+            <p className="text-slate-600">{t('home.products.subtitle')}</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -251,19 +265,19 @@ export default function Home() {
       <section className="py-16 kitchen-pro-secondary">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">Stay Updated</h2>
+            <h2 className="text-3xl font-bold text-white mb-4">{t('home.newsletter.title')}</h2>
             <p className="text-blue-100 mb-8">
-              Get the latest products, safety tips, and exclusive offers delivered to your inbox.
+              {t('home.newsletter.subtitle')}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
               <Input
                 type="email"
-                placeholder="Enter your email"
+                placeholder={t('home.newsletter.placeholder')}
                 className="flex-1 bg-white"
               />
               <Button className="bg-white text-secondary hover:bg-slate-100">
-                Subscribe
+                {t('home.newsletter.subscribe')}
               </Button>
             </div>
           </div>
@@ -287,7 +301,7 @@ export default function Home() {
                 <span className="text-xl font-bold text-white">KitchenOff</span>
               </div>
               <p className="text-slate-300 mb-4">
-                Professional kitchen equipment and safety solutions for food service businesses.
+                {t('footer.company.description')}
               </p>
               <div className="flex space-x-4">
                 <a href="#" className="text-slate-300 hover:text-white transition-colors">
@@ -307,24 +321,24 @@ export default function Home() {
 
             {/* Quick Links */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Quick Links</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">{t('footer.quickLinks')}</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="text-slate-300 hover:text-white transition-colors">About Us</a></li>
-                <li><a href="#" className="text-slate-300 hover:text-white transition-colors">Products</a></li>
-                <li><a href="#" className="text-slate-300 hover:text-white transition-colors">B2B Solutions</a></li>
-                <li><a href="#" className="text-slate-300 hover:text-white transition-colors">Contact</a></li>
-                <li><a href="#" className="text-slate-300 hover:text-white transition-colors">Support</a></li>
+                <li><a href="#" className="text-slate-300 hover:text-white transition-colors">{t('footer.aboutUs')}</a></li>
+                <li><a href="#" className="text-slate-300 hover:text-white transition-colors">{t('footer.products')}</a></li>
+                <li><a href="#" className="text-slate-300 hover:text-white transition-colors">{t('footer.b2bSolutions')}</a></li>
+                <li><a href="#" className="text-slate-300 hover:text-white transition-colors">{t('footer.contact')}</a></li>
+                <li><a href="#" className="text-slate-300 hover:text-white transition-colors">{t('footer.support')}</a></li>
               </ul>
             </div>
 
             {/* Categories */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Categories</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">{t('footer.categories')}</h3>
               <ul className="space-y-2">
                 {categories.map((category) => (
                   <li key={category.id}>
                     <Link href={`/products?category=${category.slug}`} className="text-slate-300 hover:text-white transition-colors">
-                      {category.name}
+                      {getCategoryName(category)}
                     </Link>
                   </li>
                 ))}

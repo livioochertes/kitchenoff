@@ -161,6 +161,51 @@ export interface TranslationKeys {
   // Language
   'language.select': string;
   'language.current': string;
+  
+  // Categories
+  'categories.food-labels': string;
+  'categories.haccp-equipment': string;
+  'categories.kitchen-supplies': string;
+  'categories.cleaning-sanitizing': string;
+  'categories.storage-solutions': string;
+  'categories.food-labels.description': string;
+  'categories.haccp-equipment.description': string;
+  'categories.kitchen-supplies.description': string;
+  'categories.cleaning-sanitizing.description': string;
+  'categories.storage-solutions.description': string;
+  
+  // Home page sections
+  'home.hero.title': string;
+  'home.hero.subtitle': string;
+  'home.hero.shopNow': string;
+  'home.hero.quote': string;
+  'home.features.title': string;
+  'home.features.shipping': string;
+  'home.features.compliant': string;
+  'home.features.certified': string;
+  'home.features.support': string;
+  'home.features.customers': string;
+  'home.categories.title': string;
+  'home.categories.subtitle': string;
+  'home.categories.viewAll': string;
+  'home.categories.products': string;
+  'home.products.title': string;
+  'home.products.subtitle': string;
+  'home.testimonials.title': string;
+  'home.newsletter.title': string;
+  'home.newsletter.subtitle': string;
+  'home.newsletter.placeholder': string;
+  'home.newsletter.subscribe': string;
+  
+  // Footer additions
+  'footer.company.description': string;
+  'footer.quickLinks': string;
+  'footer.aboutUs': string;
+  'footer.products': string;
+  'footer.b2bSolutions': string;
+  'footer.contact': string;
+  'footer.categories': string;
+  'footer.newsletter': string;
 }
 
 const translations: Record<Language, TranslationKeys> = {
@@ -358,6 +403,51 @@ const translations: Record<Language, TranslationKeys> = {
     // Language
     'language.select': 'Select Language',
     'language.current': 'Current Language',
+    
+    // Categories
+    'categories.food-labels': 'Food Labels',
+    'categories.haccp-equipment': 'HACCP Equipment',
+    'categories.kitchen-supplies': 'Kitchen Supplies',
+    'categories.cleaning-sanitizing': 'Cleaning & Sanitizing',
+    'categories.storage-solutions': 'Storage Solutions',
+    'categories.food-labels.description': 'Professional food labeling solutions for restaurants and food service',
+    'categories.haccp-equipment.description': 'Essential equipment for HACCP compliance and food safety',
+    'categories.kitchen-supplies.description': 'Professional kitchen tools and supplies for commercial use',
+    'categories.cleaning-sanitizing.description': 'Professional cleaning and sanitizing products for food service',
+    'categories.storage-solutions.description': 'Food storage containers and organization systems',
+    
+    // Home page sections
+    'home.hero.title': 'Professional Kitchen Equipment & Safety Solutions',
+    'home.hero.subtitle': 'Trusted by restaurants, cafes, and food service professionals worldwide. From expiration labels to HACCP compliance materials.',
+    'home.hero.shopNow': 'Shop Now',
+    'home.hero.quote': 'Request B2B Quote',
+    'home.features.title': 'Why Choose KitchenOff?',
+    'home.features.shipping': 'Free Shipping Over $500',
+    'home.features.compliant': 'FDA Compliant Products',
+    'home.features.certified': 'Industry Certified',
+    'home.features.support': '24/7 Support',
+    'home.features.customers': '10,000+ Happy Customers',
+    'home.categories.title': 'Shop by Category',
+    'home.categories.subtitle': 'Find the perfect equipment for your kitchen',
+    'home.categories.viewAll': 'View All',
+    'home.categories.products': 'Products',
+    'home.products.title': 'Featured Products',
+    'home.products.subtitle': 'Discover our most popular items',
+    'home.testimonials.title': 'What Our Customers Say',
+    'home.newsletter.title': 'Stay Updated',
+    'home.newsletter.subtitle': 'Get the latest updates on new products and special offers',
+    'home.newsletter.placeholder': 'Enter your email address',
+    'home.newsletter.subscribe': 'Subscribe',
+    
+    // Footer additions
+    'footer.company.description': 'Professional kitchen equipment and safety solutions for food service businesses.',
+    'footer.quickLinks': 'Quick Links',
+    'footer.aboutUs': 'About Us',
+    'footer.products': 'Products',
+    'footer.b2bSolutions': 'B2B Solutions',
+    'footer.contact': 'Contact',
+    'footer.categories': 'Categories',
+    'footer.newsletter': 'Newsletter',
   },
   
   es: {
@@ -521,6 +611,51 @@ const translations: Record<Language, TranslationKeys> = {
     // Language
     'language.select': 'Seleccionar Idioma',
     'language.current': 'Idioma Actual',
+    
+    // Categories
+    'categories.food-labels': 'Etiquetas de Alimentos',
+    'categories.haccp-equipment': 'Equipos HACCP',
+    'categories.kitchen-supplies': 'Suministros de Cocina',
+    'categories.cleaning-sanitizing': 'Limpieza y Saneamiento',
+    'categories.storage-solutions': 'Soluciones de Almacenamiento',
+    'categories.food-labels.description': 'Soluciones profesionales de etiquetado de alimentos para restaurantes y servicios alimentarios',
+    'categories.haccp-equipment.description': 'Equipos esenciales para el cumplimiento HACCP y la seguridad alimentaria',
+    'categories.kitchen-supplies.description': 'Herramientas y suministros de cocina profesionales para uso comercial',
+    'categories.cleaning-sanitizing.description': 'Productos profesionales de limpieza y desinfección para servicios alimentarios',
+    'categories.storage-solutions.description': 'Contenedores de almacenamiento de alimentos y sistemas de organización',
+    
+    // Home page sections
+    'home.hero.title': 'Equipos de Cocina Profesionales y Soluciones de Seguridad',
+    'home.hero.subtitle': 'Confiado por restaurantes, cafeterías y profesionales de servicios alimentarios en todo el mundo. Desde etiquetas de caducidad hasta materiales de cumplimiento HACCP.',
+    'home.hero.shopNow': 'Comprar Ahora',
+    'home.hero.quote': 'Solicitar Cotización B2B',
+    'home.features.title': '¿Por qué elegir KitchenOff?',
+    'home.features.shipping': 'Envío Gratuito en Pedidos Superiores a $500',
+    'home.features.compliant': 'Productos Compatibles con FDA',
+    'home.features.certified': 'Certificado por la Industria',
+    'home.features.support': 'Soporte 24/7',
+    'home.features.customers': 'Más de 10,000 Clientes Satisfechos',
+    'home.categories.title': 'Comprar por Categoría',
+    'home.categories.subtitle': 'Encuentra el equipo perfecto para tu cocina',
+    'home.categories.viewAll': 'Ver Todo',
+    'home.categories.products': 'Productos',
+    'home.products.title': 'Productos Destacados',
+    'home.products.subtitle': 'Descubre nuestros artículos más populares',
+    'home.testimonials.title': 'Lo que Dicen Nuestros Clientes',
+    'home.newsletter.title': 'Mantente Actualizado',
+    'home.newsletter.subtitle': 'Recibe las últimas actualizaciones sobre nuevos productos y ofertas especiales',
+    'home.newsletter.placeholder': 'Ingresa tu dirección de correo electrónico',
+    'home.newsletter.subscribe': 'Suscribirse',
+    
+    // Footer additions
+    'footer.company.description': 'Equipos de cocina profesionales y soluciones de seguridad para negocios de servicios alimentarios.',
+    'footer.quickLinks': 'Enlaces Rápidos',
+    'footer.aboutUs': 'Acerca de Nosotros',
+    'footer.products': 'Productos',
+    'footer.b2bSolutions': 'Soluciones B2B',
+    'footer.contact': 'Contacto',
+    'footer.categories': 'Categorías',
+    'footer.newsletter': 'Boletín',
   },
   
   fr: {
@@ -701,6 +836,51 @@ const translations: Record<Language, TranslationKeys> = {
     // Language
     'language.select': 'Sélectionner la Langue',
     'language.current': 'Langue Actuelle',
+    
+    // Categories
+    'categories.food-labels': 'Étiquettes Alimentaires',
+    'categories.haccp-equipment': 'Équipement HACCP',
+    'categories.kitchen-supplies': 'Fournitures de Cuisine',
+    'categories.cleaning-sanitizing': 'Nettoyage et Désinfection',
+    'categories.storage-solutions': 'Solutions de Stockage',
+    'categories.food-labels.description': 'Solutions professionnelles d\'étiquetage alimentaire pour restaurants et services alimentaires',
+    'categories.haccp-equipment.description': 'Équipements essentiels pour la conformité HACCP et la sécurité alimentaire',
+    'categories.kitchen-supplies.description': 'Outils et fournitures de cuisine professionnels pour usage commercial',
+    'categories.cleaning-sanitizing.description': 'Produits professionnels de nettoyage et désinfection pour services alimentaires',
+    'categories.storage-solutions.description': 'Contenants de stockage alimentaire et systèmes d\'organisation',
+    
+    // Home page sections
+    'home.hero.title': 'Équipements de Cuisine Professionnels et Solutions de Sécurité',
+    'home.hero.subtitle': 'Approuvé par les restaurants, cafés et professionnels des services alimentaires du monde entier. Des étiquettes de péremption aux matériaux de conformité HACCP.',
+    'home.hero.shopNow': 'Acheter Maintenant',
+    'home.hero.quote': 'Demander un Devis B2B',
+    'home.features.title': 'Pourquoi Choisir KitchenOff?',
+    'home.features.shipping': 'Livraison Gratuite au-dessus de 500$',
+    'home.features.compliant': 'Produits Conformes FDA',
+    'home.features.certified': 'Certifié par l\'Industrie',
+    'home.features.support': 'Support 24/7',
+    'home.features.customers': 'Plus de 10,000 Clients Satisfaits',
+    'home.categories.title': 'Acheter par Catégorie',
+    'home.categories.subtitle': 'Trouvez l\'équipement parfait pour votre cuisine',
+    'home.categories.viewAll': 'Voir Tout',
+    'home.categories.products': 'Produits',
+    'home.products.title': 'Produits Vedettes',
+    'home.products.subtitle': 'Découvrez nos articles les plus populaires',
+    'home.testimonials.title': 'Ce que Disent Nos Clients',
+    'home.newsletter.title': 'Restez Informé',
+    'home.newsletter.subtitle': 'Recevez les dernières mises à jour sur les nouveaux produits et offres spéciales',
+    'home.newsletter.placeholder': 'Entrez votre adresse email',
+    'home.newsletter.subscribe': 'S\'abonner',
+    
+    // Footer additions
+    'footer.company.description': 'Équipements de cuisine professionnels et solutions de sécurité pour les entreprises de services alimentaires.',
+    'footer.quickLinks': 'Liens Rapides',
+    'footer.aboutUs': 'À Propos',
+    'footer.products': 'Produits',
+    'footer.b2bSolutions': 'Solutions B2B',
+    'footer.contact': 'Contact',
+    'footer.categories': 'Catégories',
+    'footer.newsletter': 'Newsletter',
   },
   
   // Adding placeholders for other languages - these would be fully translated in a real app
@@ -1068,6 +1248,51 @@ const translations: Record<Language, TranslationKeys> = {
     // Language
     'language.select': 'Selectează Limba',
     'language.current': 'Limba Curentă',
+    
+    // Categories
+    'categories.food-labels': 'Etichete Alimentare',
+    'categories.haccp-equipment': 'Echipamente HACCP',
+    'categories.kitchen-supplies': 'Accesorii Bucătărie',
+    'categories.cleaning-sanitizing': 'Curățenie și Dezinfectare',
+    'categories.storage-solutions': 'Soluții de Depozitare',
+    'categories.food-labels.description': 'Soluții profesionale de etichetare alimentară pentru restaurante și servicii alimentare',
+    'categories.haccp-equipment.description': 'Echipamente esențiale pentru conformitatea HACCP și siguranța alimentară',
+    'categories.kitchen-supplies.description': 'Unelte și accesorii de bucătărie profesionale pentru uz comercial',
+    'categories.cleaning-sanitizing.description': 'Produse profesionale de curățenie și dezinfectare pentru servicii alimentare',
+    'categories.storage-solutions.description': 'Containere pentru depozitarea alimentelor și sisteme de organizare',
+    
+    // Home page sections
+    'home.hero.title': 'Echipamente de Bucătărie Profesionale și Soluții de Siguranță',
+    'home.hero.subtitle': 'Încredere din partea restaurantelor, cafenelelor și profesioniștilor din industria alimentară din întreaga lume. De la etichete de expirare la materiale de conformitate HACCP.',
+    'home.hero.shopNow': 'Cumpără Acum',
+    'home.hero.quote': 'Solicită Ofertă B2B',
+    'home.features.title': 'De ce să alegi KitchenOff?',
+    'home.features.shipping': 'Livrare Gratuită peste 500$',
+    'home.features.compliant': 'Produse Conforme FDA',
+    'home.features.certified': 'Certificat de Industrie',
+    'home.features.support': 'Suport 24/7',
+    'home.features.customers': 'Peste 10.000 de Clienți Mulțumiți',
+    'home.categories.title': 'Cumpără pe Categorie',
+    'home.categories.subtitle': 'Găsește echipamentul perfect pentru bucătăria ta',
+    'home.categories.viewAll': 'Vezi Toate',
+    'home.categories.products': 'Produse',
+    'home.products.title': 'Produse Recomandate',
+    'home.products.subtitle': 'Descoperă cele mai populare articole',
+    'home.testimonials.title': 'Ce Spun Clienții Noștri',
+    'home.newsletter.title': 'Rămâi la Curent',
+    'home.newsletter.subtitle': 'Primește cele mai recente actualizări despre produse noi și oferte speciale',
+    'home.newsletter.placeholder': 'Introdu adresa ta de email',
+    'home.newsletter.subscribe': 'Abonează-te',
+    
+    // Footer additions
+    'footer.company.description': 'Echipamente de bucătărie profesionale și soluții de siguranță pentru afaceri din industria alimentară.',
+    'footer.quickLinks': 'Linkuri Rapide',
+    'footer.aboutUs': 'Despre Noi',
+    'footer.products': 'Produse',
+    'footer.b2bSolutions': 'Soluții B2B',
+    'footer.contact': 'Contact',
+    'footer.categories': 'Categorii',
+    'footer.newsletter': 'Newsletter',
   },
   
   // Placeholder for other languages
