@@ -89,10 +89,19 @@ const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction) 
     return res.status(401).json({ message: "Access token required" });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET || "your-secret-key", (err: any, user: any) => {
+  // Try to verify as admin token first
+  jwt.verify(token, process.env.JWT_SECRET || "your-secret-key", async (err: any, user: any) => {
     if (err) {
       return res.status(403).json({ message: "Invalid token" });
     }
+    
+    // Check if it's an admin token
+    if (user.isAdmin) {
+      req.userId = user.id;
+      return next();
+    }
+    
+    // Otherwise treat as regular user token
     req.userId = user.id;
     next();
   });
