@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { useTranslation } from "@/hooks/useTranslation";
 import Header from "@/components/header";
 import ProductCard from "@/components/product-card";
+import ContactModal from "@/components/contact-modal";
 import type { Category, ProductWithCategory } from "@shared/schema";
 import kitchenOffLogo from "@assets/KitchenOff_Logo_Background_Removed_1752520997429.png";
 
@@ -325,7 +326,13 @@ export default function Home() {
                 <li><a href="#" className="text-slate-300 hover:text-white transition-colors">{t('footer.aboutUs')}</a></li>
                 <li><a href="#" className="text-slate-300 hover:text-white transition-colors">{t('footer.products')}</a></li>
                 <li><a href="#" className="text-slate-300 hover:text-white transition-colors">{t('footer.b2bSolutions')}</a></li>
-                <li><a href="#" className="text-slate-300 hover:text-white transition-colors">{t('footer.contact')}</a></li>
+                <li>
+                  <ContactModal>
+                    <button className="text-slate-300 hover:text-white transition-colors">
+                      {t('footer.contact')}
+                    </button>
+                  </ContactModal>
+                </li>
                 <li><a href="#" className="text-slate-300 hover:text-white transition-colors">{t('footer.support')}</a></li>
               </ul>
             </div>

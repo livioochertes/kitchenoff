@@ -590,6 +590,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Contact form submission
+  app.post("/api/contact", async (req, res) => {
+    try {
+      const { name, email, phone, subject, category, message, orderNumber } = req.body;
+      
+      // Validate required fields
+      if (!name || !email || !subject || !message || !category) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Missing required fields: name, email, subject, message, and category are required" 
+        });
+      }
+
+      // Log the contact form submission (in a real application, you'd save this to database)
+      console.log("Contact form submission:", {
+        name,
+        email,
+        phone: phone || 'Not provided',
+        subject,
+        category,
+        message,
+        orderNumber: orderNumber || 'Not provided',
+        timestamp: new Date().toISOString(),
+        ip: req.ip || 'unknown'
+      });
+
+      // In a real application, you would:
+      // 1. Save the contact form data to database
+      // 2. Send email notifications to the support team
+      // 3. Possibly send an auto-reply to the customer
+      // 4. Create a ticket in your support system
+
+      // For now, simulate successful submission
+      res.json({
+        success: true,
+        message: "Thank you for contacting us! We've received your message and will respond within 24 hours.",
+        ticketId: `TICKET_${Date.now()}`,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Contact form error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to submit contact form. Please try again." 
+      });
+    }
+  });
+
   // AI Assistant routes
   app.post("/api/ai/connect", async (req, res) => {
     try {

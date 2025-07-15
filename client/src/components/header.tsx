@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Search, ShoppingCart, User, Menu, X, Bot, LogOut } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, X, Bot, LogOut, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "@/hooks/useTranslation";
 import LanguageSwitcher from "@/components/language-switcher";
+import ContactModal from "@/components/contact-modal";
 import kitchenOffLogo from "@assets/KitchenOff_Logo_Background_Removed_1752520997429.png";
 
 export default function Header() {
@@ -78,6 +79,17 @@ export default function Header() {
           {/* Header Actions */}
           <div className="flex items-center space-x-4">
             <LanguageSwitcher />
+            <ContactModal 
+              triggerText={t('contact.title')} 
+              triggerVariant="ghost" 
+              triggerSize="sm"
+              triggerIcon={<MessageSquare className="h-4 w-4 mr-2" />}
+            >
+              <Button variant="ghost" size="sm" className="hidden md:flex">
+                <MessageSquare className="h-4 w-4 mr-2" />
+                {t('contact.title')}
+              </Button>
+            </ContactModal>
             <Link href="/ai-assistant">
               <Button variant="ghost" size="sm" className="hidden md:flex">
                 <Bot className="h-4 w-4 mr-2" />
@@ -183,6 +195,12 @@ export default function Header() {
                       {getCategoryName(category)}
                     </Button>
                   ))}
+                  <ContactModal>
+                    <Button variant="ghost" className="w-full justify-start">
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      {t('contact.title')}
+                    </Button>
+                  </ContactModal>
                   <Link href="/ai-assistant">
                     <Button variant="ghost" className="w-full justify-start">
                       <Bot className="h-4 w-4 mr-2" />
