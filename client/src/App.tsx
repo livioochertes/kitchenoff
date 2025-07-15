@@ -14,6 +14,7 @@ import Admin from "@/pages/admin";
 import Login from "@/pages/login";
 import Account from "@/pages/account";
 import AIAssistant from "@/pages/ai-assistant";
+import About from "@/pages/about";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/account" component={Account} />
       <Route path="/ai-assistant" component={AIAssistant} />
+      <Route path="/about" component={About} />
       <Route component={NotFound} />
     </Switch>
   );
