@@ -1664,12 +1664,12 @@
               <img src="/attached_assets/KitchenOff_Logo_Background_Removed_1752520997429.png" alt="KitchenOff Logo" />
               <span>KitchenOff Admin</span>
             </div>
-            <div>
-              <span style={{marginRight: '20px', fontSize: '14px', color: '#666'}}>Welcome, {admin?.firstName || 'Admin'}</span>
-              <button onClick={() => setActiveView('dashboard')} className="btn btn-secondary" style={{marginLeft: '10px', marginRight: '10px', padding: '8px 16px', fontSize: '14px'}}>
+            <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+              <span style={{fontSize: '14px', color: '#666'}}>Welcome, {admin?.firstName || 'Admin'}</span>
+              <button onClick={() => setActiveView('dashboard')} className="btn btn-secondary" style={{padding: '8px 16px', fontSize: '14px', width: 'auto'}}>
                 🏠 Dashboard
               </button>
-              <button onClick={handleLogout} className="btn btn-secondary" style={{padding: '8px 16px', fontSize: '14px'}}>
+              <button onClick={handleLogout} className="btn btn-secondary" style={{padding: '8px 16px', fontSize: '14px', width: 'auto'}}>
                 Logout
               </button>
             </div>
