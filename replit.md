@@ -10,6 +10,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### July 15, 2025
+- COMPLETED: Reordered language selector to display European languages first (English, French, German, Italian, Portuguese, Romanian, Spanish) followed by Asian languages (Arabic, Chinese, Japanese, Korean)
+- COMPLETED: Added comprehensive translation keys for categories, home page sections, and footer content
+- COMPLETED: Implemented dynamic category name translation system with getCategoryName function
+- COMPLETED: Enhanced header navigation with translated category names
+- COMPLETED: Added complete Romanian translations for all new translation keys as specifically requested
+- COMPLETED: Created systematic multilingual support for all UI elements including home page hero, features, newsletter sections
+- COMPLETED: Added footer translation keys for company description, quick links, and contact information
+
 ### July 14, 2025
 - COMPLETED: Comprehensive multilingual system with 11 language support (English, Spanish, French, German, Italian, Portuguese, Chinese, Japanese, Korean, Arabic, Romanian)
 - COMPLETED: Full Romanian language translations for all UI elements including AI Assistant 
