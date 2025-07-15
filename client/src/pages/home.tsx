@@ -354,7 +354,7 @@ export default function Home() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <i className="fas fa-envelope text-secondary"></i>
-                  <span className="text-slate-300">info@kitchenprosupply.com</span>
+                  <span className="text-slate-300">info@kitchen-off.com</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <i className="fas fa-map-marker-alt text-secondary"></i>
