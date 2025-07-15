@@ -398,87 +398,89 @@ export default function AIAssistant() {
             {/* Chat Interface */}
             <div className="lg:col-span-3">
               <Card className="h-[600px] flex flex-col">
-                <CardHeader className="flex-shrink-0">
+                <CardHeader className="flex-shrink-0 pb-4">
                   <CardTitle>{t('ai.chatTitle')}</CardTitle>
                   <CardDescription>
                     {t('ai.chatDescription')}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="flex-1 flex flex-col min-h-0">
-                  <ScrollArea className="flex-1 pr-4 mb-4 min-h-0">
-                    <div className="space-y-4 p-2">
-                      {messages.map((message) => (
-                        <div
-                          key={message.id}
-                          className={`flex gap-3 ${
-                            message.sender === "user" ? "justify-end" : "justify-start"
-                          }`}
-                        >
-                          {message.sender === "assistant" && (
+                <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
+                  <div className="flex-1 flex flex-col min-h-0 px-6">
+                    <ScrollArea className="flex-1 pr-4">
+                      <div className="space-y-4 py-2">
+                        {messages.map((message) => (
+                          <div
+                            key={message.id}
+                            className={`flex gap-3 ${
+                              message.sender === "user" ? "justify-end" : "justify-start"
+                            }`}
+                          >
+                            {message.sender === "assistant" && (
+                              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                                <Bot className="h-4 w-4 text-white" />
+                              </div>
+                            )}
+                            <div
+                              className={`max-w-[70%] p-3 rounded-lg break-words ${
+                                message.sender === "user"
+                                  ? "bg-primary text-white"
+                                  : "bg-muted"
+                              }`}
+                            >
+                              <div className="text-sm whitespace-pre-wrap">
+                                {message.sender === "assistant" 
+                                  ? renderMessageWithLinks(message.text)
+                                  : message.text
+                                }
+                              </div>
+                              <p className="text-xs opacity-70 mt-1">
+                                {message.timestamp.toLocaleTimeString()}
+                              </p>
+                            </div>
+                            {message.sender === "user" && (
+                              <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center flex-shrink-0">
+                                <User className="h-4 w-4 text-white" />
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        {isTyping && (
+                          <div className="flex gap-3 justify-start">
                             <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
                               <Bot className="h-4 w-4 text-white" />
                             </div>
-                          )}
-                          <div
-                            className={`max-w-[70%] p-3 rounded-lg break-words ${
-                              message.sender === "user"
-                                ? "bg-primary text-white"
-                                : "bg-muted"
-                            }`}
-                          >
-                            <div className="text-sm whitespace-pre-wrap">
-                              {message.sender === "assistant" 
-                                ? renderMessageWithLinks(message.text)
-                                : message.text
-                              }
-                            </div>
-                            <p className="text-xs opacity-70 mt-1">
-                              {message.timestamp.toLocaleTimeString()}
-                            </p>
-                          </div>
-                          {message.sender === "user" && (
-                            <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center flex-shrink-0">
-                              <User className="h-4 w-4 text-white" />
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                      {isTyping && (
-                        <div className="flex gap-3 justify-start">
-                          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                            <Bot className="h-4 w-4 text-white" />
-                          </div>
-                          <div className="bg-muted p-3 rounded-lg">
-                            <div className="flex space-x-1">
-                              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                            <div className="bg-muted p-3 rounded-lg">
+                              <div className="flex space-x-1">
+                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                    <div ref={messagesEndRef} />
-                  </ScrollArea>
-                  
-                  <Separator className="mb-4 flex-shrink-0" />
-                  
-                  <form onSubmit={handleSendMessage} className="flex gap-2 flex-shrink-0">
-                    <Input
-                      value={inputMessage}
-                      onChange={(e) => setInputMessage(e.target.value)}
-                      placeholder={
-                        isConnected
-                          ? t('ai.inputPlaceholder')
-                          : t('ai.inputPlaceholderDisconnected')
-                      }
-                      disabled={!isConnected}
-                      className="flex-1"
-                    />
-                    <Button type="submit" disabled={!isConnected || !inputMessage.trim()}>
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </form>
+                        )}
+                        <div ref={messagesEndRef} />
+                      </div>
+                    </ScrollArea>
+                    
+                    <Separator className="my-4 flex-shrink-0" />
+                    
+                    <form onSubmit={handleSendMessage} className="flex gap-2 flex-shrink-0 pb-6">
+                      <Input
+                        value={inputMessage}
+                        onChange={(e) => setInputMessage(e.target.value)}
+                        placeholder={
+                          isConnected
+                            ? t('ai.inputPlaceholder')
+                            : t('ai.inputPlaceholderDisconnected')
+                        }
+                        disabled={!isConnected}
+                        className="flex-1"
+                      />
+                      <Button type="submit" disabled={!isConnected || !inputMessage.trim()}>
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </form>
+                  </div>
                 </CardContent>
               </Card>
             </div>
