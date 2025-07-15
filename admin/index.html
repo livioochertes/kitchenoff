@@ -410,146 +410,274 @@
         );
       }
       
+      const renderContent = () => {
+        switch (activeView) {
+          case 'orders':
+            return (
+              <div style={{background: 'white', padding: '30px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'}}>
+                <h3 style={{marginBottom: '20px', color: '#333'}}>📋 Order Management</h3>
+                {orders.length > 0 ? (
+                  <div style={{overflowX: 'auto'}}>
+                    <table style={{width: '100%', borderCollapse: 'collapse'}}>
+                      <thead>
+                        <tr style={{backgroundColor: '#f5f5f5'}}>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Order ID</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Customer</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Amount</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Status</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {orders.slice(0, 10).map((order, index) => (
+                          <tr key={index} style={{borderBottom: '1px solid #eee'}}>
+                            <td style={{padding: '12px'}}>#{order.id}</td>
+                            <td style={{padding: '12px'}}>User #{order.userId}</td>
+                            <td style={{padding: '12px'}}>${order.totalAmount}</td>
+                            <td style={{padding: '12px'}}>
+                              <span style={{
+                                padding: '4px 8px', 
+                                borderRadius: '4px', 
+                                backgroundColor: order.status === 'pending' ? '#fff3cd' : '#d4edda',
+                                color: order.status === 'pending' ? '#856404' : '#155724'
+                              }}>
+                                {order.status}
+                              </span>
+                            </td>
+                            <td style={{padding: '12px'}}>{new Date(order.createdAt).toLocaleDateString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p style={{color: '#666', fontStyle: 'italic'}}>No orders found</p>
+                )}
+              </div>
+            );
+          
+          case 'users':
+            return (
+              <div style={{background: 'white', padding: '30px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'}}>
+                <h3 style={{marginBottom: '20px', color: '#333'}}>👥 User Management</h3>
+                <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px'}}>
+                  <div style={{padding: '20px', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6'}}>
+                    <h4 style={{marginBottom: '10px', color: '#495057'}}>Total Users</h4>
+                    <p style={{fontSize: '24px', fontWeight: 'bold', color: '#007bff', margin: '0'}}>{stats?.totalUsers || '0'}</p>
+                  </div>
+                  <div style={{padding: '20px', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6'}}>
+                    <h4 style={{marginBottom: '10px', color: '#495057'}}>Active Users</h4>
+                    <p style={{fontSize: '24px', fontWeight: 'bold', color: '#28a745', margin: '0'}}>2</p>
+                  </div>
+                  <div style={{padding: '20px', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6'}}>
+                    <h4 style={{marginBottom: '10px', color: '#495057'}}>Admin Users</h4>
+                    <p style={{fontSize: '24px', fontWeight: 'bold', color: '#dc3545', margin: '0'}}>1</p>
+                  </div>
+                </div>
+                <div style={{marginTop: '20px', padding: '15px', background: '#e9ecef', borderRadius: '6px'}}>
+                  <p style={{color: '#6c757d', margin: '0'}}>
+                    💡 User management features including user creation, editing, and role management will be implemented here.
+                  </p>
+                </div>
+              </div>
+            );
+          
+          case 'products':
+            return (
+              <div style={{background: 'white', padding: '30px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'}}>
+                <h3 style={{marginBottom: '20px', color: '#333'}}>📦 Product Management</h3>
+                {products.length > 0 ? (
+                  <div style={{overflowX: 'auto'}}>
+                    <table style={{width: '100%', borderCollapse: 'collapse'}}>
+                      <thead>
+                        <tr style={{backgroundColor: '#f5f5f5'}}>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Product ID</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Name</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Price</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Category</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Stock</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {products.slice(0, 10).map((product, index) => (
+                          <tr key={index} style={{borderBottom: '1px solid #eee'}}>
+                            <td style={{padding: '12px'}}>#{product.id}</td>
+                            <td style={{padding: '12px'}}>{product.name}</td>
+                            <td style={{padding: '12px'}}>${product.price}</td>
+                            <td style={{padding: '12px'}}>{product.category?.name || 'N/A'}</td>
+                            <td style={{padding: '12px'}}>
+                              <span style={{
+                                padding: '4px 8px', 
+                                borderRadius: '4px', 
+                                backgroundColor: product.stock > 10 ? '#d4edda' : '#f8d7da',
+                                color: product.stock > 10 ? '#155724' : '#721c24'
+                              }}>
+                                {product.stock || 'N/A'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p style={{color: '#666', fontStyle: 'italic'}}>No products found</p>
+                )}
+              </div>
+            );
+          
+          default:
+            return (
+              <>
+                <div className="dashboard-grid">
+                  <div className="stat-card">
+                    <div className="stat-number">{stats?.totalUsers || '0'}</div>
+                    <div className="stat-label">Total Users</div>
+                  </div>
+                  
+                  <div className="stat-card">
+                    <div className="stat-number">{stats?.totalOrders || '0'}</div>
+                    <div className="stat-label">Total Orders</div>
+                  </div>
+                  
+                  <div className="stat-card">
+                    <div className="stat-number">{stats?.totalProducts || '0'}</div>
+                    <div className="stat-label">Total Products</div>
+                  </div>
+                  
+                  <div className="stat-card">
+                    <div className="stat-number">{stats?.recentOrders?.length || '0'}</div>
+                    <div className="stat-label">Recent Orders</div>
+                  </div>
+                </div>
+                
+                <div style={{background: 'white', padding: '30px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'}}>
+                  <h3 style={{marginBottom: '20px', color: '#333'}}>System Overview</h3>
+                  <p style={{color: '#666', lineHeight: '1.6'}}>
+                    Welcome to the KitchenOff Admin Panel. Here you can manage your e-commerce platform, 
+                    view statistics, and monitor system performance. The dashboard shows real-time data 
+                    from your PostgreSQL database.
+                  </p>
+                  
+                  <div style={{marginTop: '30px', padding: '20px', background: '#f8f9ff', borderRadius: '6px'}}>
+                    <h4 style={{color: '#333', marginBottom: '10px'}}>Quick Stats Summary</h4>
+                    <ul style={{listStyle: 'none', padding: 0}}>
+                      <li style={{marginBottom: '5px'}}>📊 {stats?.totalUsers || '0'} registered users</li>
+                      <li style={{marginBottom: '5px'}}>🛒 {stats?.totalOrders || '0'} orders processed</li>
+                      <li style={{marginBottom: '5px'}}>📦 {stats?.totalProducts || '0'} products in catalog</li>
+                      <li style={{marginBottom: '5px'}}>🔄 {stats?.recentOrders?.length || '0'} recent orders</li>
+                    </ul>
+                  </div>
+                  
+                  <div style={{marginTop: '30px', padding: '20px', background: '#fff8e1', borderRadius: '6px'}}>
+                    <h4 style={{color: '#333', marginBottom: '10px'}}>Admin Actions</h4>
+                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginTop: '15px'}}>
+                      <button 
+                        className="btn" 
+                        style={{background: activeView === 'orders' ? '#2E7D32' : '#4CAF50', width: 'auto', padding: '10px 16px'}}
+                        onClick={() => handleViewChange('orders')}
+                      >
+                        📋 Manage Orders
+                      </button>
+                      <button 
+                        className="btn" 
+                        style={{background: activeView === 'users' ? '#1565C0' : '#2196F3', width: 'auto', padding: '10px 16px'}}
+                        onClick={() => handleViewChange('users')}
+                      >
+                        👥 Manage Users
+                      </button>
+                      <button 
+                        className="btn" 
+                        style={{background: activeView === 'products' ? '#F57C00' : '#FF9800', width: 'auto', padding: '10px 16px'}}
+                        onClick={() => handleViewChange('products')}
+                      >
+                        📦 Manage Products
+                      </button>
+                      <button 
+                        className="btn" 
+                        style={{background: '#9C27B0', width: 'auto', padding: '10px 16px'}}
+                        onClick={() => setShowTwoFactor(!showTwoFactor)}
+                      >
+                        🔐 Two-Factor Auth
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {showTwoFactor && (
+                    <div style={{marginTop: '30px', padding: '20px', background: '#e8f5e8', borderRadius: '6px', border: '2px solid #4CAF50'}}>
+                      <h4 style={{color: '#333', marginBottom: '10px'}}>🔐 Two-Factor Authentication</h4>
+                      <p style={{color: '#666', marginBottom: '15px'}}>
+                        Status: {admin?.twoFactorEnabled ? 
+                          <span style={{color: '#4CAF50', fontWeight: 'bold'}}>✅ Enabled</span> : 
+                          <span style={{color: '#f44336', fontWeight: 'bold'}}>❌ Disabled</span>
+                        }
+                      </p>
+                      <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                        <button 
+                          className="btn" 
+                          style={{background: admin?.twoFactorEnabled ? '#f44336' : '#4CAF50', width: 'auto', padding: '8px 16px'}}
+                          onClick={() => alert('2FA management functionality will be implemented')}
+                        >
+                          {admin?.twoFactorEnabled ? '🔓 Disable 2FA' : '🔒 Enable 2FA'}
+                        </button>
+                        {admin?.twoFactorEnabled && (
+                          <button 
+                            className="btn" 
+                            style={{background: '#FF9800', width: 'auto', padding: '8px 16px'}}
+                            onClick={() => alert('Backup codes regeneration will be implemented')}
+                          >
+                            🔄 Regenerate Backup Codes
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div style={{marginTop: '30px', padding: '20px', background: '#f0f8ff', borderRadius: '6px'}}>
+                    <h4 style={{color: '#333', marginBottom: '10px'}}>Recent Activity</h4>
+                    {stats?.recentOrders?.length > 0 ? (
+                      <div style={{maxHeight: '200px', overflowY: 'auto'}}>
+                        {stats.recentOrders.map((order, index) => (
+                          <div key={index} style={{
+                            padding: '10px',
+                            marginBottom: '10px',
+                            background: 'white',
+                            borderRadius: '4px',
+                            borderLeft: '4px solid #2196F3'
+                          }}>
+                            <div style={{fontWeight: 'bold'}}>Order #{order.id}</div>
+                            <div style={{fontSize: '14px', color: '#666'}}>
+                              Amount: ${order.totalAmount} | Status: {order.status}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p style={{color: '#666', fontStyle: 'italic'}}>No recent orders</p>
+                    )}
+                  </div>
+                </div>
+              </>
+            );
+        }
+      };
+
       return (
         <div className="container">
           <div className="admin-header">
             <div className="logo">🍴 KitchenOff Admin</div>
             <div>
               <span>Welcome, {admin?.firstName || 'Admin'}</span>
-              <button onClick={handleLogout} className="btn btn-secondary" style={{marginLeft: '10px'}}>
+              <button onClick={() => setActiveView('dashboard')} className="btn btn-secondary" style={{marginLeft: '10px', marginRight: '10px'}}>
+                🏠 Dashboard
+              </button>
+              <button onClick={handleLogout} className="btn btn-secondary">
                 Logout
               </button>
             </div>
           </div>
           
-          <div className="dashboard-grid">
-            <div className="stat-card">
-              <div className="stat-number">{stats?.totalUsers || '0'}</div>
-              <div className="stat-label">Total Users</div>
-            </div>
-            
-            <div className="stat-card">
-              <div className="stat-number">{stats?.totalOrders || '0'}</div>
-              <div className="stat-label">Total Orders</div>
-            </div>
-            
-            <div className="stat-card">
-              <div className="stat-number">{stats?.totalProducts || '0'}</div>
-              <div className="stat-label">Total Products</div>
-            </div>
-            
-            <div className="stat-card">
-              <div className="stat-number">{stats?.recentOrders?.length || '0'}</div>
-              <div className="stat-label">Recent Orders</div>
-            </div>
-          </div>
-          
-          <div style={{background: 'white', padding: '30px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'}}>
-            <h3 style={{marginBottom: '20px', color: '#333'}}>System Overview</h3>
-            <p style={{color: '#666', lineHeight: '1.6'}}>
-              Welcome to the KitchenOff Admin Panel. Here you can manage your e-commerce platform, 
-              view statistics, and monitor system performance. The dashboard shows real-time data 
-              from your PostgreSQL database.
-            </p>
-            
-            <div style={{marginTop: '30px', padding: '20px', background: '#f8f9ff', borderRadius: '6px'}}>
-              <h4 style={{color: '#333', marginBottom: '10px'}}>Quick Stats Summary</h4>
-              <ul style={{listStyle: 'none', padding: 0}}>
-                <li style={{marginBottom: '5px'}}>📊 {stats?.totalUsers || '0'} registered users</li>
-                <li style={{marginBottom: '5px'}}>🛒 {stats?.totalOrders || '0'} orders processed</li>
-                <li style={{marginBottom: '5px'}}>📦 {stats?.totalProducts || '0'} products in catalog</li>
-                <li style={{marginBottom: '5px'}}>🔄 {stats?.recentOrders?.length || '0'} recent orders</li>
-              </ul>
-            </div>
-            
-            <div style={{marginTop: '30px', padding: '20px', background: '#fff8e1', borderRadius: '6px'}}>
-              <h4 style={{color: '#333', marginBottom: '10px'}}>Admin Actions</h4>
-              <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginTop: '15px'}}>
-                <button 
-                  className="btn" 
-                  style={{background: '#4CAF50', width: 'auto', padding: '10px 16px'}}
-                  onClick={() => window.open('/admin/orders', '_blank')}
-                >
-                  📋 Manage Orders
-                </button>
-                <button 
-                  className="btn" 
-                  style={{background: '#2196F3', width: 'auto', padding: '10px 16px'}}
-                  onClick={() => window.open('/admin/users', '_blank')}
-                >
-                  👥 Manage Users
-                </button>
-                <button 
-                  className="btn" 
-                  style={{background: '#FF9800', width: 'auto', padding: '10px 16px'}}
-                  onClick={() => window.open('/admin/products', '_blank')}
-                >
-                  📦 Manage Products
-                </button>
-                <button 
-                  className="btn" 
-                  style={{background: '#9C27B0', width: 'auto', padding: '10px 16px'}}
-                  onClick={() => setShowTwoFactor(!showTwoFactor)}
-                >
-                  🔐 Two-Factor Auth
-                </button>
-              </div>
-            </div>
-            
-            {showTwoFactor && (
-              <div style={{marginTop: '30px', padding: '20px', background: '#e8f5e8', borderRadius: '6px', border: '2px solid #4CAF50'}}>
-                <h4 style={{color: '#333', marginBottom: '10px'}}>🔐 Two-Factor Authentication</h4>
-                <p style={{color: '#666', marginBottom: '15px'}}>
-                  Status: {admin?.twoFactorEnabled ? 
-                    <span style={{color: '#4CAF50', fontWeight: 'bold'}}>✅ Enabled</span> : 
-                    <span style={{color: '#f44336', fontWeight: 'bold'}}>❌ Disabled</span>
-                  }
-                </p>
-                <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
-                  <button 
-                    className="btn" 
-                    style={{background: admin?.twoFactorEnabled ? '#f44336' : '#4CAF50', width: 'auto', padding: '8px 16px'}}
-                    onClick={() => alert('2FA management functionality will be implemented')}
-                  >
-                    {admin?.twoFactorEnabled ? '🔓 Disable 2FA' : '🔒 Enable 2FA'}
-                  </button>
-                  {admin?.twoFactorEnabled && (
-                    <button 
-                      className="btn" 
-                      style={{background: '#FF9800', width: 'auto', padding: '8px 16px'}}
-                      onClick={() => alert('Backup codes regeneration will be implemented')}
-                    >
-                      🔄 Regenerate Backup Codes
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-            
-            <div style={{marginTop: '30px', padding: '20px', background: '#f0f8ff', borderRadius: '6px'}}>
-              <h4 style={{color: '#333', marginBottom: '10px'}}>Recent Activity</h4>
-              {stats?.recentOrders?.length > 0 ? (
-                <div style={{maxHeight: '200px', overflowY: 'auto'}}>
-                  {stats.recentOrders.map((order, index) => (
-                    <div key={index} style={{
-                      padding: '10px',
-                      marginBottom: '10px',
-                      background: 'white',
-                      borderRadius: '4px',
-                      borderLeft: '4px solid #2196F3'
-                    }}>
-                      <div style={{fontWeight: 'bold'}}>Order #{order.id}</div>
-                      <div style={{fontSize: '14px', color: '#666'}}>
-                        Amount: ${order.totalAmount} | Status: {order.status}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p style={{color: '#666', fontStyle: 'italic'}}>No recent orders</p>
-              )}
-            </div>
-          </div>
+          {renderContent()}
         </div>
       );
     }
