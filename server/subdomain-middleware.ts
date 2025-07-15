@@ -59,6 +59,7 @@ export function adminSubdomainHandler(req: Request, res: Response, next: NextFun
 function serveAdminApp(req: Request, res: Response, next: NextFunction) {
   // If it's an API request, let it go through to the admin routes
   if (req.path.startsWith('/admin/api/')) {
+    console.log("Admin API request detected, passing through:", req.path);
     return next();
   }
   

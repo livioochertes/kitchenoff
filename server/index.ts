@@ -77,10 +77,10 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const server = await registerRoutes(app);
-  
-  // Register admin routes
+  // Register admin routes FIRST before any other middleware
   await registerAdminRoutes(app);
+  
+  const server = await registerRoutes(app);
   
   // Seed database with sample data
   await seedDatabase();

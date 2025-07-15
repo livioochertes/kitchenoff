@@ -972,8 +972,8 @@ Always be helpful, professional, and focus on practical solutions. When recommen
     }
   });
 
-  // Admin routes should be accessible from subdomain
-  app.get('/admin/*', (req, res) => {
+  // Admin UI routes (non-API routes only)
+  app.get('/admin', (req, res) => {
     try {
       res.sendFile(path.resolve('./client/admin/index.html'));
     } catch (error) {

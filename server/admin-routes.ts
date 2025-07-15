@@ -348,6 +348,7 @@ export async function registerAdminRoutes(app: Express) {
   // Admin dashboard stats
   app.get("/admin/api/stats", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
     try {
+      console.log("Admin stats endpoint called");
       const totalUsers = await storage.getTotalUsers();
       const totalOrders = await storage.getTotalOrders();
       const totalProducts = await storage.getTotalProducts();
