@@ -921,6 +921,11 @@ Always be helpful, professional, and focus on practical solutions. When recommen
     }
   });
 
+  // Admin access route for testing
+  app.get('/admin', (req, res) => {
+    res.sendFile(path.resolve('./client/admin/index.html'));
+  });
+
   const httpServer = createServer(app);
   
   // Load all data into memory after server setup
