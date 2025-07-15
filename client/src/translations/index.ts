@@ -1631,6 +1631,39 @@ const translations: Record<Language, TranslationKeys> = {
     
     // Testimonials section
     'home.testimonials.subtitle': '受到全国食品服务专业人士的信赖',
+    
+    // Home page hero section
+    'home.hero.title': '专业厨房设备和安全解决方案',
+    'home.hero.subtitle': '受到全球餐厅、咖啡厅和食品服务专业人士的信赖。从保质期标签到HACCP合规材料。',
+    'home.hero.shopNow': '立即购买',
+    'home.hero.quote': '请求B2B报价',
+    'home.features.title': '为什么选择KitchenOff？',
+    'home.features.shipping': '500美元以上免费配送',
+    'home.features.compliant': 'FDA合规产品',
+    'home.features.certified': '行业认证',
+    'home.features.support': '24/7支持',
+    'home.features.customers': '超过10,000名满意客户',
+    'home.categories.title': '按类别购买',
+    'home.categories.subtitle': '为您的厨房找到完美的设备',
+    'home.categories.viewAll': '查看全部',
+    'home.categories.products': '产品',
+    'home.products.title': '精选产品',
+    'home.products.subtitle': '发现我们最受欢迎的产品',
+    'home.testimonials.title': '客户评价',
+    'home.newsletter.title': '保持更新',
+    'home.newsletter.subtitle': '获取新产品和特别优惠的最新信息',
+    'home.newsletter.placeholder': '输入您的电子邮件地址',
+    'home.newsletter.subscribe': '订阅',
+    
+    // Footer additions
+    'footer.company.description': '为食品服务企业提供专业厨房设备和安全解决方案。',
+    'footer.quickLinks': '快速链接',
+    'footer.aboutUs': '关于我们',
+    'footer.products': '产品',
+    'footer.b2bSolutions': 'B2B解决方案',
+    'footer.contact': '联系我们',
+    'footer.categories': '类别',
+    'footer.newsletter': '新闻简报',
   } as TranslationKeys,
   ja: {
     'nav.home': 'ホーム',
@@ -1691,6 +1724,39 @@ const translations: Record<Language, TranslationKeys> = {
     
     // Testimonials section
     'home.testimonials.subtitle': '全国のフードサービス専門家から信頼されています',
+    
+    // Home page hero section
+    'home.hero.title': 'プロフェッショナルキッチン機器と安全ソリューション',
+    'home.hero.subtitle': '世界中のレストラン、カフェ、フードサービス専門家から信頼されています。賞味期限ラベルからHACCP準拠材料まで。',
+    'home.hero.shopNow': '今すぐ購入',
+    'home.hero.quote': 'B2B見積もり依頼',
+    'home.features.title': 'KitchenOffを選ぶ理由',
+    'home.features.shipping': '500ドル以上で送料無料',
+    'home.features.compliant': 'FDA準拠製品',
+    'home.features.certified': '業界認定',
+    'home.features.support': '24/7サポート',
+    'home.features.customers': '10,000人以上の満足顧客',
+    'home.categories.title': 'カテゴリー別で購入',
+    'home.categories.subtitle': 'あなたのキッチンに最適な機器を見つけよう',
+    'home.categories.viewAll': 'すべて表示',
+    'home.categories.products': '製品',
+    'home.products.title': '注目製品',
+    'home.products.subtitle': '最も人気のあるアイテムを発見',
+    'home.testimonials.title': 'お客様の声',
+    'home.newsletter.title': '最新情報を受け取る',
+    'home.newsletter.subtitle': '新製品と特別オファーの最新情報を受け取る',
+    'home.newsletter.placeholder': 'メールアドレスを入力',
+    'home.newsletter.subscribe': '購読',
+    
+    // Footer additions
+    'footer.company.description': 'フードサービス企業向けの専門キッチン機器と安全ソリューション。',
+    'footer.quickLinks': 'クイックリンク',
+    'footer.aboutUs': '私たちについて',
+    'footer.products': '製品',
+    'footer.b2bSolutions': 'B2Bソリューション',
+    'footer.contact': 'お問い合わせ',
+    'footer.categories': 'カテゴリー',
+    'footer.newsletter': 'ニュースレター',
   } as TranslationKeys,
   ko: {
     'nav.home': '홈',
@@ -1751,6 +1817,39 @@ const translations: Record<Language, TranslationKeys> = {
     
     // Testimonials section
     'home.testimonials.subtitle': '전국의 식품 서비스 전문가들이 신뢰하는',
+    
+    // Home page hero section
+    'home.hero.title': '전문 주방 장비 및 안전 솔루션',
+    'home.hero.subtitle': '전 세계 레스토랑, 카페, 식품 서비스 전문가들이 신뢰합니다. 유통기한 라벨부터 HACCP 준수 자료까지.',
+    'home.hero.shopNow': '지금 구매',
+    'home.hero.quote': 'B2B 견적 요청',
+    'home.features.title': 'KitchenOff를 선택하는 이유',
+    'home.features.shipping': '500달러 이상 무료 배송',
+    'home.features.compliant': 'FDA 준수 제품',
+    'home.features.certified': '업계 인증',
+    'home.features.support': '24/7 지원',
+    'home.features.customers': '10,000명 이상의 만족 고객',
+    'home.categories.title': '카테고리별 구매',
+    'home.categories.subtitle': '귀하의 주방에 완벽한 장비를 찾으세요',
+    'home.categories.viewAll': '모두 보기',
+    'home.categories.products': '제품',
+    'home.products.title': '추천 제품',
+    'home.products.subtitle': '가장 인기 있는 제품들을 발견하세요',
+    'home.testimonials.title': '고객 후기',
+    'home.newsletter.title': '최신 정보 받기',
+    'home.newsletter.subtitle': '신제품과 특별 할인에 대한 최신 업데이트를 받으세요',
+    'home.newsletter.placeholder': '이메일 주소를 입력하세요',
+    'home.newsletter.subscribe': '구독',
+    
+    // Footer additions
+    'footer.company.description': '식품 서비스 비즈니스를 위한 전문 주방 장비 및 안전 솔루션.',
+    'footer.quickLinks': '빠른 링크',
+    'footer.aboutUs': '회사 소개',
+    'footer.products': '제품',
+    'footer.b2bSolutions': 'B2B 솔루션',
+    'footer.contact': '연락처',
+    'footer.categories': '카테고리',
+    'footer.newsletter': '뉴스레터',
   } as TranslationKeys,
   ar: {
     'nav.home': 'الرئيسية',
@@ -1811,6 +1910,39 @@ const translations: Record<Language, TranslationKeys> = {
     
     // Testimonials section
     'home.testimonials.subtitle': 'موثوق به من قبل محترفي الخدمات الغذائية في جميع أنحاء البلاد',
+    
+    // Home page hero section
+    'home.hero.title': 'معدات المطبخ المهنية وحلول السلامة',
+    'home.hero.subtitle': 'موثوق به من قبل المطاعم والمقاهي ومحترفي الخدمات الغذائية في جميع أنحاء العالم. من ملصقات انتهاء الصلاحية إلى مواد امتثال HACCP.',
+    'home.hero.shopNow': 'تسوق الآن',
+    'home.hero.quote': 'طلب عرض سعر B2B',
+    'home.features.title': 'لماذا تختار KitchenOff؟',
+    'home.features.shipping': 'شحن مجاني على طلبات أكثر من 500 دولار',
+    'home.features.compliant': 'منتجات متوافقة مع FDA',
+    'home.features.certified': 'معتمد من الصناعة',
+    'home.features.support': 'دعم 24/7',
+    'home.features.customers': 'أكثر من 10,000 عميل راضٍ',
+    'home.categories.title': 'تسوق حسب الفئة',
+    'home.categories.subtitle': 'اعثر على المعدات المثالية لمطبخك',
+    'home.categories.viewAll': 'عرض الكل',
+    'home.categories.products': 'منتجات',
+    'home.products.title': 'منتجات مميزة',
+    'home.products.subtitle': 'اكتشف أكثر المنتجات شعبية',
+    'home.testimonials.title': 'ما يقوله عملاؤنا',
+    'home.newsletter.title': 'ابق على اطلاع',
+    'home.newsletter.subtitle': 'احصل على آخر التحديثات حول المنتجات الجديدة والعروض الخاصة',
+    'home.newsletter.placeholder': 'أدخل عنوان بريدك الإلكتروني',
+    'home.newsletter.subscribe': 'اشترك',
+    
+    // Footer additions
+    'footer.company.description': 'معدات المطبخ المهنية وحلول السلامة لأعمال الخدمات الغذائية.',
+    'footer.quickLinks': 'روابط سريعة',
+    'footer.aboutUs': 'من نحن',
+    'footer.products': 'منتجات',
+    'footer.b2bSolutions': 'حلول B2B',
+    'footer.contact': 'اتصل بنا',
+    'footer.categories': 'الفئات',
+    'footer.newsletter': 'النشرة الإخبارية',
   } as TranslationKeys,
 };
 
