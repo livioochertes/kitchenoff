@@ -6,6 +6,7 @@ import {
   orderItems,
   cartItems,
   reviews,
+  settings,
   type User,
   type InsertUser,
   type Category,
@@ -23,6 +24,8 @@ import {
   type CartItemWithProduct,
   type Review,
   type InsertReview,
+  type Settings,
+  type InsertSettings,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, and, sql } from "drizzle-orm";
@@ -74,6 +77,13 @@ export interface IStorage {
   getTotalOrders(): Promise<number>;
   getTotalProducts(): Promise<number>;
   getRecentOrders(limit: number): Promise<OrderWithItems[]>;
+
+  // Settings operations
+  getSettings(): Promise<Settings[]>;
+  getSetting(key: string): Promise<Settings | undefined>;
+  setSetting(key: string, value: string, description?: string, category?: string): Promise<Settings>;
+  updateSetting(key: string, value: string): Promise<Settings>;
+  deleteSetting(key: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -559,6 +569,60 @@ export class DatabaseStorage implements IStorage {
     }
 
     return result;
+  }
+
+  // Settings operations
+  async getSettings(): Promise<Settings[]> {
+    return await db.select().from(settings).orderBy(settings.category, settings.key);
+  }
+
+  async getSetting(key: string): Promise<Settings | undefined> {
+    const [setting] = await db.select().from(settings).where(eq(settings.key, key));
+    return setting;
+  }
+
+  async setSetting(key: string, value: string, description?: string, category?: string): Promise<Settings> {
+    const existingSetting = await this.getSetting(key);
+    
+    if (existingSetting) {
+      // Update existing setting
+      const [updatedSetting] = await db
+        .update(settings)
+        .set({ 
+          value, 
+          description: description || existingSetting.description,
+          category: category || existingSetting.category,
+          updatedAt: new Date()
+        })
+        .where(eq(settings.key, key))
+        .returning();
+      return updatedSetting;
+    } else {
+      // Create new setting
+      const [newSetting] = await db
+        .insert(settings)
+        .values({
+          key,
+          value,
+          description: description || null,
+          category: category || "general"
+        })
+        .returning();
+      return newSetting;
+    }
+  }
+
+  async updateSetting(key: string, value: string): Promise<Settings> {
+    const [updatedSetting] = await db
+      .update(settings)
+      .set({ value, updatedAt: new Date() })
+      .where(eq(settings.key, key))
+      .returning();
+    return updatedSetting;
+  }
+
+  async deleteSetting(key: string): Promise<void> {
+    await db.delete(settings).where(eq(settings.key, key));
   }
 }
 

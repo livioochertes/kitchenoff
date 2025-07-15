@@ -454,9 +454,13 @@
       const [selectedOrder, setSelectedOrder] = useState(null);
       const [showOrderDetails, setShowOrderDetails] = useState(false);
       const [showOrderTools, setShowOrderTools] = useState(false);
+      const [settings, setSettings] = useState([]);
+      const [showAddSettingModal, setShowAddSettingModal] = useState(false);
+      const [editingSetting, setEditingSetting] = useState(null);
       
       useEffect(() => {
         fetchStats();
+        fetchSettings();
       }, []);
       
       // Filter orders based on search and status
@@ -578,6 +582,101 @@
           }
         } catch (err) {
           console.error('Network error fetching categories:', err);
+        }
+      };
+
+      const fetchSettings = async () => {
+        try {
+          const response = await fetch('/admin/api/settings', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            setSettings(data);
+          } else {
+            console.error('Failed to fetch settings:', data.message);
+          }
+        } catch (err) {
+          console.error('Network error fetching settings:', err);
+        }
+      };
+
+      // Settings Operations
+      const createSetting = async (settingData) => {
+        try {
+          const response = await fetch('/admin/api/settings', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(settingData)
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            fetchSettings(); // Refresh settings list
+            return { success: true, message: data.message };
+          } else {
+            return { success: false, message: data.message };
+          }
+        } catch (err) {
+          return { success: false, message: 'Network error' };
+        }
+      };
+
+      const updateSetting = async (key, value) => {
+        try {
+          const response = await fetch(`/admin/api/settings/${key}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ value })
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            fetchSettings(); // Refresh settings list
+            return { success: true, message: data.message };
+          } else {
+            return { success: false, message: data.message };
+          }
+        } catch (err) {
+          return { success: false, message: 'Network error' };
+        }
+      };
+
+      const deleteSetting = async (key) => {
+        if (!confirm(`Are you sure you want to delete the setting "${key}"?`)) {
+          return;
+        }
+        
+        try {
+          const response = await fetch(`/admin/api/settings/${key}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            fetchSettings(); // Refresh settings list
+            alert(data.message);
+          } else {
+            alert('Error: ' + data.message);
+          }
+        } catch (err) {
+          alert('Network error');
         }
       };
 
@@ -1349,6 +1448,122 @@
               </div>
             );
           
+          case 'settings':
+            return (
+              <div style={{background: 'white', padding: '30px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+                  <h3 style={{color: '#333', margin: '0'}}>⚙️ Settings Management</h3>
+                  <button 
+                    className="btn" 
+                    style={{background: '#28a745', width: 'auto', padding: '8px 16px'}}
+                    onClick={() => setShowAddSettingModal(true)}
+                  >
+                    ➕ Add Setting
+                  </button>
+                </div>
+                
+                <div style={{marginBottom: '20px'}}>
+                  <h4 style={{color: '#333', marginBottom: '15px'}}>Product Defaults</h4>
+                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '15px'}}>
+                    {settings.filter(s => s.category === 'product_defaults').map(setting => (
+                      <div key={setting.key} style={{padding: '15px', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6'}}>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                          <div>
+                            <strong style={{color: '#333'}}>{setting.key.replace('default_', '').replace(/_/g, ' ').toUpperCase()}</strong>
+                            <p style={{margin: '5px 0', color: '#666', fontSize: '14px'}}>{setting.description}</p>
+                            <span style={{color: '#007bff', fontWeight: 'bold'}}>{setting.value}</span>
+                          </div>
+                          <button 
+                            className="btn" 
+                            style={{background: '#007bff', width: 'auto', padding: '6px 12px', fontSize: '12px'}}
+                            onClick={() => {
+                              setEditingSetting(setting);
+                              setShowAddSettingModal(true);
+                            }}
+                          >
+                            Edit
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div style={{marginBottom: '20px'}}>
+                  <h4 style={{color: '#333', marginBottom: '15px'}}>Company Information</h4>
+                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '15px'}}>
+                    {settings.filter(s => s.category === 'company_info').map(setting => (
+                      <div key={setting.key} style={{padding: '15px', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6'}}>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                          <div>
+                            <strong style={{color: '#333'}}>{setting.key.replace('company_', '').replace(/_/g, ' ').toUpperCase()}</strong>
+                            <p style={{margin: '5px 0', color: '#666', fontSize: '14px'}}>{setting.description}</p>
+                            <span style={{color: '#007bff', fontWeight: 'bold'}}>{setting.value}</span>
+                          </div>
+                          <button 
+                            className="btn" 
+                            style={{background: '#007bff', width: 'auto', padding: '6px 12px', fontSize: '12px'}}
+                            onClick={() => {
+                              setEditingSetting(setting);
+                              setShowAddSettingModal(true);
+                            }}
+                          >
+                            Edit
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div style={{marginBottom: '20px'}}>
+                  <h4 style={{color: '#333', marginBottom: '15px'}}>All Settings</h4>
+                  <div style={{overflowX: 'auto'}}>
+                    <table style={{width: '100%', borderCollapse: 'collapse', background: 'white', borderRadius: '6px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'}}>
+                      <thead>
+                        <tr style={{background: '#f8f9fa'}}>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '1px solid #dee2e6', color: '#333'}}>Key</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '1px solid #dee2e6', color: '#333'}}>Value</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '1px solid #dee2e6', color: '#333'}}>Description</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '1px solid #dee2e6', color: '#333'}}>Category</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '1px solid #dee2e6', color: '#333'}}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {settings.map(setting => (
+                          <tr key={setting.key} style={{borderBottom: '1px solid #f0f0f0'}}>
+                            <td style={{padding: '12px', color: '#333', fontWeight: 'bold'}}>{setting.key}</td>
+                            <td style={{padding: '12px', color: '#007bff'}}>{setting.value}</td>
+                            <td style={{padding: '12px', color: '#666'}}>{setting.description}</td>
+                            <td style={{padding: '12px', color: '#666'}}>{setting.category}</td>
+                            <td style={{padding: '12px'}}>
+                              <button 
+                                className="btn" 
+                                style={{background: '#007bff', width: 'auto', padding: '6px 12px', fontSize: '12px', marginRight: '5px'}}
+                                onClick={() => {
+                                  setEditingSetting(setting);
+                                  setShowAddSettingModal(true);
+                                }}
+                              >
+                                Edit
+                              </button>
+                              <button 
+                                className="btn" 
+                                style={{background: '#dc3545', width: 'auto', padding: '6px 12px', fontSize: '12px'}}
+                                onClick={() => deleteSetting(setting.key)}
+                              >
+                                Delete
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            );
+          
           default:
             return (
               <>
@@ -1651,6 +1866,35 @@
           featured: false
         });
         
+        const [settingFormData, setSettingFormData] = useState({
+          key: '',
+          value: '',
+          description: '',
+          category: ''
+        });
+        
+        const handleSettingSubmit = async (e) => {
+          e.preventDefault();
+          
+          const result = editingSetting 
+            ? await updateSetting(editingSetting.key, settingFormData.value)
+            : await createSetting(settingFormData);
+          
+          if (result.success) {
+            alert(result.message);
+            setShowAddSettingModal(false);
+            setEditingSetting(null);
+            setSettingFormData({
+              key: '',
+              value: '',
+              description: '',
+              category: ''
+            });
+          } else {
+            alert('Error: ' + result.message);
+          }
+        };
+        
         const handleUserSubmit = async (e) => {
           e.preventDefault();
           
@@ -1730,10 +1974,275 @@
           }
         }, [editingProduct]);
         
+        React.useEffect(() => {
+          if (editingSetting) {
+            setSettingFormData({
+              key: editingSetting.key || '',
+              value: editingSetting.value || '',
+              description: editingSetting.description || '',
+              category: editingSetting.category || ''
+            });
+            setShowAddSettingModal(true);
+          }
+        }, [editingSetting]);
+        
         return (
           <>
-            {/* Add/Edit User Modal */}
-            {showAddUserModal && (
+            {/* Add/Edit Setting Modal */}
+            {showAddSettingModal && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1000
+              }}>
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '30px',
+                  borderRadius: '8px',
+                  width: '500px',
+                  maxWidth: '90%'
+                }}>
+                  <h3 style={{marginBottom: '20px', color: '#333'}}>
+                    {editingSetting ? 'Edit Setting' : 'Add Setting'}
+                  </h3>
+                  
+                  <form onSubmit={handleSettingSubmit}>
+                    <div style={{marginBottom: '15px'}}>
+                      <label style={{display: 'block', marginBottom: '5px', color: '#333'}}>Key</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={settingFormData.key}
+                        onChange={(e) => setSettingFormData({...settingFormData, key: e.target.value})}
+                        required
+                        disabled={editingSetting}
+                        placeholder="e.g., default_vat_quote"
+                      />
+                    </div>
+                    
+                    <div style={{marginBottom: '15px'}}>
+                      <label style={{display: 'block', marginBottom: '5px', color: '#333'}}>Value</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={settingFormData.value}
+                        onChange={(e) => setSettingFormData({...settingFormData, value: e.target.value})}
+                        required
+                        placeholder="e.g., 19.00"
+                      />
+                    </div>
+                    
+                    <div style={{marginBottom: '15px'}}>
+                      <label style={{display: 'block', marginBottom: '5px', color: '#333'}}>Description</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={settingFormData.description}
+                        onChange={(e) => setSettingFormData({...settingFormData, description: e.target.value})}
+                        placeholder="Brief description of this setting"
+                      />
+                    </div>
+                    
+                    <div style={{marginBottom: '15px'}}>
+                      <label style={{display: 'block', marginBottom: '5px', color: '#333'}}>Category</label>
+                      <select
+                        className="form-input"
+                        value={settingFormData.category}
+                        onChange={(e) => setSettingFormData({...settingFormData, category: e.target.value})}
+                      >
+                        <option value="">Select category</option>
+                        <option value="product_defaults">Product Defaults</option>
+                        <option value="company_info">Company Info</option>
+                        <option value="system">System</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                    
+                    <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => {
+                          setShowAddSettingModal(false);
+                          setEditingSetting(null);
+                          setSettingFormData({
+                            key: '',
+                            value: '',
+                            description: '',
+                            category: ''
+                          });
+                        }}
+                      >
+                        Cancel
+                      </button>
+                      <button type="submit" className="btn">
+                        {editingSetting ? 'Update Setting' : 'Add Setting'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </>
+        );
+      };
+
+      // Push database changes to apply schema updates
+      const pushDatabaseChanges = async () => {
+        try {
+          const response = await fetch('/admin/api/db/push', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            alert('Database changes applied successfully!');
+            window.location.reload();
+          } else {
+            alert('Error: ' + data.message);
+          }
+        } catch (err) {
+          alert('Network error applying database changes');
+        }
+      };
+
+      return (
+        <div className="container">
+          <div className="admin-header">
+            <div className="logo">
+              <img src="/attached_assets/KitchenOff_Logo_Background_Removed_1752520997429.png" alt="KitchenOff Logo" />
+              <span>KitchenOff Admin</span>
+            </div>
+            <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+              <span style={{fontSize: '14px', color: '#666'}}>Welcome, {admin?.firstName || 'Admin'}</span>
+              <button onClick={() => setActiveView('dashboard')} className="btn btn-secondary" style={{padding: '8px 16px', fontSize: '14px', width: 'auto'}}>
+                🏠 Dashboard
+              </button>
+              <button onClick={handleLogout} className="btn btn-secondary" style={{padding: '8px 16px', fontSize: '14px', width: 'auto'}}>
+                Logout
+              </button>
+            </div>
+          </div>
+          
+          <div className="nav-tabs">
+            <button 
+              className={`nav-tab ${activeView === 'dashboard' ? 'active' : ''}`}
+              onClick={() => handleViewChange('dashboard')}
+            >
+              📊 Dashboard
+            </button>
+            <button 
+              className={`nav-tab ${activeView === 'orders' ? 'active' : ''}`}
+              onClick={() => handleViewChange('orders')}
+            >
+              📋 Orders
+            </button>
+            <button 
+              className={`nav-tab ${activeView === 'users' ? 'active' : ''}`}
+              onClick={() => handleViewChange('users')}
+            >
+              👥 Users
+            </button>
+            <button 
+              className={`nav-tab ${activeView === 'products' ? 'active' : ''}`}
+              onClick={() => handleViewChange('products')}
+            >
+              📦 Products
+            </button>
+            <button 
+              className={`nav-tab ${activeView === 'settings' ? 'active' : ''}`}
+              onClick={() => handleViewChange('settings')}
+            >
+              ⚙️ Settings
+            </button>
+          </div>
+          
+          <div className="content-area">
+            {renderContent()}
+          </div>
+          <ModalsComponent />
+        </div>
+      );
+    }
+    
+    // Main Admin App Component
+    function AdminApp() {
+      const [isAuthenticated, setIsAuthenticated] = useState(false);
+      const [token, setToken] = useState(null);
+      const [admin, setAdmin] = useState(null);
+      const [loading, setLoading] = useState(true);
+      
+      useEffect(() => {
+        // Check for existing session
+        const savedToken = localStorage.getItem('adminToken');
+        const savedAdmin = localStorage.getItem('adminUser');
+        
+        if (savedToken && savedAdmin) {
+          setToken(savedToken);
+          setAdmin(JSON.parse(savedAdmin));
+          setIsAuthenticated(true);
+        }
+        
+        setLoading(false);
+      }, []);
+      
+      const handleLoginSuccess = (token, admin) => {
+        setToken(token);
+        setAdmin(admin);
+        setIsAuthenticated(true);
+      };
+      
+      const handleLogout = () => {
+        // Clear localStorage
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        
+        // Clear state
+        setToken(null);
+        setAdmin(null);
+        setIsAuthenticated(false);
+      };
+      
+      if (loading) {
+        return (
+          <div className="loading-container">
+            <div className="loading"></div>
+            <p>Loading admin panel...</p>
+          </div>
+        );
+      }
+      
+      return (
+        <div className="admin-app">
+          {isAuthenticated ? (
+            <AdminDashboard 
+              token={token} 
+              admin={admin} 
+              onLogout={handleLogout}
+            />
+          ) : (
+            <AdminLogin onLoginSuccess={handleLoginSuccess} />
+          )}
+        </div>
+      );
+    }
+    
+    // Render the app
+    ReactDOM.render(<AdminApp />, document.getElementById('root'));
+  </script>
+</body>
+</html>
               <div style={{
                 position: 'fixed',
                 top: 0,

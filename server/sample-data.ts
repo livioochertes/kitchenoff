@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { categories, products, users, orders, orderItems } from "../shared/schema";
+import { categories, products, users, orders, orderItems, settings } from "../shared/schema";
 import bcrypt from "bcrypt";
 
 export async function seedDatabase() {
@@ -10,6 +10,7 @@ export async function seedDatabase() {
     await db.delete(products);
     await db.delete(categories);
     await db.delete(users);
+    await db.delete(settings);
 
 
 
@@ -62,7 +63,17 @@ export async function seedDatabase() {
         stockQuantity: 150,
         featured: true,
         rating: "4.8",
-        reviewCount: 24
+        reviewCount: 24,
+        // Business fields
+        vatQuote: "19.00",
+        productCode: "LBL-EXP-500",
+        productType: "product",
+        unitMeasure: "pack",
+        countryOfOrigin: "Romania",
+        currency: "EUR",
+        ncCode: "48236100",
+        cpvCode: "39420000",
+        typeCode: "EAN"
       },
       {
         name: "Day of the Week Labels - Complete Set",
@@ -484,6 +495,64 @@ export async function seedDatabase() {
         isAdmin: false
       }
     ]).returning();
+
+    // Create default settings
+    await db.insert(settings).values([
+      {
+        key: "default_vat_quote",
+        value: "19.00",
+        description: "Default VAT quote percentage for new products",
+        category: "product_defaults"
+      },
+      {
+        key: "default_currency",
+        value: "EUR",
+        description: "Default currency for new products",
+        category: "product_defaults"
+      },
+      {
+        key: "default_country_of_origin",
+        value: "Romania",
+        description: "Default country of origin for new products",
+        category: "product_defaults"
+      },
+      {
+        key: "default_unit_measure",
+        value: "pcs",
+        description: "Default unit of measure for new products",
+        category: "product_defaults"
+      },
+      {
+        key: "default_type_code",
+        value: "EAN",
+        description: "Default type code for new products",
+        category: "product_defaults"
+      },
+      {
+        key: "company_name",
+        value: "NAMARTE",
+        description: "Company name for invoicing",
+        category: "company_info"
+      },
+      {
+        key: "company_address",
+        value: "Calea Mosilor 158, Bucharest, 020883 Romania",
+        description: "Company address for invoicing",
+        category: "company_info"
+      },
+      {
+        key: "company_vat_number",
+        value: "RO12345678",
+        description: "Company VAT number",
+        category: "company_info"
+      },
+      {
+        key: "company_registration_number",
+        value: "J40/12345/2017",
+        description: "Company registration number",
+        category: "company_info"
+      }
+    ]);
 
     // Create sample orders
     const sampleOrders = [
