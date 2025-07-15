@@ -1511,6 +1511,39 @@ const translations: Record<Language, TranslationKeys> = {
     
     // Testimonials section
     'home.testimonials.subtitle': 'Fidato dai professionisti del settore alimentare in tutto il paese',
+    
+    // Home page hero section
+    'home.hero.title': 'Attrezzature da Cucina Professionali e Soluzioni di Sicurezza',
+    'home.hero.subtitle': 'Fidati da ristoranti, caffetterie e professionisti dei servizi alimentari in tutto il mondo. Dalle etichette di scadenza ai materiali di conformità HACCP.',
+    'home.hero.shopNow': 'Acquista Ora',
+    'home.hero.quote': 'Richiedi Preventivo B2B',
+    'home.features.title': 'Perché Scegliere KitchenOff?',
+    'home.features.shipping': 'Spedizione gratuita sopra i 500$',
+    'home.features.compliant': 'Prodotti conformi FDA',
+    'home.features.certified': 'Certificato dall\'industria',
+    'home.features.support': 'Supporto 24/7',
+    'home.features.customers': 'Oltre 10,000 clienti soddisfatti',
+    'home.categories.title': 'Acquista per Categoria',
+    'home.categories.subtitle': 'Trova l\'attrezzatura perfetta per la tua cucina',
+    'home.categories.viewAll': 'Vedi Tutti',
+    'home.categories.products': 'Prodotti',
+    'home.products.title': 'Prodotti in Evidenza',
+    'home.products.subtitle': 'Scopri i nostri articoli più popolari',
+    'home.testimonials.title': 'Cosa Dicono i Nostri Clienti',
+    'home.newsletter.title': 'Rimani Aggiornato',
+    'home.newsletter.subtitle': 'Ricevi gli ultimi aggiornamenti su nuovi prodotti e offerte speciali',
+    'home.newsletter.placeholder': 'Inserisci il tuo indirizzo email',
+    'home.newsletter.subscribe': 'Iscriviti',
+    
+    // Footer additions
+    'footer.company.description': 'Attrezzature da cucina professionali e soluzioni di sicurezza per aziende di servizi alimentari.',
+    'footer.quickLinks': 'Link Rapidi',
+    'footer.aboutUs': 'Chi Siamo',
+    'footer.products': 'Prodotti',
+    'footer.b2bSolutions': 'Soluzioni B2B',
+    'footer.contact': 'Contatti',
+    'footer.categories': 'Categorie',
+    'footer.newsletter': 'Newsletter',
   } as TranslationKeys,
   pt: {
     'nav.home': 'Início',
@@ -1571,6 +1604,39 @@ const translations: Record<Language, TranslationKeys> = {
     
     // Testimonials section
     'home.testimonials.subtitle': 'Confiável por profissionais de serviços alimentares em todo o país',
+    
+    // Home page hero section
+    'home.hero.title': 'Equipamentos de Cozinha Profissionais e Soluções de Segurança',
+    'home.hero.subtitle': 'Confiável por restaurantes, cafés e profissionais de serviços alimentares em todo o mundo. Desde rótulos de validade até materiais de conformidade HACCP.',
+    'home.hero.shopNow': 'Compre Agora',
+    'home.hero.quote': 'Solicitar Orçamento B2B',
+    'home.features.title': 'Por Que Escolher KitchenOff?',
+    'home.features.shipping': 'Frete grátis acima de $500',
+    'home.features.compliant': 'Produtos compatíveis com FDA',
+    'home.features.certified': 'Certificado pela indústria',
+    'home.features.support': 'Suporte 24/7',
+    'home.features.customers': 'Mais de 10,000 clientes satisfeitos',
+    'home.categories.title': 'Compre por Categoria',
+    'home.categories.subtitle': 'Encontre o equipamento perfeito para sua cozinha',
+    'home.categories.viewAll': 'Ver Todos',
+    'home.categories.products': 'Produtos',
+    'home.products.title': 'Produtos em Destaque',
+    'home.products.subtitle': 'Descubra nossos itens mais populares',
+    'home.testimonials.title': 'O Que Nossos Clientes Dizem',
+    'home.newsletter.title': 'Mantenha-se Atualizado',
+    'home.newsletter.subtitle': 'Receba as últimas atualizações sobre novos produtos e ofertas especiais',
+    'home.newsletter.placeholder': 'Digite seu endereço de e-mail',
+    'home.newsletter.subscribe': 'Inscrever-se',
+    
+    // Footer additions
+    'footer.company.description': 'Equipamentos de cozinha profissionais e soluções de segurança para empresas de serviços alimentares.',
+    'footer.quickLinks': 'Links Rápidos',
+    'footer.aboutUs': 'Sobre Nós',
+    'footer.products': 'Produtos',
+    'footer.b2bSolutions': 'Soluções B2B',
+    'footer.contact': 'Contato',
+    'footer.categories': 'Categorias',
+    'footer.newsletter': 'Newsletter',
   } as TranslationKeys,
   zh: {
     'nav.home': '首页',
