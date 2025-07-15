@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { ArrowRight, Truck, Shield, Award, Phone, Users, Star } from "lucide-react";
+import { ArrowRight, Truck, Shield, Award, MessageSquare, Users, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +37,7 @@ export default function Home() {
     { icon: Truck, text: t('home.features.shipping') },
     { icon: Shield, text: t('home.features.compliant') },
     { icon: Award, text: t('home.features.certified') },
-    { icon: Phone, text: t('home.features.support') },
+    { icon: MessageSquare, text: t('home.features.support') },
     { icon: Users, text: t('home.features.customers') },
   ];
 
@@ -349,8 +349,8 @@ export default function Home() {
               <h3 className="text-lg font-semibold text-white mb-4">Contact Info</h3>
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
-                  <Phone className="h-4 w-4 text-secondary" />
-                  <span className="text-slate-300">+1 (234) 567-8900</span>
+                  <MessageSquare className="h-4 w-4 text-secondary" />
+                  <Link href="/ai-assistant" className="text-slate-300 hover:text-white transition-colors">Live Chat Support</Link>
                 </div>
                 <div className="flex items-center space-x-2">
                   <i className="fas fa-envelope text-secondary"></i>

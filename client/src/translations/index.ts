@@ -183,7 +183,7 @@ export interface TranslationKeys {
   // Footer
   'footer.support': string;
   'footer.needHelp': string;
-  'footer.call': string;
+  'footer.chat': string;
   'footer.copyright': string;
   'footer.freeShipping': string;
   'footer.professionalSupport': string;
@@ -468,7 +468,7 @@ const translations: Record<Language, TranslationKeys> = {
     // Footer
     'footer.support': 'Support',
     'footer.needHelp': 'Need help?',
-    'footer.call': 'Call:',
+    'footer.chat': 'Chat:',
     'footer.copyright': '© 2025 KitchenOff. All rights reserved.',
     'footer.freeShipping': 'Free shipping on orders over $500',
     'footer.professionalSupport': 'Professional support available',
@@ -719,7 +719,7 @@ const translations: Record<Language, TranslationKeys> = {
     // Footer
     'footer.support': 'Soporte',
     'footer.needHelp': '¿Necesitas ayuda?',
-    'footer.call': 'Llamar:',
+    'footer.chat': 'Chat:',
     'footer.copyright': '© 2025 KitchenOff. Todos los derechos reservados.',
     'footer.freeShipping': 'Envío gratis en pedidos superiores a $500',
     'footer.professionalSupport': 'Soporte profesional disponible',
@@ -974,7 +974,7 @@ const translations: Record<Language, TranslationKeys> = {
     // Footer
     'footer.support': 'Support',
     'footer.needHelp': 'Besoin d\'aide?',
-    'footer.call': 'Appeler:',
+    'footer.chat': 'Chat:',
     'footer.copyright': '© 2025 KitchenOff. Tous droits réservés.',
     'footer.freeShipping': 'Livraison gratuite pour les commandes de plus de 500$',
     'footer.professionalSupport': 'Support professionnel disponible',
@@ -1235,7 +1235,7 @@ const translations: Record<Language, TranslationKeys> = {
     'messages.sessionExpired': 'Sitzung abgelaufen. Bitte melden Sie sich erneut an.',
     'footer.support': 'Support',
     'footer.needHelp': 'Brauchen Sie Hilfe?',
-    'footer.call': 'Anrufen:',
+    'footer.chat': 'Chat:',
     'footer.copyright': '© 2025 KitchenOff. Alle Rechte vorbehalten.',
     'footer.freeShipping': 'Kostenloser Versand bei Bestellungen über 500$',
     'footer.professionalSupport': 'Professioneller Support verfügbar',
@@ -1515,7 +1515,7 @@ const translations: Record<Language, TranslationKeys> = {
     // Footer
     'footer.support': 'Suport',
     'footer.needHelp': 'Aveți nevoie de ajutor?',
-    'footer.call': 'Sunați:',
+    'footer.chat': 'Chat:',
     'footer.copyright': '© 2025 KitchenOff. Toate drepturile rezervate.',
     'footer.freeShipping': 'Livrare gratuită pentru comenzi peste 500$',
     'footer.professionalSupport': 'Suport profesional disponibil',
@@ -1676,6 +1676,12 @@ const translations: Record<Language, TranslationKeys> = {
     'footer.contact': 'Contatti',
     'footer.categories': 'Categorie',
     'footer.newsletter': 'Newsletter',
+    'footer.support': 'Supporto',
+    'footer.needHelp': 'Hai bisogno di aiuto?',
+    'footer.chat': 'Chat:',
+    'footer.copyright': '© 2025 KitchenOff. Tutti i diritti riservati.',
+    'footer.freeShipping': 'Spedizione gratuita sopra i $500',
+    'footer.professionalSupport': 'Supporto professionale disponibile',
     
     // Account
     'account.title': 'Il Mio Account',
@@ -1803,6 +1809,12 @@ const translations: Record<Language, TranslationKeys> = {
     // Footer additions
     'footer.company.description': 'Equipamentos de cozinha profissionais e soluções de segurança para empresas de serviços alimentares.',
     'footer.quickLinks': 'Links Rápidos',
+    'footer.support': 'Suporte',
+    'footer.needHelp': 'Precisa de ajuda?',
+    'footer.chat': 'Chat:',
+    'footer.copyright': '© 2025 KitchenOff. Todos os direitos reservados.',
+    'footer.freeShipping': 'Frete grátis acima de $500',
+    'footer.professionalSupport': 'Suporte profissional disponível',
     'footer.aboutUs': 'Sobre Nós',
     'footer.products': 'Produtos',
     'footer.b2bSolutions': 'Soluções B2B',
@@ -1942,6 +1954,12 @@ const translations: Record<Language, TranslationKeys> = {
     'footer.contact': '联系我们',
     'footer.categories': '类别',
     'footer.newsletter': '新闻简报',
+    'footer.support': '支持',
+    'footer.needHelp': '需要帮助吗？',
+    'footer.chat': '聊天:',
+    'footer.copyright': '© 2025 KitchenOff. 保留所有权利。',
+    'footer.freeShipping': '500美元以上免费配送',
+    'footer.professionalSupport': '专业支持服务',
     
     // Account
     'account.title': '我的账户',
@@ -2075,6 +2093,12 @@ const translations: Record<Language, TranslationKeys> = {
     'footer.contact': 'お問い合わせ',
     'footer.categories': 'カテゴリー',
     'footer.newsletter': 'ニュースレター',
+    'footer.support': 'サポート',
+    'footer.needHelp': 'ヘルプが必要ですか？',
+    'footer.chat': 'チャット:',
+    'footer.copyright': '© 2025 KitchenOff. すべての権利を保有。',
+    'footer.freeShipping': '500ドル以上で送料無料',
+    'footer.professionalSupport': 'プロフェッショナルサポート利用可能',
     
     // Account
     'account.title': 'マイアカウント',
@@ -2248,6 +2272,14 @@ const translations: Record<Language, TranslationKeys> = {
     'account.password': '비밀번호',
     'account.passwordDesc': '계정 비밀번호 변경',
     'account.change': '변경',
+    
+    // Footer
+    'footer.support': '지원',
+    'footer.needHelp': '도움이 필요하세요?',
+    'footer.chat': '채팅:',
+    'footer.copyright': '© 2025 KitchenOff. 모든 권리 보유.',
+    'footer.freeShipping': '500달러 이상 무료배송',
+    'footer.professionalSupport': '전문 지원 서비스',
   } as TranslationKeys,
   ar: {
     'nav.home': 'الرئيسية',
@@ -2381,6 +2413,14 @@ const translations: Record<Language, TranslationKeys> = {
     'account.password': 'كلمة المرور',
     'account.passwordDesc': 'تغيير كلمة مرور حسابك',
     'account.change': 'تغيير',
+    
+    // Footer
+    'footer.support': 'الدعم',
+    'footer.needHelp': 'هل تحتاج مساعدة؟',
+    'footer.chat': 'المحادثة:',
+    'footer.copyright': '© 2025 KitchenOff. جميع الحقوق محفوظة.',
+    'footer.freeShipping': 'شحن مجاني للطلبات فوق 500 دولار',
+    'footer.professionalSupport': 'دعم مهني متاح',
   } as TranslationKeys,
 };
 

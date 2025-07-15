@@ -249,9 +249,9 @@ export default function Header() {
             </div>
             <div className="hidden lg:flex items-center space-x-4">
               <span className="text-sm text-muted-foreground">{t('footer.needHelp')}</span>
-              <a href="tel:+1234567890" className="text-sm text-secondary font-medium">
-                {t('footer.call')} +1 (234) 567-8900
-              </a>
+              <Link href="/ai-assistant" className="text-sm text-secondary font-medium">
+                {t('footer.chat')} Support Chat
+              </Link>
             </div>
           </div>
         </div>
