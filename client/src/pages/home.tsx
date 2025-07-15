@@ -189,12 +189,16 @@ export default function Home() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Button className="kitchen-pro-secondary">
-                    {t('home.business.getQuote')}
-                  </Button>
-                  <Button variant="outline" className="border-secondary text-secondary hover:bg-secondary hover:text-white">
-                    {t('home.business.contactSales')}
-                  </Button>
+                  <Link href="/b2b">
+                    <Button className="kitchen-pro-secondary">
+                      {t('home.business.getQuote')}
+                    </Button>
+                  </Link>
+                  <Link href="/ai-assistant">
+                    <Button variant="outline" className="border-secondary text-secondary hover:bg-secondary hover:text-white">
+                      {t('home.business.contactSales')}
+                    </Button>
+                  </Link>
                 </div>
               </div>
 
@@ -325,7 +329,7 @@ export default function Home() {
               <ul className="space-y-2">
                 <li><Link href="/about" className="text-slate-300 hover:text-white transition-colors">{t('footer.aboutUs')}</Link></li>
                 <li><a href="#" className="text-slate-300 hover:text-white transition-colors">{t('footer.products')}</a></li>
-                <li><a href="#" className="text-slate-300 hover:text-white transition-colors">{t('footer.b2bSolutions')}</a></li>
+                <li><Link href="/b2b" className="text-slate-300 hover:text-white transition-colors">{t('footer.b2bSolutions')}</Link></li>
                 <li>
                   <ContactModal>
                     <button className="text-slate-300 hover:text-white transition-colors">

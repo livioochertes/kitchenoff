@@ -280,6 +280,42 @@ export interface TranslationKeys {
   'contact.categories.technical': string;
   'contact.categories.billing': string;
   'contact.categories.partnership': string;
+  
+  // B2B Solutions page
+  'b2b.hero.title': string;
+  'b2b.hero.subtitle': string;
+  'b2b.hero.badge': string;
+  'b2b.intro.title': string;
+  'b2b.intro.description': string;
+  'b2b.intro.platform': string;
+  'b2b.features.title': string;
+  'b2b.features.description': string;
+  'b2b.features.centralized.title': string;
+  'b2b.features.centralized.description': string;
+  'b2b.features.pricing.title': string;
+  'b2b.features.pricing.description': string;
+  'b2b.features.delivery.title': string;
+  'b2b.features.delivery.description': string;
+  'b2b.features.multiLocation.title': string;
+  'b2b.features.multiLocation.description': string;
+  'b2b.features.accountManagement.title': string;
+  'b2b.features.accountManagement.description': string;
+  'b2b.features.integration.title': string;
+  'b2b.features.integration.description': string;
+  'b2b.benefits.title': string;
+  'b2b.benefits.description': string;
+  'b2b.benefits.efficiency.title': string;
+  'b2b.benefits.efficiency.description': string;
+  'b2b.benefits.savings.title': string;
+  'b2b.benefits.savings.description': string;
+  'b2b.benefits.support.title': string;
+  'b2b.benefits.support.description': string;
+  'b2b.benefits.scalability.title': string;
+  'b2b.benefits.scalability.description': string;
+  'b2b.cta.title': string;
+  'b2b.cta.description': string;
+  'b2b.cta.getQuote': string;
+  'b2b.cta.viewProducts': string;
 }
 
 const translations: Record<Language, TranslationKeys> = {
@@ -626,6 +662,42 @@ const translations: Record<Language, TranslationKeys> = {
     'about.cta.description': 'Whether you\'re launching a new concept or scaling your operations, we\'re here to support your growth.',
     'about.cta.shopNow': 'Shop Now',
     'about.cta.contactUs': 'Contact Support',
+    
+    // B2B Solutions page
+    'b2b.hero.title': 'B2B Solutions',
+    'b2b.hero.subtitle': 'Streamline your procurement process and gain a competitive edge with our specialized HORECA solutions',
+    'b2b.hero.badge': 'Trusted by Hotels, Restaurants & Catering Businesses',
+    'b2b.intro.title': 'Specialized B2B Solutions for the HORECA Industry',
+    'b2b.intro.description': 'At KitchenOff, we specialize in B2B solutions for the HORECA industry, helping businesses streamline their procurement process and gain a competitive edge.',
+    'b2b.intro.platform': 'Our platform is designed with efficiency, flexibility, and scalability in mind, offering a full suite of features to meet the unique needs of hotels, restaurants, cafés, and catering businesses.',
+    'b2b.features.title': 'Comprehensive B2B Features',
+    'b2b.features.description': 'Everything you need to manage your procurement efficiently and effectively.',
+    'b2b.features.centralized.title': 'Centralized Procurement',
+    'b2b.features.centralized.description': 'Access a wide range of food, beverage, consumables, and equipment—all from a single, easy-to-use online platform.',
+    'b2b.features.pricing.title': 'Custom Pricing & Volume Discounts',
+    'b2b.features.pricing.description': 'Benefit from tailored offers and negotiated pricing based on your business volume, order frequency, or seasonal needs.',
+    'b2b.features.delivery.title': 'Scheduled Deliveries',
+    'b2b.features.delivery.description': 'Choose preferred delivery days and times to align with your kitchen workflow and minimize downtime.',
+    'b2b.features.multiLocation.title': 'Multi-Location Support',
+    'b2b.features.multiLocation.description': 'For franchises or multi-unit operators, manage procurement across multiple locations under a unified account structure.',
+    'b2b.features.accountManagement.title': 'Dedicated Account Management',
+    'b2b.features.accountManagement.description': 'Work with a B2B specialist who understands your business and provides hands-on support, order planning, and optimization.',
+    'b2b.features.integration.title': 'Integration Options',
+    'b2b.features.integration.description': 'Connect our platform with your ERP or inventory systems for a seamless purchasing experience and better stock control.',
+    'b2b.benefits.title': 'Why Choose KitchenOff B2B?',
+    'b2b.benefits.description': 'Whether you\'re a boutique restaurant or a large hotel chain, KitchenOff offers the tools and support to elevate your supply operations.',
+    'b2b.benefits.efficiency.title': 'Increased Efficiency',
+    'b2b.benefits.efficiency.description': 'Streamline your procurement process and reduce administrative overhead.',
+    'b2b.benefits.savings.title': 'Cost Savings',
+    'b2b.benefits.savings.description': 'Access volume discounts and negotiated pricing to reduce your operational costs.',
+    'b2b.benefits.support.title': 'Expert Support',
+    'b2b.benefits.support.description': 'Get dedicated account management and industry expertise to optimize your operations.',
+    'b2b.benefits.scalability.title': 'Scalable Solutions',
+    'b2b.benefits.scalability.description': 'Grow your business with solutions that scale from single locations to enterprise chains.',
+    'b2b.cta.title': 'Ready to Transform Your Procurement?',
+    'b2b.cta.description': 'Join hundreds of HORECA businesses that trust KitchenOff for their supply chain needs.',
+    'b2b.cta.getQuote': 'Get B2B Quote',
+    'b2b.cta.viewProducts': 'View Products',
   },
   
   es: {
