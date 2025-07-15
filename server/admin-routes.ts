@@ -520,6 +520,27 @@ export async function registerAdminRoutes(app: Express) {
     }
   });
 
+  // Get individual order details
+  app.get("/admin/api/orders/:id", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      
+      if (isNaN(orderId)) {
+        return res.status(400).json({ success: false, message: 'Invalid order ID' });
+      }
+
+      const order = await storage.getOrder(orderId);
+      if (!order) {
+        return res.status(404).json({ success: false, message: 'Order not found' });
+      }
+
+      res.json({ success: true, order });
+    } catch (error) {
+      console.error('Error fetching order:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch order' });
+    }
+  });
+
   // Individual order status update
   app.put("/admin/api/orders/:id/status", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
     try {

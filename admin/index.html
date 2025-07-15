@@ -451,6 +451,9 @@
       const [statusFilter, setStatusFilter] = useState('all');
       const [showSearchFilter, setShowSearchFilter] = useState(false);
       const [filteredOrders, setFilteredOrders] = useState([]);
+      const [selectedOrder, setSelectedOrder] = useState(null);
+      const [showOrderDetails, setShowOrderDetails] = useState(false);
+      const [showOrderTools, setShowOrderTools] = useState(false);
       
       useEffect(() => {
         fetchStats();
@@ -898,8 +901,7 @@
                           alert('Please select orders first by checking the checkboxes.');
                           return;
                         }
-                        setBulkOperation('tools');
-                        setShowBulkModal(true);
+                        setShowOrderTools(true);
                       }}
                     >
                       🛠️ Order Tools
@@ -1033,7 +1035,10 @@
                                     cursor: 'pointer',
                                     fontSize: '12px'
                                   }}
-                                  onClick={() => alert(`View order details for Order #${order.id}:\n\n• Customer information\n• Order items and quantities\n• Shipping address\n• Payment details\n• Order history`)}
+                                  onClick={() => {
+                                    setSelectedOrder(order);
+                                    setShowOrderDetails(true);
+                                  }}
                                 >
                                   👁️ View
                                 </button>
@@ -2018,6 +2023,284 @@
                         setShowBulkModal(false);
                         setBulkOperation('');
                         setBulkResults(null);
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Order Details Modal */}
+            {showOrderDetails && selectedOrder && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1000
+              }}>
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '30px',
+                  borderRadius: '8px',
+                  width: '90%',
+                  maxWidth: '800px',
+                  maxHeight: '80vh',
+                  overflow: 'auto'
+                }}>
+                  <h3 style={{marginBottom: '20px', color: '#333'}}>
+                    📋 Order Details - #{selectedOrder.id}
+                  </h3>
+                  
+                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '20px'}}>
+                    <div style={{padding: '15px', background: '#f8f9fa', borderRadius: '6px'}}>
+                      <h4 style={{color: '#333', marginBottom: '10px'}}>Order Information</h4>
+                      <p><strong>Order ID:</strong> #{selectedOrder.id}</p>
+                      <p><strong>Status:</strong> <span style={{
+                        padding: '4px 8px', 
+                        borderRadius: '4px', 
+                        backgroundColor: selectedOrder.status === 'pending' ? '#fff3cd' : selectedOrder.status === 'processing' ? '#cce5ff' : '#d4edda',
+                        color: selectedOrder.status === 'pending' ? '#856404' : selectedOrder.status === 'processing' ? '#0056b3' : '#155724'
+                      }}>{selectedOrder.status}</span></p>
+                      <p><strong>Total Amount:</strong> ${selectedOrder.totalAmount}</p>
+                      <p><strong>Payment Method:</strong> {selectedOrder.paymentMethod}</p>
+                      <p><strong>Payment Status:</strong> {selectedOrder.paymentStatus}</p>
+                      <p><strong>Created:</strong> {new Date(selectedOrder.createdAt).toLocaleString()}</p>
+                    </div>
+                    
+                    <div style={{padding: '15px', background: '#f8f9fa', borderRadius: '6px'}}>
+                      <h4 style={{color: '#333', marginBottom: '10px'}}>Customer Information</h4>
+                      <p><strong>Name:</strong> {selectedOrder.shippingAddress.name}</p>
+                      <p><strong>User ID:</strong> #{selectedOrder.userId}</p>
+                      <p><strong>Email:</strong> user_{selectedOrder.userId}@example.com</p>
+                    </div>
+                  </div>
+                  
+                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '20px'}}>
+                    <div style={{padding: '15px', background: '#f8f9fa', borderRadius: '6px'}}>
+                      <h4 style={{color: '#333', marginBottom: '10px'}}>Shipping Address</h4>
+                      <p>{selectedOrder.shippingAddress.name}</p>
+                      <p>{selectedOrder.shippingAddress.street}</p>
+                      <p>{selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state} {selectedOrder.shippingAddress.zipCode}</p>
+                      <p>{selectedOrder.shippingAddress.country}</p>
+                    </div>
+                    
+                    <div style={{padding: '15px', background: '#f8f9fa', borderRadius: '6px'}}>
+                      <h4 style={{color: '#333', marginBottom: '10px'}}>Billing Address</h4>
+                      <p>{selectedOrder.billingAddress.name}</p>
+                      <p>{selectedOrder.billingAddress.street}</p>
+                      <p>{selectedOrder.billingAddress.city}, {selectedOrder.billingAddress.state} {selectedOrder.billingAddress.zipCode}</p>
+                      <p>{selectedOrder.billingAddress.country}</p>
+                    </div>
+                  </div>
+                  
+                  <div style={{padding: '15px', background: '#f8f9fa', borderRadius: '6px', marginBottom: '20px'}}>
+                    <h4 style={{color: '#333', marginBottom: '15px'}}>Order Items</h4>
+                    <div style={{overflowX: 'auto'}}>
+                      <table style={{width: '100%', borderCollapse: 'collapse'}}>
+                        <thead>
+                          <tr style={{backgroundColor: '#e9ecef'}}>
+                            <th style={{padding: '10px', textAlign: 'left', borderBottom: '1px solid #dee2e6'}}>Product</th>
+                            <th style={{padding: '10px', textAlign: 'left', borderBottom: '1px solid #dee2e6'}}>Quantity</th>
+                            <th style={{padding: '10px', textAlign: 'left', borderBottom: '1px solid #dee2e6'}}>Price</th>
+                            <th style={{padding: '10px', textAlign: 'left', borderBottom: '1px solid #dee2e6'}}>Total</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {selectedOrder.items && selectedOrder.items.map((item, index) => (
+                            <tr key={index} style={{borderBottom: '1px solid #dee2e6'}}>
+                              <td style={{padding: '10px'}}>
+                                <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                                  {item.product && item.product.imageUrl && (
+                                    <img 
+                                      src={item.product.imageUrl} 
+                                      alt={item.product.name}
+                                      style={{width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px'}}
+                                    />
+                                  )}
+                                  <span>{item.product ? item.product.name : `Product ID: ${item.productId}`}</span>
+                                </div>
+                              </td>
+                              <td style={{padding: '10px'}}>{item.quantity}</td>
+                              <td style={{padding: '10px'}}>${item.price}</td>
+                              <td style={{padding: '10px', fontWeight: 'bold'}}>${item.totalPrice}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  
+                  {selectedOrder.notes && (
+                    <div style={{padding: '15px', background: '#fff3cd', borderRadius: '6px', marginBottom: '20px'}}>
+                      <h4 style={{color: '#333', marginBottom: '10px'}}>Order Notes</h4>
+                      <p>{selectedOrder.notes}</p>
+                    </div>
+                  )}
+                  
+                  <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                    <button
+                      type="button"
+                      className="btn"
+                      style={{background: '#6c757d'}}
+                      onClick={() => {
+                        setShowOrderDetails(false);
+                        setSelectedOrder(null);
+                      }}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Order Tools Modal */}
+            {showOrderTools && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1000
+              }}>
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '30px',
+                  borderRadius: '8px',
+                  width: '90%',
+                  maxWidth: '600px',
+                  maxHeight: '80vh',
+                  overflow: 'auto'
+                }}>
+                  <h3 style={{marginBottom: '20px', color: '#333'}}>
+                    🛠️ Order Tools
+                  </h3>
+                  <p style={{marginBottom: '20px', color: '#666'}}>
+                    Selected {selectedOrders.length} orders for advanced operations.
+                  </p>
+                  
+                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px', marginBottom: '20px'}}>
+                    <button
+                      className="btn"
+                      style={{background: '#17a2b8', padding: '15px', display: 'flex', alignItems: 'center', gap: '10px'}}
+                      onClick={async () => {
+                        const result = await performBulkOperation('shipping', selectedOrders);
+                        if (result.success) {
+                          alert(`Shipping labels generated for ${selectedOrders.length} orders`);
+                          setShowOrderTools(false);
+                          setSelectedOrders([]);
+                        } else {
+                          alert('Error: ' + result.message);
+                        }
+                      }}
+                    >
+                      <span style={{fontSize: '20px'}}>📦</span>
+                      <div style={{textAlign: 'left'}}>
+                        <div style={{fontWeight: 'bold'}}>Generate Shipping Labels</div>
+                        <div style={{fontSize: '12px', opacity: '0.8'}}>Create shipping labels for selected orders</div>
+                      </div>
+                    </button>
+                    
+                    <button
+                      className="btn"
+                      style={{background: '#ffc107', padding: '15px', display: 'flex', alignItems: 'center', gap: '10px'}}
+                      onClick={() => {
+                        const message = prompt('Enter notification message for customers:');
+                        if (message) {
+                          performBulkOperation('notifications', selectedOrders, { message }).then(result => {
+                            if (result.success) {
+                              alert(`Notifications sent to ${selectedOrders.length} customers`);
+                              setShowOrderTools(false);
+                              setSelectedOrders([]);
+                            } else {
+                              alert('Error: ' + result.message);
+                            }
+                          });
+                        }
+                      }}
+                    >
+                      <span style={{fontSize: '20px'}}>📧</span>
+                      <div style={{textAlign: 'left'}}>
+                        <div style={{fontWeight: 'bold'}}>Send Notifications</div>
+                        <div style={{fontSize: '12px', opacity: '0.8'}}>Send email notifications to customers</div>
+                      </div>
+                    </button>
+                    
+                    <button
+                      className="btn"
+                      style={{background: '#dc3545', padding: '15px', display: 'flex', alignItems: 'center', gap: '10px'}}
+                      onClick={() => {
+                        if (confirm('Are you sure you want to process refunds for the selected orders? This action cannot be undone.')) {
+                          performBulkOperation('refunds', selectedOrders).then(result => {
+                            if (result.success) {
+                              alert(`Refunds processed for ${selectedOrders.length} orders`);
+                              setShowOrderTools(false);
+                              setSelectedOrders([]);
+                            } else {
+                              alert('Error: ' + result.message);
+                            }
+                          });
+                        }
+                      }}
+                    >
+                      <span style={{fontSize: '20px'}}>💸</span>
+                      <div style={{textAlign: 'left'}}>
+                        <div style={{fontWeight: 'bold'}}>Process Refunds</div>
+                        <div style={{fontSize: '12px', opacity: '0.8'}}>Issue refunds for selected orders</div>
+                      </div>
+                    </button>
+                    
+                    <button
+                      className="btn"
+                      style={{background: '#28a745', padding: '15px', display: 'flex', alignItems: 'center', gap: '10px'}}
+                      onClick={() => {
+                        const orderIds = selectedOrders.join(', ');
+                        const csvContent = `Order ID,Customer,Status,Amount,Date\n${selectedOrders.map(id => {
+                          const order = filteredOrders.find(o => o.id === id);
+                          return `${order.id},User ${order.userId},${order.status},${order.totalAmount},${new Date(order.createdAt).toLocaleDateString()}`;
+                        }).join('\n')}`;
+                        
+                        const blob = new Blob([csvContent], { type: 'text/csv' });
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `orders_${new Date().toISOString().split('T')[0]}.csv`;
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        
+                        alert(`Exported ${selectedOrders.length} orders to CSV`);
+                        setShowOrderTools(false);
+                        setSelectedOrders([]);
+                      }}
+                    >
+                      <span style={{fontSize: '20px'}}>📊</span>
+                      <div style={{textAlign: 'left'}}>
+                        <div style={{fontWeight: 'bold'}}>Export to CSV</div>
+                        <div style={{fontSize: '12px', opacity: '0.8'}}>Download order data as CSV file</div>
+                      </div>
+                    </button>
+                  </div>
+                  
+                  <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                    <button
+                      type="button"
+                      className="btn"
+                      style={{background: '#6c757d'}}
+                      onClick={() => {
+                        setShowOrderTools(false);
                       }}
                     >
                       Cancel
