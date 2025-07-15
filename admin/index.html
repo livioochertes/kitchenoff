@@ -290,6 +290,7 @@
       const [stats, setStats] = useState(null);
       const [loading, setLoading] = useState(true);
       const [error, setError] = useState('');
+      const [showTwoFactor, setShowTwoFactor] = useState(false);
       
       useEffect(() => {
         fetchStats();
@@ -361,7 +362,7 @@
           <div className="admin-header">
             <div className="logo">🍴 KitchenOff Admin</div>
             <div>
-              <span>Welcome, {admin.firstName || 'Admin'}</span>
+              <span>Welcome, {admin?.firstName || 'Admin'}</span>
               <button onClick={handleLogout} className="btn btn-secondary" style={{marginLeft: '10px'}}>
                 Logout
               </button>
@@ -370,22 +371,22 @@
           
           <div className="dashboard-grid">
             <div className="stat-card">
-              <div className="stat-number">{stats.totalUsers}</div>
+              <div className="stat-number">{stats?.totalUsers || '0'}</div>
               <div className="stat-label">Total Users</div>
             </div>
             
             <div className="stat-card">
-              <div className="stat-number">{stats.totalOrders}</div>
+              <div className="stat-number">{stats?.totalOrders || '0'}</div>
               <div className="stat-label">Total Orders</div>
             </div>
             
             <div className="stat-card">
-              <div className="stat-number">{stats.totalProducts}</div>
+              <div className="stat-number">{stats?.totalProducts || '0'}</div>
               <div className="stat-label">Total Products</div>
             </div>
             
             <div className="stat-card">
-              <div className="stat-number">{stats.recentOrders.length}</div>
+              <div className="stat-number">{stats?.recentOrders?.length || '0'}</div>
               <div className="stat-label">Recent Orders</div>
             </div>
           </div>
@@ -401,11 +402,99 @@
             <div style={{marginTop: '30px', padding: '20px', background: '#f8f9ff', borderRadius: '6px'}}>
               <h4 style={{color: '#333', marginBottom: '10px'}}>Quick Stats Summary</h4>
               <ul style={{listStyle: 'none', padding: 0}}>
-                <li style={{marginBottom: '5px'}}>📊 {stats.totalUsers} registered users</li>
-                <li style={{marginBottom: '5px'}}>🛒 {stats.totalOrders} orders processed</li>
-                <li style={{marginBottom: '5px'}}>📦 {stats.totalProducts} products in catalog</li>
-                <li style={{marginBottom: '5px'}}>🔄 {stats.recentOrders.length} recent orders</li>
+                <li style={{marginBottom: '5px'}}>📊 {stats?.totalUsers || '0'} registered users</li>
+                <li style={{marginBottom: '5px'}}>🛒 {stats?.totalOrders || '0'} orders processed</li>
+                <li style={{marginBottom: '5px'}}>📦 {stats?.totalProducts || '0'} products in catalog</li>
+                <li style={{marginBottom: '5px'}}>🔄 {stats?.recentOrders?.length || '0'} recent orders</li>
               </ul>
+            </div>
+            
+            <div style={{marginTop: '30px', padding: '20px', background: '#fff8e1', borderRadius: '6px'}}>
+              <h4 style={{color: '#333', marginBottom: '10px'}}>Admin Actions</h4>
+              <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginTop: '15px'}}>
+                <button 
+                  className="btn" 
+                  style={{background: '#4CAF50', width: 'auto', padding: '10px 16px'}}
+                  onClick={() => window.open('/admin/orders', '_blank')}
+                >
+                  📋 Manage Orders
+                </button>
+                <button 
+                  className="btn" 
+                  style={{background: '#2196F3', width: 'auto', padding: '10px 16px'}}
+                  onClick={() => window.open('/admin/users', '_blank')}
+                >
+                  👥 Manage Users
+                </button>
+                <button 
+                  className="btn" 
+                  style={{background: '#FF9800', width: 'auto', padding: '10px 16px'}}
+                  onClick={() => window.open('/admin/products', '_blank')}
+                >
+                  📦 Manage Products
+                </button>
+                <button 
+                  className="btn" 
+                  style={{background: '#9C27B0', width: 'auto', padding: '10px 16px'}}
+                  onClick={() => setShowTwoFactor(!showTwoFactor)}
+                >
+                  🔐 Two-Factor Auth
+                </button>
+              </div>
+            </div>
+            
+            {showTwoFactor && (
+              <div style={{marginTop: '30px', padding: '20px', background: '#e8f5e8', borderRadius: '6px', border: '2px solid #4CAF50'}}>
+                <h4 style={{color: '#333', marginBottom: '10px'}}>🔐 Two-Factor Authentication</h4>
+                <p style={{color: '#666', marginBottom: '15px'}}>
+                  Status: {admin?.twoFactorEnabled ? 
+                    <span style={{color: '#4CAF50', fontWeight: 'bold'}}>✅ Enabled</span> : 
+                    <span style={{color: '#f44336', fontWeight: 'bold'}}>❌ Disabled</span>
+                  }
+                </p>
+                <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                  <button 
+                    className="btn" 
+                    style={{background: admin?.twoFactorEnabled ? '#f44336' : '#4CAF50', width: 'auto', padding: '8px 16px'}}
+                    onClick={() => alert('2FA management functionality will be implemented')}
+                  >
+                    {admin?.twoFactorEnabled ? '🔓 Disable 2FA' : '🔒 Enable 2FA'}
+                  </button>
+                  {admin?.twoFactorEnabled && (
+                    <button 
+                      className="btn" 
+                      style={{background: '#FF9800', width: 'auto', padding: '8px 16px'}}
+                      onClick={() => alert('Backup codes regeneration will be implemented')}
+                    >
+                      🔄 Regenerate Backup Codes
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            <div style={{marginTop: '30px', padding: '20px', background: '#f0f8ff', borderRadius: '6px'}}>
+              <h4 style={{color: '#333', marginBottom: '10px'}}>Recent Activity</h4>
+              {stats?.recentOrders?.length > 0 ? (
+                <div style={{maxHeight: '200px', overflowY: 'auto'}}>
+                  {stats.recentOrders.map((order, index) => (
+                    <div key={index} style={{
+                      padding: '10px',
+                      marginBottom: '10px',
+                      background: 'white',
+                      borderRadius: '4px',
+                      borderLeft: '4px solid #2196F3'
+                    }}>
+                      <div style={{fontWeight: 'bold'}}>Order #{order.id}</div>
+                      <div style={{fontSize: '14px', color: '#666'}}>
+                        Amount: ${order.totalAmount} | Status: {order.status}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{color: '#666', fontStyle: 'italic'}}>No recent orders</p>
+              )}
             </div>
           </div>
         </div>
@@ -464,7 +553,8 @@
     }
     
     // Render the app
-    ReactDOM.render(<AdminApp />, document.getElementById('admin-root'));
+    const root = ReactDOM.createRoot(document.getElementById('admin-root'));
+    root.render(<AdminApp />);
   </script>
 </body>
 </html>
