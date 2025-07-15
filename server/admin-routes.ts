@@ -69,12 +69,51 @@ export async function registerAdminRoutes(app: Express) {
   // Serve admin interface directly at /admin
   app.get("/admin", (req: Request, res: Response) => {
     try {
-      const adminPath = path.resolve('./admin/index.html');
+      const adminPath = path.resolve('./admin/simple.html');
       console.log('Serving admin interface from:', adminPath);
       res.sendFile(adminPath);
     } catch (error) {
       console.error('Error serving admin interface:', error);
-      res.status(500).send('Admin interface temporarily unavailable');
+      // Fallback to basic HTML
+      res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>KitchenOff Admin</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+            .container { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); max-width: 400px; width: 100%; }
+            h1 { color: #333; margin-bottom: 20px; text-align: center; }
+            .form-group { margin-bottom: 20px; }
+            label { display: block; margin-bottom: 8px; font-weight: 500; color: #333; }
+            input { width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+            button { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+            .demo-info { margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 8px; font-size: 14px; text-align: center; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>KitchenOff Admin</h1>
+            <form action="/admin/api/login" method="post">
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" value="admin@kitchen-off.com" required>
+              </div>
+              <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" value="admin123" required>
+              </div>
+              <button type="submit">Login</button>
+            </form>
+            <div class="demo-info">
+              <p><strong>Demo Credentials:</strong></p>
+              <p>Email: admin@kitchen-off.com</p>
+              <p>Password: admin123</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `);
     }
   });
   
