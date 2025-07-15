@@ -2145,6 +2145,152 @@
                     </div>
                   )}
                   
+                  <div style={{padding: '15px', background: '#f8f9fa', borderRadius: '6px', marginBottom: '20px'}}>
+                    <h4 style={{color: '#333', marginBottom: '15px'}}>Order Tools</h4>
+                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px'}}>
+                      <button
+                        className="btn"
+                        style={{background: '#17a2b8', padding: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px'}}
+                        onClick={async () => {
+                          const result = await performBulkOperation('shipping', [selectedOrder.id]);
+                          if (result.success) {
+                            alert(`Shipping label generated for Order #${selectedOrder.id}`);
+                          } else {
+                            alert('Error: ' + result.message);
+                          }
+                        }}
+                      >
+                        <span>📦</span>
+                        <span>Generate Shipping Label</span>
+                      </button>
+                      
+                      <button
+                        className="btn"
+                        style={{background: '#ffc107', padding: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px'}}
+                        onClick={() => {
+                          const message = prompt('Enter notification message for customer:');
+                          if (message) {
+                            performBulkOperation('notifications', [selectedOrder.id], { message }).then(result => {
+                              if (result.success) {
+                                alert(`Notification sent to customer for Order #${selectedOrder.id}`);
+                              } else {
+                                alert('Error: ' + result.message);
+                              }
+                            });
+                          }
+                        }}
+                      >
+                        <span>📧</span>
+                        <span>Send Notification</span>
+                      </button>
+                      
+                      <button
+                        className="btn"
+                        style={{background: '#dc3545', padding: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px'}}
+                        onClick={() => {
+                          if (confirm(`Are you sure you want to process a refund for Order #${selectedOrder.id}? This action cannot be undone.`)) {
+                            performBulkOperation('refunds', [selectedOrder.id]).then(result => {
+                              if (result.success) {
+                                alert(`Refund processed for Order #${selectedOrder.id}`);
+                              } else {
+                                alert('Error: ' + result.message);
+                              }
+                            });
+                          }
+                        }}
+                      >
+                        <span>💸</span>
+                        <span>Process Refund</span>
+                      </button>
+                      
+                      <button
+                        className="btn"
+                        style={{background: '#28a745', padding: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px'}}
+                        onClick={() => {
+                          const csvContent = `Order ID,Customer,Status,Amount,Date\n${selectedOrder.id},${selectedOrder.shippingAddress.name},${selectedOrder.status},${selectedOrder.totalAmount},${new Date(selectedOrder.createdAt).toLocaleDateString()}`;
+                          
+                          const blob = new Blob([csvContent], { type: 'text/csv' });
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `order_${selectedOrder.id}_${new Date().toISOString().split('T')[0]}.csv`;
+                          a.click();
+                          window.URL.revokeObjectURL(url);
+                          
+                          alert(`Order #${selectedOrder.id} exported to CSV`);
+                        }}
+                      >
+                        <span>📊</span>
+                        <span>Export to CSV</span>
+                      </button>
+                      
+                      <button
+                        className="btn"
+                        style={{background: '#6f42c1', padding: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px'}}
+                        onClick={() => {
+                          const newStatus = prompt(`Update order status for Order #${selectedOrder.id}:\n\nCurrent status: ${selectedOrder.status}\n\nEnter new status (pending, processing, shipped, delivered, cancelled):`);
+                          if (newStatus && ['pending', 'processing', 'shipped', 'delivered', 'cancelled'].includes(newStatus.toLowerCase())) {
+                            updateOrderStatus(selectedOrder.id, newStatus.toLowerCase()).then(result => {
+                              if (result.success) {
+                                alert('Order status updated successfully');
+                                // Update the selected order status in the modal
+                                setSelectedOrder({...selectedOrder, status: newStatus.toLowerCase()});
+                              } else {
+                                alert('Error: ' + result.message);
+                              }
+                            });
+                          } else if (newStatus) {
+                            alert('Invalid status. Please use: pending, processing, shipped, delivered, or cancelled');
+                          }
+                        }}
+                      >
+                        <span>✏️</span>
+                        <span>Update Status</span>
+                      </button>
+                      
+                      <button
+                        className="btn"
+                        style={{background: '#fd7e14', padding: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px'}}
+                        onClick={() => {
+                          const invoice = `
+INVOICE - Order #${selectedOrder.id}
+========================================
+Customer: ${selectedOrder.shippingAddress.name}
+Date: ${new Date(selectedOrder.createdAt).toLocaleDateString()}
+Status: ${selectedOrder.status}
+Payment Method: ${selectedOrder.paymentMethod}
+Payment Status: ${selectedOrder.paymentStatus}
+
+SHIPPING ADDRESS:
+${selectedOrder.shippingAddress.name}
+${selectedOrder.shippingAddress.street}
+${selectedOrder.shippingAddress.city}, ${selectedOrder.shippingAddress.state} ${selectedOrder.shippingAddress.zipCode}
+${selectedOrder.shippingAddress.country}
+
+ITEMS:
+${selectedOrder.items ? selectedOrder.items.map(item => `${item.quantity}x ${item.product ? item.product.name : 'Product ID: ' + item.productId} - $${item.price} each = $${item.totalPrice}`).join('\n') : 'No items'}
+
+TOTAL: $${selectedOrder.totalAmount}
+========================================
+                          `;
+                          
+                          const blob = new Blob([invoice], { type: 'text/plain' });
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `invoice_${selectedOrder.id}.txt`;
+                          a.click();
+                          window.URL.revokeObjectURL(url);
+                          
+                          alert(`Invoice for Order #${selectedOrder.id} downloaded`);
+                        }}
+                      >
+                        <span>📄</span>
+                        <span>Download Invoice</span>
+                      </button>
+                    </div>
+                  </div>
+                  
                   <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
                     <button
                       type="button"
