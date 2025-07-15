@@ -7,6 +7,7 @@ import QRCode from "qrcode";
 import crypto from "crypto";
 import rateLimit from "express-rate-limit";
 import { Request, Response, NextFunction } from "express";
+import path from "path";
 
 // Rate limiting for admin login attempts
 const adminLoginLimiter = rateLimit({
@@ -65,6 +66,35 @@ function generateBackupCodes(): string[] {
 }
 
 export async function registerAdminRoutes(app: Express) {
+  // Serve admin interface directly at /admin
+  app.get("/admin", (req: Request, res: Response) => {
+    try {
+      const adminPath = path.resolve('./admin/index.html');
+      console.log('Serving admin interface from:', adminPath);
+      res.sendFile(adminPath);
+    } catch (error) {
+      console.error('Error serving admin interface:', error);
+      res.status(500).send('Admin interface temporarily unavailable');
+    }
+  });
+  
+  // Serve admin interface for any admin/* route except api routes
+  app.get("/admin/*", (req: Request, res: Response) => {
+    // Skip API routes
+    if (req.path.startsWith('/admin/api/')) {
+      return;
+    }
+    
+    try {
+      const adminPath = path.resolve('./admin/index.html');
+      console.log('Serving admin interface from:', adminPath);
+      res.sendFile(adminPath);
+    } catch (error) {
+      console.error('Error serving admin interface:', error);
+      res.status(500).send('Admin interface temporarily unavailable');
+    }
+  });
+  
   // Admin login endpoint
   app.post("/admin/api/login", adminLoginLimiter, async (req: Request, res: Response) => {
     try {

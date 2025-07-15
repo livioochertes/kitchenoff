@@ -2055,8 +2055,18 @@
     }
     
     // Render the app
-    const root = ReactDOM.createRoot(document.getElementById('admin-root'));
-    root.render(<AdminApp />);
+    try {
+      const rootElement = document.getElementById('admin-root');
+      if (!rootElement) {
+        document.body.innerHTML = '<div style="padding: 20px; text-align: center; color: red;">Error: admin-root element not found</div>';
+        return;
+      }
+      const root = ReactDOM.createRoot(rootElement);
+      root.render(<AdminApp />);
+    } catch (error) {
+      console.error('Admin app rendering error:', error);
+      document.body.innerHTML = '<div style="padding: 20px; text-align: center; color: red;">Error loading admin interface: ' + error.message + '</div>';
+    }
   </script>
 </body>
 </html>
