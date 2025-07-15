@@ -57,6 +57,12 @@ Preferred communication style: Simple, everyday language.
 - COMPLETED: Enhanced footer chat support link with prominent styling and direct routing to /ai-assistant
 - COMPLETED: Updated support link in footer navigation to connect to AI Assistant instead of generic link
 - COMPLETED: Made AI Assistant the primary support channel through footer with improved visual prominence
+- COMPLETED: Created comprehensive About Us page featuring KitchenOff brand story and HORECA industry focus
+- COMPLETED: Added complete About page content highlighting professional kitchen equipment and catering solutions
+- COMPLETED: Integrated About page into navigation with proper routing at /about
+- COMPLETED: Updated footer link to connect to new About page
+- COMPLETED: Added English translations for all About page content sections
+- COMPLETED: Updated company history to reflect KitchenOff has been serving since 2017
 
 ### July 14, 2025
 - COMPLETED: Comprehensive multilingual system with 11 language support (English, Spanish, French, German, Italian, Portuguese, Chinese, Japanese, Korean, Arabic, Romanian)

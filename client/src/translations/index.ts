@@ -600,7 +600,7 @@ const translations: Record<Language, TranslationKeys> = {
     // About page
     'about.hero.title': 'About KitchenOff',
     'about.hero.subtitle': 'Your trusted partner for professional kitchen equipment and HORECA solutions',
-    'about.hero.badge': 'Serving the HORECA Industry Since 2024',
+    'about.hero.badge': 'Serving the HORECA Industry Since 2017',
     'about.story.title': 'Our Story',
     'about.story.paragraph1': 'KitchenOff is a trusted partner for businesses in the HORECA (Hotel, Restaurant, Catering) industry, offering a wide range of high-quality products, equipment, and tailored solutions designed to support professionals in delivering excellence every day.',
     'about.story.paragraph2': 'Founded with a passion for service and a commitment to innovation, KitchenOff stands at the intersection of technology and hospitality. We bring together carefully selected suppliers, modern logistics, and industry expertise to ensure that our clients can focus on what matters most: delighting their customers.',
