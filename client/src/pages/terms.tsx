@@ -174,7 +174,7 @@ export default function Terms() {
                     <div className="flex items-start space-x-3">
                       <MapPin className="h-5 w-5 text-secondary mt-1" />
                       <div>
-                        <p className="font-semibold text-primary">NAMARTE CCL</p>
+                        <p className="font-semibold text-primary">NAMARTE</p>
                         <p className="text-slate-600">Calea Moșilor no. 158</p>
                         <p className="text-slate-600">Bucharest, District 2, Romania</p>
                       </div>
@@ -190,7 +190,7 @@ export default function Terms() {
                     <div className="flex items-center space-x-3">
                       <Mail className="h-5 w-5 text-secondary" />
                       <div>
-                        <p className="text-slate-600">help@kitchen-off.com</p>
+                        <p className="text-slate-600">info@kitchen-off.com</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">

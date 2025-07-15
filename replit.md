@@ -63,6 +63,10 @@ Preferred communication style: Simple, everyday language.
 - COMPLETED: Updated footer link to connect to new About page
 - COMPLETED: Added English translations for all About page content sections
 - COMPLETED: Updated company history to reflect KitchenOff has been serving since 2017
+- COMPLETED: Changed company name from "NAMARTE CCL" to "NAMARTE" throughout Terms and Conditions page
+- COMPLETED: Updated all email addresses from "help@..." to "info@..." in Terms and Conditions translations
+- COMPLETED: Updated company information section in Terms page to display "NAMARTE" instead of "NAMARTE CCL"
+- COMPLETED: Fixed Terms and Conditions page to use consistent company branding (NAMARTE) and email addresses (info@kitchen-off.com)
 
 ### July 14, 2025
 - COMPLETED: Comprehensive multilingual system with 11 language support (English, Spanish, French, German, Italian, Portuguese, Chinese, Japanese, Korean, Arabic, Romanian)
