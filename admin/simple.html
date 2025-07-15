@@ -209,12 +209,8 @@
           localStorage.setItem('adminToken', data.token);
           localStorage.setItem('adminUser', JSON.stringify(data.admin));
           
-          // Check if 2FA is required
-          if (data.requiresTwoFactor) {
-            window.location.href = '/admin/2fa';
-          } else {
-            window.location.href = '/admin/dashboard';
-          }
+          // Always redirect to dashboard after successful login
+          window.location.href = '/admin/dashboard';
         } else {
           errorDiv.textContent = data.message || 'Login failed';
           errorDiv.style.display = 'block';

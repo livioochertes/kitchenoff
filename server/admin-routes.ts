@@ -117,6 +117,18 @@ export async function registerAdminRoutes(app: Express) {
     }
   });
   
+  // Serve admin dashboard (must come before wildcard route)
+  app.get("/admin/dashboard", (req: Request, res: Response) => {
+    try {
+      const dashboardPath = path.resolve('./admin/dashboard.html');
+      console.log('Serving admin dashboard from:', dashboardPath);
+      res.sendFile(dashboardPath);
+    } catch (error) {
+      console.error('Error serving admin dashboard:', error);
+      res.status(500).send('Dashboard temporarily unavailable');
+    }
+  });
+  
   // Serve admin interface for any admin/* route except api routes
   app.get("/admin/*", (req: Request, res: Response) => {
     // Skip API routes
@@ -125,7 +137,7 @@ export async function registerAdminRoutes(app: Express) {
     }
     
     try {
-      const adminPath = path.resolve('./admin/index.html');
+      const adminPath = path.resolve('./admin/simple.html');
       console.log('Serving admin interface from:', adminPath);
       res.sendFile(adminPath);
     } catch (error) {
