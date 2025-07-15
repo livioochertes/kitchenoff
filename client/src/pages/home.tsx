@@ -330,6 +330,7 @@ export default function Home() {
                 <li><Link href="/about" className="text-slate-300 hover:text-white transition-colors">{t('footer.aboutUs')}</Link></li>
                 <li><a href="#" className="text-slate-300 hover:text-white transition-colors">{t('footer.products')}</a></li>
                 <li><Link href="/b2b" className="text-slate-300 hover:text-white transition-colors">{t('footer.b2bSolutions')}</Link></li>
+                <li><Link href="/terms" className="text-slate-300 hover:text-white transition-colors">Terms & Conditions</Link></li>
                 <li>
                   <ContactModal>
                     <button className="text-slate-300 hover:text-white transition-colors">

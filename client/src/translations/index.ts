@@ -316,6 +316,61 @@ export interface TranslationKeys {
   'b2b.cta.description': string;
   'b2b.cta.getQuote': string;
   'b2b.cta.viewProducts': string;
+  
+  // Terms and Conditions page
+  'terms.hero.title': string;
+  'terms.hero.subtitle': string;
+  'terms.hero.lastUpdated': string;
+  'terms.company.title': string;
+  'terms.company.tax': string;
+  'terms.introduction.title': string;
+  'terms.introduction.ownership': string;
+  'terms.introduction.company': string;
+  'terms.introduction.platform': string;
+  'terms.introduction.acceptance': string;
+  'terms.introduction.agreement': string;
+  'terms.purpose.title': string;
+  'terms.purpose.description': string;
+  'terms.purpose.marketplace': string;
+  'terms.purpose.loyalty': string;
+  'terms.purpose.payments': string;
+  'terms.purpose.information': string;
+  'terms.purpose.audience': string;
+  'terms.purpose.access': string;
+  'terms.intellectual.title': string;
+  'terms.intellectual.ownership': string;
+  'terms.intellectual.rights': string;
+  'terms.intellectual.usage': string;
+  'terms.intellectual.prohibited': string;
+  'terms.intellectual.violations': string;
+  'terms.usage.title': string;
+  'terms.usage.general': string;
+  'terms.usage.prohibited': string;
+  'terms.usage.violations': string;
+  'terms.usage.contact': string;
+  'terms.usage.information': string;
+  'terms.liability.title': string;
+  'terms.liability.efforts': string;
+  'terms.liability.disclaimers': string;
+  'terms.liability.information': string;
+  'terms.liability.limitations': string;
+  'terms.liability.thirdparty': string;
+  'terms.liability.risk': string;
+  'terms.modifications.title': string;
+  'terms.modifications.rights': string;
+  'terms.modifications.recommendations': string;
+  'terms.modifications.discontinuation': string;
+  'terms.jurisdiction.title': string;
+  'terms.jurisdiction.law': string;
+  'terms.jurisdiction.disputes': string;
+  'terms.jurisdiction.consumer': string;
+  'terms.privacy.title': string;
+  'terms.privacy.importance': string;
+  'terms.privacy.consent': string;
+  'terms.privacy.contact': string;
+  'terms.footer.questions': string;
+  'terms.footer.support': string;
+  'terms.footer.privacy': string;
 }
 
 const translations: Record<Language, TranslationKeys> = {
@@ -698,6 +753,61 @@ const translations: Record<Language, TranslationKeys> = {
     'b2b.cta.description': 'Join hundreds of HORECA businesses that trust KitchenOff for their supply chain needs.',
     'b2b.cta.getQuote': 'Get B2B Quote',
     'b2b.cta.viewProducts': 'View Products',
+    
+    // Terms and Conditions page
+    'terms.hero.title': 'Terms and Conditions',
+    'terms.hero.subtitle': 'Please read these terms carefully before using our platform and services',
+    'terms.hero.lastUpdated': 'Last updated: June 25, 2025',
+    'terms.company.title': 'Company Information',
+    'terms.company.tax': 'Tax Registration Number',
+    'terms.introduction.title': 'Introduction and Acceptance of Terms',
+    'terms.introduction.ownership': 'The website www.kitchen-off.com is owned and operated by NAMARTE CCL (hereinafter referred to as "KitchenOff" or the "Company"), a joint stock company based in Bucharest, District 2, Calea Moșilor no. 158, Romania, with tax registration number RO16582983.',
+    'terms.introduction.company': 'NAMARTE CCL is a company in the food technology sector, providing customers from the HORECA industry—especially restaurants—a solution for customer loyalty and more (software app) designed to optimize their clients.',
+    'terms.introduction.platform': 'This Website and mobile apps is our official platform through which we present information about KitchenOff services and solutions. Also, via this Website, interested parties can contact us to request additional details about our offer or to initiate a collaboration.',
+    'terms.introduction.acceptance': 'Accessing and using the Website implies full and unconditional acceptance of these Terms and Conditions. If you do not agree with any of the terms stipulated below, please discontinue using the Website.',
+    'terms.introduction.agreement': 'By continuing to browse the Website, you confirm that you have read, understood, and agree to abide by this document, along with KitchenOff\'s Privacy Policy and Cookie Policy.',
+    'terms.purpose.title': 'Purpose and Functionality of the Website',
+    'terms.purpose.description': 'The website www.kitchen-off.com is a web-app platform through which KitchenOff sells vouchers to restaurants, with the goal of improving client loyalty and food experience.',
+    'terms.purpose.marketplace': 'Marketplace platform – a centralized system connecting consumers with restaurants facilitating online orders and advance discount purchases under certain conditions.',
+    'terms.purpose.loyalty': 'Restaurant loyalty systems by Prepaid Vouchers.',
+    'terms.purpose.payments': 'Integrated payments – card payment solutions (debit/credit) both online and via mobile.',
+    'terms.purpose.information': 'The Website aims to provide up-to-date information about these services and technologies, about KitchenOff\'s mission and vision, as well as case studies or partner testimonials.',
+    'terms.purpose.audience': 'The Website\'s target audience consists of hospitality industry professionals interested in digitizing their businesses, as well as consumers.',
+    'terms.purpose.access': 'Access to the Website is provided free of charge to users and is not conditional on creating a user account.',
+    'terms.intellectual.title': 'Intellectual Property',
+    'terms.intellectual.ownership': 'The content and design of the Website are the exclusive property of NAMARTE CCL or its partners and are protected by applicable copyright legislation and other intellectual property rights.',
+    'terms.intellectual.rights': 'NAMARTE CCL holds all intellectual property rights to the technology, software platform, and content provided through this Website.',
+    'terms.intellectual.usage': 'Users may access and use the Website content solely for their personal, non-commercial information.',
+    'terms.intellectual.prohibited': 'Without our prior written consent, you are not entitled to copy, reproduce, distribute, modify, or exploit the Website content for commercial purposes.',
+    'terms.intellectual.violations': 'Any unauthorized use of the Website content constitutes a breach of these conditions and may violate applicable law.',
+    'terms.usage.title': 'Use of the Website',
+    'terms.usage.general': 'The Website may be used by any visitor free of charge to obtain information about KitchenOff products and offers.',
+    'terms.usage.prohibited': 'You agree not to use the Website for illegal activities, unauthorized access attempts, transmitting harmful code, or sending unlawful content.',
+    'terms.usage.violations': 'Violation of these obligations may result in restriction of access and notification of competent authorities.',
+    'terms.usage.contact': 'The Website provides contact forms through which you can request information or negotiate service contracts.',
+    'terms.usage.information': 'Please provide accurate and complete information when using contact forms.',
+    'terms.liability.title': 'Limitation of Liability',
+    'terms.liability.efforts': 'NAMARTE CCL makes considerable efforts to ensure the accuracy and timeliness of information on the Website.',
+    'terms.liability.disclaimers': 'However, the Website content is provided for general informational purposes, and the Company does not guarantee complete accuracy or error-free operation.',
+    'terms.liability.information': 'Information about products and services is provided for informational purposes only and should not be construed as firm guarantees.',
+    'terms.liability.limitations': 'To the fullest extent permitted by law, NAMARTE CCL shall not be liable for any losses or damages resulting from use of the Website.',
+    'terms.liability.thirdparty': 'The Website may contain links to third-party websites. NAMARTE CCL assumes no responsibility for external site content.',
+    'terms.liability.risk': 'By using the Website, you expressly agree that you do so at your own risk.',
+    'terms.modifications.title': 'Right to Modify the Terms',
+    'terms.modifications.rights': 'NAMARTE CCL reserves the right to modify these Terms and Conditions at any time to reflect changes in legislation or functionalities.',
+    'terms.modifications.recommendations': 'We recommend checking this page periodically to stay updated on any changes.',
+    'terms.modifications.discontinuation': 'If you do not agree with changes made, please discontinue using the Website.',
+    'terms.jurisdiction.title': 'Governing Law and Jurisdiction',
+    'terms.jurisdiction.law': 'These Terms and Conditions are governed by the laws in force in Romania.',
+    'terms.jurisdiction.disputes': 'Any disputes will be resolved amicably or referred to competent courts in Bucharest, Romania.',
+    'terms.jurisdiction.consumer': 'Consumer protection legislation rights are not affected by these provisions.',
+    'terms.privacy.title': 'Personal Data Processing',
+    'terms.privacy.importance': 'Your personal data privacy is important to us. Personal data collected through this Website will be processed in accordance with applicable legislation, including GDPR.',
+    'terms.privacy.consent': 'By using the contact form or other functionalities, you consent to NAMARTE CCL processing your data in accordance with our Privacy Policy.',
+    'terms.privacy.contact': 'For more information on privacy practices, contact us at dpo@kitchen-off.com or via the contact form.',
+    'terms.footer.questions': 'If you have any questions about these Terms and Conditions, please contact us:',
+    'terms.footer.support': 'Contact Support',
+    'terms.footer.privacy': 'Privacy Questions',
   },
   
   es: {
