@@ -163,9 +163,10 @@ export default function AdminDashboard({ token, admin, onLogout }: AdminDashboar
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="orders">Orders</TabsTrigger>
+            <TabsTrigger value="products">Products</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
@@ -261,6 +262,22 @@ export default function AdminDashboard({ token, admin, onLogout }: AdminDashboar
                 <Alert>
                   <AlertDescription>
                     Advanced order management features coming soon. For now, you can view recent orders in the Overview tab.
+                  </AlertDescription>
+                </Alert>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="products" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Product Management</CardTitle>
+                <CardDescription>Manage your product catalog</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Alert>
+                  <AlertDescription>
+                    Advanced product management features coming soon. For now, you can view products in the main admin panel.
                   </AlertDescription>
                 </Alert>
               </CardContent>
