@@ -64,11 +64,19 @@ export default function Admin() {
 
   // Queries
   const { data: products = [], isLoading: productsLoading } = useQuery<ProductWithCategory[]>({
-    queryKey: ["/api/products", { limit: 100 }],
+    queryKey: ["/admin/api/products", { limit: 100 }],
   });
 
   // Filtered and sorted products
   const filteredProducts = useMemo(() => {
+    console.log("🔍 Filtering products:", { 
+      totalProducts: products.length, 
+      searchQuery, 
+      categoryFilter, 
+      statusFilter, 
+      stockFilter 
+    });
+    
     let filtered = products.filter(product => {
       // Search filter
       if (searchQuery) {
@@ -139,11 +147,16 @@ export default function Admin() {
       }
     });
     
+    console.log("🎯 Filter results:", { 
+      filteredCount: filtered.length, 
+      totalCount: products.length 
+    });
+    
     return filtered;
   }, [products, searchQuery, categoryFilter, statusFilter, stockFilter, sortBy, sortOrder]);
 
   const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
-    queryKey: ["/api/categories"],
+    queryKey: ["/admin/api/categories"],
   });
 
   const { data: orders = [], isLoading: ordersLoading } = useQuery<OrderWithItems[]>({
@@ -183,7 +196,7 @@ export default function Admin() {
       return await apiRequest("POST", "/api/products", data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/admin/api/products"] });
       setProductDialogOpen(false);
       productForm.reset();
       toast({ title: "Product created successfully" });
@@ -198,7 +211,7 @@ export default function Admin() {
       return await apiRequest("PUT", `/api/products/${id}`, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/admin/api/products"] });
       setProductDialogOpen(false);
       setEditingProduct(null);
       productForm.reset();
@@ -214,7 +227,7 @@ export default function Admin() {
       return await apiRequest("DELETE", `/api/products/${id}`, undefined);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/admin/api/products"] });
       toast({ title: "Product deleted successfully" });
     },
     onError: () => {
@@ -227,7 +240,7 @@ export default function Admin() {
       return await apiRequest("POST", "/api/categories", data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      queryClient.invalidateQueries({ queryKey: ["/admin/api/categories"] });
       setCategoryDialogOpen(false);
       categoryForm.reset();
       toast({ title: "Category created successfully" });
@@ -256,7 +269,7 @@ export default function Admin() {
       return await apiRequest("PUT", "/admin/api/products/bulk/prices", { productIds, multiplier, fixedPrice });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/admin/api/products"] });
       setSelectedProducts([]);
       setBulkDialogOpen(false);
       toast({ title: "Prices updated successfully" });
@@ -271,7 +284,7 @@ export default function Admin() {
       return await apiRequest("PUT", "/admin/api/products/bulk/categories", { productIds, categoryId });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/admin/api/products"] });
       setSelectedProducts([]);
       setBulkDialogOpen(false);
       toast({ title: "Categories updated successfully" });
@@ -286,7 +299,7 @@ export default function Admin() {
       return await apiRequest("PUT", "/admin/api/products/bulk/status", { productIds, status });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/admin/api/products"] });
       setSelectedProducts([]);
       setBulkDialogOpen(false);
       toast({ title: "Status updated successfully" });
@@ -301,7 +314,7 @@ export default function Admin() {
       return await apiRequest("PUT", "/admin/api/products/bulk/stock", { productIds, operation, value });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/admin/api/products"] });
       setSelectedProducts([]);
       setBulkDialogOpen(false);
       toast({ title: "Stock updated successfully" });
@@ -316,7 +329,7 @@ export default function Admin() {
       return await apiRequest("PUT", "/admin/api/products/bulk/delete", { productIds });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/admin/api/products"] });
       setSelectedProducts([]);
       setBulkDialogOpen(false);
       toast({ title: "Products deleted successfully" });
