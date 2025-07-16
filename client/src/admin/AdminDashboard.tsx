@@ -141,7 +141,14 @@ export default function AdminDashboard({ token, admin, onLogout }: AdminDashboar
 
   // Filtered products
   const filteredProducts = useMemo(() => {
-    console.log("🔍 Filtering products with:", { searchQuery, categoryFilter, statusFilter, stockFilter, productsCount: products.length });
+    console.log("🔍 Filtering products with:", { 
+      searchQuery, 
+      categoryFilter, 
+      statusFilter, 
+      stockFilter, 
+      productsCount: products.length,
+      productsData: products.slice(0, 2) // Show first 2 products for debugging
+    });
     let filtered = products.filter((product: any) => {
       // Search filter
       if (searchQuery) {
@@ -558,7 +565,7 @@ export default function AdminDashboard({ token, admin, onLogout }: AdminDashboar
                       placeholder="Search by name, category, description, or ID..."
                       value={searchQuery}
                       onChange={(e) => {
-                        console.log("Search input changed:", e.target.value);
+                        console.log("🔍 Search input changed:", e.target.value);
                         setSearchQuery(e.target.value);
                       }}
                       className="pl-10"
@@ -693,6 +700,13 @@ export default function AdminDashboard({ token, admin, onLogout }: AdminDashboar
               <CardContent>
                 {productsLoading ? (
                   <div className="text-center py-8">Loading products...</div>
+                ) : filteredProducts.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p>No products found matching your search criteria.</p>
+                    <p className="text-sm text-gray-500 mt-2">
+                      Total products: {products.length} | Filtered: {filteredProducts.length}
+                    </p>
+                  </div>
                 ) : (
                   <Table>
                     <TableHeader>
