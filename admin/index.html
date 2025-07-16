@@ -2655,6 +2655,7 @@
           price: '',
           compareAtPrice: '',
           categoryId: '',
+          supplierId: '',
           imageUrl: '',
           stockQuantity: '',
           featured: false,
@@ -2830,6 +2831,7 @@
               price: '',
               compareAtPrice: '',
               categoryId: '',
+              supplierId: '',
               imageUrl: '',
               stockQuantity: '',
               featured: false,
@@ -3061,18 +3063,33 @@
                         />
                       </div>
                     </div>
-                    <div className="form-group">
-                      <label className="form-label">Category</label>
-                      <select
-                        className="form-input"
-                        value={productFormData.categoryId}
-                        onChange={(e) => setProductFormData({...productFormData, categoryId: e.target.value})}
-                      >
-                        <option value="">Select Category</option>
-                        {categories.map(category => (
-                          <option key={category.id} value={category.id}>{category.name}</option>
-                        ))}
-                      </select>
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px'}}>
+                      <div className="form-group">
+                        <label className="form-label">Category</label>
+                        <select
+                          className="form-input"
+                          value={productFormData.categoryId}
+                          onChange={(e) => setProductFormData({...productFormData, categoryId: e.target.value})}
+                        >
+                          <option value="">Select Category</option>
+                          {categories.map(category => (
+                            <option key={category.id} value={category.id}>{category.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Supplier</label>
+                        <select
+                          className="form-input"
+                          value={productFormData.supplierId || ''}
+                          onChange={(e) => setProductFormData({...productFormData, supplierId: e.target.value})}
+                        >
+                          <option value="">Select Supplier</option>
+                          {suppliers.map(supplier => (
+                            <option key={supplier.id} value={supplier.id}>{supplier.name}</option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
                     <div className="form-group">
                       <label className="form-label">Image URL (Legacy - Optional)</label>
@@ -3364,6 +3381,7 @@
                             price: '',
                             compareAtPrice: '',
                             categoryId: '',
+                            supplierId: '',
                             imageUrl: '',
                             stockQuantity: '',
                             featured: false,

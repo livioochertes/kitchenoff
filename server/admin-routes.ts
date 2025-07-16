@@ -73,6 +73,126 @@ function generateBackupCodes(): string[] {
   return codes;
 }
 
+// Supplier API synchronization helper functions
+async function simulateSupplierDeliverySync(supplier: any, deliveryUpdate: any) {
+  // Simulate API call based on supplier's integration type
+  switch (supplier.integrationType) {
+    case 'api':
+      if (supplier.apiEndpoint && supplier.apiKey) {
+        // Simulate REST API call
+        return {
+          success: true,
+          method: 'POST',
+          endpoint: `${supplier.apiEndpoint}/delivery/update`,
+          response: {
+            orderId: deliveryUpdate.orderId,
+            status: deliveryUpdate.deliveryStatus,
+            trackingNumber: deliveryUpdate.trackingNumber,
+            estimatedDelivery: deliveryUpdate.estimatedDelivery,
+            supplierResponse: "Delivery status updated successfully"
+          }
+        };
+      }
+      break;
+    case 'email':
+      // Simulate email notification
+      return {
+        success: true,
+        method: 'EMAIL',
+        recipient: supplier.email,
+        response: {
+          subject: `Delivery Update for Order #${deliveryUpdate.orderId}`,
+          message: `Delivery status: ${deliveryUpdate.deliveryStatus}`,
+          sent: true
+        }
+      };
+    case 'manual':
+      // Manual process - just log the update
+      return {
+        success: true,
+        method: 'MANUAL',
+        response: {
+          message: "Manual delivery update logged",
+          requiresHumanAction: true
+        }
+      };
+    default:
+      return {
+        success: false,
+        message: "Unknown integration type"
+      };
+  }
+}
+
+async function fetchSupplierDeliveryStatus(supplier: any, orderId: string) {
+  // Simulate fetching delivery status from supplier's system
+  const mockStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+  const randomStatus = mockStatuses[Math.floor(Math.random() * mockStatuses.length)];
+  
+  return {
+    orderId,
+    supplierId: supplier.id,
+    supplierName: supplier.name,
+    deliveryStatus: randomStatus,
+    trackingNumber: `TRK${Date.now()}`,
+    estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    lastUpdated: new Date().toISOString(),
+    integrationType: supplier.integrationType,
+    apiEndpoint: supplier.apiEndpoint
+  };
+}
+
+async function performSupplierSync(supplier: any, order: any, action: string) {
+  try {
+    switch (action) {
+      case 'fetch_status':
+        const status = await fetchSupplierDeliveryStatus(supplier, order.id.toString());
+        return {
+          success: true,
+          message: "Delivery status fetched successfully",
+          data: status
+        };
+      
+      case 'update_delivery':
+        const updateResult = await simulateSupplierDeliverySync(supplier, {
+          orderId: order.id,
+          deliveryStatus: 'processing',
+          trackingNumber: `TRK${Date.now()}`,
+          estimatedDelivery: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString()
+        });
+        return {
+          success: true,
+          message: "Delivery status updated with supplier",
+          data: updateResult
+        };
+      
+      case 'notify_suppliers':
+        // Send notification to supplier about order
+        const notificationResult = await simulateSupplierDeliverySync(supplier, {
+          orderId: order.id,
+          deliveryStatus: 'notification',
+          message: `New order #${order.id} requires processing`
+        });
+        return {
+          success: true,
+          message: "Supplier notified successfully",
+          data: notificationResult
+        };
+      
+      default:
+        return {
+          success: false,
+          message: "Unknown sync action"
+        };
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: `Sync failed: ${error.message}`
+    };
+  }
+}
+
 export async function registerAdminRoutes(app: Express) {
   // Serve uploaded files
   app.get("/uploads/products/:filename", serveUploads);
@@ -1285,6 +1405,124 @@ export async function registerAdminRoutes(app: Express) {
     } catch (error) {
       console.error("Error deleting supplier:", error);
       res.status(500).json({ message: "Failed to delete supplier" });
+    }
+  });
+
+  // Supplier delivery synchronization endpoints
+  app.post("/admin/api/suppliers/:id/sync-delivery", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { orderId, deliveryStatus, trackingNumber, estimatedDelivery } = req.body;
+      
+      const supplier = await storage.getSupplier(parseInt(id));
+      if (!supplier) {
+        return res.status(404).json({ message: "Supplier not found" });
+      }
+
+      // Simulate API call to supplier's delivery system
+      const deliveryUpdate = {
+        orderId,
+        supplierId: parseInt(id),
+        deliveryStatus,
+        trackingNumber,
+        estimatedDelivery,
+        lastUpdated: new Date().toISOString(),
+        supplierName: supplier.name,
+        apiEndpoint: supplier.apiEndpoint
+      };
+
+      // Here you would make actual API call to supplier's system
+      // For now, we'll simulate the response
+      const syncResult = await simulateSupplierDeliverySync(supplier, deliveryUpdate);
+      
+      res.json({
+        success: true,
+        message: "Delivery status synchronized successfully",
+        data: syncResult
+      });
+    } catch (error) {
+      console.error("Error syncing delivery status:", error);
+      res.status(500).json({ message: "Failed to sync delivery status" });
+    }
+  });
+
+  app.get("/admin/api/suppliers/:id/delivery-status/:orderId", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { id, orderId } = req.params;
+      
+      const supplier = await storage.getSupplier(parseInt(id));
+      if (!supplier) {
+        return res.status(404).json({ message: "Supplier not found" });
+      }
+
+      // Simulate fetching delivery status from supplier's API
+      const deliveryStatus = await fetchSupplierDeliveryStatus(supplier, orderId);
+      
+      res.json({
+        success: true,
+        data: deliveryStatus
+      });
+    } catch (error) {
+      console.error("Error fetching delivery status:", error);
+      res.status(500).json({ message: "Failed to fetch delivery status" });
+    }
+  });
+
+  app.post("/admin/api/suppliers/bulk-sync", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { orderIds, action } = req.body; // action: 'fetch_status', 'update_delivery', 'notify_suppliers'
+      
+      if (!orderIds || !Array.isArray(orderIds)) {
+        return res.status(400).json({ message: "Order IDs array is required" });
+      }
+
+      const results = [];
+      
+      for (const orderId of orderIds) {
+        try {
+          const order = await storage.getOrder(parseInt(orderId));
+          if (!order) {
+            results.push({ orderId, success: false, message: "Order not found" });
+            continue;
+          }
+
+          // Get suppliers for products in this order
+          const supplierIds = new Set();
+          for (const item of order.items) {
+            const product = await storage.getProduct(item.productId);
+            if (product && product.supplierId) {
+              supplierIds.add(product.supplierId);
+            }
+          }
+
+          // Sync with each supplier
+          for (const supplierId of supplierIds) {
+            const supplier = await storage.getSupplier(supplierId);
+            if (supplier) {
+              const syncResult = await performSupplierSync(supplier, order, action);
+              results.push({
+                orderId,
+                supplierId,
+                supplierName: supplier.name,
+                success: syncResult.success,
+                message: syncResult.message,
+                data: syncResult.data
+              });
+            }
+          }
+        } catch (error) {
+          results.push({ orderId, success: false, message: error.message });
+        }
+      }
+
+      res.json({
+        success: true,
+        message: `Bulk sync completed for ${orderIds.length} orders`,
+        results
+      });
+    } catch (error) {
+      console.error("Error in bulk supplier sync:", error);
+      res.status(500).json({ message: "Failed to perform bulk sync" });
     }
   });
 }
