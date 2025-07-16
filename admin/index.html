@@ -1929,6 +1929,9 @@
         
         React.useEffect(() => {
           if (editingProduct) {
+            console.log('Editing product:', editingProduct);
+            console.log('Product images:', editingProduct.images);
+            
             setProductFormData({
               name: editingProduct.name || '',
               description: editingProduct.description || '',
@@ -2238,6 +2241,7 @@
                           gap: '10px',
                           marginTop: '15px'
                         }}>
+                          {console.log('Rendering uploaded images:', uploadedImages)}
                           {uploadedImages.map((image, index) => (
                             <div key={index} className="image-thumbnail" style={{
                               position: 'relative',
