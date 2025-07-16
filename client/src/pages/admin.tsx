@@ -62,6 +62,11 @@ export default function Admin() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  // Queries
+  const { data: products = [], isLoading: productsLoading } = useQuery<ProductWithCategory[]>({
+    queryKey: ["/api/products", { limit: 100 }],
+  });
+
   // Filtered and sorted products
   const filteredProducts = useMemo(() => {
     let filtered = products.filter(product => {
@@ -137,11 +142,6 @@ export default function Admin() {
     return filtered;
   }, [products, searchQuery, categoryFilter, statusFilter, stockFilter, sortBy, sortOrder]);
 
-  // Queries
-  const { data: products = [], isLoading: productsLoading } = useQuery<ProductWithCategory[]>({
-    queryKey: ["/api/products", { limit: 100 }],
-  });
-
   const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
   });
@@ -180,10 +180,7 @@ export default function Admin() {
   // Mutations
   const createProductMutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
-      const token = localStorage.getItem("token");
-      return await apiRequest("POST", "/api/products", data, {
-        Authorization: `Bearer ${token}`,
-      });
+      return await apiRequest("POST", "/api/products", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
@@ -198,10 +195,7 @@ export default function Admin() {
 
   const updateProductMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<ProductFormData> }) => {
-      const token = localStorage.getItem("token");
-      return await apiRequest("PUT", `/api/products/${id}`, data, {
-        Authorization: `Bearer ${token}`,
-      });
+      return await apiRequest("PUT", `/api/products/${id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
@@ -217,10 +211,7 @@ export default function Admin() {
 
   const deleteProductMutation = useMutation({
     mutationFn: async (id: number) => {
-      const token = localStorage.getItem("token");
-      return await apiRequest("DELETE", `/api/products/${id}`, undefined, {
-        Authorization: `Bearer ${token}`,
-      });
+      return await apiRequest("DELETE", `/api/products/${id}`, undefined);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
@@ -233,10 +224,7 @@ export default function Admin() {
 
   const createCategoryMutation = useMutation({
     mutationFn: async (data: CategoryFormData) => {
-      const token = localStorage.getItem("token");
-      return await apiRequest("POST", "/api/categories", data, {
-        Authorization: `Bearer ${token}`,
-      });
+      return await apiRequest("POST", "/api/categories", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
@@ -251,10 +239,7 @@ export default function Admin() {
 
   const updateOrderStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
-      const token = localStorage.getItem("token");
-      return await apiRequest("PUT", `/api/orders/${id}/status`, { status }, {
-        Authorization: `Bearer ${token}`,
-      });
+      return await apiRequest("PUT", `/api/orders/${id}/status`, { status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/orders"] });
@@ -268,10 +253,7 @@ export default function Admin() {
   // Bulk Operations Mutations
   const bulkUpdatePricesMutation = useMutation({
     mutationFn: async ({ productIds, multiplier, fixedPrice }: { productIds: number[]; multiplier?: number; fixedPrice?: string }) => {
-      const token = localStorage.getItem("token");
-      return await apiRequest("PUT", "/admin/api/products/bulk/prices", { productIds, multiplier, fixedPrice }, {
-        Authorization: `Bearer ${token}`,
-      });
+      return await apiRequest("PUT", "/admin/api/products/bulk/prices", { productIds, multiplier, fixedPrice });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
@@ -286,10 +268,7 @@ export default function Admin() {
 
   const bulkUpdateCategoriesMutation = useMutation({
     mutationFn: async ({ productIds, categoryId }: { productIds: number[]; categoryId: number }) => {
-      const token = localStorage.getItem("token");
-      return await apiRequest("PUT", "/admin/api/products/bulk/categories", { productIds, categoryId }, {
-        Authorization: `Bearer ${token}`,
-      });
+      return await apiRequest("PUT", "/admin/api/products/bulk/categories", { productIds, categoryId });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
@@ -304,10 +283,7 @@ export default function Admin() {
 
   const bulkUpdateStatusMutation = useMutation({
     mutationFn: async ({ productIds, status }: { productIds: number[]; status: string }) => {
-      const token = localStorage.getItem("token");
-      return await apiRequest("PUT", "/admin/api/products/bulk/status", { productIds, status }, {
-        Authorization: `Bearer ${token}`,
-      });
+      return await apiRequest("PUT", "/admin/api/products/bulk/status", { productIds, status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
@@ -322,10 +298,7 @@ export default function Admin() {
 
   const bulkUpdateStockMutation = useMutation({
     mutationFn: async ({ productIds, operation, value }: { productIds: number[]; operation: string; value: number }) => {
-      const token = localStorage.getItem("token");
-      return await apiRequest("PUT", "/admin/api/products/bulk/stock", { productIds, operation, value }, {
-        Authorization: `Bearer ${token}`,
-      });
+      return await apiRequest("PUT", "/admin/api/products/bulk/stock", { productIds, operation, value });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
@@ -340,10 +313,7 @@ export default function Admin() {
 
   const bulkDeleteMutation = useMutation({
     mutationFn: async ({ productIds }: { productIds: number[] }) => {
-      const token = localStorage.getItem("token");
-      return await apiRequest("PUT", "/admin/api/products/bulk/delete", { productIds }, {
-        Authorization: `Bearer ${token}`,
-      });
+      return await apiRequest("PUT", "/admin/api/products/bulk/delete", { productIds });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
@@ -367,9 +337,9 @@ export default function Admin() {
       compareAtPrice: product.compareAtPrice || "",
       categoryId: product.categoryId || 0,
       imageUrl: product.imageUrl || "",
-      inStock: product.inStock,
+      inStock: product.inStock || false,
       stockQuantity: product.stockQuantity || 0,
-      featured: product.featured,
+      featured: product.featured || false,
     });
     setProductDialogOpen(true);
   };
@@ -1293,7 +1263,7 @@ export default function Admin() {
                           <div>
                             <p className="font-medium">
                               {typeof order.shippingAddress === 'object' && order.shippingAddress
-                                ? `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}`
+                                ? `${(order.shippingAddress as any).firstName || ''} ${(order.shippingAddress as any).lastName || ''}`.trim() || "N/A"
                                 : "N/A"}
                             </p>
                             <p className="text-sm text-muted-foreground">
