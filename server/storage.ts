@@ -6,6 +6,7 @@ import {
   orderItems,
   cartItems,
   reviews,
+  suppliers,
   type User,
   type InsertUser,
   type Category,
@@ -23,6 +24,8 @@ import {
   type CartItemWithProduct,
   type Review,
   type InsertReview,
+  type Supplier,
+  type InsertSupplier,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, and, sql } from "drizzle-orm";
@@ -69,6 +72,13 @@ export interface IStorage {
   // Review operations
   getProductReviews(productId: number): Promise<Review[]>;
   createReview(review: InsertReview): Promise<Review>;
+
+  // Supplier operations
+  getSuppliers(): Promise<Supplier[]>;
+  getSupplier(id: number): Promise<Supplier | undefined>;
+  createSupplier(supplier: InsertSupplier): Promise<Supplier>;
+  updateSupplier(id: number, supplier: Partial<InsertSupplier>): Promise<Supplier>;
+  deleteSupplier(id: number): Promise<void>;
 
   // Admin stats operations
   getTotalUsers(): Promise<number>;
@@ -155,6 +165,7 @@ export class DatabaseStorage implements IStorage {
         price: products.price,
         compareAtPrice: products.compareAtPrice,
         categoryId: products.categoryId,
+        supplierId: products.supplierId,
         imageUrl: products.imageUrl,
         images: products.images,
         inStock: products.inStock,
@@ -174,9 +185,29 @@ export class DatabaseStorage implements IStorage {
           name: categories.name,
           slug: categories.slug,
         },
+        supplier: {
+          id: suppliers.id,
+          name: suppliers.name,
+          email: suppliers.email,
+          phone: suppliers.phone,
+          address: suppliers.address,
+          city: suppliers.city,
+          state: suppliers.state,
+          zipCode: suppliers.zipCode,
+          country: suppliers.country,
+          contactPerson: suppliers.contactPerson,
+          apiEndpoint: suppliers.apiEndpoint,
+          apiKey: suppliers.apiKey,
+          integrationType: suppliers.integrationType,
+          notes: suppliers.notes,
+          isActive: suppliers.isActive,
+          createdAt: suppliers.createdAt,
+          updatedAt: suppliers.updatedAt,
+        },
       })
       .from(products)
-      .innerJoin(categories, eq(products.categoryId, categories.id));
+      .innerJoin(categories, eq(products.categoryId, categories.id))
+      .leftJoin(suppliers, eq(products.supplierId, suppliers.id));
 
     // Apply filters directly without building conditions array
     if (options?.categoryId) {
@@ -207,6 +238,7 @@ export class DatabaseStorage implements IStorage {
         price: products.price,
         compareAtPrice: products.compareAtPrice,
         categoryId: products.categoryId,
+        supplierId: products.supplierId,
         imageUrl: products.imageUrl,
         images: products.images,
         inStock: products.inStock,
@@ -229,9 +261,29 @@ export class DatabaseStorage implements IStorage {
           imageUrl: categories.imageUrl,
           createdAt: categories.createdAt,
         },
+        supplier: {
+          id: suppliers.id,
+          name: suppliers.name,
+          email: suppliers.email,
+          phone: suppliers.phone,
+          address: suppliers.address,
+          city: suppliers.city,
+          state: suppliers.state,
+          zipCode: suppliers.zipCode,
+          country: suppliers.country,
+          contactPerson: suppliers.contactPerson,
+          apiEndpoint: suppliers.apiEndpoint,
+          apiKey: suppliers.apiKey,
+          integrationType: suppliers.integrationType,
+          notes: suppliers.notes,
+          isActive: suppliers.isActive,
+          createdAt: suppliers.createdAt,
+          updatedAt: suppliers.updatedAt,
+        },
       })
       .from(products)
       .leftJoin(categories, eq(products.categoryId, categories.id))
+      .leftJoin(suppliers, eq(products.supplierId, suppliers.id))
       .where(eq(products.id, id));
     
     return product;
@@ -247,6 +299,7 @@ export class DatabaseStorage implements IStorage {
         price: products.price,
         compareAtPrice: products.compareAtPrice,
         categoryId: products.categoryId,
+        supplierId: products.supplierId,
         imageUrl: products.imageUrl,
         images: products.images,
         inStock: products.inStock,
@@ -269,9 +322,29 @@ export class DatabaseStorage implements IStorage {
           imageUrl: categories.imageUrl,
           createdAt: categories.createdAt,
         },
+        supplier: {
+          id: suppliers.id,
+          name: suppliers.name,
+          email: suppliers.email,
+          phone: suppliers.phone,
+          address: suppliers.address,
+          city: suppliers.city,
+          state: suppliers.state,
+          zipCode: suppliers.zipCode,
+          country: suppliers.country,
+          contactPerson: suppliers.contactPerson,
+          apiEndpoint: suppliers.apiEndpoint,
+          apiKey: suppliers.apiKey,
+          integrationType: suppliers.integrationType,
+          notes: suppliers.notes,
+          isActive: suppliers.isActive,
+          createdAt: suppliers.createdAt,
+          updatedAt: suppliers.updatedAt,
+        },
       })
       .from(products)
       .leftJoin(categories, eq(products.categoryId, categories.id))
+      .leftJoin(suppliers, eq(products.supplierId, suppliers.id))
       .where(eq(products.slug, slug));
     
     return product;
@@ -505,6 +578,34 @@ export class DatabaseStorage implements IStorage {
       .where(eq(products.id, review.productId!));
     
     return newReview;
+  }
+
+  // Supplier operations
+  async getSuppliers(): Promise<Supplier[]> {
+    return await db.select().from(suppliers).orderBy(suppliers.name);
+  }
+
+  async getSupplier(id: number): Promise<Supplier | undefined> {
+    const [supplier] = await db.select().from(suppliers).where(eq(suppliers.id, id));
+    return supplier;
+  }
+
+  async createSupplier(supplier: InsertSupplier): Promise<Supplier> {
+    const [newSupplier] = await db.insert(suppliers).values(supplier).returning();
+    return newSupplier;
+  }
+
+  async updateSupplier(id: number, supplier: Partial<InsertSupplier>): Promise<Supplier> {
+    const [updatedSupplier] = await db
+      .update(suppliers)
+      .set({ ...supplier, updatedAt: new Date() })
+      .where(eq(suppliers.id, id))
+      .returning();
+    return updatedSupplier;
+  }
+
+  async deleteSupplier(id: number): Promise<void> {
+    await db.delete(suppliers).where(eq(suppliers.id, id));
   }
 
   // Admin stats operations

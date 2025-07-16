@@ -1204,4 +1204,87 @@ export async function registerAdminRoutes(app: Express) {
       res.status(500).json({ message: "Failed to delete products" });
     }
   });
+
+  // Supplier routes
+  app.get("/admin/api/suppliers", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const suppliers = await storage.getSuppliers();
+      res.json(suppliers);
+    } catch (error) {
+      console.error("Error fetching suppliers:", error);
+      res.status(500).json({ message: "Failed to fetch suppliers" });
+    }
+  });
+
+  app.post("/admin/api/suppliers", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { name, email, phone, address, city, state, zipCode, country, contactPerson, apiEndpoint, apiKey, integrationType, notes, isActive } = req.body;
+      
+      if (!name || !email) {
+        return res.status(400).json({ message: "Name and email are required" });
+      }
+      
+      const supplier = await storage.createSupplier({
+        name,
+        email,
+        phone,
+        address,
+        city,
+        state,
+        zipCode,
+        country,
+        contactPerson,
+        apiEndpoint,
+        apiKey,
+        integrationType: integrationType || 'email',
+        notes,
+        isActive: isActive !== undefined ? isActive : true
+      });
+      
+      res.json(supplier);
+    } catch (error) {
+      console.error("Error creating supplier:", error);
+      res.status(500).json({ message: "Failed to create supplier" });
+    }
+  });
+
+  app.put("/admin/api/suppliers/:id", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { name, email, phone, address, city, state, zipCode, country, contactPerson, apiEndpoint, apiKey, integrationType, notes, isActive } = req.body;
+      
+      const supplier = await storage.updateSupplier(parseInt(id), {
+        name,
+        email,
+        phone,
+        address,
+        city,
+        state,
+        zipCode,
+        country,
+        contactPerson,
+        apiEndpoint,
+        apiKey,
+        integrationType,
+        notes,
+        isActive
+      });
+      
+      res.json(supplier);
+    } catch (error) {
+      console.error("Error updating supplier:", error);
+      res.status(500).json({ message: "Failed to update supplier" });
+    }
+  });
+
+  app.delete("/admin/api/suppliers/:id", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteSupplier(parseInt(id));
+      res.json({ message: "Supplier deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting supplier:", error);
+      res.status(500).json({ message: "Failed to delete supplier" });
+    }
+  });
 }

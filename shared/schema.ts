@@ -57,6 +57,7 @@ export const products = pgTable("products", {
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   compareAtPrice: decimal("compare_at_price", { precision: 10, scale: 2 }),
   categoryId: integer("category_id").references(() => categories.id),
+  supplierId: integer("supplier_id").references(() => suppliers.id),
   imageUrl: text("image_url"),
   images: jsonb("images").default([]),
   inStock: boolean("in_stock").default(true),
@@ -117,6 +118,27 @@ export const reviews = pgTable("reviews", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Suppliers table
+export const suppliers = pgTable("suppliers", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  phone: varchar("phone", { length: 50 }),
+  address: text("address"),
+  city: varchar("city", { length: 100 }),
+  state: varchar("state", { length: 100 }),
+  zipCode: varchar("zip_code", { length: 20 }),
+  country: varchar("country", { length: 100 }),
+  contactPerson: varchar("contact_person", { length: 255 }),
+  apiEndpoint: varchar("api_endpoint", { length: 500 }),
+  apiKey: varchar("api_key", { length: 255 }),
+  integrationType: varchar("integration_type", { length: 50 }).default("email"), // email, api, manual
+  notes: text("notes"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   orders: many(orders),
@@ -132,6 +154,10 @@ export const productsRelations = relations(products, ({ one, many }) => ({
   category: one(categories, {
     fields: [products.categoryId],
     references: [categories.id],
+  }),
+  supplier: one(suppliers, {
+    fields: [products.supplierId],
+    references: [suppliers.id],
   }),
   orderItems: many(orderItems),
   cartItems: many(cartItems),
@@ -179,6 +205,10 @@ export const reviewsRelations = relations(reviews, ({ one }) => ({
   }),
 }));
 
+export const suppliersRelations = relations(suppliers, ({ many }) => ({
+  products: many(products),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -217,6 +247,12 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
   createdAt: true,
 });
 
+export const insertSupplierSchema = createInsertSchema(suppliers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -232,8 +268,10 @@ export type CartItem = typeof cartItems.$inferSelect;
 export type InsertCartItem = z.infer<typeof insertCartItemSchema>;
 export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
+export type Supplier = typeof suppliers.$inferSelect;
+export type InsertSupplier = z.infer<typeof insertSupplierSchema>;
 
 // Additional types for API responses
-export type ProductWithCategory = Product & { category: Category | null };
+export type ProductWithCategory = Product & { category: Category | null; supplier: Supplier | null };
 export type OrderWithItems = Order & { items: (OrderItem & { product: Product })[] };
 export type CartItemWithProduct = CartItem & { product: Product };

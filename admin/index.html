@@ -460,6 +460,7 @@
       const [users, setUsers] = useState([]);
       const [products, setProducts] = useState([]);
       const [categories, setCategories] = useState([]);
+      const [suppliers, setSuppliers] = useState([]);
       const [showAddUserModal, setShowAddUserModal] = useState(false);
       const [showAddProductModal, setShowAddProductModal] = useState(false);
       const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
@@ -642,6 +643,26 @@
           }
         } catch (err) {
           console.error('Network error fetching categories:', err);
+        }
+      };
+
+      const fetchSuppliers = async () => {
+        try {
+          const response = await fetch('/admin/api/suppliers', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            setSuppliers(data);
+          } else {
+            console.error('Failed to fetch suppliers:', data.message);
+          }
+        } catch (err) {
+          console.error('Network error fetching suppliers:', err);
         }
       };
 
@@ -1020,6 +1041,8 @@
           fetchProducts();
         } else if (view === 'categories' && categories.length === 0) {
           fetchCategories();
+        } else if (view === 'suppliers' && suppliers.length === 0) {
+          fetchSuppliers();
         }
       };
       
@@ -1950,6 +1973,168 @@
                       onClick={() => alert('Add your first product:\n\n• Product name and description\n• High-quality images\n• Pricing information\n• Category assignment\n• Inventory management')}
                     >
                       ➕ Add Your First Product
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          
+          case 'suppliers':
+            return (
+              <div style={{background: 'white', padding: '30px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+                  <h3 style={{color: '#333', margin: '0'}}>🏢 Supplier Management</h3>
+                  <button 
+                    className="btn" 
+                    style={{background: '#28a745', width: 'auto', padding: '12px 20px'}}
+                    onClick={() => alert('Add new supplier:\n\n• Company details\n• Contact information\n• API integration settings\n• Product assignments\n• Email notifications')}
+                  >
+                    ➕ Add New Supplier
+                  </button>
+                </div>
+                
+                <div style={{marginBottom: '20px'}}>
+                  <h4 style={{color: '#333', marginBottom: '15px'}}>Supplier Overview</h4>
+                  <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                    <button 
+                      className="btn" 
+                      style={{background: '#007bff', width: 'auto', padding: '8px 16px'}}
+                      onClick={() => alert('Supplier analytics:\n\n• Order volume by supplier\n• Performance metrics\n• Delivery times\n• Quality ratings\n• Cost analysis')}
+                    >
+                      📊 Analytics
+                    </button>
+                    <button 
+                      className="btn" 
+                      style={{background: '#17a2b8', width: 'auto', padding: '8px 16px'}}
+                      onClick={() => alert('Bulk operations:\n\n• Update contact information\n• Sync API credentials\n• Status management\n• Performance reviews\n• Contract management')}
+                    >
+                      🔄 Bulk Operations
+                    </button>
+                    <button 
+                      className="btn" 
+                      style={{background: '#6c757d', width: 'auto', padding: '8px 16px'}}
+                      onClick={() => alert('Export suppliers:\n\n• Contact directory\n• Performance reports\n• Contract details\n• Integration settings\n• Compliance documentation')}
+                    >
+                      📤 Export
+                    </button>
+                  </div>
+                </div>
+                
+                {suppliers.length > 0 ? (
+                  <div style={{marginTop: '20px', maxHeight: '500px', overflowY: 'auto'}}>
+                    <table style={{width: '100%', borderCollapse: 'collapse', border: '1px solid #dee2e6'}}>
+                      <thead>
+                        <tr style={{backgroundColor: '#f8f9fa'}}>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '1px solid #dee2e6', color: '#333'}}>Supplier Name</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '1px solid #dee2e6', color: '#333'}}>Contact</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '1px solid #dee2e6', color: '#333'}}>Location</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '1px solid #dee2e6', color: '#333'}}>Integration</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '1px solid #dee2e6', color: '#333'}}>Status</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '1px solid #dee2e6', color: '#333'}}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {suppliers.map((supplier) => (
+                          <tr key={supplier.id} style={{borderBottom: '1px solid #dee2e6'}}>
+                            <td style={{padding: '12px', color: '#333'}}>
+                              <div style={{fontWeight: 'bold'}}>{supplier.name}</div>
+                              <div style={{fontSize: '12px', color: '#666'}}>{supplier.contactPerson}</div>
+                            </td>
+                            <td style={{padding: '12px', color: '#333'}}>
+                              <div style={{fontSize: '14px'}}>{supplier.email}</div>
+                              <div style={{fontSize: '12px', color: '#666'}}>{supplier.phone}</div>
+                            </td>
+                            <td style={{padding: '12px', color: '#333'}}>
+                              <div style={{fontSize: '14px'}}>{supplier.city}, {supplier.country}</div>
+                              <div style={{fontSize: '12px', color: '#666'}}>{supplier.address}</div>
+                            </td>
+                            <td style={{padding: '12px', color: '#333'}}>
+                              <span style={{
+                                padding: '4px 8px',
+                                borderRadius: '12px',
+                                fontSize: '12px',
+                                backgroundColor: supplier.integrationType === 'api' ? '#d4edda' : '#fff3cd',
+                                color: supplier.integrationType === 'api' ? '#155724' : '#856404'
+                              }}>
+                                {supplier.integrationType === 'api' ? '🔗 API' : '📧 Email'}
+                              </span>
+                            </td>
+                            <td style={{padding: '12px', color: '#333'}}>
+                              <span style={{
+                                padding: '4px 8px',
+                                borderRadius: '12px',
+                                fontSize: '12px',
+                                backgroundColor: supplier.isActive ? '#d4edda' : '#f8d7da',
+                                color: supplier.isActive ? '#155724' : '#721c24'
+                              }}>
+                                {supplier.isActive ? '✅ Active' : '❌ Inactive'}
+                              </span>
+                            </td>
+                            <td style={{padding: '12px'}}>
+                              <div style={{display: 'flex', gap: '8px'}}>
+                                <button 
+                                  style={{
+                                    padding: '4px 8px',
+                                    border: 'none',
+                                    borderRadius: '3px',
+                                    backgroundColor: '#17a2b8',
+                                    color: 'white',
+                                    cursor: 'pointer',
+                                    fontSize: '12px'
+                                  }}
+                                  onClick={() => alert(`Edit supplier "${supplier.name}":\n\n• Update contact information\n• Modify API settings\n• Change integration type\n• Update status\n• Edit notes`)}
+                                >
+                                  ✏️ Edit
+                                </button>
+                                <button 
+                                  style={{
+                                    padding: '4px 8px',
+                                    border: 'none',
+                                    borderRadius: '3px',
+                                    backgroundColor: '#6c757d',
+                                    color: 'white',
+                                    cursor: 'pointer',
+                                    fontSize: '12px'
+                                  }}
+                                  onClick={() => alert(`Supplier "${supplier.name}" details:\n\n• Products: View associated products\n• Orders: Track supplier orders\n• Performance: View metrics\n• API logs: Check integration status\n• Contacts: Full contact details`)}
+                                >
+                                  👁️ View
+                                </button>
+                                <button 
+                                  style={{
+                                    padding: '4px 8px',
+                                    border: 'none',
+                                    borderRadius: '3px',
+                                    backgroundColor: '#dc3545',
+                                    color: 'white',
+                                    cursor: 'pointer',
+                                    fontSize: '12px'
+                                  }}
+                                  onClick={() => {
+                                    if (confirm(`Delete supplier "${supplier.name}"?\n\nThis will remove the supplier and unassign all associated products.\n\nThis action cannot be undone.`)) {
+                                      alert('Supplier deletion functionality:\n\n• Remove supplier record\n• Unassign products\n• Archive order history\n• Send notifications\n• Update system logs');
+                                    }
+                                  }}
+                                >
+                                  🗑️ Delete
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div style={{padding: '40px', textAlign: 'center', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6'}}>
+                    <p style={{color: '#666', fontSize: '18px', marginBottom: '15px'}}>No suppliers found</p>
+                    <p style={{color: '#6c757d', marginBottom: '20px'}}>Start building your supplier network by adding your first supplier.</p>
+                    <button 
+                      className="btn" 
+                      style={{background: '#28a745', width: 'auto', padding: '12px 24px'}}
+                      onClick={() => alert('Add your first supplier:\n\n• Company name and details\n• Contact information\n• Integration preferences\n• Email notifications\n• Product assignments')}
+                    >
+                      ➕ Add Your First Supplier
                     </button>
                   </div>
                 )}
@@ -3774,6 +3959,12 @@ TOTAL: $${selectedOrder.totalAmount}
               onClick={() => handleViewChange('products')}
             >
               📦 Products
+            </button>
+            <button 
+              className={`nav-tab ${activeView === 'suppliers' ? 'active' : ''}`}
+              onClick={() => handleViewChange('suppliers')}
+            >
+              🏢 Suppliers
             </button>
             <button 
               className={`nav-tab ${activeView === 'settings' ? 'active' : ''}`}
