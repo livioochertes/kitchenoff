@@ -647,12 +647,18 @@
 
       const generateProductAnalytics = () => {
         console.log('Generating product analytics with data:', products.length, 'products');
+        console.log('Categories available:', categories.length, 'categories');
         
         if (products.length === 0) {
           setAnalyticsData({
             error: 'No products found to analyze'
           });
           return;
+        }
+        
+        // Make sure categories are loaded
+        if (categories.length === 0) {
+          fetchCategories();
         }
 
         // Calculate analytics based on actual product data
@@ -662,10 +668,12 @@
           // Category analysis
           categoryBreakdown: categories.reduce((acc, cat) => {
             const categoryProducts = products.filter(p => p.categoryId === cat.id);
-            acc[cat.name] = {
-              count: categoryProducts.length,
-              percentage: ((categoryProducts.length / products.length) * 100).toFixed(1)
-            };
+            if (categoryProducts.length > 0) {
+              acc[cat.name] = {
+                count: categoryProducts.length,
+                percentage: ((categoryProducts.length / products.length) * 100).toFixed(1)
+              };
+            }
             return acc;
           }, {}),
           
