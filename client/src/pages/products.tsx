@@ -2,15 +2,13 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
-import { Filter, Grid, List, Search, Star, Package, DollarSign, RotateCcw } from "lucide-react";
+import { Filter, Grid, List, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Slider } from "@/components/ui/slider";
-import { Label } from "@/components/ui/label";
 import { useTranslation } from "@/hooks/useTranslation";
 import Header from "@/components/header";
 import ProductCard from "@/components/product-card";
@@ -79,10 +77,6 @@ export default function Products() {
   
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
-  const [stockFilter, setStockFilter] = useState<string>("all");
-  const [ratingFilter, setRatingFilter] = useState<number>(0);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
   
   // Function to get translated category name
   const getCategoryName = (category: Category | null | undefined) => {
@@ -139,11 +133,6 @@ export default function Products() {
 
   // Check if there are more products to load
   const hasMoreProducts = products.length >= currentLimit;
-
-  // Check if any filters are active
-  const hasActiveFilters = searchQuery || selectedCategory || 
-    priceRange[0] > 0 || priceRange[1] < 1000 || 
-    stockFilter !== "all" || ratingFilter > 0 || statusFilter !== "all";
   
   const handleLoadMore = () => {
     setCurrentLimit(prev => prev + 20);
@@ -167,55 +156,6 @@ export default function Products() {
     console.log("⏱️ Search navigation initiated:", performance.now() - startTime, "ms");
   };
 
-  // Filter reset functionality
-  const resetFilters = () => {
-    setSearchQuery("");
-    setSelectedCategory("");
-    setPriceRange([0, 1000]);
-    setStockFilter("all");
-    setRatingFilter(0);
-    setStatusFilter("all");
-    setSortBy("newest");
-    navigate("/products");
-  };
-
-  // Filter products based on local filters
-  const filteredProducts = products.filter(product => {
-    // Price filter
-    const price = parseFloat(product.price.toString());
-    if (price < priceRange[0] || price > priceRange[1]) return false;
-
-    // Stock filter
-    if (stockFilter === "instock" && product.stockQuantity <= 0) return false;
-    if (stockFilter === "outstock" && product.stockQuantity > 0) return false;
-
-    // Rating filter
-    const rating = parseFloat(product.rating?.toString() || "0");
-    if (rating < ratingFilter) return false;
-
-    // Status filter
-    if (statusFilter !== "all" && product.status !== statusFilter) return false;
-
-    return true;
-  });
-
-  // Sort filtered products
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    switch (sortBy) {
-      case "price-asc":
-        return parseFloat(a.price.toString()) - parseFloat(b.price.toString());
-      case "price-desc":
-        return parseFloat(b.price.toString()) - parseFloat(a.price.toString());
-      case "name":
-        return a.name.localeCompare(b.name);
-      case "rating":
-        return parseFloat(b.rating?.toString() || "0") - parseFloat(a.rating?.toString() || "0");
-      case "newest":
-      default:
-        return b.id - a.id;
-    }
-  });
-
   // Removed client-side sorting for better performance - server should handle this
 
 
@@ -230,16 +170,9 @@ export default function Products() {
           <div className="w-full lg:w-1/4">
             <Card>
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-4 flex items-center justify-between">
-                  <span className="flex items-center">
-                    <Filter className="h-5 w-5 mr-2" />
-                    {t('common.filters')}
-                  </span>
-                  {hasActiveFilters && (
-                    <Badge variant="destructive" className="text-xs">
-                      Active
-                    </Badge>
-                  )}
+                <h3 className="text-lg font-semibold mb-4 flex items-center">
+                  <Filter className="h-5 w-5 mr-2" />
+                  {t('common.filters')}
                 </h3>
 
                 {/* Search */}
@@ -310,86 +243,8 @@ export default function Products() {
                   </div>
                 </div>
 
-                {/* Price Range Filter */}
-                <div className="mb-6">
-                  <h4 className="font-medium mb-3 flex items-center">
-                    <DollarSign className="h-4 w-4 mr-2" />
-                    Price Range
-                  </h4>
-                  <div className="space-y-3">
-                    <Slider
-                      value={priceRange}
-                      onValueChange={setPriceRange}
-                      max={1000}
-                      min={0}
-                      step={10}
-                      className="w-full"
-                    />
-                    <div className="flex justify-between text-sm text-muted-foreground">
-                      <span>${priceRange[0]}</span>
-                      <span>${priceRange[1]}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Stock Filter */}
-                <div className="mb-6">
-                  <h4 className="font-medium mb-3 flex items-center">
-                    <Package className="h-4 w-4 mr-2" />
-                    Stock Status
-                  </h4>
-                  <Select value={stockFilter} onValueChange={setStockFilter}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Products</SelectItem>
-                      <SelectItem value="instock">In Stock</SelectItem>
-                      <SelectItem value="outstock">Out of Stock</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Rating Filter */}
-                <div className="mb-6">
-                  <h4 className="font-medium mb-3 flex items-center">
-                    <Star className="h-4 w-4 mr-2" />
-                    Minimum Rating
-                  </h4>
-                  <Select value={ratingFilter.toString()} onValueChange={(value) => setRatingFilter(parseInt(value))}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0">All Ratings</SelectItem>
-                      <SelectItem value="1">1+ Stars</SelectItem>
-                      <SelectItem value="2">2+ Stars</SelectItem>
-                      <SelectItem value="3">3+ Stars</SelectItem>
-                      <SelectItem value="4">4+ Stars</SelectItem>
-                      <SelectItem value="5">5 Stars</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Status Filter */}
-                <div className="mb-6">
-                  <h4 className="font-medium mb-3">Product Status</h4>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="discontinued">Discontinued</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
                 {/* Sort */}
-                <div className="mb-6">
+                <div>
                   <h4 className="font-medium mb-3">{t('common.sortBy')}</h4>
                   <Select value={sortBy} onValueChange={setSortBy}>
                     <SelectTrigger>
@@ -404,16 +259,6 @@ export default function Products() {
                     </SelectContent>
                   </Select>
                 </div>
-
-                {/* Reset Filters Button */}
-                <Button
-                  variant="outline"
-                  onClick={resetFilters}
-                  className="w-full flex items-center justify-center gap-2"
-                >
-                  <RotateCcw className="h-4 w-4" />
-                  Reset Filters
-                </Button>
               </CardContent>
             </Card>
           </div>
@@ -435,49 +280,10 @@ export default function Products() {
                   )}
                 </h1>
                 <Badge variant="secondary">
-                  {sortedProducts.length} {t('nav.products').toLowerCase()}
+                  {products.length} {t('nav.products').toLowerCase()}
                 </Badge>
               </div>
-              
-              {/* Active Filters Display */}
-              {hasActiveFilters && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Active filters:</span>
-                  <div className="flex gap-2 flex-wrap">
-                    {searchQuery && (
-                      <Badge variant="outline" className="text-xs">
-                        Search: {searchQuery}
-                      </Badge>
-                    )}
-                    {selectedCategory && (
-                      <Badge variant="outline" className="text-xs">
-                        Category: {getCategoryName(categories.find(c => c.slug === selectedCategory))}
-                      </Badge>
-                    )}
-                    {(priceRange[0] > 0 || priceRange[1] < 1000) && (
-                      <Badge variant="outline" className="text-xs">
-                        Price: ${priceRange[0]} - ${priceRange[1]}
-                      </Badge>
-                    )}
-                    {stockFilter !== "all" && (
-                      <Badge variant="outline" className="text-xs">
-                        Stock: {stockFilter}
-                      </Badge>
-                    )}
-                    {ratingFilter > 0 && (
-                      <Badge variant="outline" className="text-xs">
-                        Rating: {ratingFilter}+ stars
-                      </Badge>
-                    )}
-                    {statusFilter !== "all" && (
-                      <Badge variant="outline" className="text-xs">
-                        Status: {statusFilter}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              )}
-              
+
               <div className="flex items-center gap-2">
                 <Button
                   variant={viewMode === "grid" ? "default" : "outline"}
@@ -513,30 +319,30 @@ export default function Products() {
             )}
 
             {/* No Results */}
-            {!isLoading && !isFetching && sortedProducts.length === 0 && (
+            {!isLoading && !isFetching && products.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-muted-foreground mb-4">{t('products.noProducts')}</p>
-                <Button onClick={resetFilters}>
+                <Button onClick={() => { window.location.href = "/products"; }}>
                   {t('products.clearFilters')}
                 </Button>
               </div>
             )}
 
             {/* Products Grid */}
-            {sortedProducts.length > 0 && (
+            {products.length > 0 && (
               <>
                 <div className={`grid gap-6 ${
                   viewMode === "grid" 
                     ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" 
                     : "grid-cols-1"
                 }`}>
-                  {sortedProducts.slice(0, currentLimit).map((product) => (
+                  {products.map((product) => (
                     <ProductCard key={`${product.id}-${selectedCategory}-${searchQuery}`} product={product} />
                   ))}
                 </div>
                 
                 {/* Load More Button */}
-                {sortedProducts.length > currentLimit && (
+                {hasMoreProducts && (
                   <div className="flex justify-center mt-8">
                     <Button 
                       onClick={handleLoadMore} 
@@ -550,7 +356,7 @@ export default function Products() {
                           Loading more...
                         </>
                       ) : (
-                        <>Load More Products ({sortedProducts.length - currentLimit} remaining)</>
+                        <>Load More Products</>
                       )}
                     </Button>
                   </div>
