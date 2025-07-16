@@ -165,6 +165,7 @@ export class DatabaseStorage implements IStorage {
         productCode: products.productCode,
         ncCode: products.ncCode,
         cpvCode: products.cpvCode,
+        status: products.status,
         createdAt: products.createdAt,
         updatedAt: products.updatedAt,
         category: {
@@ -212,6 +213,11 @@ export class DatabaseStorage implements IStorage {
         featured: products.featured,
         rating: products.rating,
         reviewCount: products.reviewCount,
+        vatValue: products.vatValue,
+        productCode: products.productCode,
+        ncCode: products.ncCode,
+        cpvCode: products.cpvCode,
+        status: products.status,
         createdAt: products.createdAt,
         updatedAt: products.updatedAt,
         category: {
@@ -247,6 +253,11 @@ export class DatabaseStorage implements IStorage {
         featured: products.featured,
         rating: products.rating,
         reviewCount: products.reviewCount,
+        vatValue: products.vatValue,
+        productCode: products.productCode,
+        ncCode: products.ncCode,
+        cpvCode: products.cpvCode,
+        status: products.status,
         createdAt: products.createdAt,
         updatedAt: products.updatedAt,
         category: {
