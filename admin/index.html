@@ -1805,11 +1805,23 @@
             const result = await response.json();
             
             if (result.success) {
-              setUploadedImages(prev => [...prev, ...result.files]);
+              const newImages = [...uploadedImages, ...result.files];
+              setUploadedImages(newImages);
               setProductFormData(prev => ({
                 ...prev,
-                images: [...prev.images, ...result.files]
+                images: newImages
               }));
+              
+              // If editing an existing product, update it immediately with the new images
+              if (editingProduct) {
+                const updatedProductData = {
+                  ...productFormData,
+                  images: newImages
+                };
+                
+                await updateProduct(editingProduct.id, updatedProductData);
+              }
+              
               alert(`${result.files.length} image(s) uploaded successfully`);
             } else {
               alert('Error: ' + result.message);
@@ -1836,11 +1848,23 @@
             const result = await response.json();
             
             if (result.success) {
-              setUploadedImages(prev => prev.filter((_, i) => i !== index));
+              const newImages = uploadedImages.filter((_, i) => i !== index);
+              setUploadedImages(newImages);
               setProductFormData(prev => ({
                 ...prev,
-                images: prev.images.filter((_, i) => i !== index)
+                images: newImages
               }));
+              
+              // If editing an existing product, update it immediately with the new images
+              if (editingProduct) {
+                const updatedProductData = {
+                  ...productFormData,
+                  images: newImages
+                };
+                
+                await updateProduct(editingProduct.id, updatedProductData);
+              }
+              
               alert('Image deleted successfully');
             } else {
               alert('Error: ' + result.message);
@@ -1852,7 +1876,7 @@
         };
 
         // Set image as main function
-        const setAsMainImage = (selectedIndex) => {
+        const setAsMainImage = async (selectedIndex) => {
           if (selectedIndex === 0) return; // Already main
           
           const newImages = [...uploadedImages];
@@ -1864,6 +1888,16 @@
             ...prev,
             images: newImages
           }));
+          
+          // If editing an existing product, update it immediately with the new image order
+          if (editingProduct) {
+            const updatedProductData = {
+              ...productFormData,
+              images: newImages
+            };
+            
+            await updateProduct(editingProduct.id, updatedProductData);
+          }
         };
         
         const handleUserSubmit = async (e) => {
