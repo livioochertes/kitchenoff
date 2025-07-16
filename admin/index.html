@@ -1361,6 +1361,9 @@
                       style={{background: '#17a2b8', width: 'auto', padding: '8px 16px'}}
                       onClick={() => {
                         setShowProductSearchFilter(!showProductSearchFilter);
+                        if (!showProductSearchFilter) {
+                          fetchCategories(); // Fetch categories when opening search filter
+                        }
                         console.log('Product search filter toggled:', !showProductSearchFilter);
                       }}
                     >
