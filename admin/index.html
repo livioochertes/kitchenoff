@@ -1922,8 +1922,10 @@
               images: []
             });
             setUploadedImages([]);
-            // Refresh products to get updated data with images
-            await fetchProducts();
+            // Refresh products after a short delay to get updated data with images
+            setTimeout(() => {
+              fetchProducts();
+            }, 1000);
           } else {
             alert('Error: ' + result.message);
           }

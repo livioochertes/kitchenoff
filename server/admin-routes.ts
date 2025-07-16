@@ -804,9 +804,7 @@ export async function registerAdminRoutes(app: Express) {
         images: productData.images || []  // Ensure images are properly saved
       });
 
-      // Refresh memory cache to include updated product data
-      const { loadAllDataIntoMemory } = await import('./routes');
-      await loadAllDataIntoMemory();
+      // Note: Memory cache will be refreshed periodically, no need to refresh immediately
 
       res.json({ message: "Product updated successfully", product: updatedProduct });
     } catch (error) {

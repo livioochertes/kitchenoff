@@ -73,8 +73,15 @@ export async function loadAllDataIntoMemory() {
   }
 }
 
-// Refresh data periodically
-setInterval(loadAllDataIntoMemory, CACHE_REFRESH_INTERVAL);
+// Refresh data periodically (but not too frequently to avoid product disappearing)
+let isRefreshing = false;
+setInterval(async () => {
+  if (!isRefreshing) {
+    isRefreshing = true;
+    await loadAllDataIntoMemory();
+    isRefreshing = false;
+  }
+}, CACHE_REFRESH_INTERVAL);
 
 // JWT middleware
 interface AuthRequest extends Request {
