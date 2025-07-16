@@ -217,6 +217,43 @@
     .hidden {
       display: none;
     }
+    
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      margin-bottom: 35px;
+    }
+    
+    .stat-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 35px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .stat-number {
+      font-size: 42px;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+    
+    .stat-label {
+      font-size: 16px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
   </style>
 </head>
 <body>
@@ -279,6 +316,15 @@
           <button class="nav-tab active" data-tab="dashboard">
             📊 Dashboard
           </button>
+          <button class="nav-tab" data-tab="orders">
+            📋 Orders
+          </button>
+          <button class="nav-tab" data-tab="users">
+            👥 Users
+          </button>
+          <button class="nav-tab" data-tab="products">
+            📦 Products
+          </button>
           <button class="nav-tab" data-tab="settings">
             ⚙️ Settings
           </button>
@@ -287,8 +333,37 @@
         <div class="content-area">
           <div id="dashboard-content">
             <h2>Dashboard</h2>
-            <p>Welcome to the KitchenOff Admin Panel!</p>
-            <p>Admin interface is now working correctly!</p>
+            <div id="dashboard-stats">
+              <div class="dashboard-grid">
+                <div class="stat-card">
+                  <div class="stat-number" id="total-users">0</div>
+                  <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number" id="total-orders">0</div>
+                  <div class="stat-label">Total Orders</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number" id="total-products">0</div>
+                  <div class="stat-label">Total Products</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="orders-content" class="hidden">
+            <h2>Orders Management</h2>
+            <p>Orders management functionality will be implemented here.</p>
+          </div>
+          
+          <div id="users-content" class="hidden">
+            <h2>Users Management</h2>
+            <p>Users management functionality will be implemented here.</p>
+          </div>
+          
+          <div id="products-content" class="hidden">
+            <h2>Products Management</h2>
+            <p>Products management functionality will be implemented here.</p>
           </div>
           
           <div id="settings-content" class="hidden">
@@ -406,6 +481,9 @@
       document.getElementById('login-screen').classList.add('hidden');
       document.getElementById('dashboard-screen').classList.remove('hidden');
       document.getElementById('loading-screen').classList.add('hidden');
+      
+      // Load dashboard statistics
+      loadDashboardStats();
     }
     
     function showError(message) {
@@ -423,8 +501,33 @@
       
       // Show/hide content
       document.getElementById('dashboard-content').classList.add('hidden');
+      document.getElementById('orders-content').classList.add('hidden');
+      document.getElementById('users-content').classList.add('hidden');
+      document.getElementById('products-content').classList.add('hidden');
       document.getElementById('settings-content').classList.add('hidden');
       document.getElementById(`${tabName}-content`).classList.remove('hidden');
+    }
+    
+    // Load dashboard statistics
+    async function loadDashboardStats() {
+      const token = localStorage.getItem('adminToken');
+      
+      try {
+        const response = await fetch('/admin/api/stats', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const stats = await response.json();
+          document.getElementById('total-users').textContent = stats.totalUsers || 0;
+          document.getElementById('total-orders').textContent = stats.totalOrders || 0;
+          document.getElementById('total-products').textContent = stats.totalProducts || 0;
+        }
+      } catch (err) {
+        console.error('Error loading dashboard stats:', err);
+      }
     }
   </script>
 </body>
