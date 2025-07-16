@@ -66,7 +66,8 @@ export async function seedDatabase() {
         vatValue: "19.00",
         productCode: "FDL-EXP-500",
         ncCode: "4821.10.90",
-        cpvCode: "39224110-8"
+        cpvCode: "39224110-8",
+        status: "active"
       },
       {
         name: "Day of the Week Labels - Complete Set",
@@ -84,7 +85,8 @@ export async function seedDatabase() {
         vatValue: "19.00",
         productCode: "FDL-DOW-SET",
         ncCode: "4821.10.90",
-        cpvCode: "39224110-8"
+        cpvCode: "39224110-8",
+        status: "inactive"
       },
       {
         name: "Custom Food Labels - 1000 pack",
@@ -102,7 +104,8 @@ export async function seedDatabase() {
         vatValue: "19.00",
         productCode: "FDL-CST-1000",
         ncCode: "4821.10.90",
-        cpvCode: "39224110-8"
+        cpvCode: "39224110-8",
+        status: "draft"
       },
       
       // HACCP Equipment
@@ -122,7 +125,8 @@ export async function seedDatabase() {
         vatValue: "19.00",
         productCode: "HACP-THM-DIG",
         ncCode: "9025.19.80",
-        cpvCode: "38500000-8"
+        cpvCode: "38500000-8",
+        status: "active"
       },
       {
         name: "Temperature Log Book",
@@ -140,7 +144,8 @@ export async function seedDatabase() {
         vatValue: "19.00",
         productCode: "HACP-LOG-100",
         ncCode: "4820.10.90",
-        cpvCode: "30192140-8"
+        cpvCode: "30192140-8",
+        status: "discontinued"
       },
       {
         name: "Infrared Thermometer Gun",
@@ -158,7 +163,8 @@ export async function seedDatabase() {
         vatValue: "19.00",
         productCode: "HACP-CLN-SOL",
         ncCode: "3402.20.90",
-        cpvCode: "39831200-8"
+        cpvCode: "39831200-8",
+        status: "active"
       },
       
       // Kitchen Supplies
@@ -178,7 +184,8 @@ export async function seedDatabase() {
         vatValue: "19.00",
         productCode: "KIT-CUT-SET",
         ncCode: "3926.90.97",
-        cpvCode: "39224400-2"
+        cpvCode: "39224400-2",
+        status: "draft"
       },
       {
         name: "Professional Chef Knife Set",
@@ -196,7 +203,8 @@ export async function seedDatabase() {
         vatValue: "19.00",
         productCode: "KIT-KNF-SET",
         ncCode: "8211.91.00",
-        cpvCode: "39224200-6"
+        cpvCode: "39224200-6",
+        status: "inactive"
       },
       {
         name: "Stainless Steel Mixing Bowls",
@@ -214,7 +222,8 @@ export async function seedDatabase() {
         vatValue: "19.00",
         productCode: "KIT-MIX-6SET",
         ncCode: "7615.20.00",
-        cpvCode: "39224300-7"
+        cpvCode: "39224300-7",
+        status: "active"
       },
       
       // Cleaning & Sanitizing

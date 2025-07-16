@@ -1361,6 +1361,7 @@
                           <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Price</th>
                           <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Category</th>
                           <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Stock</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Status</th>
                           <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>VAT %</th>
                           <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Product Code</th>
                           <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>NC Code</th>
@@ -1462,6 +1463,16 @@
                                 color: product.stock > 10 ? '#155724' : '#721c24'
                               }}>
                                 {product.stock || 'N/A'}
+                              </span>
+                            </td>
+                            <td style={{padding: '12px'}}>
+                              <span style={{
+                                padding: '4px 8px', 
+                                borderRadius: '4px', 
+                                backgroundColor: product.status === 'active' ? '#d4edda' : product.status === 'inactive' ? '#f8d7da' : product.status === 'draft' ? '#fff3cd' : '#e2e3e5',
+                                color: product.status === 'active' ? '#155724' : product.status === 'inactive' ? '#721c24' : product.status === 'draft' ? '#856404' : '#6c757d'
+                              }}>
+                                {product.status || 'active'}
                               </span>
                             </td>
                             <td style={{padding: '12px', color: '#6c757d', fontSize: '14px'}}>{product.vatValue || 'N/A'}%</td>
@@ -2050,6 +2061,7 @@
           productCode: '',
           ncCode: '',
           cpvCode: '',
+          status: 'active',
           images: []
         });
 
@@ -2224,6 +2236,7 @@
               productCode: '',
               ncCode: '',
               cpvCode: '',
+              status: 'active',
               images: []
             });
             setUploadedImages([]);
@@ -2265,6 +2278,7 @@
               productCode: editingProduct.productCode || '',
               ncCode: editingProduct.ncCode || '',
               cpvCode: editingProduct.cpvCode || '',
+              status: editingProduct.status || 'active',
               images: editingProduct.images || []
             });
             setUploadedImages(editingProduct.images || []);
@@ -2707,15 +2721,30 @@
                         />
                       </div>
                     </div>
-                    <div className="form-group">
-                      <label style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
-                        <input
-                          type="checkbox"
-                          checked={productFormData.featured}
-                          onChange={(e) => setProductFormData({...productFormData, featured: e.target.checked})}
-                        />
-                        Featured Product
-                      </label>
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px'}}>
+                      <div className="form-group">
+                        <label className="form-label">Status</label>
+                        <select
+                          className="form-input"
+                          value={productFormData.status}
+                          onChange={(e) => setProductFormData({...productFormData, status: e.target.value})}
+                        >
+                          <option value="active">Active</option>
+                          <option value="inactive">Inactive</option>
+                          <option value="draft">Draft</option>
+                          <option value="discontinued">Discontinued</option>
+                        </select>
+                      </div>
+                      <div className="form-group">
+                        <label style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                          <input
+                            type="checkbox"
+                            checked={productFormData.featured}
+                            onChange={(e) => setProductFormData({...productFormData, featured: e.target.checked})}
+                          />
+                          Featured Product
+                        </label>
+                      </div>
                     </div>
                     <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
                       <button type="submit" className="btn" style={{background: '#28a745'}}>
@@ -2741,6 +2770,7 @@
                             productCode: '',
                             ncCode: '',
                             cpvCode: '',
+                            status: 'active',
                             images: []
                           });
                           setUploadedImages([]);

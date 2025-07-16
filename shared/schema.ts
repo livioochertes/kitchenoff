@@ -68,6 +68,7 @@ export const products = pgTable("products", {
   productCode: varchar("product_code", { length: 50 }),
   ncCode: varchar("nc_code", { length: 50 }),
   cpvCode: varchar("cpv_code", { length: 50 }),
+  status: varchar("status", { length: 20 }).default("active"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
