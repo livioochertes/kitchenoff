@@ -91,8 +91,16 @@ export default function Admin() {
   }
 
   // Queries
-  const { data: products = [], isLoading: productsLoading } = useQuery<ProductWithCategory[]>({
+  const { data: products = [], isLoading: productsLoading, error: productsError } = useQuery<ProductWithCategory[]>({
     queryKey: ["/api/products", { limit: 100 }],
+  });
+
+  console.log("🔍 Products query status:", { 
+    productsLoading, 
+    productsError, 
+    productsCount: products.length,
+    user: user?.email,
+    isAdmin: user?.isAdmin 
   });
 
   // Filtered and sorted products
