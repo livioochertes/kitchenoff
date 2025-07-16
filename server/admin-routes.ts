@@ -892,4 +892,205 @@ export async function registerAdminRoutes(app: Express) {
       res.status(500).json({ message: "Failed to delete category" });
     }
   });
+
+  // Product Bulk Operations
+  app.put("/admin/api/products/bulk/price-update", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { productIds, percentage, operation } = req.body;
+      
+      if (!Array.isArray(productIds) || productIds.length === 0) {
+        return res.status(400).json({ success: false, message: "Product IDs array is required" });
+      }
+      
+      if (!percentage || !operation) {
+        return res.status(400).json({ success: false, message: "Percentage and operation are required" });
+      }
+      
+      const results = [];
+      for (const productId of productIds) {
+        try {
+          const product = await storage.getProduct(productId);
+          if (!product) {
+            results.push({ productId, success: false, error: "Product not found" });
+            continue;
+          }
+          
+          const currentPrice = parseFloat(product.price);
+          let newPrice;
+          
+          if (operation === 'increase') {
+            newPrice = currentPrice * (1 + percentage / 100);
+          } else if (operation === 'decrease') {
+            newPrice = Math.max(0, currentPrice * (1 - percentage / 100));
+          } else {
+            results.push({ productId, success: false, error: "Invalid operation" });
+            continue;
+          }
+          
+          await storage.updateProduct(productId, { price: newPrice });
+          results.push({ productId, success: true, oldPrice: currentPrice, newPrice });
+        } catch (error) {
+          results.push({ productId, success: false, error: error.message });
+        }
+      }
+      
+      // Refresh memory cache
+      const { loadAllDataIntoMemory } = await import('./routes');
+      await loadAllDataIntoMemory();
+      
+      res.json({ 
+        success: true,
+        message: `Price updated for ${results.filter(r => r.success).length} products`,
+        results
+      });
+    } catch (error) {
+      console.error("Bulk price update error:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.put("/admin/api/products/bulk/category-update", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { productIds, categoryId } = req.body;
+      
+      if (!Array.isArray(productIds) || productIds.length === 0) {
+        return res.status(400).json({ success: false, message: "Product IDs array is required" });
+      }
+      
+      if (!categoryId) {
+        return res.status(400).json({ success: false, message: "Category ID is required" });
+      }
+      
+      const results = [];
+      for (const productId of productIds) {
+        try {
+          const product = await storage.getProduct(productId);
+          if (!product) {
+            results.push({ productId, success: false, error: "Product not found" });
+            continue;
+          }
+          
+          await storage.updateProduct(productId, { categoryId });
+          results.push({ productId, success: true, newCategoryId: categoryId });
+        } catch (error) {
+          results.push({ productId, success: false, error: error.message });
+        }
+      }
+      
+      // Refresh memory cache
+      const { loadAllDataIntoMemory } = await import('./routes');
+      await loadAllDataIntoMemory();
+      
+      res.json({ 
+        success: true,
+        message: `Category updated for ${results.filter(r => r.success).length} products`,
+        results
+      });
+    } catch (error) {
+      console.error("Bulk category update error:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.put("/admin/api/products/bulk/stock-update", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { productIds, stockQuantity, operation } = req.body;
+      
+      if (!Array.isArray(productIds) || productIds.length === 0) {
+        return res.status(400).json({ success: false, message: "Product IDs array is required" });
+      }
+      
+      if (!stockQuantity || !operation) {
+        return res.status(400).json({ success: false, message: "Stock quantity and operation are required" });
+      }
+      
+      const results = [];
+      for (const productId of productIds) {
+        try {
+          const product = await storage.getProduct(productId);
+          if (!product) {
+            results.push({ productId, success: false, error: "Product not found" });
+            continue;
+          }
+          
+          const currentStock = product.stockQuantity || 0;
+          let newStock;
+          
+          if (operation === 'set') {
+            newStock = stockQuantity;
+          } else if (operation === 'increase') {
+            newStock = currentStock + stockQuantity;
+          } else if (operation === 'decrease') {
+            newStock = Math.max(0, currentStock - stockQuantity);
+          } else {
+            results.push({ productId, success: false, error: "Invalid operation" });
+            continue;
+          }
+          
+          await storage.updateProduct(productId, { stockQuantity: newStock });
+          results.push({ productId, success: true, oldStock: currentStock, newStock });
+        } catch (error) {
+          results.push({ productId, success: false, error: error.message });
+        }
+      }
+      
+      // Refresh memory cache
+      const { loadAllDataIntoMemory } = await import('./routes');
+      await loadAllDataIntoMemory();
+      
+      res.json({ 
+        success: true,
+        message: `Stock updated for ${results.filter(r => r.success).length} products`,
+        results
+      });
+    } catch (error) {
+      console.error("Bulk stock update error:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Product Analytics
+  app.get("/admin/api/products/analytics", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const products = await storage.getProducts();
+      const categories = await storage.getCategories();
+      
+      const totalProducts = products.length;
+      const totalStock = products.reduce((sum, p) => sum + (p.stockQuantity || 0), 0);
+      const averageStock = totalStock / totalProducts;
+      
+      const prices = products.map(p => parseFloat(p.price));
+      const averagePrice = prices.reduce((sum, p) => sum + p, 0) / prices.length;
+      const highestPrice = Math.max(...prices);
+      const lowestPrice = Math.min(...prices);
+      const priceRange = highestPrice - lowestPrice;
+      
+      const lowStockItems = products.filter(p => (p.stockQuantity || 0) < 10).length;
+      const outOfStock = products.filter(p => (p.stockQuantity || 0) === 0).length;
+      
+      const categoryDistribution = categories.map(cat => ({
+        category: cat.name,
+        count: products.filter(p => p.categoryId === cat.id).length
+      }));
+      
+      const analytics = {
+        totalProducts,
+        averagePrice: averagePrice.toFixed(2),
+        lowStockItems,
+        outOfStock,
+        categoryDistribution,
+        highestPrice: highestPrice.toFixed(2),
+        lowestPrice: lowestPrice.toFixed(2),
+        priceRange: priceRange.toFixed(2),
+        totalStock,
+        averageStock: averageStock.toFixed(2),
+        stockTurnover: "N/A" // Would need sales data to calculate
+      };
+      
+      res.json({ success: true, data: analytics });
+    } catch (error) {
+      console.error("Product analytics error:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
 }
