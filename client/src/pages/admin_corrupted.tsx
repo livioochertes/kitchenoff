@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Edit, Trash2, Package, Users, ShoppingCart, DollarSign, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -61,81 +61,6 @@ export default function Admin() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
-  // Filtered and sorted products
-  const filteredProducts = useMemo(() => {
-    let filtered = products.filter(product => {
-      // Search filter
-      if (searchQuery) {
-        const searchLower = searchQuery.toLowerCase();
-        const matchesSearch = 
-          product.name.toLowerCase().includes(searchLower) ||
-          product.description?.toLowerCase().includes(searchLower) ||
-          product.category?.name.toLowerCase().includes(searchLower) ||
-          product.id.toString().includes(searchLower);
-        if (!matchesSearch) return false;
-      }
-      
-      // Category filter
-      if (categoryFilter !== "all") {
-        if (product.categoryId !== parseInt(categoryFilter)) return false;
-      }
-      
-      // Status filter
-      if (statusFilter !== "all") {
-        if ((product.status || "active") !== statusFilter) return false;
-      }
-      
-      // Stock filter
-      if (stockFilter !== "all") {
-        const stock = product.stockQuantity || 0;
-        if (stockFilter === "in-stock" && stock <= 0) return false;
-        if (stockFilter === "low-stock" && stock >= 10) return false;
-        if (stockFilter === "out-of-stock" && stock > 0) return false;
-      }
-      
-      return true;
-    });
-    
-    // Sort filtered products
-    filtered.sort((a, b) => {
-      let aValue, bValue;
-      
-      switch (sortBy) {
-        case "name":
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
-          break;
-        case "price":
-          aValue = parseFloat(a.price);
-          bValue = parseFloat(b.price);
-          break;
-        case "category":
-          aValue = a.category?.name.toLowerCase() || "";
-          bValue = b.category?.name.toLowerCase() || "";
-          break;
-        case "stock":
-          aValue = a.stockQuantity || 0;
-          bValue = b.stockQuantity || 0;
-          break;
-        case "status":
-          aValue = a.status || "active";
-          bValue = b.status || "active";
-          break;
-        default:
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
-      }
-      
-      if (sortOrder === "asc") {
-        return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
-      }
-    });
-    
-    return filtered;
-  }, [products, searchQuery, categoryFilter, statusFilter, stockFilter, sortBy, sortOrder]);
 
   // Queries
   const { data: products = [], isLoading: productsLoading } = useQuery<ProductWithCategory[]>({
@@ -467,6 +392,68 @@ export default function Admin() {
   const totalOrders = orders.length;
   const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.totalAmount), 0);
   const pendingOrders = orders.filter(order => order.status === "pending").length;
+
+  const filteredProducts = products
+    .filter(product => {
+      // Text search
+      const matchesSearch = searchQuery === "" || 
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.category?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.productCode?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.id.toString().includes(searchQuery);
+
+      // Category filter
+      const matchesCategory = categoryFilter === "all" || 
+        product.categoryId.toString() === categoryFilter;
+
+      // Status filter  
+      const matchesStatus = statusFilter === "all" || 
+        product.status === statusFilter;
+
+      // Stock filter
+      const matchesStock = stockFilter === "all" || 
+        (stockFilter === "in-stock" && product.inStock) ||
+        (stockFilter === "out-of-stock" && !product.inStock) ||
+        (stockFilter === "low-stock" && product.stockQuantity && product.stockQuantity < 10);
+
+      return matchesSearch && matchesCategory && matchesStatus && matchesStock;
+    })
+    .sort((a, b) => {
+      let aValue: any, bValue: any;
+      
+      switch (sortBy) {
+        case "name":
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case "price":
+          aValue = parseFloat(a.price);
+          bValue = parseFloat(b.price);
+          break;
+        case "category":
+          aValue = a.category?.name?.toLowerCase() || "";
+          bValue = b.category?.name?.toLowerCase() || "";
+          break;
+        case "stock":
+          aValue = a.stockQuantity || 0;
+          bValue = b.stockQuantity || 0;
+          break;
+        case "status":
+          aValue = a.status || "active";
+          bValue = b.status || "active";
+          break;
+        default:
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+      }
+      
+      if (sortOrder === "asc") {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      } else {
+        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      }
+    });
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -903,108 +890,175 @@ export default function Admin() {
               </CardContent>
             </Card>
             
-            {/* Products Table */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Products</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-12">
-                        <input
-                          type="checkbox"
-                          checked={selectedProducts.length === filteredProducts.length && filteredProducts.length > 0}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedProducts(filteredProducts.map(p => p.id));
-                            } else {
-                              setSelectedProducts([]);
-                            }
-                          }}
-                          className="rounded border-gray-300"
+            {/* Filter Controls */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={productForm.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Product Name</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
                         />
-                      </TableHead>
-                      <TableHead>Image</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Price</TableHead>
-                      <TableHead>Stock</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredProducts.map((product) => (
-                      <TableRow key={product.id}>
-                        <TableCell>
-                          <input
-                            type="checkbox"
-                            checked={selectedProducts.includes(product.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedProducts([...selectedProducts, product.id]);
-                              } else {
-                                setSelectedProducts(selectedProducts.filter(id => id !== product.id));
-                              }
-                            }}
-                            className="rounded border-gray-300"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <div className="relative w-12 h-12">
-                            {product.imageUrl ? (
-                              <img 
-                                src={product.imageUrl} 
-                                alt={product.name}
-                                className="w-full h-full object-cover rounded"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-gray-200 rounded flex items-center justify-center">
-                                <span className="text-xs text-gray-500">No Image</span>
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-medium">{product.name}</TableCell>
-                        <TableCell>{product.category?.name || 'No Category'}</TableCell>
-                        <TableCell>${parseFloat(product.price).toFixed(2)}</TableCell>
-                        <TableCell>{product.stockQuantity}</TableCell>
-                        <TableCell>
-                          <Badge variant={
-                            product.status === "active" ? "default" :
-                            product.status === "inactive" ? "secondary" :
-                            product.status === "draft" ? "outline" :
-                            "destructive"
-                          }>
-                            {product.status || "active"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleEditProduct(product)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDeleteProduct(product.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+                        <FormField
+                          control={productForm.control}
+                          name="slug"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Slug</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <FormField
+                        control={productForm.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Description</FormLabel>
+                            <FormControl>
+                              <Textarea {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={productForm.control}
+                          name="price"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Price</FormLabel>
+                              <FormControl>
+                                <Input type="number" step="0.01" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={productForm.control}
+                          name="compareAtPrice"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Compare At Price</FormLabel>
+                              <FormControl>
+                                <Input type="number" step="0.01" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={productForm.control}
+                          name="categoryId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Category</FormLabel>
+                              <Select value={field.value.toString()} onValueChange={(value) => field.onChange(parseInt(value))}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select category" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {categories.map((category) => (
+                                    <SelectItem key={category.id} value={category.id.toString()}>
+                                      {category.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={productForm.control}
+                          name="stockQuantity"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Stock Quantity</FormLabel>
+                              <FormControl>
+                                <Input type="number" {...field} onChange={(e) => field.onChange(parseInt(e.target.value) || 0)} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <FormField
+                        control={productForm.control}
+                        name="imageUrl"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Image URL</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="flex items-center space-x-6">
+                        <FormField
+                          control={productForm.control}
+                          name="inStock"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <FormLabel>In Stock</FormLabel>
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={productForm.control}
+                          name="featured"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <FormLabel>Featured</FormLabel>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="flex justify-end space-x-2">
+                        <Button type="button" variant="outline" onClick={() => setProductDialogOpen(false)}>
+                          Cancel
+                        </Button>
+                        <Button type="submit" className="kitchen-pro-secondary">
+                          {editingProduct ? "Update" : "Create"} Product
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                </DialogContent>
+              </Dialog>
+            </div>
+
             {/* Bulk Operations */}
             {selectedProducts.length > 0 && (
               <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
@@ -1413,83 +1467,94 @@ function BulkOperationsForm({ operation, onSubmit, onCancel, categories }: {
         );
       case 'categories':
         return (
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Select Category</label>
-              <select
-                className="w-full mt-1 p-2 border rounded-md"
-                value={formData.categoryId || ''}
-                onChange={(e) => setFormData({...formData, categoryId: parseInt(e.target.value)})}
-              >
-                <option value="">Choose a category</option>
-                {categories.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div>
+            <label className="text-sm font-medium">Select Category</label>
+            <select
+              className="w-full mt-1 p-2 border rounded-md"
+              value={formData.categoryId || ''}
+              onChange={(e) => setFormData({...formData, categoryId: parseInt(e.target.value)})}
+            >
+              <option value="">Choose a category</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
           </div>
         );
       case 'status':
         return (
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Product Status</label>
-              <select
-                className="w-full mt-1 p-2 border rounded-md"
-                value={formData.status || 'active'}
-                onChange={(e) => setFormData({...formData, status: e.target.value})}
-              >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="draft">Draft</option>
-                <option value="discontinued">Discontinued</option>
-              </select>
-            </div>
+          <div>
+            <label className="text-sm font-medium">Stock Status</label>
+            <select
+              className="w-full mt-1 p-2 border rounded-md"
+              value={formData.status || ''}
+              onChange={(e) => setFormData({...formData, status: e.target.value})}
+            >
+              <option value="">Choose status</option>
+              <option value="in_stock">In Stock</option>
+              <option value="out_of_stock">Out of Stock</option>
+              <option value="discontinued">Discontinued</option>
+            </select>
           </div>
         );
       case 'stock':
         return (
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Stock Update Method</label>
-              <select
-                className="w-full mt-1 p-2 border rounded-md"
-                value={formData.operation || 'set'}
-                onChange={(e) => setFormData({...formData, operation: e.target.value})}
-              >
-                <option value="set">Set stock level</option>
-                <option value="add">Add to stock</option>
-                <option value="subtract">Subtract from stock</option>
-              </select>
+          <>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Stock Operation</label>
+                <select
+                  className="w-full mt-1 p-2 border rounded-md"
+                  value={formData.operation || ''}
+                  onChange={(e) => setFormData({...formData, operation: e.target.value})}
+                >
+                  <option value="">Choose operation</option>
+                  <option value="add">Add to current stock</option>
+                  <option value="subtract">Subtract from current stock</option>
+                  <option value="set">Set exact stock amount</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Value</label>
+                <input
+                  type="number"
+                  min="0"
+                  className="w-full mt-1 p-2 border rounded-md"
+                  value={formData.value || ''}
+                  onChange={(e) => setFormData({...formData, value: parseInt(e.target.value)})}
+                  placeholder="Enter quantity"
+                />
+              </div>
             </div>
-            <div>
-              <label className="text-sm font-medium">Stock Value</label>
-              <input
-                type="number"
-                min="0"
-                className="w-full mt-1 p-2 border rounded-md"
-                value={formData.value || ''}
-                onChange={(e) => setFormData({...formData, value: parseInt(e.target.value)})}
-                placeholder="e.g., 100"
-              />
-            </div>
+          </>
+        );
+      case 'delete':
+        return (
+          <div className="text-center py-4">
+            <p className="text-red-600 font-medium">Are you sure you want to delete the selected products?</p>
+            <p className="text-sm text-gray-600 mt-2">This action cannot be undone.</p>
           </div>
         );
       default:
-        return <div>Unknown operation</div>;
+        return null;
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {renderForm()}
-      <div className="flex justify-end space-x-2">
+      <div className="flex justify-end space-x-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit">Apply Changes</Button>
+        <Button
+          type="submit"
+          className={operation === 'delete' ? 'bg-red-600 hover:bg-red-700' : 'kitchen-pro-secondary'}
+        >
+          {operation === 'delete' ? 'Delete Products' : 'Apply Changes'}
+        </Button>
       </div>
     </form>
   );
