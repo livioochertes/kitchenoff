@@ -1812,16 +1812,6 @@
                 images: newImages
               }));
               
-              // If editing an existing product, update it immediately with the new images
-              if (editingProduct) {
-                const updatedProductData = {
-                  ...productFormData,
-                  images: newImages
-                };
-                
-                await updateProduct(editingProduct.id, updatedProductData);
-              }
-              
               alert(`${result.files.length} image(s) uploaded successfully`);
             } else {
               alert('Error: ' + result.message);
@@ -1855,16 +1845,6 @@
                 images: newImages
               }));
               
-              // If editing an existing product, update it immediately with the new images
-              if (editingProduct) {
-                const updatedProductData = {
-                  ...productFormData,
-                  images: newImages
-                };
-                
-                await updateProduct(editingProduct.id, updatedProductData);
-              }
-              
               alert('Image deleted successfully');
             } else {
               alert('Error: ' + result.message);
@@ -1889,15 +1869,7 @@
             images: newImages
           }));
           
-          // If editing an existing product, update it immediately with the new image order
-          if (editingProduct) {
-            const updatedProductData = {
-              ...productFormData,
-              images: newImages
-            };
-            
-            await updateProduct(editingProduct.id, updatedProductData);
-          }
+          // Images will be saved when the form is submitted
         };
         
         const handleUserSubmit = async (e) => {
