@@ -188,7 +188,7 @@ export default function Admin() {
   // Bulk Operations Mutations
   const bulkUpdatePricesMutation = useMutation({
     mutationFn: async ({ productIds, multiplier, fixedPrice }: { productIds: number[]; multiplier?: number; fixedPrice?: string }) => {
-      const token = localStorage.getItem("admin_token");
+      const token = localStorage.getItem("token");
       return await apiRequest("PUT", "/admin/api/products/bulk/prices", { productIds, multiplier, fixedPrice }, {
         Authorization: `Bearer ${token}`,
       });
@@ -206,7 +206,7 @@ export default function Admin() {
 
   const bulkUpdateCategoriesMutation = useMutation({
     mutationFn: async ({ productIds, categoryId }: { productIds: number[]; categoryId: number }) => {
-      const token = localStorage.getItem("admin_token");
+      const token = localStorage.getItem("token");
       return await apiRequest("PUT", "/admin/api/products/bulk/categories", { productIds, categoryId }, {
         Authorization: `Bearer ${token}`,
       });
@@ -224,7 +224,7 @@ export default function Admin() {
 
   const bulkUpdateStatusMutation = useMutation({
     mutationFn: async ({ productIds, status }: { productIds: number[]; status: string }) => {
-      const token = localStorage.getItem("admin_token");
+      const token = localStorage.getItem("token");
       return await apiRequest("PUT", "/admin/api/products/bulk/status", { productIds, status }, {
         Authorization: `Bearer ${token}`,
       });
@@ -242,7 +242,7 @@ export default function Admin() {
 
   const bulkUpdateStockMutation = useMutation({
     mutationFn: async ({ productIds, operation, value }: { productIds: number[]; operation: string; value: number }) => {
-      const token = localStorage.getItem("admin_token");
+      const token = localStorage.getItem("token");
       return await apiRequest("PUT", "/admin/api/products/bulk/stock", { productIds, operation, value }, {
         Authorization: `Bearer ${token}`,
       });
@@ -260,7 +260,7 @@ export default function Admin() {
 
   const bulkDeleteMutation = useMutation({
     mutationFn: async ({ productIds }: { productIds: number[] }) => {
-      const token = localStorage.getItem("admin_token");
+      const token = localStorage.getItem("token");
       return await apiRequest("PUT", "/admin/api/products/bulk/delete", { productIds }, {
         Authorization: `Bearer ${token}`,
       });

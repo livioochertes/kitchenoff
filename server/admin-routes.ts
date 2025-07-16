@@ -42,14 +42,21 @@ const authenticateAdmin = async (req: AdminAuthRequest, res: Response, next: Nex
       return res.status(401).json({ message: "Admin authentication required" });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "fallback-secret") as { adminId: number };
-    const admin = await storage.getUser(decoded.adminId);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "fallback-secret") as { id?: number; adminId?: number; isAdmin?: boolean };
+    
+    // Support both token structures: regular admin tokens (with id) and admin-specific tokens (with adminId)
+    const userId = decoded.id || decoded.adminId;
+    if (!userId) {
+      return res.status(401).json({ message: "Invalid token structure" });
+    }
+
+    const admin = await storage.getUser(userId);
     
     if (!admin || !admin.isAdmin) {
       return res.status(401).json({ message: "Admin access denied" });
     }
 
-    req.adminId = decoded.adminId;
+    req.adminId = userId;
     req.admin = admin;
     next();
   } catch (error) {
