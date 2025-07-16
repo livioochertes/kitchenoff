@@ -600,7 +600,7 @@ export async function registerAdminRoutes(app: Express) {
       const orderId = parseInt(req.params.id);
       const { status } = req.body;
       
-      const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+      const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'accepted'];
       if (!validStatuses.includes(status)) {
         return res.status(400).json({ message: "Invalid status" });
       }
@@ -610,6 +610,59 @@ export async function registerAdminRoutes(app: Express) {
     } catch (error) {
       console.error("Error updating order status:", error);
       res.status(500).json({ message: "Failed to update order status" });
+    }
+  });
+
+  // Accept order with email notifications
+  app.post("/admin/api/orders/:id/accept", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      
+      if (isNaN(orderId)) {
+        return res.status(400).json({ success: false, message: 'Invalid order ID' });
+      }
+
+      // Get the order details first
+      const order = await storage.getOrder(orderId);
+      if (!order) {
+        return res.status(404).json({ success: false, message: 'Order not found' });
+      }
+
+      // Check if order is already accepted
+      if (order.status === 'accepted') {
+        return res.status(400).json({ success: false, message: 'Order is already accepted' });
+      }
+
+      // Accept the order
+      const updatedOrder = await storage.acceptOrder(orderId);
+      
+      // Get user details for email
+      const user = await storage.getUser(order.userId!);
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+
+      // Import email functions
+      const { sendOrderConfirmationEmail, sendLogisticsNotificationEmail } = await import('./email-service');
+      
+      // Send confirmation email to customer
+      const customerEmailSent = await sendOrderConfirmationEmail(order, user);
+      
+      // Send notification to logistics
+      const logisticsEmailSent = await sendLogisticsNotificationEmail(order, user);
+
+      res.json({
+        success: true,
+        message: "Order accepted successfully",
+        order: updatedOrder,
+        notifications: {
+          customerEmail: customerEmailSent,
+          logisticsEmail: logisticsEmailSent
+        }
+      });
+    } catch (error) {
+      console.error("Error accepting order:", error);
+      res.status(500).json({ success: false, message: "Failed to accept order" });
     }
   });
 

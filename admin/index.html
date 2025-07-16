@@ -889,6 +889,33 @@
         }
       };
 
+      const acceptOrder = async (orderId) => {
+        try {
+          const response = await fetch(`/admin/api/orders/${orderId}/accept`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            fetchOrders(); // Refresh order list
+            return { 
+              success: true, 
+              message: data.message, 
+              notifications: data.notifications 
+            };
+          } else {
+            return { success: false, message: data.message };
+          }
+        } catch (err) {
+          return { success: false, message: 'Network error' };
+        }
+      };
+
       const performBulkOperation = async (operation, orderIds, data = {}) => {
         try {
           let endpoint = '';
@@ -1135,6 +1162,7 @@
                         >
                           <option value="all">All Status</option>
                           <option value="pending">Pending</option>
+                          <option value="accepted">Accepted</option>
                           <option value="processing">Processing</option>
                           <option value="shipped">Shipped</option>
                           <option value="delivered">Delivered</option>
@@ -1209,15 +1237,25 @@
                               <span style={{
                                 padding: '4px 8px', 
                                 borderRadius: '4px', 
-                                backgroundColor: order.status === 'pending' ? '#fff3cd' : order.status === 'processing' ? '#cce5ff' : '#d4edda',
-                                color: order.status === 'pending' ? '#856404' : order.status === 'processing' ? '#0056b3' : '#155724'
+                                backgroundColor: order.status === 'pending' ? '#fff3cd' : 
+                                                order.status === 'accepted' ? '#d1ecf1' : 
+                                                order.status === 'processing' ? '#cce5ff' : 
+                                                order.status === 'shipped' ? '#d4edda' : 
+                                                order.status === 'delivered' ? '#d4edda' : 
+                                                order.status === 'cancelled' ? '#f8d7da' : '#e2e3e5',
+                                color: order.status === 'pending' ? '#856404' : 
+                                       order.status === 'accepted' ? '#0c5460' : 
+                                       order.status === 'processing' ? '#0056b3' : 
+                                       order.status === 'shipped' ? '#155724' : 
+                                       order.status === 'delivered' ? '#155724' : 
+                                       order.status === 'cancelled' ? '#721c24' : '#383d41'
                               }}>
                                 {order.status}
                               </span>
                             </td>
                             <td style={{padding: '12px'}}>{new Date(order.createdAt).toLocaleDateString()}</td>
                             <td style={{padding: '12px'}}>
-                              <div style={{display: 'flex', gap: '5px'}}>
+                              <div style={{display: 'flex', gap: '5px', flexWrap: 'wrap'}}>
                                 <button 
                                   style={{
                                     padding: '4px 8px', 
@@ -1235,6 +1273,37 @@
                                 >
                                   👁️ View
                                 </button>
+                                {order.status === 'pending' && (
+                                  <button 
+                                    style={{
+                                      padding: '4px 8px', 
+                                      border: 'none', 
+                                      borderRadius: '3px', 
+                                      backgroundColor: '#17a2b8', 
+                                      color: 'white', 
+                                      cursor: 'pointer',
+                                      fontSize: '12px'
+                                    }}
+                                    onClick={async () => {
+                                      if (confirm(`Accept order #${order.id}?\n\nThis will:\n• Update order status to 'accepted'\n• Send confirmation email to customer\n• Send notification to logistics team`)) {
+                                        const result = await acceptOrder(order.id);
+                                        if (result.success) {
+                                          let message = 'Order accepted successfully!';
+                                          if (result.notifications) {
+                                            message += '\n\nEmail notifications:';
+                                            message += result.notifications.customerEmail ? '\n✅ Customer confirmation sent' : '\n❌ Customer email failed';
+                                            message += result.notifications.logisticsEmail ? '\n✅ Logistics notification sent' : '\n❌ Logistics email failed';
+                                          }
+                                          alert(message);
+                                        } else {
+                                          alert('Error: ' + result.message);
+                                        }
+                                      }
+                                    }}
+                                  >
+                                    ✅ Accept
+                                  </button>
+                                )}
                                 <button 
                                   style={{
                                     padding: '4px 8px', 
@@ -1246,8 +1315,8 @@
                                     fontSize: '12px'
                                   }}
                                   onClick={async () => {
-                                    const newStatus = prompt(`Update order status for Order #${order.id}:\n\nCurrent status: ${order.status}\n\nEnter new status (pending, processing, shipped, delivered, cancelled):`);
-                                    if (newStatus && ['pending', 'processing', 'shipped', 'delivered', 'cancelled'].includes(newStatus.toLowerCase())) {
+                                    const newStatus = prompt(`Update order status for Order #${order.id}:\n\nCurrent status: ${order.status}\n\nEnter new status (pending, accepted, processing, shipped, delivered, cancelled):`);
+                                    if (newStatus && ['pending', 'accepted', 'processing', 'shipped', 'delivered', 'cancelled'].includes(newStatus.toLowerCase())) {
                                       const result = await updateOrderStatus(order.id, newStatus.toLowerCase());
                                       if (result.success) {
                                         alert('Order status updated successfully');
@@ -1255,7 +1324,7 @@
                                         alert('Error: ' + result.message);
                                       }
                                     } else if (newStatus) {
-                                      alert('Invalid status. Please use: pending, processing, shipped, delivered, or cancelled');
+                                      alert('Invalid status. Please use: pending, accepted, processing, shipped, delivered, or cancelled');
                                     }
                                   }}
                                 >
