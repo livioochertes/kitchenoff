@@ -64,6 +64,10 @@ export const products = pgTable("products", {
   featured: boolean("featured").default(false),
   rating: decimal("rating", { precision: 3, scale: 2 }).default("0"),
   reviewCount: integer("review_count").default(0),
+  vatValue: decimal("vat_value", { precision: 5, scale: 2 }).default("0"),
+  productCode: varchar("product_code", { length: 50 }),
+  ncCode: varchar("nc_code", { length: 50 }),
+  cpvCode: varchar("cpv_code", { length: 50 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

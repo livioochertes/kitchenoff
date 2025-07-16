@@ -62,7 +62,11 @@ export async function seedDatabase() {
         stockQuantity: 150,
         featured: true,
         rating: "4.8",
-        reviewCount: 24
+        reviewCount: 24,
+        vatValue: "19.00",
+        productCode: "FDL-EXP-500",
+        ncCode: "4821.10.90",
+        cpvCode: "39224110-8"
       },
       {
         name: "Day of the Week Labels - Complete Set",
@@ -76,7 +80,11 @@ export async function seedDatabase() {
         stockQuantity: 200,
         featured: true,
         rating: "4.7",
-        reviewCount: 18
+        reviewCount: 18,
+        vatValue: "19.00",
+        productCode: "FDL-DOW-SET",
+        ncCode: "4821.10.90",
+        cpvCode: "39224110-8"
       },
       {
         name: "Custom Food Labels - 1000 pack",
@@ -90,7 +98,11 @@ export async function seedDatabase() {
         stockQuantity: 75,
         featured: false,
         rating: "4.9",
-        reviewCount: 31
+        reviewCount: 31,
+        vatValue: "19.00",
+        productCode: "FDL-CST-1000",
+        ncCode: "4821.10.90",
+        cpvCode: "39224110-8"
       },
       
       // HACCP Equipment
@@ -106,7 +118,11 @@ export async function seedDatabase() {
         stockQuantity: 120,
         featured: true,
         rating: "4.6",
-        reviewCount: 42
+        reviewCount: 42,
+        vatValue: "19.00",
+        productCode: "HACP-THM-DIG",
+        ncCode: "9025.19.80",
+        cpvCode: "38500000-8"
       },
       {
         name: "Temperature Log Book",
@@ -120,7 +136,11 @@ export async function seedDatabase() {
         stockQuantity: 300,
         featured: false,
         rating: "4.5",
-        reviewCount: 15
+        reviewCount: 15,
+        vatValue: "19.00",
+        productCode: "HACP-LOG-100",
+        ncCode: "4820.10.90",
+        cpvCode: "30192140-8"
       },
       {
         name: "Infrared Thermometer Gun",
@@ -134,7 +154,11 @@ export async function seedDatabase() {
         stockQuantity: 45,
         featured: true,
         rating: "4.8",
-        reviewCount: 38
+        reviewCount: 38,
+        vatValue: "19.00",
+        productCode: "HACP-CLN-SOL",
+        ncCode: "3402.20.90",
+        cpvCode: "39831200-8"
       },
       
       // Kitchen Supplies
@@ -150,7 +174,11 @@ export async function seedDatabase() {
         stockQuantity: 85,
         featured: true,
         rating: "4.7",
-        reviewCount: 29
+        reviewCount: 29,
+        vatValue: "19.00",
+        productCode: "KIT-CUT-SET",
+        ncCode: "3926.90.97",
+        cpvCode: "39224400-2"
       },
       {
         name: "Professional Chef Knife Set",
@@ -164,7 +192,11 @@ export async function seedDatabase() {
         stockQuantity: 35,
         featured: false,
         rating: "4.9",
-        reviewCount: 56
+        reviewCount: 56,
+        vatValue: "19.00",
+        productCode: "KIT-KNF-SET",
+        ncCode: "8211.91.00",
+        cpvCode: "39224200-6"
       },
       {
         name: "Stainless Steel Mixing Bowls",
@@ -178,7 +210,11 @@ export async function seedDatabase() {
         stockQuantity: 95,
         featured: false,
         rating: "4.6",
-        reviewCount: 22
+        reviewCount: 22,
+        vatValue: "19.00",
+        productCode: "KIT-MIX-6SET",
+        ncCode: "7615.20.00",
+        cpvCode: "39224300-7"
       },
       
       // Cleaning & Sanitizing
@@ -462,7 +498,16 @@ export async function seedDatabase() {
       }
     ];
 
-    const insertedProducts = await db.insert(products).values(sampleProducts).returning();
+    // Add default values for new fields to all products
+    const productsWithNewFields = sampleProducts.map((product, index) => ({
+      ...product,
+      vatValue: product.vatValue || "19.00",
+      productCode: product.productCode || `PROD-${String(index + 1).padStart(3, '0')}`,
+      ncCode: product.ncCode || "9999.99.99",
+      cpvCode: product.cpvCode || "39000000-0"
+    }));
+
+    const insertedProducts = await db.insert(products).values(productsWithNewFields).returning();
 
     // Create users
     const adminPassword = await bcrypt.hash("admin123", 10);
