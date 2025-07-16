@@ -800,8 +800,13 @@ export async function registerAdminRoutes(app: Express) {
         ...productData,
         price: productData.price ? parseFloat(productData.price) : undefined,
         compareAtPrice: productData.compareAtPrice ? parseFloat(productData.compareAtPrice) : undefined,
-        stockQuantity: productData.stockQuantity ? parseInt(productData.stockQuantity) : undefined
+        stockQuantity: productData.stockQuantity ? parseInt(productData.stockQuantity) : undefined,
+        images: productData.images || []  // Ensure images are properly saved
       });
+
+      // Refresh memory cache to include updated product data
+      const { loadAllDataIntoMemory } = await import('./routes');
+      await loadAllDataIntoMemory();
 
       res.json({ message: "Product updated successfully", product: updatedProduct });
     } catch (error) {

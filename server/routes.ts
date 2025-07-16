@@ -35,7 +35,7 @@ let stringifiedProductsData: string = '';
 let stringifiedCategoriesData: string = '';
 
 // Load ALL data into memory at startup - never hit database again
-async function loadAllDataIntoMemory() {
+export async function loadAllDataIntoMemory() {
   try {
     console.log('Loading all data into permanent memory...');
     
