@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KitchenOff Admin Panel</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     * {
       margin: 0;
@@ -95,129 +98,6 @@
       border-radius: 10px;
     }
     
-    .btn {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    }
-    
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-    }
-    
-    .btn-secondary {
-      background: #6c757d;
-      color: white;
-    }
-    
-    .btn-secondary:hover {
-      background: #5a6268;
-    }
-    
-    .form-input {
-      width: 100%;
-      padding: 15px;
-      border: 2px solid #e9ecef;
-      border-radius: 8px;
-      font-size: 16px;
-      margin-bottom: 20px;
-      transition: border-color 0.3s ease;
-    }
-    
-    .form-input:focus {
-      outline: none;
-      border-color: #667eea;
-    }
-    
-    .loading-container {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      color: white;
-    }
-    
-    .loading {
-      width: 40px;
-      height: 40px;
-      border: 4px solid rgba(255, 255, 255, 0.3);
-      border-top: 4px solid white;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 20px;
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    .nav-tabs {
-      display: flex;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      border-radius: 12px;
-      padding: 10px;
-      margin-bottom: 30px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .nav-tab {
-      flex: 1;
-      padding: 15px 20px;
-      border: none;
-      background: transparent;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: 500;
-      color: #666;
-      transition: all 0.3s ease;
-    }
-    
-    .nav-tab:hover {
-      background: rgba(102, 126, 234, 0.1);
-      color: #667eea;
-    }
-    
-    .nav-tab.active {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    }
-    
-    .content-area {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      border-radius: 12px;
-      padding: 30px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .error-message {
-      background: #f8d7da;
-      color: #721c24;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      border: 1px solid #f5c6cb;
-    }
-    
-    .hidden {
-      display: none;
-    }
-    
     .dashboard-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -245,290 +125,2458 @@
       font-size: 42px;
       font-weight: bold;
       color: #667eea;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
     .stat-label {
-      font-size: 16px;
       color: #666;
+      font-size: 14px;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
+      font-weight: 500;
+    }
+    
+    .content-area {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      overflow: hidden;
+    }
+    
+    .content-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 25px 30px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .content-title {
+      font-size: 22px;
+      font-weight: 600;
+      margin: 0;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .content-body {
+      padding: 30px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 14px 28px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      width: 100%;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      box-shadow: 0 4px 15px rgba(108, 117, 125, 0.4);
+    }
+    
+    .btn-secondary:hover {
+      background: #5a6268;
+      box-shadow: 0 8px 25px rgba(108, 117, 125, 0.6);
+    }
+    
+    .nav-tabs {
+      display: flex;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 8px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .nav-tab {
+      flex: 1;
+      padding: 12px 20px;
+      text-align: center;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .nav-tab.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .nav-tab:hover:not(.active) {
+      background: rgba(102, 126, 234, 0.1);
+      color: #667eea;
+    }
+    
+    .btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .btn-secondary {
+      background: #f5f5f5;
+      color: #333;
+      border: 2px solid #e0e0e0;
+    }
+    
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+    
+    .error-message {
+      background: #fee;
+      color: #c33;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      border: 1px solid #fcc;
+    }
+    
+    .success-message {
+      background: #efe;
+      color: #393;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      border: 1px solid #cfc;
+    }
+    
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 10px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .text-center {
+      text-align: center;
+    }
+    
+    .mb-20 {
+      margin-bottom: 20px;
+    }
+    
+    .mb-30 {
+      margin-bottom: 30px;
+    }
+    
+    .text-sm {
+      font-size: 14px;
+      color: #666;
     }
   </style>
 </head>
 <body>
-  <div id="app">
-    <!-- Login Screen -->
-    <div id="login-screen" class="login-container">
-      <div class="login-header">
-        <div class="login-logo">
-          <img src="/attached_assets/KitchenOff_Logo_Background_Removed_1752520997429.png" alt="KitchenOff Logo" />
-        </div>
-        <h1 class="login-title">KitchenOff Admin</h1>
-        <p class="login-subtitle">Secure Admin Access</p>
-      </div>
-      
-      <div id="error-message" class="error-message hidden"></div>
-      
-      <form id="login-form">
-        <input
-          type="email"
-          id="email"
-          class="form-input"
-          placeholder="Email"
-          required
-        />
-        <input
-          type="password"
-          id="password"
-          class="form-input"
-          placeholder="Password"
-          required
-        />
-        <button
-          type="submit"
-          class="btn"
-          id="login-btn"
-          style="width: 100%"
-        >
-          Login
-        </button>
-      </form>
-    </div>
+  <div id="admin-root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
     
-    <!-- Admin Dashboard -->
-    <div id="dashboard-screen" class="hidden">
-      <div class="container">
-        <div class="admin-header">
-          <div class="logo">
-            <img src="/attached_assets/KitchenOff_Logo_Background_Removed_1752520997429.png" alt="KitchenOff Logo" />
-            <span>KitchenOff Admin</span>
+    // Admin Login Component
+    function AdminLogin({ onLoginSuccess }) {
+      const [formData, setFormData] = useState({ email: '', password: '' });
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState('');
+      
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        
+        try {
+          const response = await fetch('/admin/api/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            localStorage.setItem('adminToken', data.token);
+            localStorage.setItem('adminUser', JSON.stringify(data.admin));
+            onLoginSuccess(data.token, data.admin);
+          } else {
+            setError(data.message || 'Login failed');
+          }
+        } catch (err) {
+          setError('Network error. Please try again.');
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      return (
+        <div className="login-container">
+          <div className="login-header">
+            <div className="login-logo">
+              <img src="/attached_assets/KitchenOff_Logo_Background_Removed_1752520997429.png" alt="KitchenOff Logo" />
+              <span>KitchenOff</span>
+            </div>
+            <h1 className="login-title">Admin Panel</h1>
+            <p className="login-subtitle">Welcome back! Please sign in to continue.</p>
           </div>
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 14px; color: #666;" id="welcome-text">Welcome, Admin</span>
-            <button id="logout-btn" class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;">
+          
+          {error && <div className="error-message">{error}</div>}
+          
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label">Email</label>
+              <input
+                type="email"
+                className="form-input"
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                required
+                placeholder="admin@kitchen-off.com"
+              />
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label">Password</label>
+              <input
+                type="password"
+                className="form-input"
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                required
+                placeholder="Enter your password"
+              />
+            </div>
+            
+            <button type="submit" className="btn" disabled={loading}>
+              {loading && <span className="loading"></span>}
+              {loading ? 'Logging in...' : 'Login'}
+            </button>
+          </form>
+          
+          <div className="text-sm text-center" style={{marginTop: '20px'}}>
+            <p><strong>Demo Credentials:</strong></p>
+            <p>Email: admin@kitchen-off.com</p>
+            <p>Password: admin123</p>
+          </div>
+        </div>
+      );
+    }
+    
+    // Admin Dashboard Component
+    function AdminDashboard({ token, admin, onLogout }) {
+      const [stats, setStats] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState('');
+      const [showTwoFactor, setShowTwoFactor] = useState(false);
+      const [activeView, setActiveView] = useState('dashboard');
+      const [orders, setOrders] = useState([]);
+      const [users, setUsers] = useState([]);
+      const [products, setProducts] = useState([]);
+      const [categories, setCategories] = useState([]);
+      const [showAddUserModal, setShowAddUserModal] = useState(false);
+      const [showAddProductModal, setShowAddProductModal] = useState(false);
+      const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+      const [editingUser, setEditingUser] = useState(null);
+      const [editingProduct, setEditingProduct] = useState(null);
+      const [editingCategory, setEditingCategory] = useState(null);
+      const [selectedOrders, setSelectedOrders] = useState([]);
+      const [showBulkModal, setShowBulkModal] = useState(false);
+      const [bulkOperation, setBulkOperation] = useState('');
+      const [bulkResults, setBulkResults] = useState(null);
+      const [searchTerm, setSearchTerm] = useState('');
+      const [statusFilter, setStatusFilter] = useState('all');
+      const [showSearchFilter, setShowSearchFilter] = useState(false);
+      const [filteredOrders, setFilteredOrders] = useState([]);
+      const [selectedOrder, setSelectedOrder] = useState(null);
+      const [showOrderDetails, setShowOrderDetails] = useState(false);
+      const [showOrderTools, setShowOrderTools] = useState(false);
+      
+      useEffect(() => {
+        fetchStats();
+      }, []);
+      
+      // Filter orders based on search and status
+      useEffect(() => {
+        let filtered = orders;
+        
+        if (searchTerm) {
+          filtered = filtered.filter(order => 
+            order.id.toString().includes(searchTerm) ||
+            order.shippingAddress.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            order.shippingAddress.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            order.status.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+        }
+        
+        if (statusFilter !== 'all') {
+          filtered = filtered.filter(order => order.status === statusFilter);
+        }
+        
+        setFilteredOrders(filtered);
+      }, [orders, searchTerm, statusFilter]);
+      
+      const fetchStats = async () => {
+        try {
+          const response = await fetch('/admin/api/stats', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            setStats(data);
+          } else {
+            setError(data.message || 'Failed to fetch stats');
+          }
+        } catch (err) {
+          setError('Network error. Please try again.');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const fetchUsers = async () => {
+        try {
+          const response = await fetch('/admin/api/users', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            setUsers(data);
+          } else {
+            console.error('Failed to fetch users:', data.message);
+          }
+        } catch (err) {
+          console.error('Network error fetching users:', err);
+        }
+      };
+
+      const fetchOrders = async () => {
+        try {
+          const response = await fetch('/admin/api/orders', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            setOrders(data);
+          } else {
+            console.error('Failed to fetch orders:', data.message);
+          }
+        } catch (err) {
+          console.error('Network error fetching orders:', err);
+        }
+      };
+
+      const fetchProducts = async () => {
+        try {
+          const response = await fetch('/admin/api/products', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            setProducts(data);
+          } else {
+            console.error('Failed to fetch products:', data.message);
+          }
+        } catch (err) {
+          console.error('Network error fetching products:', err);
+        }
+      };
+
+      const fetchCategories = async () => {
+        try {
+          const response = await fetch('/admin/api/categories', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            setCategories(data);
+          } else {
+            console.error('Failed to fetch categories:', data.message);
+          }
+        } catch (err) {
+          console.error('Network error fetching categories:', err);
+        }
+      };
+
+      // CRUD Operations
+      const createUser = async (userData) => {
+        try {
+          const response = await fetch('/admin/api/users', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(userData)
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            fetchUsers(); // Refresh user list
+            return { success: true, message: data.message };
+          } else {
+            return { success: false, message: data.message };
+          }
+        } catch (err) {
+          return { success: false, message: 'Network error' };
+        }
+      };
+
+      const updateUser = async (userId, userData) => {
+        try {
+          const response = await fetch(`/admin/api/users/${userId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(userData)
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            fetchUsers(); // Refresh user list
+            return { success: true, message: data.message };
+          } else {
+            return { success: false, message: data.message };
+          }
+        } catch (err) {
+          return { success: false, message: 'Network error' };
+        }
+      };
+
+      const deleteUser = async (userId) => {
+        try {
+          const response = await fetch(`/admin/api/users/${userId}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            fetchUsers(); // Refresh user list
+            return { success: true, message: data.message };
+          } else {
+            return { success: false, message: data.message };
+          }
+        } catch (err) {
+          return { success: false, message: 'Network error' };
+        }
+      };
+
+      const createProduct = async (productData) => {
+        try {
+          const response = await fetch('/admin/api/products', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(productData)
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            fetchProducts(); // Refresh product list
+            return { success: true, message: data.message };
+          } else {
+            return { success: false, message: data.message };
+          }
+        } catch (err) {
+          return { success: false, message: 'Network error' };
+        }
+      };
+
+      const updateProduct = async (productId, productData) => {
+        try {
+          const response = await fetch(`/admin/api/products/${productId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(productData)
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            fetchProducts(); // Refresh product list
+            return { success: true, message: data.message };
+          } else {
+            return { success: false, message: data.message };
+          }
+        } catch (err) {
+          return { success: false, message: 'Network error' };
+        }
+      };
+
+      const deleteProduct = async (productId) => {
+        try {
+          const response = await fetch(`/admin/api/products/${productId}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            fetchProducts(); // Refresh product list
+            return { success: true, message: data.message };
+          } else {
+            return { success: false, message: data.message };
+          }
+        } catch (err) {
+          return { success: false, message: 'Network error' };
+        }
+      };
+
+      const updateOrderStatus = async (orderId, status) => {
+        try {
+          const response = await fetch(`/admin/api/orders/${orderId}/status`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ status })
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            fetchOrders(); // Refresh order list
+            return { success: true, message: data.message };
+          } else {
+            return { success: false, message: data.message };
+          }
+        } catch (err) {
+          return { success: false, message: 'Network error' };
+        }
+      };
+
+      const performBulkOperation = async (operation, orderIds, data = {}) => {
+        try {
+          let endpoint = '';
+          let payload = { orderIds, ...data };
+          
+          switch (operation) {
+            case 'status':
+              endpoint = '/admin/api/orders/bulk/status';
+              break;
+            case 'shipping':
+              endpoint = '/admin/api/orders/bulk/shipping-labels';
+              break;
+            case 'notifications':
+              endpoint = '/admin/api/orders/bulk/notifications';
+              break;
+            case 'refunds':
+              endpoint = '/admin/api/orders/bulk/refunds';
+              break;
+            default:
+              return { success: false, message: 'Invalid operation' };
+          }
+          
+          const response = await fetch(endpoint, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+          });
+          
+          const result = await response.json();
+          
+          if (response.ok) {
+            fetchOrders(); // Refresh order list
+            return { success: true, message: result.message, results: result.results };
+          } else {
+            return { success: false, message: result.message };
+          }
+        } catch (err) {
+          return { success: false, message: 'Network error' };
+        }
+      };
+
+      const handleViewChange = (view) => {
+        setActiveView(view);
+        if (view === 'users' && users.length === 0) {
+          fetchUsers();
+        } else if (view === 'orders' && orders.length === 0) {
+          fetchOrders();
+        } else if (view === 'products' && products.length === 0) {
+          fetchProducts();
+        } else if (view === 'categories' && categories.length === 0) {
+          fetchCategories();
+        }
+      };
+      
+      const handleLogout = async () => {
+        try {
+          await fetch('/admin/api/logout', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+        } catch (err) {
+          console.error('Logout error:', err);
+        } finally {
+          // Clear all admin session data
+          localStorage.removeItem('adminToken');
+          localStorage.removeItem('adminUser');
+          // Force page reload to ensure clean state
+          window.location.reload();
+        }
+      };
+      
+      if (loading) {
+        return (
+          <div className="container">
+            <div className="text-center">
+              <div className="loading"></div>
+              <p>Loading dashboard...</p>
+            </div>
+          </div>
+        );
+      }
+      
+      if (error) {
+        return (
+          <div className="container">
+            <div className="error-message">{error}</div>
+            <button onClick={handleLogout} className="btn btn-secondary">
               Logout
             </button>
           </div>
-        </div>
-        
-        <div class="nav-tabs">
-          <button class="nav-tab active" data-tab="dashboard">
-            📊 Dashboard
-          </button>
-          <button class="nav-tab" data-tab="orders">
-            📋 Orders
-          </button>
-          <button class="nav-tab" data-tab="users">
-            👥 Users
-          </button>
-          <button class="nav-tab" data-tab="products">
-            📦 Products
-          </button>
-          <button class="nav-tab" data-tab="settings">
-            ⚙️ Settings
-          </button>
-        </div>
-        
-        <div class="content-area">
-          <div id="dashboard-content">
-            <h2>Dashboard</h2>
-            <div id="dashboard-stats">
-              <div class="dashboard-grid">
-                <div class="stat-card">
-                  <div class="stat-number" id="total-users">0</div>
-                  <div class="stat-label">Total Users</div>
+        );
+      }
+      
+      const renderContent = () => {
+        switch (activeView) {
+          case 'orders':
+            return (
+              <div style={{background: 'white', padding: '30px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+                  <h3 style={{color: '#333', margin: '0'}}>📋 Order Management</h3>
+                  <div style={{display: 'flex', gap: '10px'}}>
+                    <button 
+                      className="btn" 
+                      style={{background: '#17a2b8', width: 'auto', padding: '8px 16px'}}
+                      onClick={() => alert('Export orders functionality:\n\n• Export to CSV/Excel\n• Filter by date range\n• Include customer details\n• Sales reports\n• Tax documentation')}
+                    >
+                      📊 Export Orders
+                    </button>
+                    <button 
+                      className="btn" 
+                      style={{background: '#6c757d', width: 'auto', padding: '8px 16px'}}
+                      onClick={() => alert('Order analytics:\n\n• Sales performance\n• Revenue trends\n• Customer behavior\n• Popular products\n• Seasonal patterns')}
+                    >
+                      📈 Analytics
+                    </button>
+                  </div>
                 </div>
-                <div class="stat-card">
-                  <div class="stat-number" id="total-orders">0</div>
-                  <div class="stat-label">Total Orders</div>
+                
+                <div style={{marginBottom: '20px'}}>
+                  <h4 style={{color: '#333', marginBottom: '15px'}}>Order Actions</h4>
+                  <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                    <button 
+                      className="btn" 
+                      style={{background: '#007bff', width: 'auto', padding: '8px 16px'}}
+                      onClick={() => setShowSearchFilter(!showSearchFilter)}
+                    >
+                      🔍 Search & Filter
+                    </button>
+                    <button 
+                      className="btn" 
+                      style={{background: '#28a745', width: 'auto', padding: '8px 16px'}}
+                      onClick={() => {
+                        if (selectedOrders.length === 0) {
+                          alert('Please select orders first by checking the checkboxes.');
+                          return;
+                        }
+                        setBulkOperation('status');
+                        setShowBulkModal(true);
+                      }}
+                    >
+                      🔄 Bulk Operations
+                    </button>
+                    <button 
+                      className="btn" 
+                      style={{background: '#dc3545', width: 'auto', padding: '8px 16px'}}
+                      onClick={() => {
+                        if (selectedOrders.length === 0) {
+                          alert('Please select orders first by checking the checkboxes.');
+                          return;
+                        }
+                        setShowOrderTools(true);
+                      }}
+                    >
+                      🛠️ Order Tools
+                    </button>
+                  </div>
                 </div>
-                <div class="stat-card">
-                  <div class="stat-number" id="total-products">0</div>
-                  <div class="stat-label">Total Products</div>
+                
+                {showSearchFilter && (
+                  <div style={{background: '#f8f9fa', padding: '20px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #dee2e6'}}>
+                    <h4 style={{color: '#333', marginBottom: '15px'}}>🔍 Search & Filter Orders</h4>
+                    <div style={{display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'center'}}>
+                      <div style={{flex: '1', minWidth: '200px'}}>
+                        <input
+                          type="text"
+                          placeholder="Search by order ID, customer name, or city..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          style={{
+                            width: '100%',
+                            padding: '10px',
+                            borderRadius: '4px',
+                            border: '1px solid #ddd',
+                            fontSize: '14px'
+                          }}
+                        />
+                      </div>
+                      <div style={{minWidth: '150px'}}>
+                        <select
+                          value={statusFilter}
+                          onChange={(e) => setStatusFilter(e.target.value)}
+                          style={{
+                            width: '100%',
+                            padding: '10px',
+                            borderRadius: '4px',
+                            border: '1px solid #ddd',
+                            fontSize: '14px'
+                          }}
+                        >
+                          <option value="all">All Status</option>
+                          <option value="pending">Pending</option>
+                          <option value="processing">Processing</option>
+                          <option value="shipped">Shipped</option>
+                          <option value="delivered">Delivered</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
+                      </div>
+                      <button
+                        className="btn"
+                        style={{background: '#6c757d', width: 'auto', padding: '8px 16px'}}
+                        onClick={() => {
+                          setSearchTerm('');
+                          setStatusFilter('all');
+                        }}
+                      >
+                        Clear
+                      </button>
+                    </div>
+                    <div style={{marginTop: '10px', color: '#666', fontSize: '14px'}}>
+                      Showing {filteredOrders.length} of {orders.length} orders
+                    </div>
+                  </div>
+                )}
+                
+                {orders.length > 0 ? (
+                  <div style={{overflowX: 'auto'}}>
+                    <table style={{width: '100%', borderCollapse: 'collapse'}}>
+                      <thead>
+                        <tr style={{backgroundColor: '#f5f5f5'}}>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>
+                            <input 
+                              type="checkbox" 
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedOrders(filteredOrders.map(order => order.id));
+                                } else {
+                                  setSelectedOrders([]);
+                                }
+                              }}
+                              checked={selectedOrders.length === filteredOrders.length && filteredOrders.length > 0}
+                              style={{marginRight: '8px'}}
+                            />
+                            Select
+                          </th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Order ID</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Customer</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Amount</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Status</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Date</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredOrders.slice(0, 10).map((order, index) => (
+                          <tr key={index} style={{borderBottom: '1px solid #eee'}}>
+                            <td style={{padding: '12px'}}>
+                              <input 
+                                type="checkbox" 
+                                checked={selectedOrders.includes(order.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedOrders([...selectedOrders, order.id]);
+                                  } else {
+                                    setSelectedOrders(selectedOrders.filter(id => id !== order.id));
+                                  }
+                                }}
+                              />
+                            </td>
+                            <td style={{padding: '12px', fontWeight: '500'}}>#{order.id}</td>
+                            <td style={{padding: '12px'}}>User #{order.userId}</td>
+                            <td style={{padding: '12px', color: '#28a745', fontWeight: 'bold'}}>${order.totalAmount}</td>
+                            <td style={{padding: '12px'}}>
+                              <span style={{
+                                padding: '4px 8px', 
+                                borderRadius: '4px', 
+                                backgroundColor: order.status === 'pending' ? '#fff3cd' : order.status === 'processing' ? '#cce5ff' : '#d4edda',
+                                color: order.status === 'pending' ? '#856404' : order.status === 'processing' ? '#0056b3' : '#155724'
+                              }}>
+                                {order.status}
+                              </span>
+                            </td>
+                            <td style={{padding: '12px'}}>{new Date(order.createdAt).toLocaleDateString()}</td>
+                            <td style={{padding: '12px'}}>
+                              <div style={{display: 'flex', gap: '5px'}}>
+                                <button 
+                                  style={{
+                                    padding: '4px 8px', 
+                                    border: 'none', 
+                                    borderRadius: '3px', 
+                                    backgroundColor: '#007bff', 
+                                    color: 'white', 
+                                    cursor: 'pointer',
+                                    fontSize: '12px'
+                                  }}
+                                  onClick={() => {
+                                    setSelectedOrder(order);
+                                    setShowOrderDetails(true);
+                                  }}
+                                >
+                                  👁️ View
+                                </button>
+                                <button 
+                                  style={{
+                                    padding: '4px 8px', 
+                                    border: 'none', 
+                                    borderRadius: '3px', 
+                                    backgroundColor: '#28a745', 
+                                    color: 'white', 
+                                    cursor: 'pointer',
+                                    fontSize: '12px'
+                                  }}
+                                  onClick={async () => {
+                                    const newStatus = prompt(`Update order status for Order #${order.id}:\n\nCurrent status: ${order.status}\n\nEnter new status (pending, processing, shipped, delivered, cancelled):`);
+                                    if (newStatus && ['pending', 'processing', 'shipped', 'delivered', 'cancelled'].includes(newStatus.toLowerCase())) {
+                                      const result = await updateOrderStatus(order.id, newStatus.toLowerCase());
+                                      if (result.success) {
+                                        alert('Order status updated successfully');
+                                      } else {
+                                        alert('Error: ' + result.message);
+                                      }
+                                    } else if (newStatus) {
+                                      alert('Invalid status. Please use: pending, processing, shipped, delivered, or cancelled');
+                                    }
+                                  }}
+                                >
+                                  ✏️ Update
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div style={{padding: '40px', textAlign: 'center', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6'}}>
+                    <p style={{color: '#666', fontSize: '18px', marginBottom: '15px'}}>No orders found</p>
+                    <p style={{color: '#6c757d', marginBottom: '20px'}}>Orders will appear here once customers start purchasing your products.</p>
+                    <button 
+                      className="btn" 
+                      style={{background: '#007bff', width: 'auto', padding: '12px 24px'}}
+                      onClick={() => setActiveView('dashboard')}
+                    >
+                      📊 View Dashboard
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          
+          case 'users':
+            return (
+              <div style={{background: 'white', padding: '30px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+                  <h3 style={{color: '#333', margin: '0'}}>👥 User Management</h3>
+                  <button 
+                    className="btn" 
+                    style={{background: '#28a745', width: 'auto', padding: '8px 16px'}}
+                    onClick={() => setShowAddUserModal(true)}
+                  >
+                    ➕ Add New User
+                  </button>
+                </div>
+                
+                <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '20px'}}>
+                  <div style={{padding: '20px', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6'}}>
+                    <h4 style={{marginBottom: '10px', color: '#495057'}}>Total Users</h4>
+                    <p style={{fontSize: '24px', fontWeight: 'bold', color: '#007bff', margin: '0'}}>{stats?.totalUsers || '0'}</p>
+                  </div>
+                  <div style={{padding: '20px', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6'}}>
+                    <h4 style={{marginBottom: '10px', color: '#495057'}}>Regular Users</h4>
+                    <p style={{fontSize: '24px', fontWeight: 'bold', color: '#28a745', margin: '0'}}>{users.filter(u => !u.isAdmin).length}</p>
+                  </div>
+                  <div style={{padding: '20px', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6'}}>
+                    <h4 style={{marginBottom: '10px', color: '#495057'}}>Admin Users</h4>
+                    <p style={{fontSize: '24px', fontWeight: 'bold', color: '#dc3545', margin: '0'}}>{users.filter(u => u.isAdmin).length}</p>
+                  </div>
+                </div>
+                
+                {users.length > 0 ? (
+                  <div style={{overflowX: 'auto'}}>
+                    <table style={{width: '100%', borderCollapse: 'collapse'}}>
+                      <thead>
+                        <tr style={{backgroundColor: '#f5f5f5'}}>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>User ID</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Name</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Email</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Role</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {users.map((user, index) => (
+                          <tr key={index} style={{borderBottom: '1px solid #eee'}}>
+                            <td style={{padding: '12px'}}>#{user.id}</td>
+                            <td style={{padding: '12px', fontWeight: '500'}}>{user.firstName} {user.lastName}</td>
+                            <td style={{padding: '12px'}}>{user.email}</td>
+                            <td style={{padding: '12px'}}>
+                              <span style={{
+                                padding: '4px 8px', 
+                                borderRadius: '4px', 
+                                backgroundColor: user.isAdmin ? '#f8d7da' : '#d4edda',
+                                color: user.isAdmin ? '#721c24' : '#155724'
+                              }}>
+                                {user.isAdmin ? 'Admin' : 'User'}
+                              </span>
+                            </td>
+                            <td style={{padding: '12px'}}>
+                              <div style={{display: 'flex', gap: '5px'}}>
+                                <button 
+                                  style={{
+                                    padding: '4px 8px', 
+                                    border: 'none', 
+                                    borderRadius: '3px', 
+                                    backgroundColor: '#007bff', 
+                                    color: 'white', 
+                                    cursor: 'pointer',
+                                    fontSize: '12px'
+                                  }}
+                                  onClick={() => setEditingUser(user)}
+                                >
+                                  ✏️ Edit
+                                </button>
+                                <button 
+                                  style={{
+                                    padding: '4px 8px', 
+                                    border: 'none', 
+                                    borderRadius: '3px', 
+                                    backgroundColor: '#dc3545', 
+                                    color: 'white', 
+                                    cursor: 'pointer',
+                                    fontSize: '12px'
+                                  }}
+                                  onClick={async () => {
+                                    if (confirm(`Delete user "${user.firstName} ${user.lastName}"?\n\nThis action cannot be undone.`)) {
+                                      const result = await deleteUser(user.id);
+                                      if (result.success) {
+                                        alert('User deleted successfully');
+                                      } else {
+                                        alert('Error: ' + result.message);
+                                      }
+                                    }
+                                  }}
+                                >
+                                  🗑️ Delete
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div style={{padding: '40px', textAlign: 'center', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6'}}>
+                    <p style={{color: '#666', fontSize: '18px', marginBottom: '15px'}}>No users found</p>
+                    <p style={{color: '#6c757d', marginBottom: '20px'}}>Create your first user to get started with user management.</p>
+                    <button 
+                      className="btn" 
+                      style={{background: '#28a745', width: 'auto', padding: '12px 24px'}}
+                      onClick={() => setShowAddUserModal(true)}
+                    >
+                      ➕ Add Your First User
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          
+          case 'products':
+            return (
+              <div style={{background: 'white', padding: '30px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+                  <h3 style={{color: '#333', margin: '0'}}>📦 Product Management</h3>
+                  <button 
+                    className="btn" 
+                    style={{background: '#28a745', width: 'auto', padding: '8px 16px'}}
+                    onClick={() => {
+                      fetchCategories();
+                      setShowAddProductModal(true);
+                    }}
+                  >
+                    ➕ Add New Product
+                  </button>
+                </div>
+                
+                <div style={{marginBottom: '20px'}}>
+                  <h4 style={{color: '#333', marginBottom: '15px'}}>Product Actions</h4>
+                  <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                    <button 
+                      className="btn" 
+                      style={{background: '#007bff', width: 'auto', padding: '8px 16px'}}
+                      onClick={() => alert('Bulk product operations:\n\n• Update prices in bulk\n• Change categories\n• Manage inventory\n• Export product data\n• Import from CSV')}
+                    >
+                      🔄 Bulk Operations
+                    </button>
+                    <button 
+                      className="btn" 
+                      style={{background: '#17a2b8', width: 'auto', padding: '8px 16px'}}
+                      onClick={() => alert('Product search and filter:\n\n• Search by name, SKU, or category\n• Filter by price range\n• Sort by popularity, date, price\n• Stock level filtering\n• Advanced search options')}
+                    >
+                      🔍 Search & Filter
+                    </button>
+                    <button 
+                      className="btn" 
+                      style={{background: '#6c757d', width: 'auto', padding: '8px 16px'}}
+                      onClick={() => alert('Product analytics:\n\n• Sales performance\n• Inventory turnover\n• Product popularity\n• Revenue by category\n• Stock alerts')}
+                    >
+                      📊 Analytics
+                    </button>
+                  </div>
+                </div>
+                
+                {products.length > 0 ? (
+                  <div style={{overflowX: 'auto'}}>
+                    <table style={{width: '100%', borderCollapse: 'collapse'}}>
+                      <thead>
+                        <tr style={{backgroundColor: '#f5f5f5'}}>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Product ID</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Name</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Price</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Category</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Stock</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {products.slice(0, 10).map((product, index) => (
+                          <tr key={index} style={{borderBottom: '1px solid #eee'}}>
+                            <td style={{padding: '12px'}}>#{product.id}</td>
+                            <td style={{padding: '12px', fontWeight: '500'}}>{product.name}</td>
+                            <td style={{padding: '12px', color: '#28a745', fontWeight: 'bold'}}>${product.price}</td>
+                            <td style={{padding: '12px'}}>{product.category?.name || 'N/A'}</td>
+                            <td style={{padding: '12px'}}>
+                              <span style={{
+                                padding: '4px 8px', 
+                                borderRadius: '4px', 
+                                backgroundColor: product.stock > 10 ? '#d4edda' : '#f8d7da',
+                                color: product.stock > 10 ? '#155724' : '#721c24'
+                              }}>
+                                {product.stock || 'N/A'}
+                              </span>
+                            </td>
+                            <td style={{padding: '12px'}}>
+                              <div style={{display: 'flex', gap: '5px'}}>
+                                <button 
+                                  style={{
+                                    padding: '4px 8px', 
+                                    border: 'none', 
+                                    borderRadius: '3px', 
+                                    backgroundColor: '#007bff', 
+                                    color: 'white', 
+                                    cursor: 'pointer',
+                                    fontSize: '12px'
+                                  }}
+                                  onClick={() => {
+                                    fetchCategories();
+                                    setEditingProduct(product);
+                                  }}
+                                >
+                                  ✏️ Edit
+                                </button>
+                                <button 
+                                  style={{
+                                    padding: '4px 8px', 
+                                    border: 'none', 
+                                    borderRadius: '3px', 
+                                    backgroundColor: '#dc3545', 
+                                    color: 'white', 
+                                    cursor: 'pointer',
+                                    fontSize: '12px'
+                                  }}
+                                  onClick={async () => {
+                                    if (confirm(`Delete product "${product.name}"?\n\nThis action cannot be undone.`)) {
+                                      const result = await deleteProduct(product.id);
+                                      if (result.success) {
+                                        alert('Product deleted successfully');
+                                      } else {
+                                        alert('Error: ' + result.message);
+                                      }
+                                    }
+                                  }}
+                                >
+                                  🗑️ Delete
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div style={{padding: '40px', textAlign: 'center', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6'}}>
+                    <p style={{color: '#666', fontSize: '18px', marginBottom: '15px'}}>No products found</p>
+                    <p style={{color: '#6c757d', marginBottom: '20px'}}>Start building your product catalog by adding your first product.</p>
+                    <button 
+                      className="btn" 
+                      style={{background: '#28a745', width: 'auto', padding: '12px 24px'}}
+                      onClick={() => alert('Add your first product:\n\n• Product name and description\n• High-quality images\n• Pricing information\n• Category assignment\n• Inventory management')}
+                    >
+                      ➕ Add Your First Product
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          
+          default:
+            return (
+              <>
+                <div className="dashboard-grid">
+                  <div className="stat-card">
+                    <div className="stat-number">{stats?.totalUsers || '0'}</div>
+                    <div className="stat-label">Total Users</div>
+                  </div>
+                  
+                  <div className="stat-card">
+                    <div className="stat-number">{stats?.totalOrders || '0'}</div>
+                    <div className="stat-label">Total Orders</div>
+                  </div>
+                  
+                  <div className="stat-card">
+                    <div className="stat-number">{stats?.totalProducts || '0'}</div>
+                    <div className="stat-label">Total Products</div>
+                  </div>
+                  
+                  <div className="stat-card">
+                    <div className="stat-number">{stats?.recentOrders?.length || '0'}</div>
+                    <div className="stat-label">Recent Orders</div>
+                  </div>
+                </div>
+                
+                <div style={{background: 'white', padding: '30px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'}}>
+                  <h3 style={{marginBottom: '20px', color: '#333'}}>System Overview</h3>
+                  <p style={{color: '#666', lineHeight: '1.6'}}>
+                    Welcome to the KitchenOff Admin Panel. Here you can manage your e-commerce platform, 
+                    view statistics, and monitor system performance. The dashboard shows real-time data 
+                    from your PostgreSQL database.
+                  </p>
+                  
+                  <div style={{marginTop: '30px', padding: '20px', background: '#f8f9ff', borderRadius: '6px'}}>
+                    <h4 style={{color: '#333', marginBottom: '10px'}}>Quick Stats Summary</h4>
+                    <ul style={{listStyle: 'none', padding: 0}}>
+                      <li style={{marginBottom: '5px'}}>📊 {stats?.totalUsers || '0'} registered users</li>
+                      <li style={{marginBottom: '5px'}}>🛒 {stats?.totalOrders || '0'} orders processed</li>
+                      <li style={{marginBottom: '5px'}}>📦 {stats?.totalProducts || '0'} products in catalog</li>
+                      <li style={{marginBottom: '5px'}}>🔄 {stats?.recentOrders?.length || '0'} recent orders</li>
+                    </ul>
+                  </div>
+                  
+                  <div style={{marginTop: '30px', padding: '20px', background: '#fff8e1', borderRadius: '6px'}}>
+                    <h4 style={{color: '#333', marginBottom: '10px'}}>Admin Actions</h4>
+                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginTop: '15px'}}>
+                      <button 
+                        className="btn" 
+                        style={{background: activeView === 'orders' ? '#2E7D32' : '#4CAF50', width: 'auto', padding: '10px 16px'}}
+                        onClick={() => handleViewChange('orders')}
+                      >
+                        📋 Manage Orders
+                      </button>
+                      <button 
+                        className="btn" 
+                        style={{background: activeView === 'users' ? '#1565C0' : '#2196F3', width: 'auto', padding: '10px 16px'}}
+                        onClick={() => handleViewChange('users')}
+                      >
+                        👥 Manage Users
+                      </button>
+                      <button 
+                        className="btn" 
+                        style={{background: activeView === 'products' ? '#F57C00' : '#FF9800', width: 'auto', padding: '10px 16px'}}
+                        onClick={() => handleViewChange('products')}
+                      >
+                        📦 Manage Products
+                      </button>
+                      <button 
+                        className="btn" 
+                        style={{background: '#9C27B0', width: 'auto', padding: '10px 16px'}}
+                        onClick={() => setShowTwoFactor(!showTwoFactor)}
+                      >
+                        🔐 Two-Factor Auth
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {showTwoFactor && (
+                    <div style={{marginTop: '30px', padding: '20px', background: '#e8f5e8', borderRadius: '6px', border: '2px solid #4CAF50'}}>
+                      <h4 style={{color: '#333', marginBottom: '10px'}}>🔐 Two-Factor Authentication</h4>
+                      <p style={{color: '#666', marginBottom: '15px'}}>
+                        Status: {admin?.twoFactorEnabled ? 
+                          <span style={{color: '#4CAF50', fontWeight: 'bold'}}>✅ Enabled</span> : 
+                          <span style={{color: '#f44336', fontWeight: 'bold'}}>❌ Disabled</span>
+                        }
+                      </p>
+                      <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                        <button 
+                          className="btn" 
+                          style={{background: admin?.twoFactorEnabled ? '#f44336' : '#4CAF50', width: 'auto', padding: '8px 16px'}}
+                          onClick={() => alert('2FA management functionality will be implemented')}
+                        >
+                          {admin?.twoFactorEnabled ? '🔓 Disable 2FA' : '🔒 Enable 2FA'}
+                        </button>
+                        {admin?.twoFactorEnabled && (
+                          <button 
+                            className="btn" 
+                            style={{background: '#FF9800', width: 'auto', padding: '8px 16px'}}
+                            onClick={() => alert('Backup codes regeneration will be implemented')}
+                          >
+                            🔄 Regenerate Backup Codes
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div style={{marginTop: '30px', padding: '20px', background: '#f0f8ff', borderRadius: '6px'}}>
+                    <h4 style={{color: '#333', marginBottom: '10px'}}>Recent Activity</h4>
+                    {stats?.recentOrders?.length > 0 ? (
+                      <div style={{maxHeight: '200px', overflowY: 'auto'}}>
+                        {stats.recentOrders.map((order, index) => (
+                          <div key={index} style={{
+                            padding: '10px',
+                            marginBottom: '10px',
+                            background: 'white',
+                            borderRadius: '4px',
+                            borderLeft: '4px solid #2196F3'
+                          }}>
+                            <div style={{fontWeight: 'bold'}}>Order #{order.id}</div>
+                            <div style={{fontSize: '14px', color: '#666'}}>
+                              Amount: ${order.totalAmount} | Status: {order.status}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p style={{color: '#666', fontStyle: 'italic'}}>No recent orders</p>
+                    )}
+                  </div>
+                </div>
+              </>
+            );
+        }
+      };
+
+      // Bulk Operations Components
+      const BulkStatusComponent = () => {
+        const [newStatus, setNewStatus] = useState('');
+        const [isProcessing, setIsProcessing] = useState(false);
+        
+        const handleStatusUpdate = async () => {
+          if (!newStatus) {
+            alert('Please select a status');
+            return;
+          }
+          
+          setIsProcessing(true);
+          const result = await performBulkOperation('status', selectedOrders, { status: newStatus });
+          
+          if (result.success) {
+            alert(`Status updated successfully for ${selectedOrders.length} orders`);
+            setSelectedOrders([]);
+            setShowBulkModal(false);
+            setBulkOperation('');
+          } else {
+            alert('Error: ' + result.message);
+          }
+          setIsProcessing(false);
+        };
+        
+        return (
+          <div>
+            <div className="form-group">
+              <label className="form-label">Select New Status</label>
+              <select
+                className="form-input"
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value)}
+              >
+                <option value="">Choose Status...</option>
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+            <button
+              className="btn"
+              style={{background: '#28a745'}}
+              onClick={handleStatusUpdate}
+              disabled={isProcessing}
+            >
+              {isProcessing ? 'Updating...' : 'Update Status'}
+            </button>
+          </div>
+        );
+      };
+      
+      const BulkToolsComponent = () => {
+        const [selectedTool, setSelectedTool] = useState('');
+        const [isProcessing, setIsProcessing] = useState(false);
+        const [notificationMessage, setNotificationMessage] = useState('');
+        
+        const handleToolOperation = async (operation) => {
+          setIsProcessing(true);
+          let result;
+          
+          switch (operation) {
+            case 'shipping':
+              result = await performBulkOperation('shipping', selectedOrders);
+              break;
+            case 'notifications':
+              result = await performBulkOperation('notifications', selectedOrders, { message: notificationMessage });
+              break;
+            case 'refunds':
+              result = await performBulkOperation('refunds', selectedOrders);
+              break;
+            default:
+              result = { success: false, message: 'Invalid operation' };
+          }
+          
+          if (result.success) {
+            alert(`${operation} operation completed successfully for ${selectedOrders.length} orders`);
+            setSelectedOrders([]);
+            setShowBulkModal(false);
+            setBulkOperation('');
+          } else {
+            alert('Error: ' + result.message);
+          }
+          setIsProcessing(false);
+        };
+        
+        return (
+          <div>
+            <div style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
+              <button
+                className="btn"
+                style={{background: '#17a2b8'}}
+                onClick={() => handleToolOperation('shipping')}
+                disabled={isProcessing}
+              >
+                📦 Generate Shipping Labels
+              </button>
+              
+              <div>
+                <div className="form-group">
+                  <label className="form-label">Custom Notification Message</label>
+                  <textarea
+                    className="form-input"
+                    value={notificationMessage}
+                    onChange={(e) => setNotificationMessage(e.target.value)}
+                    placeholder="Enter custom notification message..."
+                    rows="3"
+                  />
+                </div>
+                <button
+                  className="btn"
+                  style={{background: '#ffc107'}}
+                  onClick={() => handleToolOperation('notifications')}
+                  disabled={isProcessing}
+                >
+                  📧 Send Notifications
+                </button>
+              </div>
+              
+              <button
+                className="btn"
+                style={{background: '#dc3545'}}
+                onClick={() => {
+                  if (confirm('Are you sure you want to process refunds for the selected orders? This action cannot be undone.')) {
+                    handleToolOperation('refunds');
+                  }
+                }}
+                disabled={isProcessing}
+              >
+                💸 Process Refunds
+              </button>
+            </div>
+            
+            {isProcessing && (
+              <div style={{textAlign: 'center', marginTop: '20px'}}>
+                <div className="loading"></div>
+                <p>Processing operation...</p>
+              </div>
+            )}
+          </div>
+        );
+      };
+      
+      // Modal Forms Component
+      const ModalsComponent = () => {
+        const [userFormData, setUserFormData] = useState({
+          email: '',
+          password: '',
+          firstName: '',
+          lastName: '',
+          isAdmin: false
+        });
+        
+        const [productFormData, setProductFormData] = useState({
+          name: '',
+          description: '',
+          price: '',
+          compareAtPrice: '',
+          categoryId: '',
+          imageUrl: '',
+          stockQuantity: '',
+          featured: false
+        });
+        
+        const handleUserSubmit = async (e) => {
+          e.preventDefault();
+          
+          const result = editingUser 
+            ? await updateUser(editingUser.id, userFormData)
+            : await createUser(userFormData);
+          
+          if (result.success) {
+            alert(result.message);
+            setShowAddUserModal(false);
+            setEditingUser(null);
+            setUserFormData({
+              email: '',
+              password: '',
+              firstName: '',
+              lastName: '',
+              isAdmin: false
+            });
+          } else {
+            alert('Error: ' + result.message);
+          }
+        };
+        
+        const handleProductSubmit = async (e) => {
+          e.preventDefault();
+          
+          const result = editingProduct 
+            ? await updateProduct(editingProduct.id, productFormData)
+            : await createProduct(productFormData);
+          
+          if (result.success) {
+            alert(result.message);
+            setShowAddProductModal(false);
+            setEditingProduct(null);
+            setProductFormData({
+              name: '',
+              description: '',
+              price: '',
+              compareAtPrice: '',
+              categoryId: '',
+              imageUrl: '',
+              stockQuantity: '',
+              featured: false
+            });
+          } else {
+            alert('Error: ' + result.message);
+          }
+        };
+        
+        // Set form data when editing
+        React.useEffect(() => {
+          if (editingUser) {
+            setUserFormData({
+              email: editingUser.email || '',
+              password: '',
+              firstName: editingUser.firstName || '',
+              lastName: editingUser.lastName || '',
+              isAdmin: editingUser.isAdmin || false
+            });
+            setShowAddUserModal(true);
+          }
+        }, [editingUser]);
+        
+        React.useEffect(() => {
+          if (editingProduct) {
+            setProductFormData({
+              name: editingProduct.name || '',
+              description: editingProduct.description || '',
+              price: editingProduct.price || '',
+              compareAtPrice: editingProduct.compareAtPrice || '',
+              categoryId: editingProduct.categoryId || '',
+              imageUrl: editingProduct.imageUrl || '',
+              stockQuantity: editingProduct.stockQuantity || '',
+              featured: editingProduct.featured || false
+            });
+            setShowAddProductModal(true);
+          }
+        }, [editingProduct]);
+        
+        return (
+          <>
+            {/* Add/Edit User Modal */}
+            {showAddUserModal && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1000
+              }}>
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '30px',
+                  borderRadius: '8px',
+                  width: '90%',
+                  maxWidth: '500px',
+                  maxHeight: '80vh',
+                  overflow: 'auto'
+                }}>
+                  <h3 style={{marginBottom: '20px', color: '#333'}}>
+                    {editingUser ? 'Edit User' : 'Add New User'}
+                  </h3>
+                  <form onSubmit={handleUserSubmit}>
+                    <div className="form-group">
+                      <label className="form-label">Email</label>
+                      <input
+                        type="email"
+                        className="form-input"
+                        value={userFormData.email}
+                        onChange={(e) => setUserFormData({...userFormData, email: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Password {editingUser && '(leave empty to keep current)'}</label>
+                      <input
+                        type="password"
+                        className="form-input"
+                        value={userFormData.password}
+                        onChange={(e) => setUserFormData({...userFormData, password: e.target.value})}
+                        required={!editingUser}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">First Name</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={userFormData.firstName}
+                        onChange={(e) => setUserFormData({...userFormData, firstName: e.target.value})}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Last Name</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={userFormData.lastName}
+                        onChange={(e) => setUserFormData({...userFormData, lastName: e.target.value})}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                        <input
+                          type="checkbox"
+                          checked={userFormData.isAdmin}
+                          onChange={(e) => setUserFormData({...userFormData, isAdmin: e.target.checked})}
+                        />
+                        Admin User
+                      </label>
+                    </div>
+                    <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
+                      <button type="submit" className="btn" style={{background: '#28a745'}}>
+                        {editingUser ? 'Update User' : 'Create User'}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn"
+                        style={{background: '#6c757d'}}
+                        onClick={() => {
+                          setShowAddUserModal(false);
+                          setEditingUser(null);
+                          setUserFormData({
+                            email: '',
+                            password: '',
+                            firstName: '',
+                            lastName: '',
+                            isAdmin: false
+                          });
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
                 </div>
               </div>
+            )}
+            
+            {/* Add/Edit Product Modal */}
+            {showAddProductModal && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1000
+              }}>
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '30px',
+                  borderRadius: '8px',
+                  width: '90%',
+                  maxWidth: '600px',
+                  maxHeight: '80vh',
+                  overflow: 'auto'
+                }}>
+                  <h3 style={{marginBottom: '20px', color: '#333'}}>
+                    {editingProduct ? 'Edit Product' : 'Add New Product'}
+                  </h3>
+                  <form onSubmit={handleProductSubmit}>
+                    <div className="form-group">
+                      <label className="form-label">Product Name</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={productFormData.name}
+                        onChange={(e) => setProductFormData({...productFormData, name: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Description</label>
+                      <textarea
+                        className="form-input"
+                        value={productFormData.description}
+                        onChange={(e) => setProductFormData({...productFormData, description: e.target.value})}
+                        rows="3"
+                      />
+                    </div>
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px'}}>
+                      <div className="form-group">
+                        <label className="form-label">Price</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          className="form-input"
+                          value={productFormData.price}
+                          onChange={(e) => setProductFormData({...productFormData, price: e.target.value})}
+                          required
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Compare At Price</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          className="form-input"
+                          value={productFormData.compareAtPrice}
+                          onChange={(e) => setProductFormData({...productFormData, compareAtPrice: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Category</label>
+                      <select
+                        className="form-input"
+                        value={productFormData.categoryId}
+                        onChange={(e) => setProductFormData({...productFormData, categoryId: e.target.value})}
+                      >
+                        <option value="">Select Category</option>
+                        {categories.map(category => (
+                          <option key={category.id} value={category.id}>{category.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Image URL</label>
+                      <input
+                        type="url"
+                        className="form-input"
+                        value={productFormData.imageUrl}
+                        onChange={(e) => setProductFormData({...productFormData, imageUrl: e.target.value})}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Stock Quantity</label>
+                      <input
+                        type="number"
+                        className="form-input"
+                        value={productFormData.stockQuantity}
+                        onChange={(e) => setProductFormData({...productFormData, stockQuantity: e.target.value})}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                        <input
+                          type="checkbox"
+                          checked={productFormData.featured}
+                          onChange={(e) => setProductFormData({...productFormData, featured: e.target.checked})}
+                        />
+                        Featured Product
+                      </label>
+                    </div>
+                    <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
+                      <button type="submit" className="btn" style={{background: '#28a745'}}>
+                        {editingProduct ? 'Update Product' : 'Create Product'}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn"
+                        style={{background: '#6c757d'}}
+                        onClick={() => {
+                          setShowAddProductModal(false);
+                          setEditingProduct(null);
+                          setProductFormData({
+                            name: '',
+                            description: '',
+                            price: '',
+                            compareAtPrice: '',
+                            categoryId: '',
+                            imageUrl: '',
+                            stockQuantity: '',
+                            featured: false
+                          });
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+            
+            {/* Bulk Operations Modal */}
+            {showBulkModal && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1000
+              }}>
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '30px',
+                  borderRadius: '8px',
+                  width: '90%',
+                  maxWidth: '600px',
+                  maxHeight: '80vh',
+                  overflow: 'auto'
+                }}>
+                  <h3 style={{marginBottom: '20px', color: '#333'}}>
+                    {bulkOperation === 'status' ? '🔄 Bulk Status Update' : '🛠️ Bulk Order Tools'}
+                  </h3>
+                  <p style={{marginBottom: '20px', color: '#666'}}>
+                    Selected {selectedOrders.length} orders for bulk operation.
+                  </p>
+                  
+                  {bulkOperation === 'status' && (
+                    <BulkStatusComponent />
+                  )}
+                  
+                  {bulkOperation === 'tools' && (
+                    <BulkToolsComponent />
+                  )}
+                  
+                  <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
+                    <button
+                      type="button"
+                      className="btn"
+                      style={{background: '#6c757d'}}
+                      onClick={() => {
+                        setShowBulkModal(false);
+                        setBulkOperation('');
+                        setBulkResults(null);
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Order Details Modal */}
+            {showOrderDetails && selectedOrder && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1000
+              }}>
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '30px',
+                  borderRadius: '8px',
+                  width: '90%',
+                  maxWidth: '800px',
+                  maxHeight: '80vh',
+                  overflow: 'auto'
+                }}>
+                  <h3 style={{marginBottom: '20px', color: '#333'}}>
+                    📋 Order Details - #{selectedOrder.id}
+                  </h3>
+                  
+                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '20px'}}>
+                    <div style={{padding: '15px', background: '#f8f9fa', borderRadius: '6px'}}>
+                      <h4 style={{color: '#333', marginBottom: '10px'}}>Order Information</h4>
+                      <p><strong>Order ID:</strong> #{selectedOrder.id}</p>
+                      <p><strong>Status:</strong> <span style={{
+                        padding: '4px 8px', 
+                        borderRadius: '4px', 
+                        backgroundColor: selectedOrder.status === 'pending' ? '#fff3cd' : selectedOrder.status === 'processing' ? '#cce5ff' : '#d4edda',
+                        color: selectedOrder.status === 'pending' ? '#856404' : selectedOrder.status === 'processing' ? '#0056b3' : '#155724'
+                      }}>{selectedOrder.status}</span></p>
+                      <p><strong>Total Amount:</strong> ${selectedOrder.totalAmount}</p>
+                      <p><strong>Payment Method:</strong> {selectedOrder.paymentMethod}</p>
+                      <p><strong>Payment Status:</strong> {selectedOrder.paymentStatus}</p>
+                      <p><strong>Created:</strong> {new Date(selectedOrder.createdAt).toLocaleString()}</p>
+                    </div>
+                    
+                    <div style={{padding: '15px', background: '#f8f9fa', borderRadius: '6px'}}>
+                      <h4 style={{color: '#333', marginBottom: '10px'}}>Customer Information</h4>
+                      <p><strong>Name:</strong> {selectedOrder.shippingAddress.name}</p>
+                      <p><strong>User ID:</strong> #{selectedOrder.userId}</p>
+                      <p><strong>Email:</strong> user_{selectedOrder.userId}@example.com</p>
+                    </div>
+                  </div>
+                  
+                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '20px'}}>
+                    <div style={{padding: '15px', background: '#f8f9fa', borderRadius: '6px'}}>
+                      <h4 style={{color: '#333', marginBottom: '10px'}}>Shipping Address</h4>
+                      <p>{selectedOrder.shippingAddress.name}</p>
+                      <p>{selectedOrder.shippingAddress.street}</p>
+                      <p>{selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state} {selectedOrder.shippingAddress.zipCode}</p>
+                      <p>{selectedOrder.shippingAddress.country}</p>
+                    </div>
+                    
+                    <div style={{padding: '15px', background: '#f8f9fa', borderRadius: '6px'}}>
+                      <h4 style={{color: '#333', marginBottom: '10px'}}>Billing Address</h4>
+                      <p>{selectedOrder.billingAddress.name}</p>
+                      <p>{selectedOrder.billingAddress.street}</p>
+                      <p>{selectedOrder.billingAddress.city}, {selectedOrder.billingAddress.state} {selectedOrder.billingAddress.zipCode}</p>
+                      <p>{selectedOrder.billingAddress.country}</p>
+                    </div>
+                  </div>
+                  
+                  <div style={{padding: '15px', background: '#f8f9fa', borderRadius: '6px', marginBottom: '20px'}}>
+                    <h4 style={{color: '#333', marginBottom: '15px'}}>Order Items</h4>
+                    <div style={{overflowX: 'auto'}}>
+                      <table style={{width: '100%', borderCollapse: 'collapse'}}>
+                        <thead>
+                          <tr style={{backgroundColor: '#e9ecef'}}>
+                            <th style={{padding: '10px', textAlign: 'left', borderBottom: '1px solid #dee2e6'}}>Product</th>
+                            <th style={{padding: '10px', textAlign: 'left', borderBottom: '1px solid #dee2e6'}}>Quantity</th>
+                            <th style={{padding: '10px', textAlign: 'left', borderBottom: '1px solid #dee2e6'}}>Price</th>
+                            <th style={{padding: '10px', textAlign: 'left', borderBottom: '1px solid #dee2e6'}}>Total</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {selectedOrder.items && selectedOrder.items.map((item, index) => (
+                            <tr key={index} style={{borderBottom: '1px solid #dee2e6'}}>
+                              <td style={{padding: '10px'}}>
+                                <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                                  {item.product && item.product.imageUrl && (
+                                    <img 
+                                      src={item.product.imageUrl} 
+                                      alt={item.product.name}
+                                      style={{width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px'}}
+                                    />
+                                  )}
+                                  <span>{item.product ? item.product.name : `Product ID: ${item.productId}`}</span>
+                                </div>
+                              </td>
+                              <td style={{padding: '10px'}}>{item.quantity}</td>
+                              <td style={{padding: '10px'}}>${item.price}</td>
+                              <td style={{padding: '10px', fontWeight: 'bold'}}>${item.totalPrice}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  
+                  {selectedOrder.notes && (
+                    <div style={{padding: '15px', background: '#fff3cd', borderRadius: '6px', marginBottom: '20px'}}>
+                      <h4 style={{color: '#333', marginBottom: '10px'}}>Order Notes</h4>
+                      <p>{selectedOrder.notes}</p>
+                    </div>
+                  )}
+                  
+                  <div style={{padding: '15px', background: '#f8f9fa', borderRadius: '6px', marginBottom: '20px'}}>
+                    <h4 style={{color: '#333', marginBottom: '15px'}}>Order Tools</h4>
+                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px'}}>
+                      <button
+                        className="btn"
+                        style={{background: '#17a2b8', padding: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px'}}
+                        onClick={async () => {
+                          const result = await performBulkOperation('shipping', [selectedOrder.id]);
+                          if (result.success) {
+                            alert(`Shipping label generated for Order #${selectedOrder.id}`);
+                          } else {
+                            alert('Error: ' + result.message);
+                          }
+                        }}
+                      >
+                        <span>📦</span>
+                        <span>Generate Shipping Label</span>
+                      </button>
+                      
+                      <button
+                        className="btn"
+                        style={{background: '#ffc107', padding: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px'}}
+                        onClick={() => {
+                          const message = prompt('Enter notification message for customer:');
+                          if (message) {
+                            performBulkOperation('notifications', [selectedOrder.id], { message }).then(result => {
+                              if (result.success) {
+                                alert(`Notification sent to customer for Order #${selectedOrder.id}`);
+                              } else {
+                                alert('Error: ' + result.message);
+                              }
+                            });
+                          }
+                        }}
+                      >
+                        <span>📧</span>
+                        <span>Send Notification</span>
+                      </button>
+                      
+                      <button
+                        className="btn"
+                        style={{background: '#dc3545', padding: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px'}}
+                        onClick={() => {
+                          if (confirm(`Are you sure you want to process a refund for Order #${selectedOrder.id}? This action cannot be undone.`)) {
+                            performBulkOperation('refunds', [selectedOrder.id]).then(result => {
+                              if (result.success) {
+                                alert(`Refund processed for Order #${selectedOrder.id}`);
+                              } else {
+                                alert('Error: ' + result.message);
+                              }
+                            });
+                          }
+                        }}
+                      >
+                        <span>💸</span>
+                        <span>Process Refund</span>
+                      </button>
+                      
+                      <button
+                        className="btn"
+                        style={{background: '#28a745', padding: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px'}}
+                        onClick={() => {
+                          const csvContent = `Order ID,Customer,Status,Amount,Date\n${selectedOrder.id},${selectedOrder.shippingAddress.name},${selectedOrder.status},${selectedOrder.totalAmount},${new Date(selectedOrder.createdAt).toLocaleDateString()}`;
+                          
+                          const blob = new Blob([csvContent], { type: 'text/csv' });
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `order_${selectedOrder.id}_${new Date().toISOString().split('T')[0]}.csv`;
+                          a.click();
+                          window.URL.revokeObjectURL(url);
+                          
+                          alert(`Order #${selectedOrder.id} exported to CSV`);
+                        }}
+                      >
+                        <span>📊</span>
+                        <span>Export to CSV</span>
+                      </button>
+                      
+                      <button
+                        className="btn"
+                        style={{background: '#6f42c1', padding: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px'}}
+                        onClick={() => {
+                          const newStatus = prompt(`Update order status for Order #${selectedOrder.id}:\n\nCurrent status: ${selectedOrder.status}\n\nEnter new status (pending, processing, shipped, delivered, cancelled):`);
+                          if (newStatus && ['pending', 'processing', 'shipped', 'delivered', 'cancelled'].includes(newStatus.toLowerCase())) {
+                            updateOrderStatus(selectedOrder.id, newStatus.toLowerCase()).then(result => {
+                              if (result.success) {
+                                alert('Order status updated successfully');
+                                // Update the selected order status in the modal
+                                setSelectedOrder({...selectedOrder, status: newStatus.toLowerCase()});
+                              } else {
+                                alert('Error: ' + result.message);
+                              }
+                            });
+                          } else if (newStatus) {
+                            alert('Invalid status. Please use: pending, processing, shipped, delivered, or cancelled');
+                          }
+                        }}
+                      >
+                        <span>✏️</span>
+                        <span>Update Status</span>
+                      </button>
+                      
+                      <button
+                        className="btn"
+                        style={{background: '#fd7e14', padding: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px'}}
+                        onClick={() => {
+                          const invoice = `
+INVOICE - Order #${selectedOrder.id}
+========================================
+Customer: ${selectedOrder.shippingAddress.name}
+Date: ${new Date(selectedOrder.createdAt).toLocaleDateString()}
+Status: ${selectedOrder.status}
+Payment Method: ${selectedOrder.paymentMethod}
+Payment Status: ${selectedOrder.paymentStatus}
+
+SHIPPING ADDRESS:
+${selectedOrder.shippingAddress.name}
+${selectedOrder.shippingAddress.street}
+${selectedOrder.shippingAddress.city}, ${selectedOrder.shippingAddress.state} ${selectedOrder.shippingAddress.zipCode}
+${selectedOrder.shippingAddress.country}
+
+ITEMS:
+${selectedOrder.items ? selectedOrder.items.map(item => `${item.quantity}x ${item.product ? item.product.name : 'Product ID: ' + item.productId} - $${item.price} each = $${item.totalPrice}`).join('\n') : 'No items'}
+
+TOTAL: $${selectedOrder.totalAmount}
+========================================
+                          `;
+                          
+                          const blob = new Blob([invoice], { type: 'text/plain' });
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `invoice_${selectedOrder.id}.txt`;
+                          a.click();
+                          window.URL.revokeObjectURL(url);
+                          
+                          alert(`Invoice for Order #${selectedOrder.id} downloaded`);
+                        }}
+                      >
+                        <span>📄</span>
+                        <span>Download Invoice</span>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                    <button
+                      type="button"
+                      className="btn"
+                      style={{background: '#6c757d'}}
+                      onClick={() => {
+                        setShowOrderDetails(false);
+                        setSelectedOrder(null);
+                      }}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Order Tools Modal */}
+            {showOrderTools && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1000
+              }}>
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '30px',
+                  borderRadius: '8px',
+                  width: '90%',
+                  maxWidth: '600px',
+                  maxHeight: '80vh',
+                  overflow: 'auto'
+                }}>
+                  <h3 style={{marginBottom: '20px', color: '#333'}}>
+                    🛠️ Order Tools
+                  </h3>
+                  <p style={{marginBottom: '20px', color: '#666'}}>
+                    Selected {selectedOrders.length} orders for advanced operations.
+                  </p>
+                  
+                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px', marginBottom: '20px'}}>
+                    <button
+                      className="btn"
+                      style={{background: '#17a2b8', padding: '15px', display: 'flex', alignItems: 'center', gap: '10px'}}
+                      onClick={async () => {
+                        const result = await performBulkOperation('shipping', selectedOrders);
+                        if (result.success) {
+                          alert(`Shipping labels generated for ${selectedOrders.length} orders`);
+                          setShowOrderTools(false);
+                          setSelectedOrders([]);
+                        } else {
+                          alert('Error: ' + result.message);
+                        }
+                      }}
+                    >
+                      <span style={{fontSize: '20px'}}>📦</span>
+                      <div style={{textAlign: 'left'}}>
+                        <div style={{fontWeight: 'bold'}}>Generate Shipping Labels</div>
+                        <div style={{fontSize: '12px', opacity: '0.8'}}>Create shipping labels for selected orders</div>
+                      </div>
+                    </button>
+                    
+                    <button
+                      className="btn"
+                      style={{background: '#ffc107', padding: '15px', display: 'flex', alignItems: 'center', gap: '10px'}}
+                      onClick={() => {
+                        const message = prompt('Enter notification message for customers:');
+                        if (message) {
+                          performBulkOperation('notifications', selectedOrders, { message }).then(result => {
+                            if (result.success) {
+                              alert(`Notifications sent to ${selectedOrders.length} customers`);
+                              setShowOrderTools(false);
+                              setSelectedOrders([]);
+                            } else {
+                              alert('Error: ' + result.message);
+                            }
+                          });
+                        }
+                      }}
+                    >
+                      <span style={{fontSize: '20px'}}>📧</span>
+                      <div style={{textAlign: 'left'}}>
+                        <div style={{fontWeight: 'bold'}}>Send Notifications</div>
+                        <div style={{fontSize: '12px', opacity: '0.8'}}>Send email notifications to customers</div>
+                      </div>
+                    </button>
+                    
+                    <button
+                      className="btn"
+                      style={{background: '#dc3545', padding: '15px', display: 'flex', alignItems: 'center', gap: '10px'}}
+                      onClick={() => {
+                        if (confirm('Are you sure you want to process refunds for the selected orders? This action cannot be undone.')) {
+                          performBulkOperation('refunds', selectedOrders).then(result => {
+                            if (result.success) {
+                              alert(`Refunds processed for ${selectedOrders.length} orders`);
+                              setShowOrderTools(false);
+                              setSelectedOrders([]);
+                            } else {
+                              alert('Error: ' + result.message);
+                            }
+                          });
+                        }
+                      }}
+                    >
+                      <span style={{fontSize: '20px'}}>💸</span>
+                      <div style={{textAlign: 'left'}}>
+                        <div style={{fontWeight: 'bold'}}>Process Refunds</div>
+                        <div style={{fontSize: '12px', opacity: '0.8'}}>Issue refunds for selected orders</div>
+                      </div>
+                    </button>
+                    
+                    <button
+                      className="btn"
+                      style={{background: '#28a745', padding: '15px', display: 'flex', alignItems: 'center', gap: '10px'}}
+                      onClick={() => {
+                        const orderIds = selectedOrders.join(', ');
+                        const csvContent = `Order ID,Customer,Status,Amount,Date\n${selectedOrders.map(id => {
+                          const order = filteredOrders.find(o => o.id === id);
+                          return `${order.id},User ${order.userId},${order.status},${order.totalAmount},${new Date(order.createdAt).toLocaleDateString()}`;
+                        }).join('\n')}`;
+                        
+                        const blob = new Blob([csvContent], { type: 'text/csv' });
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `orders_${new Date().toISOString().split('T')[0]}.csv`;
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        
+                        alert(`Exported ${selectedOrders.length} orders to CSV`);
+                        setShowOrderTools(false);
+                        setSelectedOrders([]);
+                      }}
+                    >
+                      <span style={{fontSize: '20px'}}>📊</span>
+                      <div style={{textAlign: 'left'}}>
+                        <div style={{fontWeight: 'bold'}}>Export to CSV</div>
+                        <div style={{fontSize: '12px', opacity: '0.8'}}>Download order data as CSV file</div>
+                      </div>
+                    </button>
+                  </div>
+                  
+                  <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                    <button
+                      type="button"
+                      className="btn"
+                      style={{background: '#6c757d'}}
+                      onClick={() => {
+                        setShowOrderTools(false);
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        );
+      };
+
+      return (
+        <div className="container">
+          <div className="admin-header">
+            <div className="logo">
+              <img src="/attached_assets/KitchenOff_Logo_Background_Removed_1752520997429.png" alt="KitchenOff Logo" />
+              <span>KitchenOff Admin</span>
+            </div>
+            <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+              <span style={{fontSize: '14px', color: '#666'}}>Welcome, {admin?.firstName || 'Admin'}</span>
+              <button onClick={() => setActiveView('dashboard')} className="btn btn-secondary" style={{padding: '8px 16px', fontSize: '14px', width: 'auto'}}>
+                🏠 Dashboard
+              </button>
+              <button onClick={handleLogout} className="btn btn-secondary" style={{padding: '8px 16px', fontSize: '14px', width: 'auto'}}>
+                Logout
+              </button>
             </div>
           </div>
           
-          <div id="orders-content" class="hidden">
-            <h2>Orders Management</h2>
-            <p>Orders management functionality will be implemented here.</p>
+          <div className="nav-tabs">
+            <button 
+              className={`nav-tab ${activeView === 'dashboard' ? 'active' : ''}`}
+              onClick={() => handleViewChange('dashboard')}
+            >
+              📊 Dashboard
+            </button>
+            <button 
+              className={`nav-tab ${activeView === 'orders' ? 'active' : ''}`}
+              onClick={() => handleViewChange('orders')}
+            >
+              📋 Orders
+            </button>
+            <button 
+              className={`nav-tab ${activeView === 'users' ? 'active' : ''}`}
+              onClick={() => handleViewChange('users')}
+            >
+              👥 Users
+            </button>
+            <button 
+              className={`nav-tab ${activeView === 'products' ? 'active' : ''}`}
+              onClick={() => handleViewChange('products')}
+            >
+              📦 Products
+            </button>
+            <button 
+              className={`nav-tab ${activeView === 'settings' ? 'active' : ''}`}
+              onClick={() => handleViewChange('settings')}
+            >
+              ⚙️ Settings
+            </button>
           </div>
           
-          <div id="users-content" class="hidden">
-            <h2>Users Management</h2>
-            <p>Users management functionality will be implemented here.</p>
+          <div className="content-area">
+            {renderContent()}
           </div>
-          
-          <div id="products-content" class="hidden">
-            <h2>Products Management</h2>
-            <p>Products management functionality will be implemented here.</p>
-          </div>
-          
-          <div id="settings-content" class="hidden">
-            <h2>Settings</h2>
-            <p>Settings management functionality will be implemented here.</p>
-          </div>
+          <ModalsComponent />
         </div>
-      </div>
-    </div>
+      );
+    }
     
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="loading-container hidden">
-      <div class="loading"></div>
-      <p>Loading admin panel...</p>
-    </div>
-  </div>
-  
-  <script>
-    // Check for existing session on page load
-    document.addEventListener('DOMContentLoaded', function() {
-      const savedToken = localStorage.getItem('adminToken');
-      const savedAdmin = localStorage.getItem('adminUser');
+    // Main Admin App Component
+    function AdminApp() {
+      const [isAuthenticated, setIsAuthenticated] = useState(false);
+      const [token, setToken] = useState(null);
+      const [admin, setAdmin] = useState(null);
+      const [loading, setLoading] = useState(true);
       
-      if (savedToken && savedAdmin) {
-        try {
-          const admin = JSON.parse(savedAdmin);
-          showDashboard(admin);
-        } catch (err) {
-          console.error('Error parsing saved admin data:', err);
-          localStorage.removeItem('adminToken');
-          localStorage.removeItem('adminUser');
-          showLogin();
-        }
-      } else {
-        showLogin();
-      }
-    });
-    
-    // Login form handler
-    document.getElementById('login-form').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const loginBtn = document.getElementById('login-btn');
-      const errorDiv = document.getElementById('error-message');
-      
-      loginBtn.textContent = 'Logging in...';
-      loginBtn.disabled = true;
-      errorDiv.classList.add('hidden');
-      
-      try {
-        const response = await fetch('/admin/api/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email, password })
-        });
+      useEffect(() => {
+        // Check for existing session
+        const savedToken = localStorage.getItem('adminToken');
+        const savedAdmin = localStorage.getItem('adminUser');
         
-        const data = await response.json();
-        
-        if (response.ok) {
-          localStorage.setItem('adminToken', data.token);
-          localStorage.setItem('adminUser', JSON.stringify(data.admin));
-          showDashboard(data.admin);
-        } else {
-          showError(data.message || 'Login failed');
+        if (savedToken && savedAdmin) {
+          setToken(savedToken);
+          setAdmin(JSON.parse(savedAdmin));
+          setIsAuthenticated(true);
         }
-      } catch (err) {
-        showError('Network error. Please try again.');
-      } finally {
-        loginBtn.textContent = 'Login';
-        loginBtn.disabled = false;
-      }
-    });
-    
-    // Logout handler
-    document.getElementById('logout-btn').addEventListener('click', async function() {
-      const token = localStorage.getItem('adminToken');
-      
-      try {
-        await fetch('/admin/api/logout', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-      } catch (err) {
-        console.error('Logout error:', err);
-      }
-      
-      localStorage.removeItem('adminToken');
-      localStorage.removeItem('adminUser');
-      showLogin();
-    });
-    
-    // Tab switching
-    document.querySelectorAll('.nav-tab').forEach(tab => {
-      tab.addEventListener('click', function() {
-        const tabName = this.dataset.tab;
-        switchTab(tabName);
-      });
-    });
-    
-    // Helper functions
-    function showLogin() {
-      document.getElementById('login-screen').classList.remove('hidden');
-      document.getElementById('dashboard-screen').classList.add('hidden');
-      document.getElementById('loading-screen').classList.add('hidden');
-    }
-    
-    function showDashboard(admin) {
-      document.getElementById('welcome-text').textContent = `Welcome, ${admin.firstName || 'Admin'}`;
-      document.getElementById('login-screen').classList.add('hidden');
-      document.getElementById('dashboard-screen').classList.remove('hidden');
-      document.getElementById('loading-screen').classList.add('hidden');
-      
-      // Load dashboard statistics
-      loadDashboardStats();
-    }
-    
-    function showError(message) {
-      const errorDiv = document.getElementById('error-message');
-      errorDiv.textContent = message;
-      errorDiv.classList.remove('hidden');
-    }
-    
-    function switchTab(tabName) {
-      // Update active tab
-      document.querySelectorAll('.nav-tab').forEach(tab => {
-        tab.classList.remove('active');
-      });
-      document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-      
-      // Show/hide content
-      document.getElementById('dashboard-content').classList.add('hidden');
-      document.getElementById('orders-content').classList.add('hidden');
-      document.getElementById('users-content').classList.add('hidden');
-      document.getElementById('products-content').classList.add('hidden');
-      document.getElementById('settings-content').classList.add('hidden');
-      document.getElementById(`${tabName}-content`).classList.remove('hidden');
-    }
-    
-    // Load dashboard statistics
-    async function loadDashboardStats() {
-      const token = localStorage.getItem('adminToken');
-      
-      try {
-        const response = await fetch('/admin/api/stats', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
         
-        if (response.ok) {
-          const stats = await response.json();
-          document.getElementById('total-users').textContent = stats.totalUsers || 0;
-          document.getElementById('total-orders').textContent = stats.totalOrders || 0;
-          document.getElementById('total-products').textContent = stats.totalProducts || 0;
-        }
-      } catch (err) {
-        console.error('Error loading dashboard stats:', err);
+        setLoading(false);
+      }, []);
+      
+      const handleLoginSuccess = (token, admin) => {
+        setToken(token);
+        setAdmin(admin);
+        setIsAuthenticated(true);
+      };
+      
+      const handleLogout = () => {
+        // Clear localStorage
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        
+        // Clear state
+        setToken(null);
+        setAdmin(null);
+        setIsAuthenticated(false);
+      };
+      
+      if (loading) {
+        return (
+          <div className="container">
+            <div className="text-center">
+              <div className="loading"></div>
+              <p>Loading...</p>
+            </div>
+          </div>
+        );
       }
+      
+      if (!isAuthenticated) {
+        return <AdminLogin onLoginSuccess={handleLoginSuccess} />;
+      }
+      
+      return <AdminDashboard token={token} admin={admin} onLogout={handleLogout} />;
     }
+    
+    // Render the app
+    const root = ReactDOM.createRoot(document.getElementById('admin-root'));
+    root.render(<AdminApp />);
   </script>
 </body>
 </html>
