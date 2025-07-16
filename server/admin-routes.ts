@@ -8,6 +8,7 @@ import crypto from "crypto";
 import rateLimit from "express-rate-limit";
 import { Request, Response, NextFunction } from "express";
 import { upload, processImages, serveUploads, deleteUploadedFile } from "./upload-middleware";
+import { loadAllDataIntoMemory } from "./routes";
 
 // Rate limiting for admin login attempts
 const adminLoginLimiter = rateLimit({
@@ -888,6 +889,259 @@ export async function registerAdminRoutes(app: Express) {
     } catch (error) {
       console.error("Error deleting category:", error);
       res.status(500).json({ message: "Failed to delete category" });
+    }
+  });
+
+  // Product Bulk Operations
+  app.put("/admin/api/products/bulk/prices", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { productIds, multiplier, fixedPrice } = req.body;
+      
+      if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
+        return res.status(400).json({ message: "Product IDs are required" });
+      }
+      
+      const results = [];
+      for (const productId of productIds) {
+        try {
+          const product = await storage.getProduct(parseInt(productId));
+          if (product) {
+            let newPrice = product.price;
+            if (multiplier) {
+              newPrice = product.price * multiplier;
+            } else if (fixedPrice) {
+              newPrice = fixedPrice;
+            }
+            
+            await storage.updateProduct(parseInt(productId), { price: newPrice });
+            results.push({ id: productId, success: true, newPrice });
+          } else {
+            results.push({ id: productId, success: false, message: "Product not found" });
+          }
+        } catch (error) {
+          results.push({ id: productId, success: false, message: error.message });
+        }
+      }
+      
+      // Refresh memory cache after bulk operations
+      await loadAllDataIntoMemory();
+      
+      res.json({ 
+        message: `Price update completed for ${productIds.length} products`,
+        results
+      });
+    } catch (error) {
+      console.error("Error updating product prices:", error);
+      res.status(500).json({ message: "Failed to update product prices" });
+    }
+  });
+
+  app.put("/admin/api/products/bulk/categories", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { productIds, categoryId } = req.body;
+      
+      if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
+        return res.status(400).json({ message: "Product IDs are required" });
+      }
+      
+      if (!categoryId) {
+        return res.status(400).json({ message: "Category ID is required" });
+      }
+      
+      const results = [];
+      for (const productId of productIds) {
+        try {
+          const product = await storage.getProduct(parseInt(productId));
+          if (product) {
+            await storage.updateProduct(parseInt(productId), { categoryId: parseInt(categoryId) });
+            results.push({ id: productId, success: true });
+          } else {
+            results.push({ id: productId, success: false, message: "Product not found" });
+          }
+        } catch (error) {
+          results.push({ id: productId, success: false, message: error.message });
+        }
+      }
+      
+      // Refresh memory cache after bulk operations
+      await loadAllDataIntoMemory();
+      
+      res.json({ 
+        message: `Category update completed for ${productIds.length} products`,
+        results
+      });
+    } catch (error) {
+      console.error("Error updating product categories:", error);
+      res.status(500).json({ message: "Failed to update product categories" });
+    }
+  });
+
+  app.put("/admin/api/products/bulk/status", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { productIds, status } = req.body;
+      
+      if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
+        return res.status(400).json({ message: "Product IDs are required" });
+      }
+      
+      if (!status) {
+        return res.status(400).json({ message: "Status is required" });
+      }
+      
+      const results = [];
+      for (const productId of productIds) {
+        try {
+          const product = await storage.getProduct(parseInt(productId));
+          if (product) {
+            await storage.updateProduct(parseInt(productId), { status });
+            results.push({ id: productId, success: true });
+          } else {
+            results.push({ id: productId, success: false, message: "Product not found" });
+          }
+        } catch (error) {
+          results.push({ id: productId, success: false, message: error.message });
+        }
+      }
+      
+      // Refresh memory cache after bulk operations
+      await loadAllDataIntoMemory();
+      
+      res.json({ 
+        message: `Status update completed for ${productIds.length} products`,
+        results
+      });
+    } catch (error) {
+      console.error("Error updating product status:", error);
+      res.status(500).json({ message: "Failed to update product status" });
+    }
+  });
+
+  app.put("/admin/api/products/bulk/stock", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { productIds, operation, value } = req.body;
+      
+      if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
+        return res.status(400).json({ message: "Product IDs are required" });
+      }
+      
+      if (!operation || !value) {
+        return res.status(400).json({ message: "Operation and value are required" });
+      }
+      
+      const results = [];
+      for (const productId of productIds) {
+        try {
+          const product = await storage.getProduct(parseInt(productId));
+          if (product) {
+            let newStock = product.stockQuantity || 0;
+            
+            switch (operation) {
+              case 'set':
+                newStock = value;
+                break;
+              case 'add':
+                newStock += value;
+                break;
+              case 'subtract':
+                newStock = Math.max(0, newStock - value);
+                break;
+              default:
+                throw new Error('Invalid operation');
+            }
+            
+            await storage.updateProduct(parseInt(productId), { stockQuantity: newStock });
+            results.push({ id: productId, success: true, newStock });
+          } else {
+            results.push({ id: productId, success: false, message: "Product not found" });
+          }
+        } catch (error) {
+          results.push({ id: productId, success: false, message: error.message });
+        }
+      }
+      
+      // Refresh memory cache after bulk operations
+      await loadAllDataIntoMemory();
+      
+      res.json({ 
+        message: `Stock update completed for ${productIds.length} products`,
+        results
+      });
+    } catch (error) {
+      console.error("Error updating product stock:", error);
+      res.status(500).json({ message: "Failed to update product stock" });
+    }
+  });
+
+  app.put("/admin/api/products/bulk/export", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { productIds } = req.body;
+      
+      if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
+        return res.status(400).json({ message: "Product IDs are required" });
+      }
+      
+      const products = [];
+      for (const productId of productIds) {
+        try {
+          const product = await storage.getProduct(parseInt(productId));
+          if (product) {
+            products.push(product);
+          }
+        } catch (error) {
+          console.error(`Error fetching product ${productId}:`, error);
+        }
+      }
+      
+      // Generate CSV content
+      const csvHeader = "ID,Name,Price,Category,Stock,VAT%,Product Code,NC Code,CPV Code,Description\n";
+      const csvRows = products.map(product => 
+        `${product.id},"${product.name}",${product.price},"${product.category?.name || 'N/A'}",${product.stockQuantity || 0},${product.vatValue || 0},"${product.productCode || ''}","${product.ncCode || ''}","${product.cpvCode || ''}","${product.description || ''}"`
+      ).join('\n');
+      
+      const csvContent = csvHeader + csvRows;
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename="products_export.csv"');
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error exporting products:", error);
+      res.status(500).json({ message: "Failed to export products" });
+    }
+  });
+
+  app.put("/admin/api/products/bulk/delete", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { productIds } = req.body;
+      
+      if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
+        return res.status(400).json({ message: "Product IDs are required" });
+      }
+      
+      const results = [];
+      for (const productId of productIds) {
+        try {
+          const product = await storage.getProduct(parseInt(productId));
+          if (product) {
+            await storage.deleteProduct(parseInt(productId));
+            results.push({ id: productId, success: true });
+          } else {
+            results.push({ id: productId, success: false, message: "Product not found" });
+          }
+        } catch (error) {
+          results.push({ id: productId, success: false, message: error.message });
+        }
+      }
+      
+      // Refresh memory cache after bulk operations
+      await loadAllDataIntoMemory();
+      
+      res.json({ 
+        message: `Delete operation completed for ${productIds.length} products`,
+        results
+      });
+    } catch (error) {
+      console.error("Error deleting products:", error);
+      res.status(500).json({ message: "Failed to delete products" });
     }
   });
 }
