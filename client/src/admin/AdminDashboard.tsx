@@ -141,6 +141,7 @@ export default function AdminDashboard({ token, admin, onLogout }: AdminDashboar
 
   // Filtered products
   const filteredProducts = useMemo(() => {
+    console.log("🔍 Filtering products with:", { searchQuery, categoryFilter, statusFilter, stockFilter, productsCount: products.length });
     let filtered = products.filter((product: any) => {
       // Search filter
       if (searchQuery) {
@@ -216,6 +217,7 @@ export default function AdminDashboard({ token, admin, onLogout }: AdminDashboar
 
   // Filtered orders
   const filteredOrders = useMemo(() => {
+    console.log("🔍 Filtering orders with:", { orderSearchQuery, orderStatusFilter, ordersCount: orders.length });
     let filtered = orders.filter((order: any) => {
       // Search filter
       if (orderSearchQuery) {
@@ -443,8 +445,11 @@ export default function AdminDashboard({ token, admin, onLogout }: AdminDashboar
                   <Button
                     variant="outline"
                     onClick={() => {
-                      setOrderSearchQuery("");
-                      setOrderStatusFilter("all");
+                      // Force a refresh of the filtered results
+                      console.log("Search button clicked - Current filters:", {
+                        orderSearchQuery,
+                        orderStatusFilter
+                      });
                     }}
                   >
                     🔍 Search & Filter
@@ -559,10 +564,13 @@ export default function AdminDashboard({ token, admin, onLogout }: AdminDashboar
                   <Button
                     variant="outline"
                     onClick={() => {
-                      setSearchQuery("");
-                      setCategoryFilter("all");
-                      setStatusFilter("all");
-                      setStockFilter("all");
+                      // Force a refresh of the filtered results
+                      console.log("Search button clicked - Current filters:", {
+                        searchQuery,
+                        categoryFilter,
+                        statusFilter,
+                        stockFilter
+                      });
                     }}
                   >
                     🔍 Search & Filter
