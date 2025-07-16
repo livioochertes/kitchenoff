@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Edit, Trash2, Package, Users, ShoppingCart, DollarSign, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -51,6 +51,9 @@ export default function Admin() {
   const [editingProduct, setEditingProduct] = useState<ProductWithCategory | null>(null);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+  const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
+  const [bulkOperation, setBulkOperation] = useState<string>("");
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -182,6 +185,97 @@ export default function Admin() {
     },
   });
 
+  // Bulk Operations Mutations
+  const bulkUpdatePricesMutation = useMutation({
+    mutationFn: async ({ productIds, multiplier, fixedPrice }: { productIds: number[]; multiplier?: number; fixedPrice?: string }) => {
+      const token = localStorage.getItem("admin_token");
+      return await apiRequest("PUT", "/admin/api/products/bulk/prices", { productIds, multiplier, fixedPrice }, {
+        Authorization: `Bearer ${token}`,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      setSelectedProducts([]);
+      setBulkDialogOpen(false);
+      toast({ title: "Prices updated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update prices", variant: "destructive" });
+    },
+  });
+
+  const bulkUpdateCategoriesMutation = useMutation({
+    mutationFn: async ({ productIds, categoryId }: { productIds: number[]; categoryId: number }) => {
+      const token = localStorage.getItem("admin_token");
+      return await apiRequest("PUT", "/admin/api/products/bulk/categories", { productIds, categoryId }, {
+        Authorization: `Bearer ${token}`,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      setSelectedProducts([]);
+      setBulkDialogOpen(false);
+      toast({ title: "Categories updated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update categories", variant: "destructive" });
+    },
+  });
+
+  const bulkUpdateStatusMutation = useMutation({
+    mutationFn: async ({ productIds, status }: { productIds: number[]; status: string }) => {
+      const token = localStorage.getItem("admin_token");
+      return await apiRequest("PUT", "/admin/api/products/bulk/status", { productIds, status }, {
+        Authorization: `Bearer ${token}`,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      setSelectedProducts([]);
+      setBulkDialogOpen(false);
+      toast({ title: "Status updated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update status", variant: "destructive" });
+    },
+  });
+
+  const bulkUpdateStockMutation = useMutation({
+    mutationFn: async ({ productIds, operation, value }: { productIds: number[]; operation: string; value: number }) => {
+      const token = localStorage.getItem("admin_token");
+      return await apiRequest("PUT", "/admin/api/products/bulk/stock", { productIds, operation, value }, {
+        Authorization: `Bearer ${token}`,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      setSelectedProducts([]);
+      setBulkDialogOpen(false);
+      toast({ title: "Stock updated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update stock", variant: "destructive" });
+    },
+  });
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async ({ productIds }: { productIds: number[] }) => {
+      const token = localStorage.getItem("admin_token");
+      return await apiRequest("PUT", "/admin/api/products/bulk/delete", { productIds }, {
+        Authorization: `Bearer ${token}`,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      setSelectedProducts([]);
+      setBulkDialogOpen(false);
+      toast({ title: "Products deleted successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to delete products", variant: "destructive" });
+    },
+  });
+
   // Handlers
   const handleEditProduct = (product: ProductWithCategory) => {
     setEditingProduct(product);
@@ -220,6 +314,72 @@ export default function Admin() {
 
   const handleUpdateOrderStatus = (orderId: number, status: string) => {
     updateOrderStatusMutation.mutate({ id: orderId, status });
+  };
+
+  // Bulk Operations Handlers
+  const handleSelectProduct = (productId: number) => {
+    setSelectedProducts(prev => 
+      prev.includes(productId) 
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  const handleSelectAllProducts = () => {
+    if (selectedProducts.length === filteredProducts.length) {
+      setSelectedProducts([]);
+    } else {
+      setSelectedProducts(filteredProducts.map(p => p.id));
+    }
+  };
+
+  const handleBulkOperation = (operation: string) => {
+    if (selectedProducts.length === 0) {
+      toast({ title: "No products selected", variant: "destructive" });
+      return;
+    }
+    setBulkOperation(operation);
+    setBulkDialogOpen(true);
+  };
+
+  const handleBulkSubmit = (formData: any) => {
+    const productIds = selectedProducts;
+    
+    switch (bulkOperation) {
+      case 'prices':
+        bulkUpdatePricesMutation.mutate({ 
+          productIds, 
+          multiplier: formData.multiplier, 
+          fixedPrice: formData.fixedPrice 
+        });
+        break;
+      case 'categories':
+        bulkUpdateCategoriesMutation.mutate({ 
+          productIds, 
+          categoryId: formData.categoryId 
+        });
+        break;
+      case 'status':
+        bulkUpdateStatusMutation.mutate({ 
+          productIds, 
+          status: formData.status 
+        });
+        break;
+      case 'stock':
+        bulkUpdateStockMutation.mutate({ 
+          productIds, 
+          operation: formData.operation, 
+          value: formData.value 
+        });
+        break;
+      case 'delete':
+        if (confirm(`Are you sure you want to delete ${productIds.length} products?`)) {
+          bulkDeleteMutation.mutate({ productIds });
+        }
+        break;
+      default:
+        toast({ title: "Unknown operation", variant: "destructive" });
+    }
   };
 
   // Statistics
@@ -556,11 +716,82 @@ export default function Admin() {
               </Dialog>
             </div>
 
+            {/* Bulk Operations */}
+            {selectedProducts.length > 0 && (
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                      {selectedProducts.length} product{selectedProducts.length > 1 ? 's' : ''} selected
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedProducts([])}
+                      className="text-blue-600 border-blue-300 hover:bg-blue-100"
+                    >
+                      Clear Selection
+                    </Button>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleBulkOperation('prices')}
+                      className="text-green-600 border-green-300 hover:bg-green-100"
+                    >
+                      Update Prices
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleBulkOperation('categories')}
+                      className="text-purple-600 border-purple-300 hover:bg-purple-100"
+                    >
+                      Change Category
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleBulkOperation('status')}
+                      className="text-yellow-600 border-yellow-300 hover:bg-yellow-100"
+                    >
+                      Update Status
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleBulkOperation('stock')}
+                      className="text-blue-600 border-blue-300 hover:bg-blue-100"
+                    >
+                      Update Stock
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleBulkOperation('delete')}
+                      className="text-red-600 border-red-300 hover:bg-red-100"
+                    >
+                      Delete Selected
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <Card>
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-12">
+                        <input
+                          type="checkbox"
+                          checked={selectedProducts.length === filteredProducts.length && filteredProducts.length > 0}
+                          onChange={handleSelectAllProducts}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                      </TableHead>
                       <TableHead>Product</TableHead>
                       <TableHead>Category</TableHead>
                       <TableHead>Price</TableHead>
@@ -572,6 +803,14 @@ export default function Admin() {
                   <TableBody>
                     {filteredProducts.map((product) => (
                       <TableRow key={product.id}>
+                        <TableCell>
+                          <input
+                            type="checkbox"
+                            checked={selectedProducts.includes(product.id)}
+                            onChange={() => handleSelectProduct(product.id)}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                        </TableCell>
                         <TableCell>
                           <div className="flex items-center space-x-3">
                             <img
@@ -799,7 +1038,176 @@ export default function Admin() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Bulk Operations Dialog */}
+        <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Bulk Operations</DialogTitle>
+            </DialogHeader>
+            <BulkOperationsForm
+              operation={bulkOperation}
+              onSubmit={handleBulkSubmit}
+              onCancel={() => setBulkDialogOpen(false)}
+              categories={categories}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
+  );
+}
+
+// Bulk Operations Form Component
+function BulkOperationsForm({ operation, onSubmit, onCancel, categories }: {
+  operation: string;
+  onSubmit: (data: any) => void;
+  onCancel: () => void;
+  categories: Category[];
+}) {
+  const [formData, setFormData] = useState<any>({});
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
+  const renderForm = () => {
+    switch (operation) {
+      case 'prices':
+        return (
+          <>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Price Update Method</label>
+                <select
+                  className="w-full mt-1 p-2 border rounded-md"
+                  value={formData.method || 'multiplier'}
+                  onChange={(e) => setFormData({...formData, method: e.target.value})}
+                >
+                  <option value="multiplier">Multiply by factor</option>
+                  <option value="fixed">Set fixed price</option>
+                </select>
+              </div>
+              {formData.method === 'multiplier' ? (
+                <div>
+                  <label className="text-sm font-medium">Multiplier</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    className="w-full mt-1 p-2 border rounded-md"
+                    value={formData.multiplier || ''}
+                    onChange={(e) => setFormData({...formData, multiplier: parseFloat(e.target.value)})}
+                    placeholder="e.g., 1.1 for 10% increase"
+                  />
+                </div>
+              ) : (
+                <div>
+                  <label className="text-sm font-medium">Fixed Price</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    className="w-full mt-1 p-2 border rounded-md"
+                    value={formData.fixedPrice || ''}
+                    onChange={(e) => setFormData({...formData, fixedPrice: e.target.value})}
+                    placeholder="e.g., 29.99"
+                  />
+                </div>
+              )}
+            </div>
+          </>
+        );
+      case 'categories':
+        return (
+          <div>
+            <label className="text-sm font-medium">Select Category</label>
+            <select
+              className="w-full mt-1 p-2 border rounded-md"
+              value={formData.categoryId || ''}
+              onChange={(e) => setFormData({...formData, categoryId: parseInt(e.target.value)})}
+            >
+              <option value="">Choose a category</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+      case 'status':
+        return (
+          <div>
+            <label className="text-sm font-medium">Stock Status</label>
+            <select
+              className="w-full mt-1 p-2 border rounded-md"
+              value={formData.status || ''}
+              onChange={(e) => setFormData({...formData, status: e.target.value})}
+            >
+              <option value="">Choose status</option>
+              <option value="in_stock">In Stock</option>
+              <option value="out_of_stock">Out of Stock</option>
+              <option value="discontinued">Discontinued</option>
+            </select>
+          </div>
+        );
+      case 'stock':
+        return (
+          <>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Stock Operation</label>
+                <select
+                  className="w-full mt-1 p-2 border rounded-md"
+                  value={formData.operation || ''}
+                  onChange={(e) => setFormData({...formData, operation: e.target.value})}
+                >
+                  <option value="">Choose operation</option>
+                  <option value="add">Add to current stock</option>
+                  <option value="subtract">Subtract from current stock</option>
+                  <option value="set">Set exact stock amount</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Value</label>
+                <input
+                  type="number"
+                  min="0"
+                  className="w-full mt-1 p-2 border rounded-md"
+                  value={formData.value || ''}
+                  onChange={(e) => setFormData({...formData, value: parseInt(e.target.value)})}
+                  placeholder="Enter quantity"
+                />
+              </div>
+            </div>
+          </>
+        );
+      case 'delete':
+        return (
+          <div className="text-center py-4">
+            <p className="text-red-600 font-medium">Are you sure you want to delete the selected products?</p>
+            <p className="text-sm text-gray-600 mt-2">This action cannot be undone.</p>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {renderForm()}
+      <div className="flex justify-end space-x-2 pt-4">
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          className={operation === 'delete' ? 'bg-red-600 hover:bg-red-700' : 'kitchen-pro-secondary'}
+        >
+          {operation === 'delete' ? 'Delete Products' : 'Apply Changes'}
+        </Button>
+      </div>
+    </form>
   );
 }
