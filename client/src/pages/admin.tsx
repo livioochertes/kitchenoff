@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Edit, Trash2, Package, Users, ShoppingCart, DollarSign, Search, Filter } from "lucide-react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/header";
 import type { Category, ProductWithCategory, OrderWithItems } from "@shared/schema";
 
@@ -61,6 +63,32 @@ export default function Admin() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { user, isLoading: userLoading } = useAuth();
+  const [, navigate] = useLocation();
+
+  // Check if user is admin
+  useEffect(() => {
+    if (!userLoading && (!user || !user.isAdmin)) {
+      navigate("/login?redirect=/admin");
+    }
+  }, [user, userLoading, navigate]);
+
+  // Show loading while checking auth
+  if (userLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not admin
+  if (!user || !user.isAdmin) {
+    return null;
+  }
 
   // Queries
   const { data: products = [], isLoading: productsLoading } = useQuery<ProductWithCategory[]>({
