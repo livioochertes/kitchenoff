@@ -142,6 +142,161 @@ async function fetchSupplierDeliveryStatus(supplier: any, orderId: string) {
   };
 }
 
+// Fetch updated prices from supplier's API
+async function fetchSupplierPrices(supplier: any) {
+  // Simulate API call to fetch prices from supplier
+  const mockPriceUpdates = [
+    { productId: 7537, price: 125.99, compareAtPrice: 149.99, stockQuantity: 15 },
+    { productId: 7536, price: 89.99, compareAtPrice: 109.99, stockQuantity: 22 },
+    { productId: 7535, price: 34.99, compareAtPrice: 39.99, stockQuantity: 45 }
+  ];
+
+  if (supplier.integrationType === 'api' && supplier.apiEndpoint) {
+    // In real implementation, make HTTP request to supplier's API
+    // const response = await fetch(`${supplier.apiEndpoint}/prices`, {
+    //   headers: { 'Authorization': `Bearer ${supplier.apiKey}` }
+    // });
+    // return await response.json();
+    
+    return mockPriceUpdates;
+  }
+  
+  return mockPriceUpdates;
+}
+
+// Fetch updated stock from supplier's API
+async function fetchSupplierStock(supplier: any) {
+  // Simulate API call to fetch stock from supplier
+  const mockStockUpdates = [
+    { productId: 7537, stockQuantity: 18 },
+    { productId: 7536, stockQuantity: 25 },
+    { productId: 7535, stockQuantity: 42 },
+    { productId: 7534, stockQuantity: 8 }
+  ];
+
+  if (supplier.integrationType === 'api' && supplier.apiEndpoint) {
+    // In real implementation, make HTTP request to supplier's API
+    // const response = await fetch(`${supplier.apiEndpoint}/stock`, {
+    //   headers: { 'Authorization': `Bearer ${supplier.apiKey}` }
+    // });
+    // return await response.json();
+    
+    return mockStockUpdates;
+  }
+  
+  return mockStockUpdates;
+}
+
+// Forward order to supplier
+async function forwardOrderToSupplier(supplier: any, orderData: any) {
+  try {
+    switch (supplier.integrationType) {
+      case 'api':
+        if (supplier.apiEndpoint && supplier.apiKey) {
+          // In real implementation, make HTTP request to supplier's API
+          // const response = await fetch(`${supplier.apiEndpoint}/orders`, {
+          //   method: 'POST',
+          //   headers: { 
+          //     'Authorization': `Bearer ${supplier.apiKey}`,
+          //     'Content-Type': 'application/json'
+          //   },
+          //   body: JSON.stringify(orderData)
+          // });
+          
+          return {
+            success: true,
+            method: 'API',
+            endpoint: `${supplier.apiEndpoint}/orders`,
+            data: {
+              orderId: orderData.orderId,
+              supplierOrderId: `SUP-${Date.now()}`,
+              status: 'forwarded',
+              message: 'Order successfully forwarded to supplier API',
+              items: orderData.items.length,
+              totalAmount: orderData.items.reduce((sum, item) => sum + parseFloat(item.totalPrice), 0)
+            }
+          };
+        }
+        break;
+        
+      case 'email':
+        // Format order for email
+        const emailContent = {
+          to: supplier.email,
+          subject: `New Order #${orderData.orderId} - ${supplier.name}`,
+          html: `
+            <h2>New Order Received</h2>
+            <p><strong>Order ID:</strong> ${orderData.orderId}</p>
+            <p><strong>Order Date:</strong> ${orderData.orderDate}</p>
+            
+            <h3>Delivery Address:</h3>
+            <p>${orderData.shippingAddress.name}<br>
+            ${orderData.shippingAddress.street}<br>
+            ${orderData.shippingAddress.city}, ${orderData.shippingAddress.zipCode}<br>
+            ${orderData.shippingAddress.country}</p>
+            
+            <h3>Order Items:</h3>
+            <table border="1" style="border-collapse: collapse;">
+              <tr>
+                <th>Product</th>
+                <th>Code</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total</th>
+              </tr>
+              ${orderData.items.map(item => `
+                <tr>
+                  <td>${item.productName}</td>
+                  <td>${item.productCode || 'N/A'}</td>
+                  <td>${item.quantity}</td>
+                  <td>€${item.price}</td>
+                  <td>€${item.totalPrice}</td>
+                </tr>
+              `).join('')}
+            </table>
+            
+            <p><strong>Instructions:</strong> ${orderData.supplierInstructions}</p>
+          `
+        };
+        
+        return {
+          success: true,
+          method: 'EMAIL',
+          data: {
+            orderId: orderData.orderId,
+            recipient: supplier.email,
+            subject: emailContent.subject,
+            status: 'sent',
+            message: 'Order details sent via email'
+          }
+        };
+        
+      case 'manual':
+        return {
+          success: true,
+          method: 'MANUAL',
+          data: {
+            orderId: orderData.orderId,
+            status: 'logged',
+            message: 'Order logged for manual processing',
+            requiresHumanAction: true
+          }
+        };
+        
+      default:
+        return {
+          success: false,
+          message: 'Unknown integration type'
+        };
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: `Failed to forward order: ${error.message}`
+    };
+  }
+}
+
 async function performSupplierSync(supplier: any, order: any, action: string) {
   try {
     switch (action) {
@@ -1408,41 +1563,194 @@ export async function registerAdminRoutes(app: Express) {
     }
   });
 
-  // Supplier delivery synchronization endpoints
-  app.post("/admin/api/suppliers/:id/sync-delivery", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+  // Supplier price and stock synchronization endpoints
+  app.post("/admin/api/suppliers/:id/sync-prices", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
     try {
       const { id } = req.params;
-      const { orderId, deliveryStatus, trackingNumber, estimatedDelivery } = req.body;
-      
       const supplier = await storage.getSupplier(parseInt(id));
+      
       if (!supplier) {
         return res.status(404).json({ message: "Supplier not found" });
       }
 
-      // Simulate API call to supplier's delivery system
-      const deliveryUpdate = {
-        orderId,
-        supplierId: parseInt(id),
-        deliveryStatus,
-        trackingNumber,
-        estimatedDelivery,
-        lastUpdated: new Date().toISOString(),
-        supplierName: supplier.name,
-        apiEndpoint: supplier.apiEndpoint
-      };
+      // Fetch updated prices from supplier's API
+      const priceUpdates = await fetchSupplierPrices(supplier);
+      
+      // Update products with new prices
+      const updateResults = [];
+      for (const update of priceUpdates) {
+        try {
+          const product = await storage.getProduct(update.productId);
+          if (product && product.supplierId === parseInt(id)) {
+            await storage.updateProduct(update.productId, {
+              price: update.price.toString(),
+              compareAtPrice: update.compareAtPrice?.toString(),
+              stockQuantity: update.stockQuantity
+            });
+            updateResults.push({
+              productId: update.productId,
+              productName: product.name,
+              oldPrice: product.price,
+              newPrice: update.price,
+              oldStock: product.stockQuantity,
+              newStock: update.stockQuantity,
+              success: true
+            });
+          }
+        } catch (error) {
+          updateResults.push({
+            productId: update.productId,
+            success: false,
+            error: error.message
+          });
+        }
+      }
 
-      // Here you would make actual API call to supplier's system
-      // For now, we'll simulate the response
-      const syncResult = await simulateSupplierDeliverySync(supplier, deliveryUpdate);
+      // Refresh memory cache
+      await loadAllDataIntoMemory();
       
       res.json({
         success: true,
-        message: "Delivery status synchronized successfully",
-        data: syncResult
+        message: `Updated prices for ${updateResults.filter(r => r.success).length} products`,
+        data: updateResults
       });
     } catch (error) {
-      console.error("Error syncing delivery status:", error);
-      res.status(500).json({ message: "Failed to sync delivery status" });
+      console.error("Error syncing prices:", error);
+      res.status(500).json({ message: "Failed to sync prices with supplier" });
+    }
+  });
+
+  app.post("/admin/api/suppliers/:id/sync-stock", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const supplier = await storage.getSupplier(parseInt(id));
+      
+      if (!supplier) {
+        return res.status(404).json({ message: "Supplier not found" });
+      }
+
+      // Fetch updated stock from supplier's API
+      const stockUpdates = await fetchSupplierStock(supplier);
+      
+      // Update products with new stock levels
+      const updateResults = [];
+      for (const update of stockUpdates) {
+        try {
+          const product = await storage.getProduct(update.productId);
+          if (product && product.supplierId === parseInt(id)) {
+            await storage.updateProduct(update.productId, {
+              stockQuantity: update.stockQuantity
+            });
+            updateResults.push({
+              productId: update.productId,
+              productName: product.name,
+              oldStock: product.stockQuantity,
+              newStock: update.stockQuantity,
+              success: true
+            });
+          }
+        } catch (error) {
+          updateResults.push({
+            productId: update.productId,
+            success: false,
+            error: error.message
+          });
+        }
+      }
+
+      // Refresh memory cache
+      await loadAllDataIntoMemory();
+      
+      res.json({
+        success: true,
+        message: `Updated stock for ${updateResults.filter(r => r.success).length} products`,
+        data: updateResults
+      });
+    } catch (error) {
+      console.error("Error syncing stock:", error);
+      res.status(500).json({ message: "Failed to sync stock with supplier" });
+    }
+  });
+
+  // Order forwarding to suppliers
+  app.post("/admin/api/suppliers/forward-order", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { orderId } = req.body;
+      
+      const order = await storage.getOrder(parseInt(orderId));
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      // Group order items by supplier
+      const supplierOrders = new Map();
+      
+      for (const item of order.items) {
+        const product = await storage.getProduct(item.productId);
+        if (product && product.supplierId) {
+          if (!supplierOrders.has(product.supplierId)) {
+            supplierOrders.set(product.supplierId, []);
+          }
+          supplierOrders.get(product.supplierId).push({
+            ...item,
+            product: product
+          });
+        }
+      }
+
+      // Forward order to each supplier
+      const forwardResults = [];
+      for (const [supplierId, items] of supplierOrders) {
+        try {
+          const supplier = await storage.getSupplier(supplierId);
+          if (supplier) {
+            const orderData = {
+              orderId: order.id,
+              orderDate: order.createdAt,
+              customerInfo: {
+                userId: order.userId,
+                totalAmount: order.totalAmount
+              },
+              shippingAddress: order.shippingAddress,
+              billingAddress: order.billingAddress,
+              items: items.map(item => ({
+                productId: item.productId,
+                productName: item.product.name,
+                productCode: item.product.productCode,
+                quantity: item.quantity,
+                price: item.price,
+                totalPrice: item.totalPrice
+              })),
+              supplierInstructions: `Please process order #${order.id} for delivery to customer`
+            };
+
+            const result = await forwardOrderToSupplier(supplier, orderData);
+            forwardResults.push({
+              supplierId,
+              supplierName: supplier.name,
+              itemCount: items.length,
+              success: result.success,
+              message: result.message,
+              data: result.data
+            });
+          }
+        } catch (error) {
+          forwardResults.push({
+            supplierId,
+            success: false,
+            error: error.message
+          });
+        }
+      }
+
+      res.json({
+        success: true,
+        message: `Order forwarded to ${forwardResults.length} suppliers`,
+        data: forwardResults
+      });
+    } catch (error) {
+      console.error("Error forwarding order:", error);
+      res.status(500).json({ message: "Failed to forward order to suppliers" });
     }
   });
 

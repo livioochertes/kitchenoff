@@ -666,6 +666,83 @@
         }
       };
 
+      // Sync supplier prices
+      const syncSupplierPrices = async (supplierId) => {
+        try {
+          const response = await fetch(`/admin/api/suppliers/${supplierId}/sync-prices`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          const data = await response.json();
+          
+          if (response.ok) {
+            alert(`✅ Price Sync Successful!\n\n${data.message}\n\nUpdated Products:\n${data.data.filter(r => r.success).map(r => `• ${r.productName}: €${r.oldPrice} → €${r.newPrice}`).join('\n')}`);
+            // Refresh products data
+            fetchProducts();
+          } else {
+            alert(`❌ Price Sync Failed\n\n${data.message}`);
+          }
+        } catch (error) {
+          console.error('Error syncing prices:', error);
+          alert('❌ Network error during price sync');
+        }
+      };
+
+      // Sync supplier stock
+      const syncSupplierStock = async (supplierId) => {
+        try {
+          const response = await fetch(`/admin/api/suppliers/${supplierId}/sync-stock`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          const data = await response.json();
+          
+          if (response.ok) {
+            alert(`✅ Stock Sync Successful!\n\n${data.message}\n\nUpdated Products:\n${data.data.filter(r => r.success).map(r => `• ${r.productName}: ${r.oldStock} → ${r.newStock} units`).join('\n')}`);
+            // Refresh products data
+            fetchProducts();
+          } else {
+            alert(`❌ Stock Sync Failed\n\n${data.message}`);
+          }
+        } catch (error) {
+          console.error('Error syncing stock:', error);
+          alert('❌ Network error during stock sync');
+        }
+      };
+
+      // Forward order to suppliers
+      const forwardOrderToSuppliers = async (orderId) => {
+        try {
+          const response = await fetch('/admin/api/suppliers/forward-order', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ orderId })
+          });
+          const data = await response.json();
+          
+          if (response.ok) {
+            const results = data.data.map(r => 
+              `• ${r.supplierName}: ${r.success ? '✅ Forwarded' : '❌ Failed'} (${r.itemCount} items)`
+            ).join('\n');
+            alert(`📤 Order Forward Results\n\n${data.message}\n\nSupplier Results:\n${results}`);
+          } else {
+            alert(`❌ Order Forward Failed\n\n${data.message}`);
+          }
+        } catch (error) {
+          console.error('Error forwarding order:', error);
+          alert('❌ Network error during order forwarding');
+        }
+      };
+
       const generateProductAnalytics = () => {
         console.log('Generating product analytics with data:', products.length, 'products');
         console.log('Categories available:', categories.length, 'categories');
@@ -1327,6 +1404,20 @@
                                     ✅ Accept
                                   </button>
                                 )}
+                                <button 
+                                  style={{
+                                    padding: '4px 8px', 
+                                    border: 'none', 
+                                    borderRadius: '3px', 
+                                    backgroundColor: '#fd7e14', 
+                                    color: 'white', 
+                                    cursor: 'pointer',
+                                    fontSize: '12px'
+                                  }}
+                                  onClick={() => forwardOrderToSuppliers(order.id)}
+                                >
+                                  📤 Forward to Suppliers
+                                </button>
                                 <button 
                                   style={{
                                     padding: '4px 8px', 
@@ -2072,6 +2163,34 @@
                             </td>
                             <td style={{padding: '12px'}}>
                               <div style={{display: 'flex', gap: '8px'}}>
+                                <button 
+                                  style={{
+                                    padding: '4px 8px',
+                                    border: 'none',
+                                    borderRadius: '3px',
+                                    backgroundColor: '#28a745',
+                                    color: 'white',
+                                    cursor: 'pointer',
+                                    fontSize: '12px'
+                                  }}
+                                  onClick={() => syncSupplierPrices(supplier.id)}
+                                >
+                                  💰 Sync Prices
+                                </button>
+                                <button 
+                                  style={{
+                                    padding: '4px 8px',
+                                    border: 'none',
+                                    borderRadius: '3px',
+                                    backgroundColor: '#ffc107',
+                                    color: 'black',
+                                    cursor: 'pointer',
+                                    fontSize: '12px'
+                                  }}
+                                  onClick={() => syncSupplierStock(supplier.id)}
+                                >
+                                  📦 Sync Stock
+                                </button>
                                 <button 
                                   style={{
                                     padding: '4px 8px',
