@@ -7,6 +7,7 @@ import QRCode from "qrcode";
 import crypto from "crypto";
 import rateLimit from "express-rate-limit";
 import { Request, Response, NextFunction } from "express";
+import { upload, processImages, serveUploads, deleteUploadedFile } from "./upload-middleware";
 
 // Rate limiting for admin login attempts
 const adminLoginLimiter = rateLimit({
@@ -65,6 +66,50 @@ function generateBackupCodes(): string[] {
 }
 
 export async function registerAdminRoutes(app: Express) {
+  // Serve uploaded files
+  app.get("/uploads/products/:filename", serveUploads);
+
+  // Image upload endpoint
+  app.post("/admin/api/upload-images", authenticateAdmin, upload.array('images', 10), processImages, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      if (!req.processedFiles || req.processedFiles.length === 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "No files uploaded" 
+        });
+      }
+
+      res.json({
+        success: true,
+        message: `${req.processedFiles.length} image(s) uploaded successfully`,
+        files: req.processedFiles
+      });
+    } catch (error) {
+      console.error("Upload error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Error uploading images" 
+      });
+    }
+  });
+
+  // Delete image endpoint
+  app.delete("/admin/api/delete-image/:filename", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { filename } = req.params;
+      const deleted = await deleteUploadedFile(filename);
+      
+      if (deleted) {
+        res.json({ success: true, message: "Image deleted successfully" });
+      } else {
+        res.status(404).json({ success: false, message: "Image not found" });
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      res.status(500).json({ success: false, message: "Error deleting image" });
+    }
+  });
+
   // Admin login endpoint
   app.post("/admin/api/login", adminLoginLimiter, async (req: Request, res: Response) => {
     try {

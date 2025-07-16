@@ -1660,8 +1660,78 @@
           vatValue: '',
           productCode: '',
           ncCode: '',
-          cpvCode: ''
+          cpvCode: '',
+          images: []
         });
+
+        const [uploadedImages, setUploadedImages] = useState([]);
+        const [uploading, setUploading] = useState(false);
+
+        // Image upload function
+        const uploadImages = async (files) => {
+          setUploading(true);
+          const formData = new FormData();
+          
+          Array.from(files).forEach(file => {
+            formData.append('images', file);
+          });
+
+          try {
+            const response = await fetch('/admin/api/upload-images', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+              },
+              body: formData
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+              setUploadedImages(prev => [...prev, ...result.files]);
+              setProductFormData(prev => ({
+                ...prev,
+                images: [...prev.images, ...result.files]
+              }));
+              alert(`${result.files.length} image(s) uploaded successfully`);
+            } else {
+              alert('Error: ' + result.message);
+            }
+          } catch (error) {
+            console.error('Upload error:', error);
+            alert('Error uploading images');
+          } finally {
+            setUploading(false);
+          }
+        };
+
+        // Delete image function
+        const deleteImage = async (filename, index) => {
+          try {
+            const response = await fetch(`/admin/api/delete-image/${filename}`, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+              }
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+              setUploadedImages(prev => prev.filter((_, i) => i !== index));
+              setProductFormData(prev => ({
+                ...prev,
+                images: prev.images.filter((_, i) => i !== index)
+              }));
+              alert('Image deleted successfully');
+            } else {
+              alert('Error: ' + result.message);
+            }
+          } catch (error) {
+            console.error('Delete error:', error);
+            alert('Error deleting image');
+          }
+        };
         
         const handleUserSubmit = async (e) => {
           e.preventDefault();
@@ -1709,8 +1779,10 @@
               vatValue: '',
               productCode: '',
               ncCode: '',
-              cpvCode: ''
+              cpvCode: '',
+              images: []
             });
+            setUploadedImages([]);
           } else {
             alert('Error: ' + result.message);
           }
@@ -1744,8 +1816,10 @@
               vatValue: editingProduct.vatValue || '',
               productCode: editingProduct.productCode || '',
               ncCode: editingProduct.ncCode || '',
-              cpvCode: editingProduct.cpvCode || ''
+              cpvCode: editingProduct.cpvCode || '',
+              images: editingProduct.images || []
             });
+            setUploadedImages(editingProduct.images || []);
             setShowAddProductModal(true);
           }
         }, [editingProduct]);
@@ -1938,13 +2012,125 @@
                       </select>
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Image URL</label>
+                      <label className="form-label">Image URL (Legacy - Optional)</label>
                       <input
                         type="url"
                         className="form-input"
                         value={productFormData.imageUrl}
                         onChange={(e) => setProductFormData({...productFormData, imageUrl: e.target.value})}
+                        placeholder="https://example.com/image.jpg"
                       />
+                    </div>
+                    
+                    <div className="form-group">
+                      <label className="form-label">Product Images</label>
+                      <div style={{
+                        border: '2px dashed #ddd',
+                        borderRadius: '8px',
+                        padding: '20px',
+                        textAlign: 'center',
+                        backgroundColor: '#f9f9f9',
+                        marginBottom: '15px'
+                      }}>
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files.length > 0) {
+                              uploadImages(e.target.files);
+                            }
+                          }}
+                          style={{display: 'none'}}
+                          id="image-upload"
+                        />
+                        <label
+                          htmlFor="image-upload"
+                          style={{
+                            cursor: 'pointer',
+                            color: '#007bff',
+                            textDecoration: 'underline'
+                          }}
+                        >
+                          {uploading ? 'Uploading...' : 'Click to upload images or drag and drop'}
+                        </label>
+                        <p style={{color: '#666', fontSize: '14px', marginTop: '10px'}}>
+                          Maximum 10 images, 5MB each. Supported formats: JPG, PNG, GIF, WebP
+                        </p>
+                      </div>
+                      
+                      {uploadedImages.length > 0 && (
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+                          gap: '10px',
+                          marginTop: '15px'
+                        }}>
+                          {uploadedImages.map((image, index) => (
+                            <div key={index} style={{
+                              position: 'relative',
+                              border: '1px solid #ddd',
+                              borderRadius: '8px',
+                              overflow: 'hidden',
+                              backgroundColor: '#fff'
+                            }}>
+                              <img
+                                src={image.thumbnailUrl || image.url}
+                                alt={`Product image ${index + 1}`}
+                                style={{
+                                  width: '100%',
+                                  height: '100px',
+                                  objectFit: 'cover',
+                                  display: 'block'
+                                }}
+                              />
+                              <div style={{
+                                position: 'absolute',
+                                top: '5px',
+                                right: '5px',
+                                display: 'flex',
+                                gap: '5px'
+                              }}>
+                                {index === 0 && (
+                                  <span style={{
+                                    backgroundColor: '#28a745',
+                                    color: 'white',
+                                    padding: '2px 6px',
+                                    borderRadius: '3px',
+                                    fontSize: '10px',
+                                    fontWeight: 'bold'
+                                  }}>
+                                    MAIN
+                                  </span>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => deleteImage(image.filename, index)}
+                                  style={{
+                                    backgroundColor: '#dc3545',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '3px',
+                                    padding: '2px 6px',
+                                    fontSize: '10px',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  ×
+                                </button>
+                              </div>
+                              <div style={{
+                                padding: '5px',
+                                fontSize: '11px',
+                                color: '#666',
+                                textAlign: 'center'
+                              }}>
+                                {image.originalName}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className="form-group">
                       <label className="form-label">Stock Quantity</label>
@@ -2033,8 +2219,10 @@
                             vatValue: '',
                             productCode: '',
                             ncCode: '',
-                            cpvCode: ''
+                            cpvCode: '',
+                            images: []
                           });
+                          setUploadedImages([]);
                         }}
                       >
                         Cancel
