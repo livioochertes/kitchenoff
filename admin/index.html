@@ -480,6 +480,11 @@
       const [selectedProducts, setSelectedProducts] = useState([]);
       const [showProductBulkModal, setShowProductBulkModal] = useState(false);
       const [productBulkOperation, setProductBulkOperation] = useState('');
+      const [showProductSearchFilter, setShowProductSearchFilter] = useState(false);
+      const [productSearchTerm, setProductSearchTerm] = useState('');
+      const [productCategoryFilter, setProductCategoryFilter] = useState('all');
+      const [productStatusFilter, setProductStatusFilter] = useState('all');
+      const [filteredProducts, setFilteredProducts] = useState([]);
       
       useEffect(() => {
         fetchStats();
@@ -504,6 +509,37 @@
         
         setFilteredOrders(filtered);
       }, [orders, searchTerm, statusFilter]);
+      
+      // Filter products based on search and filters
+      useEffect(() => {
+        let filtered = products;
+        
+        if (productSearchTerm) {
+          filtered = filtered.filter(product => 
+            product.name.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
+            product.id.toString().includes(productSearchTerm) ||
+            product.category?.name?.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
+            product.description?.toLowerCase().includes(productSearchTerm.toLowerCase())
+          );
+        }
+        
+        if (productCategoryFilter !== 'all') {
+          filtered = filtered.filter(product => product.categoryId === parseInt(productCategoryFilter));
+        }
+        
+        if (productStatusFilter !== 'all') {
+          filtered = filtered.filter(product => (product.status || 'active') === productStatusFilter);
+        }
+        
+        setFilteredProducts(filtered);
+        console.log('Products filtered:', {
+          searchTerm: productSearchTerm,
+          categoryFilter: productCategoryFilter,
+          statusFilter: productStatusFilter,
+          totalProducts: products.length,
+          filteredProducts: filtered.length
+        });
+      }, [products, productSearchTerm, productCategoryFilter, productStatusFilter]);
       
       const fetchStats = async () => {
         try {
@@ -1323,7 +1359,10 @@
                     <button 
                       className="btn" 
                       style={{background: '#17a2b8', width: 'auto', padding: '8px 16px'}}
-                      onClick={() => alert('Product search and filter:\n\n• Search by name, SKU, or category\n• Filter by price range\n• Sort by popularity, date, price\n• Stock level filtering\n• Advanced search options')}
+                      onClick={() => {
+                        setShowProductSearchFilter(!showProductSearchFilter);
+                        console.log('Product search filter toggled:', !showProductSearchFilter);
+                      }}
                     >
                       🔍 Search & Filter
                     </button>
@@ -1337,7 +1376,86 @@
                   </div>
                 </div>
                 
-                {products.length > 0 ? (
+                {showProductSearchFilter && (
+                  <div style={{background: '#f8f9fa', padding: '20px', borderRadius: '6px', marginBottom: '20px', border: '1px solid #dee2e6'}}>
+                    <h4 style={{color: '#333', marginBottom: '15px'}}>🔍 Search & Filter Products</h4>
+                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '15px'}}>
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: '500'}}>Search Products:</label>
+                        <input 
+                          type="text" 
+                          placeholder="Search by name, ID, category, or description..."
+                          value={productSearchTerm}
+                          onChange={(e) => {
+                            setProductSearchTerm(e.target.value);
+                            console.log('Product search term changed:', e.target.value);
+                          }}
+                          style={{width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px'}}
+                        />
+                      </div>
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: '500'}}>Category:</label>
+                        <select 
+                          value={productCategoryFilter}
+                          onChange={(e) => setProductCategoryFilter(e.target.value)}
+                          style={{width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px'}}
+                        >
+                          <option value="all">All Categories</option>
+                          {categories.map(cat => (
+                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: '500'}}>Status:</label>
+                        <select 
+                          value={productStatusFilter}
+                          onChange={(e) => setProductStatusFilter(e.target.value)}
+                          style={{width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px'}}
+                        >
+                          <option value="all">All Status</option>
+                          <option value="active">Active</option>
+                          <option value="inactive">Inactive</option>
+                          <option value="draft">Draft</option>
+                          <option value="discontinued">Discontinued</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                      <button 
+                        className="btn" 
+                        style={{background: '#28a745', width: 'auto', padding: '6px 12px', fontSize: '14px'}}
+                        onClick={() => {
+                          console.log('Search applied with filters:', {
+                            searchTerm: productSearchTerm,
+                            categoryFilter: productCategoryFilter,
+                            statusFilter: productStatusFilter
+                          });
+                          alert(`Search applied! Found ${filteredProducts.length} products out of ${products.length} total.`);
+                        }}
+                      >
+                        ✅ Apply Search
+                      </button>
+                      <button 
+                        className="btn" 
+                        style={{background: '#6c757d', width: 'auto', padding: '6px 12px', fontSize: '14px'}}
+                        onClick={() => {
+                          setProductSearchTerm('');
+                          setProductCategoryFilter('all');
+                          setProductStatusFilter('all');
+                          console.log('Product filters cleared');
+                        }}
+                      >
+                        🗑️ Clear Filters
+                      </button>
+                    </div>
+                    <div style={{marginTop: '10px', fontSize: '14px', color: '#666'}}>
+                      Showing {filteredProducts.length} of {products.length} products
+                    </div>
+                  </div>
+                )}
+                
+                {(showProductSearchFilter ? filteredProducts : products).length > 0 ? (
                   <div style={{overflowX: 'auto'}}>
                     <table style={{width: '100%', borderCollapse: 'collapse'}}>
                       <thead>
@@ -1345,10 +1463,11 @@
                           <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd', width: '50px'}}>
                             <input 
                               type="checkbox" 
-                              checked={selectedProducts.length === products.length && products.length > 0}
+                              checked={selectedProducts.length === (showProductSearchFilter ? filteredProducts : products).length && (showProductSearchFilter ? filteredProducts : products).length > 0}
                               onChange={(e) => {
+                                const currentProducts = showProductSearchFilter ? filteredProducts : products;
                                 if (e.target.checked) {
-                                  setSelectedProducts(products.map(p => p.id));
+                                  setSelectedProducts(currentProducts.map(p => p.id));
                                 } else {
                                   setSelectedProducts([]);
                                 }
@@ -1370,7 +1489,7 @@
                         </tr>
                       </thead>
                       <tbody>
-                        {products.slice(0, 10).map((product, index) => (
+                        {(showProductSearchFilter ? filteredProducts : products).slice(0, 10).map((product, index) => (
                           <tr key={index} style={{borderBottom: '1px solid #eee'}}>
                             <td style={{padding: '12px', textAlign: 'center'}}>
                               <input 
