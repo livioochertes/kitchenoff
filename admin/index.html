@@ -1850,6 +1850,21 @@
             alert('Error deleting image');
           }
         };
+
+        // Set image as main function
+        const setAsMainImage = (selectedIndex) => {
+          if (selectedIndex === 0) return; // Already main
+          
+          const newImages = [...uploadedImages];
+          const mainImage = newImages.splice(selectedIndex, 1)[0];
+          newImages.unshift(mainImage);
+          
+          setUploadedImages(newImages);
+          setProductFormData(prev => ({
+            ...prev,
+            images: newImages
+          }));
+        };
         
         const handleUserSubmit = async (e) => {
           e.preventDefault();
@@ -2292,6 +2307,32 @@
                                   ×
                                 </button>
                               </div>
+                              
+                              {index !== 0 && (
+                                <div style={{
+                                  position: 'absolute',
+                                  bottom: '25px',
+                                  left: '5px',
+                                  right: '5px'
+                                }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => setAsMainImage(index)}
+                                    style={{
+                                      backgroundColor: '#007bff',
+                                      color: 'white',
+                                      border: 'none',
+                                      borderRadius: '3px',
+                                      padding: '3px 6px',
+                                      fontSize: '10px',
+                                      cursor: 'pointer',
+                                      width: '100%'
+                                    }}
+                                  >
+                                    Set as Main
+                                  </button>
+                                </div>
+                              )}
                               <div style={{
                                 padding: '5px',
                                 fontSize: '11px',
