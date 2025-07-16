@@ -151,6 +151,10 @@ Preferred communication style: Simple, everyday language.
 - COMPLETED: Added memory cache refresh after product updates to ensure real-time data consistency
 - COMPLETED: Edit modal now correctly displays existing uploaded images for products
 - COMPLETED: Image gallery in Edit modal shows all uploaded images with management controls
+- COMPLETED: Added main image selection functionality with "Set as Main" button for uploaded images
+- COMPLETED: Main image reordering system that moves selected image to first position
+- COMPLETED: Visual indicators showing which image is the main product image with "MAIN" label
+- COMPLETED: Image management controls allowing users to change primary product image dynamically
 
 ### July 14, 2025
 - COMPLETED: Comprehensive multilingual system with 11 language support (English, Spanish, French, German, Italian, Portuguese, Chinese, Japanese, Korean, Arabic, Romanian)
