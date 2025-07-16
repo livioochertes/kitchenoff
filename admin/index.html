@@ -1907,6 +1907,10 @@
             setSelectedProducts([]);
             setShowProductBulkModal(false);
             setProductBulkOperation('');
+            // Force refresh of products after bulk operations
+            setTimeout(() => {
+              fetchProducts();
+            }, 1000);
           } else {
             alert('Error: ' + result.message);
           }
