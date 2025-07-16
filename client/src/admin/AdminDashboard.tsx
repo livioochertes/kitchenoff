@@ -557,20 +557,24 @@ export default function AdminDashboard({ token, admin, onLogout }: AdminDashboar
                     <Input
                       placeholder="Search by name, category, description, or ID..."
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={(e) => {
+                        console.log("Search input changed:", e.target.value);
+                        setSearchQuery(e.target.value);
+                      }}
                       className="pl-10"
                     />
                   </div>
                   <Button
                     variant="outline"
                     onClick={() => {
-                      // Force a refresh of the filtered results
-                      console.log("Search button clicked - Current filters:", {
-                        searchQuery,
+                      console.log("🔍 Search button clicked!");
+                      console.log("Current search query:", searchQuery);
+                      console.log("Current filters:", {
                         categoryFilter,
                         statusFilter,
                         stockFilter
                       });
+                      alert("Search button clicked! Check console for details.");
                     }}
                   >
                     🔍 Search & Filter
