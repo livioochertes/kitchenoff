@@ -478,6 +478,13 @@
       const [showOrderDetails, setShowOrderDetails] = useState(false);
       const [showOrderTools, setShowOrderTools] = useState(false);
       
+      // Product management state
+      const [selectedProducts, setSelectedProducts] = useState([]);
+      const [filteredProducts, setFilteredProducts] = useState([]);
+      const [showBulkOperationsModal, setShowBulkOperationsModal] = useState(false);
+      const [showSearchFilterModal, setShowSearchFilterModal] = useState(false);
+      const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
+      
       useEffect(() => {
         fetchStats();
       }, []);
@@ -842,6 +849,122 @@
           localStorage.removeItem('adminUser');
           // Force page reload to ensure clean state
           window.location.reload();
+        }
+      };
+      
+      // Product management functions
+      const handleProductSelection = (productId, isSelected) => {
+        if (isSelected) {
+          const product = products.find(p => p.id === productId);
+          if (product) {
+            setSelectedProducts(prev => [...prev, product]);
+          }
+        } else {
+          setSelectedProducts(prev => prev.filter(p => p.id !== productId));
+        }
+      };
+      
+      const handleSelectAllProducts = (isSelected) => {
+        if (isSelected) {
+          setSelectedProducts([...products]);
+        } else {
+          setSelectedProducts([]);
+        }
+      };
+      
+      // Bulk operations functions
+      const handleBulkPriceUpdate = async (percentage, operation) => {
+        if (!percentage || selectedProducts.length === 0) return;
+        
+        const productIds = selectedProducts.map(p => p.id);
+        
+        try {
+          const response = await fetch('/admin/api/products/bulk/price-update', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              productIds,
+              percentage: parseFloat(percentage),
+              operation
+            })
+          });
+          
+          if (response.ok) {
+            fetchProducts();
+            alert('Prices updated successfully!');
+            setShowBulkOperationsModal(false);
+          } else {
+            const error = await response.json();
+            alert('Error: ' + error.message);
+          }
+        } catch (err) {
+          alert('Network error occurred');
+        }
+      };
+      
+      const handleBulkCategoryUpdate = async (categoryId) => {
+        if (!categoryId || selectedProducts.length === 0) return;
+        
+        const productIds = selectedProducts.map(p => p.id);
+        
+        try {
+          const response = await fetch('/admin/api/products/bulk/category-update', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              productIds,
+              categoryId: parseInt(categoryId)
+            })
+          });
+          
+          if (response.ok) {
+            fetchProducts();
+            alert('Categories updated successfully!');
+            setShowBulkOperationsModal(false);
+          } else {
+            const error = await response.json();
+            alert('Error: ' + error.message);
+          }
+        } catch (err) {
+          alert('Network error occurred');
+        }
+      };
+      
+      const handleBulkStockUpdate = async (quantity, operation) => {
+        if (!quantity || selectedProducts.length === 0) return;
+        
+        const productIds = selectedProducts.map(p => p.id);
+        
+        try {
+          const response = await fetch('/admin/api/products/bulk/stock-update', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              productIds,
+              quantity: parseInt(quantity),
+              operation
+            })
+          });
+          
+          if (response.ok) {
+            fetchProducts();
+            alert('Stock updated successfully!');
+            setShowBulkOperationsModal(false);
+          } else {
+            const error = await response.json();
+            alert('Error: ' + error.message);
+          }
+        } catch (err) {
+          alert('Network error occurred');
         }
       };
       
