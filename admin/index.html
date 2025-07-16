@@ -485,6 +485,8 @@
       const [productCategoryFilter, setProductCategoryFilter] = useState('all');
       const [productStatusFilter, setProductStatusFilter] = useState('all');
       const [filteredProducts, setFilteredProducts] = useState([]);
+      const [showProductAnalytics, setShowProductAnalytics] = useState(false);
+      const [analyticsData, setAnalyticsData] = useState(null);
       
       useEffect(() => {
         fetchStats();
@@ -641,6 +643,77 @@
         } catch (err) {
           console.error('Network error fetching categories:', err);
         }
+      };
+
+      const generateProductAnalytics = () => {
+        console.log('Generating product analytics with data:', products.length, 'products');
+        
+        if (products.length === 0) {
+          setAnalyticsData({
+            error: 'No products found to analyze'
+          });
+          return;
+        }
+
+        // Calculate analytics based on actual product data
+        const analytics = {
+          totalProducts: products.length,
+          
+          // Category analysis
+          categoryBreakdown: categories.reduce((acc, cat) => {
+            const categoryProducts = products.filter(p => p.categoryId === cat.id);
+            acc[cat.name] = {
+              count: categoryProducts.length,
+              percentage: ((categoryProducts.length / products.length) * 100).toFixed(1)
+            };
+            return acc;
+          }, {}),
+          
+          // Status analysis
+          statusBreakdown: {
+            active: products.filter(p => (p.status || 'active') === 'active').length,
+            inactive: products.filter(p => p.status === 'inactive').length,
+            draft: products.filter(p => p.status === 'draft').length,
+            discontinued: products.filter(p => p.status === 'discontinued').length
+          },
+          
+          // Price analysis
+          priceAnalysis: (() => {
+            const prices = products.map(p => parseFloat(p.price) || 0).filter(p => p > 0);
+            if (prices.length === 0) return { avg: 0, min: 0, max: 0 };
+            
+            return {
+              avg: (prices.reduce((sum, p) => sum + p, 0) / prices.length).toFixed(2),
+              min: Math.min(...prices).toFixed(2),
+              max: Math.max(...prices).toFixed(2)
+            };
+          })(),
+          
+          // Stock analysis
+          stockAnalysis: {
+            totalStock: products.reduce((sum, p) => sum + (p.stockQuantity || 0), 0),
+            inStock: products.filter(p => (p.stockQuantity || 0) > 0).length,
+            outOfStock: products.filter(p => (p.stockQuantity || 0) === 0).length,
+            lowStock: products.filter(p => (p.stockQuantity || 0) > 0 && (p.stockQuantity || 0) < 10).length
+          },
+          
+          // Top products by price
+          topPriceProducts: products
+            .filter(p => p.price && parseFloat(p.price) > 0)
+            .sort((a, b) => parseFloat(b.price) - parseFloat(a.price))
+            .slice(0, 5)
+            .map(p => ({
+              name: p.name,
+              price: parseFloat(p.price).toFixed(2),
+              category: categories.find(c => c.id === p.categoryId)?.name || 'Unknown'
+            })),
+          
+          // Generated timestamp
+          generatedAt: new Date().toLocaleString()
+        };
+
+        console.log('Analytics generated:', analytics);
+        setAnalyticsData(analytics);
       };
 
       // CRUD Operations
@@ -1372,7 +1445,13 @@
                     <button 
                       className="btn" 
                       style={{background: '#6c757d', width: 'auto', padding: '8px 16px'}}
-                      onClick={() => alert('Product analytics:\n\n• Sales performance\n• Inventory turnover\n• Product popularity\n• Revenue by category\n• Stock alerts')}
+                      onClick={() => {
+                        setShowProductAnalytics(!showProductAnalytics);
+                        if (!showProductAnalytics) {
+                          generateProductAnalytics();
+                        }
+                        console.log('Product analytics toggled:', !showProductAnalytics);
+                      }}
                     >
                       📊 Analytics
                     </button>
@@ -1454,6 +1533,140 @@
                     </div>
                     <div style={{marginTop: '10px', fontSize: '14px', color: '#666'}}>
                       Showing {filteredProducts.length} of {products.length} products
+                    </div>
+                  </div>
+                )}
+                
+                {showProductAnalytics && (
+                  <div style={{background: '#f8f9fa', padding: '20px', borderRadius: '6px', marginBottom: '20px', border: '1px solid #dee2e6'}}>
+                    <h4 style={{color: '#333', marginBottom: '20px'}}>📊 Product Analytics Dashboard</h4>
+                    
+                    {analyticsData && !analyticsData.error ? (
+                      <div>
+                        {/* Overview Stats */}
+                        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '25px'}}>
+                          <div style={{background: 'white', padding: '20px', borderRadius: '8px', textAlign: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'}}>
+                            <h5 style={{color: '#007bff', fontSize: '28px', margin: '0 0 10px 0'}}>{analyticsData.totalProducts}</h5>
+                            <p style={{color: '#666', margin: '0', fontSize: '14px'}}>Total Products</p>
+                          </div>
+                          <div style={{background: 'white', padding: '20px', borderRadius: '8px', textAlign: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'}}>
+                            <h5 style={{color: '#28a745', fontSize: '28px', margin: '0 0 10px 0'}}>{analyticsData.stockAnalysis.inStock}</h5>
+                            <p style={{color: '#666', margin: '0', fontSize: '14px'}}>In Stock</p>
+                          </div>
+                          <div style={{background: 'white', padding: '20px', borderRadius: '8px', textAlign: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'}}>
+                            <h5 style={{color: '#ffc107', fontSize: '28px', margin: '0 0 10px 0'}}>{analyticsData.stockAnalysis.lowStock}</h5>
+                            <p style={{color: '#666', margin: '0', fontSize: '14px'}}>Low Stock</p>
+                          </div>
+                          <div style={{background: 'white', padding: '20px', borderRadius: '8px', textAlign: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'}}>
+                            <h5 style={{color: '#dc3545', fontSize: '28px', margin: '0 0 10px 0'}}>{analyticsData.stockAnalysis.outOfStock}</h5>
+                            <p style={{color: '#666', margin: '0', fontSize: '14px'}}>Out of Stock</p>
+                          </div>
+                        </div>
+
+                        {/* Category Breakdown */}
+                        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '25px'}}>
+                          <div style={{background: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'}}>
+                            <h5 style={{color: '#333', marginBottom: '15px', fontSize: '16px'}}>📂 Products by Category</h5>
+                            {Object.entries(analyticsData.categoryBreakdown).map(([category, data]) => (
+                              <div key={category} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', padding: '8px', background: '#f8f9fa', borderRadius: '4px'}}>
+                                <span style={{fontSize: '14px', color: '#333'}}>{category}</span>
+                                <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                                  <span style={{fontSize: '14px', fontWeight: 'bold', color: '#007bff'}}>{data.count}</span>
+                                  <span style={{fontSize: '12px', color: '#666', background: '#e9ecef', padding: '2px 8px', borderRadius: '12px'}}>{data.percentage}%</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          <div style={{background: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'}}>
+                            <h5 style={{color: '#333', marginBottom: '15px', fontSize: '16px'}}>📈 Status Distribution</h5>
+                            {Object.entries(analyticsData.statusBreakdown).map(([status, count]) => (
+                              <div key={status} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', padding: '8px', background: '#f8f9fa', borderRadius: '4px'}}>
+                                <span style={{fontSize: '14px', color: '#333', textTransform: 'capitalize'}}>{status}</span>
+                                <span style={{fontSize: '14px', fontWeight: 'bold', color: status === 'active' ? '#28a745' : status === 'inactive' ? '#6c757d' : status === 'draft' ? '#ffc107' : '#dc3545'}}>{count}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Price Analysis */}
+                        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '25px'}}>
+                          <div style={{background: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'}}>
+                            <h5 style={{color: '#333', marginBottom: '15px', fontSize: '16px'}}>💰 Price Analysis</h5>
+                            <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+                              <div style={{display: 'flex', justifyContent: 'space-between', padding: '8px', background: '#f8f9fa', borderRadius: '4px'}}>
+                                <span style={{fontSize: '14px', color: '#333'}}>Average Price</span>
+                                <span style={{fontSize: '14px', fontWeight: 'bold', color: '#007bff'}}>${analyticsData.priceAnalysis.avg}</span>
+                              </div>
+                              <div style={{display: 'flex', justifyContent: 'space-between', padding: '8px', background: '#f8f9fa', borderRadius: '4px'}}>
+                                <span style={{fontSize: '14px', color: '#333'}}>Lowest Price</span>
+                                <span style={{fontSize: '14px', fontWeight: 'bold', color: '#28a745'}}>${analyticsData.priceAnalysis.min}</span>
+                              </div>
+                              <div style={{display: 'flex', justifyContent: 'space-between', padding: '8px', background: '#f8f9fa', borderRadius: '4px'}}>
+                                <span style={{fontSize: '14px', color: '#333'}}>Highest Price</span>
+                                <span style={{fontSize: '14px', fontWeight: 'bold', color: '#dc3545'}}>${analyticsData.priceAnalysis.max}</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div style={{background: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'}}>
+                            <h5 style={{color: '#333', marginBottom: '15px', fontSize: '16px'}}>🏆 Top Products by Price</h5>
+                            {analyticsData.topPriceProducts.length > 0 ? (
+                              <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                                {analyticsData.topPriceProducts.map((product, index) => (
+                                  <div key={index} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px', background: '#f8f9fa', borderRadius: '4px'}}>
+                                    <div style={{display: 'flex', flexDirection: 'column'}}>
+                                      <span style={{fontSize: '13px', fontWeight: '500', color: '#333'}}>{product.name}</span>
+                                      <span style={{fontSize: '12px', color: '#666'}}>{product.category}</span>
+                                    </div>
+                                    <span style={{fontSize: '14px', fontWeight: 'bold', color: '#007bff'}}>${product.price}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p style={{color: '#666', fontSize: '14px', textAlign: 'center', margin: '20px 0'}}>No products with prices found</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Generated timestamp */}
+                        <div style={{textAlign: 'center', marginTop: '20px', padding: '10px', background: '#e9ecef', borderRadius: '4px'}}>
+                          <p style={{color: '#666', fontSize: '12px', margin: '0'}}>Analytics generated at: {analyticsData.generatedAt}</p>
+                        </div>
+                      </div>
+                    ) : analyticsData && analyticsData.error ? (
+                      <div style={{textAlign: 'center', padding: '40px', color: '#dc3545'}}>
+                        <h5>Error: {analyticsData.error}</h5>
+                        <p>Please make sure products are loaded and try again.</p>
+                      </div>
+                    ) : (
+                      <div style={{textAlign: 'center', padding: '40px'}}>
+                        <div className="loading"></div>
+                        <p style={{color: '#666', marginTop: '10px'}}>Generating analytics...</p>
+                      </div>
+                    )}
+                    
+                    <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
+                      <button 
+                        className="btn" 
+                        style={{background: '#28a745', width: 'auto', padding: '6px 12px', fontSize: '14px'}}
+                        onClick={() => {
+                          generateProductAnalytics();
+                          console.log('Analytics refreshed');
+                        }}
+                      >
+                        🔄 Refresh Analytics
+                      </button>
+                      <button 
+                        className="btn" 
+                        style={{background: '#6c757d', width: 'auto', padding: '6px 12px', fontSize: '14px'}}
+                        onClick={() => {
+                          setShowProductAnalytics(false);
+                          console.log('Analytics closed');
+                        }}
+                      >
+                        ✖️ Close
+                      </button>
                     </div>
                   </div>
                 )}
