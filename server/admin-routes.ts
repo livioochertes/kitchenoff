@@ -2094,9 +2094,9 @@ export async function registerAdminRoutes(app: Express) {
       const allCategories = await storage.getCategories();
       const resetPromises = allCategories.map(category => 
         storage.updateCategory(category.id, { 
-          show_on_main_top: false, 
-          show_on_main_shop: false,
-          sort_order: 0 
+          showOnMainTop: false, 
+          showOnMainShop: false,
+          sortOrder: 0 
         })
       );
       await Promise.all(resetPromises);
@@ -2104,9 +2104,9 @@ export async function registerAdminRoutes(app: Express) {
       // Update main top categories
       const mainTopPromises = mainTopCategories.map((categoryId, index) => 
         storage.updateCategory(parseInt(categoryId), { 
-          show_on_main_top: true, 
-          show_on_main_shop: false,
-          sort_order: index + 1 
+          showOnMainTop: true, 
+          showOnMainShop: false,
+          sortOrder: index + 1 
         })
       );
       await Promise.all(mainTopPromises);
@@ -2114,9 +2114,9 @@ export async function registerAdminRoutes(app: Express) {
       // Update main shop categories
       const mainShopPromises = mainShopCategories.map((categoryId, index) => 
         storage.updateCategory(parseInt(categoryId), { 
-          show_on_main_top: false, 
-          show_on_main_shop: true,
-          sort_order: index + 1 
+          showOnMainTop: false, 
+          showOnMainShop: true,
+          sortOrder: index + 1 
         })
       );
       await Promise.all(mainShopPromises);
