@@ -6000,6 +6000,7 @@ TOTAL: $${selectedOrder.totalAmount}
                           if (response.ok) {
                             alert('Homepage categories updated successfully!');
                             setShowHomepageConfigModal(false);
+                            setHomepageConfig({ mainTop: [], mainShop: [] }); // Reset the configuration
                             fetchCategories(); // Refresh the categories list
                           } else {
                             alert('Error: ' + data.message);

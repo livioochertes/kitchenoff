@@ -24,6 +24,12 @@ Preferred communication style: Simple, everyday language.
 - COMPLETED: Database schema includes homepage positioning fields (showOnMainTop, showOnMainShop, sortOrder)
 - COMPLETED: Category management now supports proper order management with sortOrder field
 - COMPLETED: Fixed updateHomepageCategories API function integration with admin interface
+- COMPLETED: Fixed "Add new category" functionality by implementing missing createCategory and updateCategory functions
+- COMPLETED: Resolved mutual exclusivity issues in homepage configuration with improved user experience
+- COMPLETED: Enhanced dropdown menus to show all categories with status indicators (Already selected, In other section)
+- COMPLETED: Implemented priority-based save logic where Main Top categories take precedence over Shop Categories
+- COMPLETED: Categories no longer disappear during configuration - mutual exclusivity only enforced on save
+- COMPLETED: Added proper state management for homepage configuration modal with current settings loading
 
 ### July 16, 2025
 - COMPLETED: Implemented comprehensive order acceptance flow with email notifications system
