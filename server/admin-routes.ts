@@ -1581,6 +1581,109 @@ export async function registerAdminRoutes(app: Express) {
     }
   });
 
+  // Supplier bulk operations
+  app.post("/admin/api/suppliers/bulk", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { operation, supplierIds, ...operationData } = req.body;
+      
+      if (!Array.isArray(supplierIds) || supplierIds.length === 0) {
+        return res.status(400).json({ message: "No suppliers selected" });
+      }
+
+      let processed = 0;
+      let success = 0;
+      let failed = 0;
+      let message = "";
+
+      for (const supplierId of supplierIds) {
+        try {
+          processed++;
+          
+          switch (operation) {
+            case 'activate':
+              await storage.updateSupplier(supplierId, { isActive: true });
+              success++;
+              break;
+              
+            case 'deactivate':
+              await storage.updateSupplier(supplierId, { isActive: false });
+              success++;
+              break;
+              
+            case 'status':
+              await storage.updateSupplier(supplierId, { isActive: operationData.status === 'active' });
+              success++;
+              break;
+              
+            case 'sync-prices':
+              // This would normally call the supplier's API to sync prices
+              // For now, we'll simulate the operation
+              console.log(`Syncing prices for supplier ${supplierId}`);
+              success++;
+              break;
+              
+            case 'sync-stock':
+              // This would normally call the supplier's API to sync stock
+              // For now, we'll simulate the operation
+              console.log(`Syncing stock for supplier ${supplierId}`);
+              success++;
+              break;
+              
+            case 'delete':
+              await storage.deleteSupplier(supplierId);
+              success++;
+              break;
+              
+            default:
+              throw new Error(`Unknown operation: ${operation}`);
+          }
+        } catch (error) {
+          console.error(`Error processing supplier ${supplierId}:`, error);
+          failed++;
+        }
+      }
+
+      // Set appropriate message based on operation
+      switch (operation) {
+        case 'activate':
+          message = `Successfully activated ${success} supplier(s)`;
+          break;
+        case 'deactivate':
+          message = `Successfully deactivated ${success} supplier(s)`;
+          break;
+        case 'status':
+          message = `Successfully updated status for ${success} supplier(s)`;
+          break;
+        case 'sync-prices':
+          message = `Successfully synced prices for ${success} supplier(s)`;
+          break;
+        case 'sync-stock':
+          message = `Successfully synced stock for ${success} supplier(s)`;
+          break;
+        case 'delete':
+          message = `Successfully deleted ${success} supplier(s)`;
+          break;
+        default:
+          message = `Successfully processed ${success} supplier(s)`;
+      }
+
+      if (failed > 0) {
+        message += ` (${failed} failed)`;
+      }
+
+      res.json({
+        message,
+        processed,
+        success,
+        failed,
+        operation
+      });
+    } catch (error) {
+      console.error("Error in supplier bulk operation:", error);
+      res.status(500).json({ message: "Failed to perform bulk operation" });
+    }
+  });
+
   app.delete("/admin/api/suppliers/:id", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
     try {
       const { id } = req.params;

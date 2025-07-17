@@ -493,6 +493,9 @@
       const [viewingSupplier, setViewingSupplier] = useState(null);
       const [showViewSupplierModal, setShowViewSupplierModal] = useState(false);
       const [supplierDetails, setSupplierDetails] = useState(null);
+      const [selectedSuppliers, setSelectedSuppliers] = useState([]);
+      const [showSupplierBulkModal, setShowSupplierBulkModal] = useState(false);
+      const [supplierBulkOperation, setSupplierBulkOperation] = useState('');
       
       useEffect(() => {
         fetchStats();
@@ -810,6 +813,62 @@
         } catch (error) {
           console.error('Error fetching supplier details:', error);
           return null;
+        }
+      };
+
+      // Handle supplier selection
+      const handleSupplierSelection = (supplierId, isChecked) => {
+        setSelectedSuppliers(prev => {
+          if (isChecked) {
+            return [...prev, supplierId];
+          } else {
+            return prev.filter(id => id !== supplierId);
+          }
+        });
+      };
+
+      // Handle select all suppliers
+      const handleSelectAllSuppliers = (isChecked) => {
+        if (isChecked) {
+          setSelectedSuppliers(suppliers.map(s => s.id));
+        } else {
+          setSelectedSuppliers([]);
+        }
+      };
+
+      // Perform bulk operations on suppliers
+      const performSupplierBulkOperation = async (operation, formData) => {
+        try {
+          const response = await fetch('/admin/api/suppliers/bulk', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              operation,
+              supplierIds: selectedSuppliers,
+              ...formData
+            })
+          });
+
+          const result = await response.json();
+          
+          if (response.ok) {
+            alert(`✅ Bulk operation completed successfully!\n\n${result.message}\nProcessed: ${result.processed} suppliers\nSuccess: ${result.success}\nFailed: ${result.failed}`);
+            
+            // Refresh suppliers list
+            fetchSuppliers();
+            
+            // Reset selection
+            setSelectedSuppliers([]);
+            setShowSupplierBulkModal(false);
+          } else {
+            alert(`❌ Bulk operation failed: ${result.message}`);
+          }
+        } catch (error) {
+          console.error('Error performing bulk operation:', error);
+          alert('❌ Network error during bulk operation');
         }
       };
 
@@ -2167,9 +2226,16 @@
                     <button 
                       className="btn" 
                       style={{background: '#17a2b8', width: 'auto', padding: '8px 16px'}}
-                      onClick={() => alert('Bulk operations:\n\n• Update contact information\n• Sync API credentials\n• Status management\n• Performance reviews\n• Contract management')}
+                      onClick={() => {
+                        if (selectedSuppliers.length === 0) {
+                          alert('Please select suppliers first by checking the boxes in the table');
+                        } else {
+                          setSupplierBulkOperation('status');
+                          setShowSupplierBulkModal(true);
+                        }
+                      }}
                     >
-                      🔄 Bulk Operations
+                      🔄 Bulk Operations {selectedSuppliers.length > 0 ? `(${selectedSuppliers.length})` : ''}
                     </button>
                     <button 
                       className="btn" 
@@ -2186,6 +2252,14 @@
                     <table style={{width: '100%', borderCollapse: 'collapse', border: '1px solid #dee2e6'}}>
                       <thead>
                         <tr style={{backgroundColor: '#f8f9fa'}}>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '1px solid #dee2e6', color: '#333', width: '50px'}}>
+                            <input 
+                              type="checkbox" 
+                              checked={selectedSuppliers.length === suppliers.length && suppliers.length > 0}
+                              onChange={(e) => handleSelectAllSuppliers(e.target.checked)}
+                              style={{cursor: 'pointer'}}
+                            />
+                          </th>
                           <th style={{padding: '12px', textAlign: 'left', borderBottom: '1px solid #dee2e6', color: '#333'}}>Supplier Name</th>
                           <th style={{padding: '12px', textAlign: 'left', borderBottom: '1px solid #dee2e6', color: '#333'}}>Contact</th>
                           <th style={{padding: '12px', textAlign: 'left', borderBottom: '1px solid #dee2e6', color: '#333'}}>Location</th>
@@ -2197,6 +2271,14 @@
                       <tbody>
                         {suppliers.map((supplier) => (
                           <tr key={supplier.id} style={{borderBottom: '1px solid #dee2e6'}}>
+                            <td style={{padding: '12px', textAlign: 'center'}}>
+                              <input 
+                                type="checkbox" 
+                                checked={selectedSuppliers.includes(supplier.id)}
+                                onChange={(e) => handleSupplierSelection(supplier.id, e.target.checked)}
+                                style={{cursor: 'pointer'}}
+                              />
+                            </td>
                             <td style={{padding: '12px', color: '#333'}}>
                               <div style={{fontWeight: 'bold'}}>{supplier.name}</div>
                               <div style={{fontSize: '12px', color: '#666'}}>{supplier.contactPerson}</div>
@@ -4713,6 +4795,253 @@ TOTAL: $${selectedOrder.totalAmount}
                       Close
                     </button>
                   </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Supplier Bulk Operations Modal */}
+            {showSupplierBulkModal && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1000
+              }}>
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '30px',
+                  borderRadius: '8px',
+                  width: '90%',
+                  maxWidth: '600px',
+                  maxHeight: '80vh',
+                  overflow: 'auto'
+                }}>
+                  <h3 style={{marginBottom: '20px', color: '#333'}}>
+                    🔄 Bulk Operations - {selectedSuppliers.length} supplier(s) selected
+                  </h3>
+                  
+                  {supplierBulkOperation === 'status' && (
+                    <div>
+                      <h4>Update Status</h4>
+                      <div style={{marginBottom: '15px'}}>
+                        <label style={{display: 'block', marginBottom: '5px', color: '#555'}}>New Status:</label>
+                        <select 
+                          id="bulkStatus"
+                          style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd'}}
+                          defaultValue="active"
+                        >
+                          <option value="active">Active</option>
+                          <option value="inactive">Inactive</option>
+                        </select>
+                      </div>
+                      <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                        <button
+                          className="btn"
+                          style={{background: '#6c757d'}}
+                          onClick={() => setShowSupplierBulkModal(false)}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className="btn"
+                          style={{background: '#28a745'}}
+                          onClick={async () => {
+                            const status = document.getElementById('bulkStatus').value;
+                            await performSupplierBulkOperation('status', { status });
+                          }}
+                        >
+                          Update Status
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {supplierBulkOperation === 'activate' && (
+                    <div>
+                      <h4>Activate Suppliers</h4>
+                      <p style={{marginBottom: '20px', color: '#666'}}>
+                        Are you sure you want to activate {selectedSuppliers.length} supplier(s)? This will:
+                      </p>
+                      <ul style={{marginBottom: '20px', paddingLeft: '20px'}}>
+                        <li>Enable order processing from these suppliers</li>
+                        <li>Allow API synchronization (if configured)</li>
+                        <li>Include suppliers in bulk operations</li>
+                        <li>Enable automatic notifications</li>
+                      </ul>
+                      <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                        <button
+                          className="btn"
+                          style={{background: '#6c757d'}}
+                          onClick={() => setShowSupplierBulkModal(false)}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className="btn"
+                          style={{background: '#28a745'}}
+                          onClick={async () => {
+                            await performSupplierBulkOperation('activate', {});
+                          }}
+                        >
+                          Activate Suppliers
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {supplierBulkOperation === 'deactivate' && (
+                    <div>
+                      <h4>Deactivate Suppliers</h4>
+                      <p style={{marginBottom: '20px', color: '#666'}}>
+                        Are you sure you want to deactivate {selectedSuppliers.length} supplier(s)? This will:
+                      </p>
+                      <ul style={{marginBottom: '20px', paddingLeft: '20px'}}>
+                        <li>Disable order processing from these suppliers</li>
+                        <li>Pause API synchronization</li>
+                        <li>Exclude suppliers from bulk operations</li>
+                        <li>Stop automatic notifications</li>
+                      </ul>
+                      <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                        <button
+                          className="btn"
+                          style={{background: '#6c757d'}}
+                          onClick={() => setShowSupplierBulkModal(false)}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className="btn"
+                          style={{background: '#ffc107'}}
+                          onClick={async () => {
+                            await performSupplierBulkOperation('deactivate', {});
+                          }}
+                        >
+                          Deactivate Suppliers
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {supplierBulkOperation === 'sync-prices' && (
+                    <div>
+                      <h4>Sync Prices</h4>
+                      <p style={{marginBottom: '20px', color: '#666'}}>
+                        Sync product prices from {selectedSuppliers.length} supplier(s). This will:
+                      </p>
+                      <ul style={{marginBottom: '20px', paddingLeft: '20px'}}>
+                        <li>Fetch latest prices from supplier APIs</li>
+                        <li>Update all associated products</li>
+                        <li>Maintain price history</li>
+                        <li>Send notifications on significant changes</li>
+                      </ul>
+                      <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                        <button
+                          className="btn"
+                          style={{background: '#6c757d'}}
+                          onClick={() => setShowSupplierBulkModal(false)}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className="btn"
+                          style={{background: '#17a2b8'}}
+                          onClick={async () => {
+                            await performSupplierBulkOperation('sync-prices', {});
+                          }}
+                        >
+                          Sync Prices
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {supplierBulkOperation === 'sync-stock' && (
+                    <div>
+                      <h4>Sync Stock</h4>
+                      <p style={{marginBottom: '20px', color: '#666'}}>
+                        Sync stock levels from {selectedSuppliers.length} supplier(s). This will:
+                      </p>
+                      <ul style={{marginBottom: '20px', paddingLeft: '20px'}}>
+                        <li>Fetch current inventory levels</li>
+                        <li>Update product availability</li>
+                        <li>Trigger low stock alerts</li>
+                        <li>Update order processing status</li>
+                      </ul>
+                      <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                        <button
+                          className="btn"
+                          style={{background: '#6c757d'}}
+                          onClick={() => setShowSupplierBulkModal(false)}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className="btn"
+                          style={{background: '#ffc107'}}
+                          onClick={async () => {
+                            await performSupplierBulkOperation('sync-stock', {});
+                          }}
+                        >
+                          Sync Stock
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {supplierBulkOperation === 'delete' && (
+                    <div>
+                      <h4 style={{color: '#dc3545'}}>⚠️ Delete Suppliers</h4>
+                      <p style={{marginBottom: '20px', color: '#666'}}>
+                        <strong>WARNING:</strong> This action cannot be undone. Deleting {selectedSuppliers.length} supplier(s) will:
+                      </p>
+                      <ul style={{marginBottom: '20px', paddingLeft: '20px', color: '#dc3545'}}>
+                        <li>Permanently remove supplier records</li>
+                        <li>Unlink all associated products</li>
+                        <li>Remove API integrations</li>
+                        <li>Delete order history connections</li>
+                      </ul>
+                      <div style={{marginBottom: '20px'}}>
+                        <label style={{display: 'block', marginBottom: '5px', color: '#555'}}>
+                          Type "DELETE" to confirm:
+                        </label>
+                        <input 
+                          type="text"
+                          id="deleteConfirmation"
+                          style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd'}}
+                          placeholder="Type DELETE to confirm"
+                        />
+                      </div>
+                      <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                        <button
+                          className="btn"
+                          style={{background: '#6c757d'}}
+                          onClick={() => setShowSupplierBulkModal(false)}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className="btn"
+                          style={{background: '#dc3545'}}
+                          onClick={async () => {
+                            const confirmation = document.getElementById('deleteConfirmation').value;
+                            if (confirmation === 'DELETE') {
+                              await performSupplierBulkOperation('delete', {});
+                            } else {
+                              alert('Please type "DELETE" to confirm this action');
+                            }
+                          }}
+                        >
+                          Delete Suppliers
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
