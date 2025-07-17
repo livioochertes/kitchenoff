@@ -174,7 +174,7 @@ export default function Header() {
                   >
                     {t('nav.products')}
                   </Button>
-                  {categories?.filter(category => category.showOnMainShop).sort((a, b) => a.sortOrder - b.sortOrder).map((category: any) => (
+                  {categories?.filter(category => category.showOnMainTop).sort((a, b) => a.sortOrder - b.sortOrder).map((category: any) => (
                     <Button 
                       key={category.id} 
                       variant="ghost" 
@@ -243,7 +243,7 @@ export default function Header() {
               >
                 {t('nav.allCategories')}
               </Button>
-              {categories?.filter(category => category.showOnMainShop).sort((a, b) => a.sortOrder - b.sortOrder).slice(0, 3).map((category: any) => (
+              {categories?.filter(category => category.showOnMainTop).sort((a, b) => a.sortOrder - b.sortOrder).map((category: any) => (
                 <Button 
                   key={category.id} 
                   variant="ghost" 
