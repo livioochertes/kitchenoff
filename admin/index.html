@@ -2455,8 +2455,15 @@
                     style={{background: '#007bff', width: 'auto', padding: '8px 16px'}}
                     onClick={() => {
                       // Initialize homepage config with current settings
+                      console.log('All categories:', categories);
+                      console.log('Categories with showOnMainTop:', categories.filter(cat => cat.showOnMainTop));
+                      console.log('Categories with showOnMainShop:', categories.filter(cat => cat.showOnMainShop));
+                      
                       const currentMainTop = categories.filter(cat => cat.showOnMainTop).sort((a, b) => a.sortOrder - b.sortOrder);
                       const currentMainShop = categories.filter(cat => cat.showOnMainShop).sort((a, b) => a.sortOrder - b.sortOrder);
+                      
+                      console.log('Current Main Top:', currentMainTop);
+                      console.log('Current Main Shop:', currentMainShop);
                       
                       setHomepageConfig({
                         mainTop: currentMainTop.map(cat => cat.id),

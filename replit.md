@@ -38,6 +38,9 @@ Preferred communication style: Simple, everyday language.
 - COMPLETED: Fixed SQL syntax error in category updates by reverting to camelCase field names in Drizzle schema
 - COMPLETED: Synchronized all field references between frontend, backend, and database schema for consistent data operations
 - COMPLETED: Category management system now fully operational with proper database persistence
+- COMPLETED: Added debugging logs to homepage configuration modal to identify any field name mismatches
+- COMPLETED: Verified admin API endpoints correctly return category data with homepage positioning fields (showOnMainTop, showOnMainShop, sortOrder)
+- COMPLETED: Database currently has 4 categories assigned to Main Top and 1 category assigned to Shop section for testing
 
 ### July 16, 2025
 - COMPLETED: Implemented comprehensive order acceptance flow with email notifications system
