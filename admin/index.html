@@ -4959,24 +4959,33 @@ TOTAL: $${selectedOrder.totalAmount}
                           <option value="inactive">Inactive</option>
                         </select>
                       </div>
-                      <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                      <div style={{display: 'flex', gap: '10px', justifyContent: 'space-between'}}>
                         <button
                           className="btn"
                           style={{background: '#6c757d'}}
-                          onClick={() => setShowSupplierBulkModal(false)}
+                          onClick={() => setSupplierBulkOperation('menu')}
                         >
-                          Cancel
+                          ← Back to Menu
                         </button>
-                        <button
-                          className="btn"
-                          style={{background: '#28a745'}}
-                          onClick={async () => {
-                            const status = document.getElementById('bulkStatus').value;
-                            await performSupplierBulkOperation('status', { status });
-                          }}
-                        >
-                          Update Status
-                        </button>
+                        <div style={{display: 'flex', gap: '10px'}}>
+                          <button
+                            className="btn"
+                            style={{background: '#6c757d'}}
+                            onClick={() => setShowSupplierBulkModal(false)}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            className="btn"
+                            style={{background: '#28a745'}}
+                            onClick={async () => {
+                              const status = document.getElementById('bulkStatus').value;
+                              await performSupplierBulkOperation('status', { status });
+                            }}
+                          >
+                            Update Status
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -4993,23 +5002,32 @@ TOTAL: $${selectedOrder.totalAmount}
                         <li>Include suppliers in bulk operations</li>
                         <li>Enable automatic notifications</li>
                       </ul>
-                      <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                      <div style={{display: 'flex', gap: '10px', justifyContent: 'space-between'}}>
                         <button
                           className="btn"
                           style={{background: '#6c757d'}}
-                          onClick={() => setShowSupplierBulkModal(false)}
+                          onClick={() => setSupplierBulkOperation('menu')}
                         >
-                          Cancel
+                          ← Back to Menu
                         </button>
-                        <button
-                          className="btn"
-                          style={{background: '#28a745'}}
-                          onClick={async () => {
-                            await performSupplierBulkOperation('activate', {});
-                          }}
-                        >
-                          Activate Suppliers
-                        </button>
+                        <div style={{display: 'flex', gap: '10px'}}>
+                          <button
+                            className="btn"
+                            style={{background: '#6c757d'}}
+                            onClick={() => setShowSupplierBulkModal(false)}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            className="btn"
+                            style={{background: '#28a745'}}
+                            onClick={async () => {
+                              await performSupplierBulkOperation('activate', {});
+                            }}
+                          >
+                            Activate Suppliers
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -5026,23 +5044,32 @@ TOTAL: $${selectedOrder.totalAmount}
                         <li>Exclude suppliers from bulk operations</li>
                         <li>Stop automatic notifications</li>
                       </ul>
-                      <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                      <div style={{display: 'flex', gap: '10px', justifyContent: 'space-between'}}>
                         <button
                           className="btn"
                           style={{background: '#6c757d'}}
-                          onClick={() => setShowSupplierBulkModal(false)}
+                          onClick={() => setSupplierBulkOperation('menu')}
                         >
-                          Cancel
+                          ← Back to Menu
                         </button>
-                        <button
-                          className="btn"
-                          style={{background: '#ffc107'}}
-                          onClick={async () => {
-                            await performSupplierBulkOperation('deactivate', {});
-                          }}
-                        >
-                          Deactivate Suppliers
-                        </button>
+                        <div style={{display: 'flex', gap: '10px'}}>
+                          <button
+                            className="btn"
+                            style={{background: '#6c757d'}}
+                            onClick={() => setShowSupplierBulkModal(false)}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            className="btn"
+                            style={{background: '#ffc107'}}
+                            onClick={async () => {
+                              await performSupplierBulkOperation('deactivate', {});
+                            }}
+                          >
+                            Deactivate Suppliers
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -5059,23 +5086,32 @@ TOTAL: $${selectedOrder.totalAmount}
                         <li>Maintain price history</li>
                         <li>Send notifications on significant changes</li>
                       </ul>
-                      <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                      <div style={{display: 'flex', gap: '10px', justifyContent: 'space-between'}}>
                         <button
                           className="btn"
                           style={{background: '#6c757d'}}
-                          onClick={() => setShowSupplierBulkModal(false)}
+                          onClick={() => setSupplierBulkOperation('menu')}
                         >
-                          Cancel
+                          ← Back to Menu
                         </button>
-                        <button
-                          className="btn"
-                          style={{background: '#17a2b8'}}
-                          onClick={async () => {
-                            await performSupplierBulkOperation('sync-prices', {});
-                          }}
-                        >
-                          Sync Prices
-                        </button>
+                        <div style={{display: 'flex', gap: '10px'}}>
+                          <button
+                            className="btn"
+                            style={{background: '#6c757d'}}
+                            onClick={() => setShowSupplierBulkModal(false)}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            className="btn"
+                            style={{background: '#17a2b8'}}
+                            onClick={async () => {
+                              await performSupplierBulkOperation('sync-prices', {});
+                            }}
+                          >
+                            Sync Prices
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -5092,23 +5128,32 @@ TOTAL: $${selectedOrder.totalAmount}
                         <li>Trigger low stock alerts</li>
                         <li>Update order processing status</li>
                       </ul>
-                      <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                      <div style={{display: 'flex', gap: '10px', justifyContent: 'space-between'}}>
                         <button
                           className="btn"
                           style={{background: '#6c757d'}}
-                          onClick={() => setShowSupplierBulkModal(false)}
+                          onClick={() => setSupplierBulkOperation('menu')}
                         >
-                          Cancel
+                          ← Back to Menu
                         </button>
-                        <button
-                          className="btn"
-                          style={{background: '#ffc107'}}
-                          onClick={async () => {
-                            await performSupplierBulkOperation('sync-stock', {});
-                          }}
-                        >
-                          Sync Stock
-                        </button>
+                        <div style={{display: 'flex', gap: '10px'}}>
+                          <button
+                            className="btn"
+                            style={{background: '#6c757d'}}
+                            onClick={() => setShowSupplierBulkModal(false)}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            className="btn"
+                            style={{background: '#ffc107'}}
+                            onClick={async () => {
+                              await performSupplierBulkOperation('sync-stock', {});
+                            }}
+                          >
+                            Sync Stock
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -5136,28 +5181,37 @@ TOTAL: $${selectedOrder.totalAmount}
                           placeholder="Type DELETE to confirm"
                         />
                       </div>
-                      <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                      <div style={{display: 'flex', gap: '10px', justifyContent: 'space-between'}}>
                         <button
                           className="btn"
                           style={{background: '#6c757d'}}
-                          onClick={() => setShowSupplierBulkModal(false)}
+                          onClick={() => setSupplierBulkOperation('menu')}
                         >
-                          Cancel
+                          ← Back to Menu
                         </button>
-                        <button
-                          className="btn"
-                          style={{background: '#dc3545'}}
-                          onClick={async () => {
-                            const confirmation = document.getElementById('deleteConfirmation').value;
-                            if (confirmation === 'DELETE') {
-                              await performSupplierBulkOperation('delete', {});
-                            } else {
-                              alert('Please type "DELETE" to confirm this action');
-                            }
-                          }}
-                        >
-                          Delete Suppliers
-                        </button>
+                        <div style={{display: 'flex', gap: '10px'}}>
+                          <button
+                            className="btn"
+                            style={{background: '#6c757d'}}
+                            onClick={() => setShowSupplierBulkModal(false)}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            className="btn"
+                            style={{background: '#dc3545'}}
+                            onClick={async () => {
+                              const confirmation = document.getElementById('deleteConfirmation').value;
+                              if (confirmation === 'DELETE') {
+                                await performSupplierBulkOperation('delete', {});
+                              } else {
+                                alert('Please type "DELETE" to confirm this action');
+                              }
+                            }}
+                          >
+                            Delete Suppliers
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
