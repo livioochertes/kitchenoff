@@ -679,6 +679,58 @@
         }
       };
 
+      // Create category
+      const createCategory = async (categoryData) => {
+        try {
+          const response = await fetch('/admin/api/categories', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(categoryData)
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            await fetchCategories(); // Refresh categories list
+            return { success: true, message: 'Category created successfully' };
+          } else {
+            return { success: false, message: data.message || 'Failed to create category' };
+          }
+        } catch (error) {
+          console.error('Error creating category:', error);
+          return { success: false, message: 'Network error. Please try again.' };
+        }
+      };
+
+      // Update category
+      const updateCategory = async (categoryId, categoryData) => {
+        try {
+          const response = await fetch(`/admin/api/categories/${categoryId}`, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(categoryData)
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            await fetchCategories(); // Refresh categories list
+            return { success: true, message: 'Category updated successfully' };
+          } else {
+            return { success: false, message: data.message || 'Failed to update category' };
+          }
+        } catch (error) {
+          console.error('Error updating category:', error);
+          return { success: false, message: 'Network error. Please try again.' };
+        }
+      };
+
       // Sync supplier prices
       const syncSupplierPrices = async (supplierId) => {
         try {
