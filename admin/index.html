@@ -2230,7 +2230,7 @@
                         if (selectedSuppliers.length === 0) {
                           alert('Please select suppliers first by checking the boxes in the table');
                         } else {
-                          setSupplierBulkOperation('status');
+                          setSupplierBulkOperation('menu');
                           setShowSupplierBulkModal(true);
                         }
                       }}
@@ -4825,6 +4825,125 @@ TOTAL: $${selectedOrder.totalAmount}
                   <h3 style={{marginBottom: '20px', color: '#333'}}>
                     🔄 Bulk Operations - {selectedSuppliers.length} supplier(s) selected
                   </h3>
+                  
+                  {supplierBulkOperation === 'menu' && (
+                    <div>
+                      <h4 style={{marginBottom: '20px'}}>Choose Operation</h4>
+                      <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '15px', marginBottom: '20px'}}>
+                        <button
+                          className="btn"
+                          style={{
+                            background: '#28a745',
+                            padding: '20px',
+                            textAlign: 'left',
+                            height: 'auto',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-start'
+                          }}
+                          onClick={() => setSupplierBulkOperation('activate')}
+                        >
+                          <div style={{fontSize: '16px', fontWeight: 'bold', marginBottom: '8px'}}>✅ Activate Suppliers</div>
+                          <div style={{fontSize: '12px', opacity: '0.9'}}>Enable order processing and API sync</div>
+                        </button>
+                        
+                        <button
+                          className="btn"
+                          style={{
+                            background: '#ffc107',
+                            padding: '20px',
+                            textAlign: 'left',
+                            height: 'auto',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-start'
+                          }}
+                          onClick={() => setSupplierBulkOperation('deactivate')}
+                        >
+                          <div style={{fontSize: '16px', fontWeight: 'bold', marginBottom: '8px'}}>❌ Deactivate Suppliers</div>
+                          <div style={{fontSize: '12px', opacity: '0.9'}}>Disable order processing and pause sync</div>
+                        </button>
+                        
+                        <button
+                          className="btn"
+                          style={{
+                            background: '#17a2b8',
+                            padding: '20px',
+                            textAlign: 'left',
+                            height: 'auto',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-start'
+                          }}
+                          onClick={() => setSupplierBulkOperation('sync-prices')}
+                        >
+                          <div style={{fontSize: '16px', fontWeight: 'bold', marginBottom: '8px'}}>💰 Sync Prices</div>
+                          <div style={{fontSize: '12px', opacity: '0.9'}}>Fetch latest prices from supplier APIs</div>
+                        </button>
+                        
+                        <button
+                          className="btn"
+                          style={{
+                            background: '#fd7e14',
+                            padding: '20px',
+                            textAlign: 'left',
+                            height: 'auto',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-start'
+                          }}
+                          onClick={() => setSupplierBulkOperation('sync-stock')}
+                        >
+                          <div style={{fontSize: '16px', fontWeight: 'bold', marginBottom: '8px'}}>📊 Sync Stock</div>
+                          <div style={{fontSize: '12px', opacity: '0.9'}}>Update inventory levels from suppliers</div>
+                        </button>
+                        
+                        <button
+                          className="btn"
+                          style={{
+                            background: '#6c757d',
+                            padding: '20px',
+                            textAlign: 'left',
+                            height: 'auto',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-start'
+                          }}
+                          onClick={() => setSupplierBulkOperation('status')}
+                        >
+                          <div style={{fontSize: '16px', fontWeight: 'bold', marginBottom: '8px'}}>🔄 Update Status</div>
+                          <div style={{fontSize: '12px', opacity: '0.9'}}>Change supplier status with options</div>
+                        </button>
+                        
+                        <button
+                          className="btn"
+                          style={{
+                            background: '#dc3545',
+                            padding: '20px',
+                            textAlign: 'left',
+                            height: 'auto',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-start'
+                          }}
+                          onClick={() => setSupplierBulkOperation('delete')}
+                        >
+                          <div style={{fontSize: '16px', fontWeight: 'bold', marginBottom: '8px'}}>🗑️ Delete Suppliers</div>
+                          <div style={{fontSize: '12px', opacity: '0.9'}}>Permanently remove suppliers (requires confirmation)</div>
+                        </button>
+                      </div>
+                      
+                      <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+                        <button
+                          className="btn"
+                          style={{background: '#6c757d'}}
+                          onClick={() => setShowSupplierBulkModal(false)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
                   
                   {supplierBulkOperation === 'status' && (
                     <div>
