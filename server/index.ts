@@ -5,6 +5,7 @@ import { registerAdminRoutes } from "./admin-routes";
 import { subdomainMiddleware, adminSubdomainHandler } from "./subdomain-middleware";
 import { setupVite, serveStatic, log } from "./vite";
 import { seedDatabase } from "./sample-data";
+import { loadAllDataIntoMemory } from "./routes";
 
 const app = express();
 
@@ -88,6 +89,8 @@ app.use((req, res, next) => {
   // Seed database with sample data
   try {
     await seedDatabase();
+    // Refresh cache after seeding to ensure latest data is loaded
+    await loadAllDataIntoMemory();
   } catch (error) {
     console.error('Database seeding failed:', error);
     log('Database seeding failed, continuing without seeding');
