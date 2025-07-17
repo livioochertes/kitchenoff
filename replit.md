@@ -44,6 +44,8 @@ Preferred communication style: Simple, everyday language.
 - COMPLETED: Main Top Categories (4): Cleaning & Sanitizing, Food Labels, HACCP Equipment, Kitchen Supplies
 - COMPLETED: Shop Categories (1): Storage Solutions  
 - COMPLETED: Application restarted to refresh in-memory cache with updated database values
+- COMPLETED: Fixed sample data seeding to include permanent homepage category assignments (showOnMainTop, showOnMainShop, sortOrder)
+- COMPLETED: Homepage category assignments now persist across server restarts - no longer lost when database is reseeded
 
 ### July 16, 2025
 - COMPLETED: Implemented comprehensive order acceptance flow with email notifications system

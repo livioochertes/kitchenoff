@@ -13,37 +13,52 @@ export async function seedDatabase() {
 
 
 
-    // Create categories
+    // Create categories with homepage positioning
     const insertedCategories = await db.insert(categories).values([
       {
         name: "Food Labels",
         slug: "food-labels",
         description: "Professional food labeling solutions for restaurants and food service",
-        imageUrl: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop"
+        imageUrl: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
+        showOnMainTop: true,
+        showOnMainShop: false,
+        sortOrder: 2
       },
       {
         name: "HACCP Equipment",
         slug: "haccp-equipment",
         description: "Essential equipment for HACCP compliance and food safety",
-        imageUrl: "https://images.unsplash.com/photo-1584308972272-9e4e7685e80f?w=400&h=300&fit=crop"
+        imageUrl: "https://images.unsplash.com/photo-1584308972272-9e4e7685e80f?w=400&h=300&fit=crop",
+        showOnMainTop: true,
+        showOnMainShop: false,
+        sortOrder: 3
       },
       {
         name: "Kitchen Supplies",
         slug: "kitchen-supplies",
         description: "Professional kitchen tools and supplies for commercial use",
-        imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop"
+        imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop",
+        showOnMainTop: true,
+        showOnMainShop: false,
+        sortOrder: 4
       },
       {
         name: "Cleaning & Sanitizing",
         slug: "cleaning-sanitizing",
         description: "Professional cleaning and sanitizing products for food service",
-        imageUrl: "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400&h=300&fit=crop"
+        imageUrl: "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400&h=300&fit=crop",
+        showOnMainTop: true,
+        showOnMainShop: false,
+        sortOrder: 1
       },
       {
         name: "Storage Solutions",
         slug: "storage-solutions",
         description: "Food storage containers and organization systems",
-        imageUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop"
+        imageUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop",
+        showOnMainTop: false,
+        showOnMainShop: true,
+        sortOrder: 1
       }
     ]).returning();
 
