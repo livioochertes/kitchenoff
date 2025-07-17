@@ -30,6 +30,9 @@ Preferred communication style: Simple, everyday language.
 - COMPLETED: Implemented priority-based save logic where Main Top categories take precedence over Shop Categories
 - COMPLETED: Categories no longer disappear during configuration - mutual exclusivity only enforced on save
 - COMPLETED: Added proper state management for homepage configuration modal with current settings loading
+- COMPLETED: Fixed critical database field name mismatch - UI now uses snake_case (show_on_main_top, show_on_main_shop, sort_order) to match database schema
+- COMPLETED: Resolved homepage configuration display issue - categories now properly show their saved state in admin interface
+- COMPLETED: Fixed all JavaScript field references to use correct database column names throughout admin interface
 
 ### July 16, 2025
 - COMPLETED: Implemented comprehensive order acceptance flow with email notifications system

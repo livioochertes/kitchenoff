@@ -2391,7 +2391,7 @@
                     <div style={{padding: '20px', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #dee2e6'}}>
                       <h5 style={{color: '#495057', marginBottom: '15px'}}>Main Top Categories (Max 4)</h5>
                       <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
-                        {categories.filter(cat => cat.showOnMainTop).sort((a, b) => a.sortOrder - b.sortOrder).map(category => (
+                        {categories.filter(cat => cat.show_on_main_top).sort((a, b) => a.sort_order - b.sort_order).map(category => (
                           <div key={category.id} style={{
                             padding: '8px 12px',
                             background: '#007bff',
@@ -2402,10 +2402,10 @@
                             alignItems: 'center'
                           }}>
                             <span>{category.name}</span>
-                            <span style={{fontSize: '12px', opacity: '0.8'}}>#{category.sortOrder}</span>
+                            <span style={{fontSize: '12px', opacity: '0.8'}}>#{category.sort_order}</span>
                           </div>
                         ))}
-                        {categories.filter(cat => cat.showOnMainTop).length === 0 && (
+                        {categories.filter(cat => cat.show_on_main_top).length === 0 && (
                           <p style={{color: '#6c757d', fontStyle: 'italic'}}>No categories assigned to main top section</p>
                         )}
                       </div>
@@ -2414,7 +2414,7 @@
                     <div style={{padding: '20px', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #dee2e6'}}>
                       <h5 style={{color: '#495057', marginBottom: '15px'}}>Shop Categories (Max 3)</h5>
                       <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
-                        {categories.filter(cat => cat.showOnMainShop).sort((a, b) => a.sortOrder - b.sortOrder).map(category => (
+                        {categories.filter(cat => cat.show_on_main_shop).sort((a, b) => a.sort_order - b.sort_order).map(category => (
                           <div key={category.id} style={{
                             padding: '8px 12px',
                             background: '#28a745',
@@ -2425,10 +2425,10 @@
                             alignItems: 'center'
                           }}>
                             <span>{category.name}</span>
-                            <span style={{fontSize: '12px', opacity: '0.8'}}>#{category.sortOrder}</span>
+                            <span style={{fontSize: '12px', opacity: '0.8'}}>#{category.sort_order}</span>
                           </div>
                         ))}
-                        {categories.filter(cat => cat.showOnMainShop).length === 0 && (
+                        {categories.filter(cat => cat.show_on_main_shop).length === 0 && (
                           <p style={{color: '#6c757d', fontStyle: 'italic'}}>No categories assigned to shop section</p>
                         )}
                       </div>
@@ -2439,8 +2439,8 @@
                     className="btn" 
                     style={{background: '#6c757d', width: 'auto', padding: '8px 16px'}}
                     onClick={() => {
-                      const mainTopCategories = categories.filter(cat => cat.showOnMainTop).sort((a, b) => a.sortOrder - b.sortOrder);
-                      const mainShopCategories = categories.filter(cat => cat.showOnMainShop).sort((a, b) => a.sortOrder - b.sortOrder);
+                      const mainTopCategories = categories.filter(cat => cat.show_on_main_top).sort((a, b) => a.sort_order - b.sort_order);
+                      const mainShopCategories = categories.filter(cat => cat.show_on_main_shop).sort((a, b) => a.sort_order - b.sort_order);
                       
                       alert(`Homepage Category Configuration:\n\nMain Top (${mainTopCategories.length}/4): ${mainTopCategories.map(c => c.name).join(', ') || 'None'}\n\nShop Section (${mainShopCategories.length}/3): ${mainShopCategories.map(c => c.name).join(', ') || 'None'}\n\nTo modify these settings, use the "Configure Homepage" button below.`);
                     }}
@@ -2455,8 +2455,8 @@
                     style={{background: '#007bff', width: 'auto', padding: '8px 16px'}}
                     onClick={() => {
                       // Initialize homepage config with current settings
-                      const currentMainTop = categories.filter(cat => cat.showOnMainTop).sort((a, b) => a.sortOrder - b.sortOrder);
-                      const currentMainShop = categories.filter(cat => cat.showOnMainShop).sort((a, b) => a.sortOrder - b.sortOrder);
+                      const currentMainTop = categories.filter(cat => cat.show_on_main_top).sort((a, b) => a.sort_order - b.sort_order);
+                      const currentMainShop = categories.filter(cat => cat.show_on_main_shop).sort((a, b) => a.sort_order - b.sort_order);
                       
                       setHomepageConfig({
                         mainTop: currentMainTop.map(cat => cat.id),
@@ -2494,7 +2494,7 @@
                             </td>
                             <td style={{padding: '12px'}}>
                               <div style={{display: 'flex', flexDirection: 'column', gap: '4px'}}>
-                                {category.showOnMainTop && (
+                                {category.show_on_main_top && (
                                   <span style={{
                                     padding: '2px 6px',
                                     borderRadius: '3px',
@@ -2502,10 +2502,10 @@
                                     color: 'white',
                                     fontSize: '11px'
                                   }}>
-                                    Main Top #{category.sortOrder}
+                                    Main Top #{category.sort_order}
                                   </span>
                                 )}
-                                {category.showOnMainShop && (
+                                {category.show_on_main_shop && (
                                   <span style={{
                                     padding: '2px 6px',
                                     borderRadius: '3px',
@@ -2513,10 +2513,10 @@
                                     color: 'white',
                                     fontSize: '11px'
                                   }}>
-                                    Shop #{category.sortOrder}
+                                    Shop #{category.sort_order}
                                   </span>
                                 )}
-                                {!category.showOnMainTop && !category.showOnMainShop && (
+                                {!category.show_on_main_top && !category.show_on_main_shop && (
                                   <span style={{color: '#6c757d', fontSize: '12px'}}>Not featured</span>
                                 )}
                               </div>
