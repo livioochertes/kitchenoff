@@ -5744,7 +5744,7 @@ TOTAL: $${selectedOrder.totalAmount}
                       <strong style={{color: '#1976d2'}}>Important:</strong>
                     </div>
                     <p style={{color: '#1976d2', fontSize: '14px', margin: '0'}}>
-                      Each category can only appear in one section at a time. When you add a category to one section, it will automatically be moved from the other section if it was already there.
+                      Categories can be added to Main Top without restrictions. When you add a category to Shop Categories, it will be automatically removed from Main Top if it exists there.
                     </p>
                   </div>
                   
@@ -5821,14 +5821,10 @@ TOTAL: $${selectedOrder.totalAmount}
                             onChange={(e) => {
                               const categoryId = parseInt(e.target.value);
                               if (categoryId && !homepageConfig.mainTop.includes(categoryId)) {
-                                // Only remove from mainShop if we're adding to mainTop and it's already there
-                                const newMainShop = homepageConfig.mainShop.includes(categoryId) 
-                                  ? homepageConfig.mainShop.filter(id => id !== categoryId)
-                                  : homepageConfig.mainShop;
+                                // Add to mainTop without removing from mainShop yet
                                 setHomepageConfig({
                                   ...homepageConfig,
-                                  mainTop: [...homepageConfig.mainTop, categoryId],
-                                  mainShop: newMainShop
+                                  mainTop: [...homepageConfig.mainTop, categoryId]
                                 });
                               }
                               e.target.value = '';
@@ -5916,7 +5912,7 @@ TOTAL: $${selectedOrder.totalAmount}
                             onChange={(e) => {
                               const categoryId = parseInt(e.target.value);
                               if (categoryId && !homepageConfig.mainShop.includes(categoryId)) {
-                                // Only remove from mainTop if we're adding to mainShop and it's already there
+                                // Remove from mainTop if it exists there, then add to mainShop
                                 const newMainTop = homepageConfig.mainTop.includes(categoryId) 
                                   ? homepageConfig.mainTop.filter(id => id !== categoryId)
                                   : homepageConfig.mainTop;
