@@ -23,7 +23,9 @@ declare global {
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
-    const uploadDir = path.join(process.cwd(), 'uploads', 'products');
+    // Determine upload directory based on request path
+    const uploadType = req.path.includes('categories') ? 'categories' : 'products';
+    const uploadDir = path.join(process.cwd(), 'uploads', uploadType);
     await fs.mkdir(uploadDir, { recursive: true });
     cb(null, uploadDir);
   },
@@ -32,7 +34,8 @@ const storage = multer.diskStorage({
     const timestamp = Date.now();
     const randomNum = Math.floor(Math.random() * 1000);
     const ext = path.extname(file.originalname);
-    const filename = `product-${timestamp}-${randomNum}${ext}`;
+    const fileType = req.path.includes('categories') ? 'category' : 'product';
+    const filename = `${fileType}-${timestamp}-${randomNum}${ext}`;
     cb(null, filename);
   }
 });
@@ -58,14 +61,21 @@ export const upload = multer({
 
 // Middleware to process uploaded images
 export const processImages = async (req: Request, res: Response, next: NextFunction) => {
-  if (!req.files || !Array.isArray(req.files)) {
+  // Handle both single file and multiple files
+  let files: Express.Multer.File[] = [];
+  
+  if (req.files && Array.isArray(req.files)) {
+    files = req.files;
+  } else if (req.file) {
+    files = [req.file];
+  } else {
     return next();
   }
 
   try {
     const processedFiles = [];
     
-    for (const file of req.files) {
+    for (const file of files) {
       const inputPath = file.path;
       const outputPath = path.join(
         path.dirname(inputPath),

@@ -1240,6 +1240,37 @@ export async function registerAdminRoutes(app: Express) {
     }
   });
 
+  // Category image upload endpoint
+  app.post("/admin/api/categories/:id/upload-image", authenticateAdmin, upload.single('image'), processImages, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const categoryId = parseInt(req.params.id);
+      
+      if (!req.processedFiles || req.processedFiles.length === 0) {
+        return res.status(400).json({ message: "No image file provided" });
+      }
+
+      const processedFile = req.processedFiles[0];
+      
+      // Update category with new image URL
+      const updatedCategory = await storage.updateCategory(categoryId, {
+        imageUrl: processedFile.url
+      });
+
+      // Refresh memory cache
+      await loadAllDataIntoMemory();
+      
+      res.json({ 
+        message: "Category image uploaded successfully", 
+        category: updatedCategory,
+        imageUrl: processedFile.url,
+        thumbnailUrl: processedFile.thumbnailUrl
+      });
+    } catch (error) {
+      console.error("Error uploading category image:", error);
+      res.status(500).json({ message: "Failed to upload category image" });
+    }
+  });
+
   // Product Bulk Operations
   app.put("/admin/api/products/bulk/prices", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
     try {
