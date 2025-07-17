@@ -43,6 +43,9 @@ export async function loadAllDataIntoMemory() {
     categoriesData = await storage.getCategories();
     setCachedData('categories-all', categoriesData);
     
+    // Refresh stringified categories data
+    stringifiedCategoriesData = JSON.stringify(categoriesData);
+    
     // Load products for each category (all products, no limit)
     for (const category of categoriesData) {
       const products = await storage.getProducts({
@@ -61,7 +64,6 @@ export async function loadAllDataIntoMemory() {
     
     // Pre-stringify JSON for fastest possible responses
     stringifiedProductsData = JSON.stringify(allProductsData);
-    stringifiedCategoriesData = JSON.stringify(categoriesData);
     
     console.log('✅ All data loaded into permanent memory - database queries eliminated');
     console.log(`📊 Memory data loaded: ${allProductsData.length} total products`);
