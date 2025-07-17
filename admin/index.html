@@ -496,6 +496,11 @@
       const [selectedSuppliers, setSelectedSuppliers] = useState([]);
       const [showSupplierBulkModal, setShowSupplierBulkModal] = useState(false);
       const [supplierBulkOperation, setSupplierBulkOperation] = useState('');
+      const [showHomepageConfigModal, setShowHomepageConfigModal] = useState(false);
+      const [homepageConfig, setHomepageConfig] = useState({
+        mainTop: [],
+        mainShop: []
+      });
       
       useEffect(() => {
         fetchStats();
@@ -2397,43 +2402,16 @@
                     className="btn" 
                     style={{background: '#007bff', width: 'auto', padding: '8px 16px'}}
                     onClick={() => {
-                      const mainTopIds = categories.filter(cat => cat.showOnMainTop).sort((a, b) => a.sortOrder - b.sortOrder).map(c => c.id);
-                      const mainShopIds = categories.filter(cat => cat.showOnMainShop).sort((a, b) => a.sortOrder - b.sortOrder).map(c => c.id);
+                      // Initialize homepage config with current settings
+                      const currentMainTop = categories.filter(cat => cat.showOnMainTop).sort((a, b) => a.sortOrder - b.sortOrder);
+                      const currentMainShop = categories.filter(cat => cat.showOnMainShop).sort((a, b) => a.sortOrder - b.sortOrder);
                       
-                      const newMainTop = [];
-                      const newMainShop = [];
+                      setHomepageConfig({
+                        mainTop: currentMainTop.map(cat => cat.id),
+                        mainShop: currentMainShop.map(cat => cat.id)
+                      });
                       
-                      // Select main top categories
-                      for (let i = 0; i < 4; i++) {
-                        const selected = prompt(`Select category ${i + 1} for Main Top section (max 4):\n\n${categories.map((c, idx) => `${idx + 1}. ${c.name}`).join('\n')}\n\nEnter category number (1-${categories.length}) or leave empty to skip:`);
-                        if (selected && !isNaN(selected) && selected >= 1 && selected <= categories.length) {
-                          const categoryId = categories[selected - 1].id;
-                          if (!newMainTop.includes(categoryId)) {
-                            newMainTop.push(categoryId);
-                          }
-                        }
-                      }
-                      
-                      // Select shop categories
-                      for (let i = 0; i < 3; i++) {
-                        const selected = prompt(`Select category ${i + 1} for Shop section (max 3):\n\n${categories.map((c, idx) => `${idx + 1}. ${c.name}`).join('\n')}\n\nEnter category number (1-${categories.length}) or leave empty to skip:`);
-                        if (selected && !isNaN(selected) && selected >= 1 && selected <= categories.length) {
-                          const categoryId = categories[selected - 1].id;
-                          if (!newMainShop.includes(categoryId) && !newMainTop.includes(categoryId)) {
-                            newMainShop.push(categoryId);
-                          }
-                        }
-                      }
-                      
-                      if (newMainTop.length > 0 || newMainShop.length > 0) {
-                        updateHomepageCategories(newMainTop, newMainShop).then(result => {
-                          if (result.success) {
-                            alert('Homepage categories updated successfully!');
-                          } else {
-                            alert('Error: ' + result.message);
-                          }
-                        });
-                      }
+                      setShowHomepageConfigModal(true);
                     }}
                   >
                     ⚙️ Configure Homepage
@@ -5671,6 +5649,299 @@ TOTAL: $${selectedOrder.totalAmount}
                       </button>
                     </div>
                   </form>
+                </div>
+              </div>
+            )}
+            
+            {/* Homepage Configuration Modal */}
+            {showHomepageConfigModal && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1000
+              }}>
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '30px',
+                  borderRadius: '8px',
+                  width: '90%',
+                  maxWidth: '800px',
+                  maxHeight: '80vh',
+                  overflow: 'auto'
+                }}>
+                  <h3 style={{marginBottom: '20px', color: '#333'}}>
+                    🏠 Configure Homepage Categories
+                  </h3>
+                  
+                  <div style={{marginBottom: '30px'}}>
+                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '30px'}}>
+                      {/* Main Top Categories Section */}
+                      <div style={{padding: '20px', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #dee2e6'}}>
+                        <h4 style={{color: '#333', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px'}}>
+                          <span style={{
+                            display: 'inline-block',
+                            width: '20px',
+                            height: '20px',
+                            backgroundColor: '#007bff',
+                            borderRadius: '50%',
+                            color: 'white',
+                            textAlign: 'center',
+                            lineHeight: '20px',
+                            fontSize: '12px'
+                          }}>1</span>
+                          Main Top Categories (Max 4)
+                        </h4>
+                        <p style={{color: '#666', fontSize: '14px', marginBottom: '15px'}}>
+                          These categories appear in the hero section of your homepage. Select up to 4 most important categories.
+                        </p>
+                        
+                        <div style={{display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '15px'}}>
+                          {homepageConfig.mainTop.map((categoryId, index) => {
+                            const category = categories.find(c => c.id === categoryId);
+                            return category ? (
+                              <div key={categoryId} style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '8px 12px',
+                                background: '#007bff',
+                                color: 'white',
+                                borderRadius: '4px'
+                              }}>
+                                <span>{category.name}</span>
+                                <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                  <span style={{fontSize: '12px', opacity: '0.8'}}>#{index + 1}</span>
+                                  <button
+                                    style={{
+                                      background: 'rgba(255,255,255,0.2)',
+                                      border: 'none',
+                                      color: 'white',
+                                      cursor: 'pointer',
+                                      borderRadius: '3px',
+                                      padding: '2px 6px',
+                                      fontSize: '12px'
+                                    }}
+                                    onClick={() => {
+                                      const newMainTop = homepageConfig.mainTop.filter(id => id !== categoryId);
+                                      setHomepageConfig({...homepageConfig, mainTop: newMainTop});
+                                    }}
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                              </div>
+                            ) : null;
+                          })}
+                        </div>
+                        
+                        {homepageConfig.mainTop.length < 4 && (
+                          <select
+                            style={{
+                              width: '100%',
+                              padding: '8px',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px',
+                              backgroundColor: 'white'
+                            }}
+                            onChange={(e) => {
+                              const categoryId = parseInt(e.target.value);
+                              if (categoryId && !homepageConfig.mainTop.includes(categoryId) && !homepageConfig.mainShop.includes(categoryId)) {
+                                setHomepageConfig({
+                                  ...homepageConfig,
+                                  mainTop: [...homepageConfig.mainTop, categoryId]
+                                });
+                              }
+                              e.target.value = '';
+                            }}
+                            value=""
+                          >
+                            <option value="">+ Add Category to Main Top</option>
+                            {categories.filter(cat => 
+                              !homepageConfig.mainTop.includes(cat.id) && 
+                              !homepageConfig.mainShop.includes(cat.id)
+                            ).map(category => (
+                              <option key={category.id} value={category.id}>{category.name}</option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                      
+                      {/* Main Shop Categories Section */}
+                      <div style={{padding: '20px', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #dee2e6'}}>
+                        <h4 style={{color: '#333', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px'}}>
+                          <span style={{
+                            display: 'inline-block',
+                            width: '20px',
+                            height: '20px',
+                            backgroundColor: '#28a745',
+                            borderRadius: '50%',
+                            color: 'white',
+                            textAlign: 'center',
+                            lineHeight: '20px',
+                            fontSize: '12px'
+                          }}>2</span>
+                          Shop Categories (Max 3)
+                        </h4>
+                        <p style={{color: '#666', fontSize: '14px', marginBottom: '15px'}}>
+                          These categories appear in the "Shop by Category" section. Select up to 3 popular categories.
+                        </p>
+                        
+                        <div style={{display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '15px'}}>
+                          {homepageConfig.mainShop.map((categoryId, index) => {
+                            const category = categories.find(c => c.id === categoryId);
+                            return category ? (
+                              <div key={categoryId} style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '8px 12px',
+                                background: '#28a745',
+                                color: 'white',
+                                borderRadius: '4px'
+                              }}>
+                                <span>{category.name}</span>
+                                <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                  <span style={{fontSize: '12px', opacity: '0.8'}}>#{index + 1}</span>
+                                  <button
+                                    style={{
+                                      background: 'rgba(255,255,255,0.2)',
+                                      border: 'none',
+                                      color: 'white',
+                                      cursor: 'pointer',
+                                      borderRadius: '3px',
+                                      padding: '2px 6px',
+                                      fontSize: '12px'
+                                    }}
+                                    onClick={() => {
+                                      const newMainShop = homepageConfig.mainShop.filter(id => id !== categoryId);
+                                      setHomepageConfig({...homepageConfig, mainShop: newMainShop});
+                                    }}
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                              </div>
+                            ) : null;
+                          })}
+                        </div>
+                        
+                        {homepageConfig.mainShop.length < 3 && (
+                          <select
+                            style={{
+                              width: '100%',
+                              padding: '8px',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px',
+                              backgroundColor: 'white'
+                            }}
+                            onChange={(e) => {
+                              const categoryId = parseInt(e.target.value);
+                              if (categoryId && !homepageConfig.mainShop.includes(categoryId) && !homepageConfig.mainTop.includes(categoryId)) {
+                                setHomepageConfig({
+                                  ...homepageConfig,
+                                  mainShop: [...homepageConfig.mainShop, categoryId]
+                                });
+                              }
+                              e.target.value = '';
+                            }}
+                            value=""
+                          >
+                            <option value="">+ Add Category to Shop Section</option>
+                            {categories.filter(cat => 
+                              !homepageConfig.mainTop.includes(cat.id) && 
+                              !homepageConfig.mainShop.includes(cat.id)
+                            ).map(category => (
+                              <option key={category.id} value={category.id}>{category.name}</option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div style={{
+                    padding: '15px',
+                    background: '#e9ecef',
+                    borderRadius: '6px',
+                    marginBottom: '20px'
+                  }}>
+                    <h5 style={{color: '#495057', marginBottom: '10px'}}>Current Configuration Summary</h5>
+                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px'}}>
+                      <div>
+                        <strong style={{color: '#007bff'}}>Main Top ({homepageConfig.mainTop.length}/4):</strong>
+                        <div style={{fontSize: '14px', color: '#666'}}>
+                          {homepageConfig.mainTop.length > 0 ? 
+                            homepageConfig.mainTop.map(id => categories.find(c => c.id === id)?.name).join(', ') : 
+                            'None selected'
+                          }
+                        </div>
+                      </div>
+                      <div>
+                        <strong style={{color: '#28a745'}}>Shop Section ({homepageConfig.mainShop.length}/3):</strong>
+                        <div style={{fontSize: '14px', color: '#666'}}>
+                          {homepageConfig.mainShop.length > 0 ? 
+                            homepageConfig.mainShop.map(id => categories.find(c => c.id === id)?.name).join(', ') : 
+                            'None selected'
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                    <button
+                      type="button"
+                      className="btn"
+                      style={{background: '#6c757d'}}
+                      onClick={() => {
+                        setShowHomepageConfigModal(false);
+                        setHomepageConfig({ mainTop: [], mainShop: [] });
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className="btn"
+                      style={{background: '#28a745'}}
+                      onClick={async () => {
+                        try {
+                          const response = await fetch('/admin/api/categories/bulk/homepage', {
+                            method: 'PUT',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({
+                              mainTopCategories: homepageConfig.mainTop,
+                              mainShopCategories: homepageConfig.mainShop
+                            })
+                          });
+                          
+                          const data = await response.json();
+                          
+                          if (response.ok) {
+                            alert('Homepage categories updated successfully!');
+                            setShowHomepageConfigModal(false);
+                            fetchCategories(); // Refresh the categories list
+                          } else {
+                            alert('Error: ' + data.message);
+                          }
+                        } catch (err) {
+                          alert('Network error: ' + err.message);
+                        }
+                      }}
+                    >
+                      💾 Save Configuration
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
