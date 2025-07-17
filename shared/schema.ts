@@ -45,6 +45,10 @@ export const categories = pgTable("categories", {
   slug: varchar("slug", { length: 100 }).notNull().unique(),
   description: text("description"),
   imageUrl: text("image_url"),
+  // Homepage positioning fields
+  showOnMainTop: boolean("show_on_main_top").default(false),
+  showOnMainShop: boolean("show_on_main_shop").default(false),
+  sortOrder: integer("sort_order").default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

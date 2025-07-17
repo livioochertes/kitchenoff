@@ -1965,4 +1965,173 @@ export async function registerAdminRoutes(app: Express) {
       res.status(500).json({ message: "Failed to perform bulk sync" });
     }
   });
+
+  // Category Management Routes
+  app.get("/admin/api/categories", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const categories = await storage.getCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      res.status(500).json({ message: "Failed to fetch categories" });
+    }
+  });
+
+  app.post("/admin/api/categories", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { name, description, imageUrl, showOnMainTop, showOnMainShop, sortOrder } = req.body;
+      
+      if (!name) {
+        return res.status(400).json({ message: "Category name is required" });
+      }
+
+      // Generate slug from name
+      const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      
+      const categoryData = {
+        name,
+        slug,
+        description: description || null,
+        imageUrl: imageUrl || null,
+        showOnMainTop: showOnMainTop || false,
+        showOnMainShop: showOnMainShop || false,
+        sortOrder: sortOrder || 0,
+      };
+
+      const category = await storage.createCategory(categoryData);
+      
+      // Refresh memory cache
+      await loadAllDataIntoMemory();
+      
+      res.json(category);
+    } catch (error) {
+      console.error("Error creating category:", error);
+      res.status(500).json({ message: "Failed to create category" });
+    }
+  });
+
+  app.put("/admin/api/categories/:id", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const categoryId = parseInt(req.params.id);
+      const { name, description, imageUrl, showOnMainTop, showOnMainShop, sortOrder } = req.body;
+      
+      if (isNaN(categoryId)) {
+        return res.status(400).json({ message: "Invalid category ID" });
+      }
+
+      const updateData: any = {};
+      
+      if (name !== undefined) {
+        updateData.name = name;
+        // Update slug if name changed
+        updateData.slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      }
+      if (description !== undefined) updateData.description = description;
+      if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
+      if (showOnMainTop !== undefined) updateData.showOnMainTop = showOnMainTop;
+      if (showOnMainShop !== undefined) updateData.showOnMainShop = showOnMainShop;
+      if (sortOrder !== undefined) updateData.sortOrder = sortOrder;
+
+      const category = await storage.updateCategory(categoryId, updateData);
+      
+      // Refresh memory cache
+      await loadAllDataIntoMemory();
+      
+      res.json(category);
+    } catch (error) {
+      console.error("Error updating category:", error);
+      res.status(500).json({ message: "Failed to update category" });
+    }
+  });
+
+  app.delete("/admin/api/categories/:id", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const categoryId = parseInt(req.params.id);
+      
+      if (isNaN(categoryId)) {
+        return res.status(400).json({ message: "Invalid category ID" });
+      }
+
+      // Check if category has products
+      const products = await storage.getProducts({ categoryId });
+      if (products.length > 0) {
+        return res.status(400).json({ 
+          message: `Cannot delete category. It contains ${products.length} product(s). Please move or delete the products first.` 
+        });
+      }
+
+      await storage.deleteCategory(categoryId);
+      
+      // Refresh memory cache
+      await loadAllDataIntoMemory();
+      
+      res.json({ message: "Category deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      res.status(500).json({ message: "Failed to delete category" });
+    }
+  });
+
+  // Bulk update category homepage positioning
+  app.put("/admin/api/categories/bulk/homepage", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { mainTopCategories, mainShopCategories } = req.body;
+      
+      // Validate input
+      if (!Array.isArray(mainTopCategories) || !Array.isArray(mainShopCategories)) {
+        return res.status(400).json({ message: "Invalid category arrays" });
+      }
+      
+      if (mainTopCategories.length > 4) {
+        return res.status(400).json({ message: "Maximum 4 categories allowed for main top section" });
+      }
+      
+      if (mainShopCategories.length > 3) {
+        return res.status(400).json({ message: "Maximum 3 categories allowed for main shop section" });
+      }
+
+      // Reset all categories
+      const allCategories = await storage.getCategories();
+      const resetPromises = allCategories.map(category => 
+        storage.updateCategory(category.id, { 
+          showOnMainTop: false, 
+          showOnMainShop: false,
+          sortOrder: 0 
+        })
+      );
+      await Promise.all(resetPromises);
+
+      // Update main top categories
+      const mainTopPromises = mainTopCategories.map((categoryId, index) => 
+        storage.updateCategory(parseInt(categoryId), { 
+          showOnMainTop: true, 
+          showOnMainShop: false,
+          sortOrder: index + 1 
+        })
+      );
+      await Promise.all(mainTopPromises);
+
+      // Update main shop categories
+      const mainShopPromises = mainShopCategories.map((categoryId, index) => 
+        storage.updateCategory(parseInt(categoryId), { 
+          showOnMainTop: false, 
+          showOnMainShop: true,
+          sortOrder: index + 1 
+        })
+      );
+      await Promise.all(mainShopPromises);
+
+      // Refresh memory cache
+      await loadAllDataIntoMemory();
+      
+      res.json({ 
+        message: "Homepage categories updated successfully",
+        mainTopCount: mainTopCategories.length,
+        mainShopCount: mainShopCategories.length
+      });
+    } catch (error) {
+      console.error("Error updating homepage categories:", error);
+      res.status(500).json({ message: "Failed to update homepage categories" });
+    }
+  });
 }
