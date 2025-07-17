@@ -5680,6 +5680,22 @@ TOTAL: $${selectedOrder.totalAmount}
                     🏠 Configure Homepage Categories
                   </h3>
                   
+                  <div style={{
+                    padding: '15px',
+                    background: '#e3f2fd',
+                    border: '1px solid #2196f3',
+                    borderRadius: '6px',
+                    marginBottom: '20px'
+                  }}>
+                    <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px'}}>
+                      <span style={{color: '#1976d2', fontSize: '16px'}}>ℹ️</span>
+                      <strong style={{color: '#1976d2'}}>Important:</strong>
+                    </div>
+                    <p style={{color: '#1976d2', fontSize: '14px', margin: '0'}}>
+                      Each category can only appear in one section at a time. If you add a category to one section, it will automatically be removed from the other section.
+                    </p>
+                  </div>
+                  
                   <div style={{marginBottom: '30px'}}>
                     <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '30px'}}>
                       {/* Main Top Categories Section */}
@@ -5752,10 +5768,13 @@ TOTAL: $${selectedOrder.totalAmount}
                             }}
                             onChange={(e) => {
                               const categoryId = parseInt(e.target.value);
-                              if (categoryId && !homepageConfig.mainTop.includes(categoryId) && !homepageConfig.mainShop.includes(categoryId)) {
+                              if (categoryId && !homepageConfig.mainTop.includes(categoryId)) {
+                                // Remove from mainShop if it exists there
+                                const newMainShop = homepageConfig.mainShop.filter(id => id !== categoryId);
                                 setHomepageConfig({
                                   ...homepageConfig,
-                                  mainTop: [...homepageConfig.mainTop, categoryId]
+                                  mainTop: [...homepageConfig.mainTop, categoryId],
+                                  mainShop: newMainShop
                                 });
                               }
                               e.target.value = '';
@@ -5764,8 +5783,7 @@ TOTAL: $${selectedOrder.totalAmount}
                           >
                             <option value="">+ Add Category to Main Top</option>
                             {categories.filter(cat => 
-                              !homepageConfig.mainTop.includes(cat.id) && 
-                              !homepageConfig.mainShop.includes(cat.id)
+                              !homepageConfig.mainTop.includes(cat.id)
                             ).map(category => (
                               <option key={category.id} value={category.id}>{category.name}</option>
                             ))}
@@ -5843,9 +5861,12 @@ TOTAL: $${selectedOrder.totalAmount}
                             }}
                             onChange={(e) => {
                               const categoryId = parseInt(e.target.value);
-                              if (categoryId && !homepageConfig.mainShop.includes(categoryId) && !homepageConfig.mainTop.includes(categoryId)) {
+                              if (categoryId && !homepageConfig.mainShop.includes(categoryId)) {
+                                // Remove from mainTop if it exists there
+                                const newMainTop = homepageConfig.mainTop.filter(id => id !== categoryId);
                                 setHomepageConfig({
                                   ...homepageConfig,
+                                  mainTop: newMainTop,
                                   mainShop: [...homepageConfig.mainShop, categoryId]
                                 });
                               }
@@ -5855,7 +5876,6 @@ TOTAL: $${selectedOrder.totalAmount}
                           >
                             <option value="">+ Add Category to Shop Section</option>
                             {categories.filter(cat => 
-                              !homepageConfig.mainTop.includes(cat.id) && 
                               !homepageConfig.mainShop.includes(cat.id)
                             ).map(category => (
                               <option key={category.id} value={category.id}>{category.name}</option>
