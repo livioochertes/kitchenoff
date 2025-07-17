@@ -38,9 +38,9 @@ export async function seedDatabase() {
         slug: "kitchen-supplies",
         description: "Professional kitchen tools and supplies for commercial use",
         imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop",
-        showOnMainTop: true,
+        showOnMainTop: false,
         showOnMainShop: false,
-        sortOrder: 4
+        sortOrder: 0
       },
       {
         name: "Cleaning & Sanitizing",
@@ -56,9 +56,9 @@ export async function seedDatabase() {
         slug: "storage-solutions",
         description: "Food storage containers and organization systems",
         imageUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop",
-        showOnMainTop: false,
+        showOnMainTop: true,
         showOnMainShop: false,
-        sortOrder: 0
+        sortOrder: 4
       }
     ]).returning();
 
