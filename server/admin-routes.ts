@@ -787,13 +787,20 @@ export async function registerAdminRoutes(app: Express) {
   // Admin Order Management Routes
   app.get("/admin/api/orders", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
     try {
-      const { status, limit = 50, offset = 0 } = req.query;
+      const { status, limit = 50, offset = 0, supplierId } = req.query;
       
       const orders = await storage.getOrders();
       
       let filteredOrders = orders;
       if (status) {
         filteredOrders = orders.filter(order => order.status === status);
+      }
+      
+      // Filter by supplier if specified
+      if (supplierId) {
+        filteredOrders = filteredOrders.filter(order => 
+          order.orderItems && order.orderItems.some(item => item.supplierId === parseInt(supplierId as string))
+        );
       }
       
       const paginatedOrders = filteredOrders.slice(
@@ -1084,7 +1091,7 @@ export async function registerAdminRoutes(app: Express) {
   // Admin Product Management Routes
   app.get("/admin/api/products", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
     try {
-      const { search, categoryId, featured, limit = 50, offset = 0 } = req.query;
+      const { search, categoryId, featured, limit = 50, offset = 0, supplierId } = req.query;
       
       const products = await storage.getProducts({
         search: search as string,
@@ -1094,7 +1101,13 @@ export async function registerAdminRoutes(app: Express) {
         offset: parseInt(offset as string)
       });
 
-      res.json(products);
+      // Filter by supplier if specified
+      let filteredProducts = products;
+      if (supplierId) {
+        filteredProducts = products.filter(product => product.supplierId === parseInt(supplierId as string));
+      }
+
+      res.json(filteredProducts);
     } catch (error) {
       console.error("Error fetching products:", error);
       res.status(500).json({ message: "Failed to fetch products" });
@@ -1488,6 +1501,22 @@ export async function registerAdminRoutes(app: Express) {
     } catch (error) {
       console.error("Error fetching suppliers:", error);
       res.status(500).json({ message: "Failed to fetch suppliers" });
+    }
+  });
+
+  app.get("/admin/api/suppliers/:id", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const supplier = await storage.getSupplier(parseInt(id));
+      
+      if (!supplier) {
+        return res.status(404).json({ message: "Supplier not found" });
+      }
+      
+      res.json(supplier);
+    } catch (error) {
+      console.error("Error fetching supplier:", error);
+      res.status(500).json({ message: "Failed to fetch supplier" });
     }
   });
 

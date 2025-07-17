@@ -490,6 +490,9 @@
       const [analyticsData, setAnalyticsData] = useState(null);
       const [editingSupplier, setEditingSupplier] = useState(null);
       const [showEditSupplierModal, setShowEditSupplierModal] = useState(false);
+      const [viewingSupplier, setViewingSupplier] = useState(null);
+      const [showViewSupplierModal, setShowViewSupplierModal] = useState(false);
+      const [supplierDetails, setSupplierDetails] = useState(null);
       
       useEffect(() => {
         fetchStats();
@@ -766,6 +769,47 @@
         } catch (error) {
           console.error('Error updating supplier:', error);
           return { success: false, message: 'Network error during supplier update' };
+        }
+      };
+
+      // Fetch supplier details with related data
+      const fetchSupplierDetails = async (supplierId) => {
+        try {
+          // Fetch supplier info
+          const supplierResponse = await fetch(`/admin/api/suppliers/${supplierId}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          const supplier = await supplierResponse.json();
+
+          // Fetch products associated with this supplier
+          const productsResponse = await fetch(`/admin/api/products?supplierId=${supplierId}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          const supplierProducts = await productsResponse.json();
+
+          // Fetch orders containing products from this supplier
+          const ordersResponse = await fetch(`/admin/api/orders?supplierId=${supplierId}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          const supplierOrders = await ordersResponse.json();
+
+          return {
+            supplier,
+            products: supplierProducts || [],
+            orders: supplierOrders || [],
+            totalProducts: supplierProducts?.length || 0,
+            totalOrders: supplierOrders?.length || 0,
+            totalRevenue: supplierOrders?.reduce((sum, order) => sum + parseFloat(order.totalAmount || 0), 0) || 0
+          };
+        } catch (error) {
+          console.error('Error fetching supplier details:', error);
+          return null;
         }
       };
 
@@ -2244,7 +2288,12 @@
                                     cursor: 'pointer',
                                     fontSize: '12px'
                                   }}
-                                  onClick={() => alert(`Supplier "${supplier.name}" details:\n\n• Products: View associated products\n• Orders: Track supplier orders\n• Performance: View metrics\n• API logs: Check integration status\n• Contacts: Full contact details`)}
+                                  onClick={async () => {
+                                    setViewingSupplier(supplier);
+                                    setShowViewSupplierModal(true);
+                                    const details = await fetchSupplierDetails(supplier.id);
+                                    setSupplierDetails(details);
+                                  }}
                                 >
                                   👁️ View
                                 </button>
@@ -4442,6 +4491,228 @@ TOTAL: $${selectedOrder.totalAmount}
                       </button>
                     </div>
                   </form>
+                </div>
+              </div>
+            )}
+            
+            {/* View Supplier Modal */}
+            {showViewSupplierModal && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1000
+              }}>
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '30px',
+                  borderRadius: '8px',
+                  width: '90%',
+                  maxWidth: '1000px',
+                  maxHeight: '80vh',
+                  overflow: 'auto'
+                }}>
+                  <h3 style={{marginBottom: '20px', color: '#333'}}>
+                    👁️ Supplier Details - {viewingSupplier?.name}
+                  </h3>
+                  
+                  {supplierDetails ? (
+                    <div>
+                      {/* Supplier Overview */}
+                      <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px'}}>
+                        <div style={{padding: '20px', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6'}}>
+                          <h4 style={{marginBottom: '10px', color: '#495057'}}>Total Products</h4>
+                          <p style={{fontSize: '24px', fontWeight: 'bold', color: '#007bff', margin: '0'}}>{supplierDetails.totalProducts}</p>
+                        </div>
+                        <div style={{padding: '20px', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6'}}>
+                          <h4 style={{marginBottom: '10px', color: '#495057'}}>Total Orders</h4>
+                          <p style={{fontSize: '24px', fontWeight: 'bold', color: '#28a745', margin: '0'}}>{supplierDetails.totalOrders}</p>
+                        </div>
+                        <div style={{padding: '20px', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6'}}>
+                          <h4 style={{marginBottom: '10px', color: '#495057'}}>Total Revenue</h4>
+                          <p style={{fontSize: '24px', fontWeight: 'bold', color: '#28a745', margin: '0'}}>€{supplierDetails.totalRevenue.toFixed(2)}</p>
+                        </div>
+                        <div style={{padding: '20px', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6'}}>
+                          <h4 style={{marginBottom: '10px', color: '#495057'}}>Status</h4>
+                          <p style={{fontSize: '18px', fontWeight: 'bold', color: supplierDetails.supplier.isActive ? '#28a745' : '#dc3545', margin: '0'}}>
+                            {supplierDetails.supplier.isActive ? 'Active' : 'Inactive'}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {/* Contact Information */}
+                      <div style={{marginBottom: '30px'}}>
+                        <h4 style={{marginBottom: '15px', color: '#333', borderBottom: '2px solid #007bff', paddingBottom: '5px'}}>📞 Contact Information</h4>
+                        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px'}}>
+                          <div>
+                            <strong>Email:</strong> {supplierDetails.supplier.email || 'Not provided'}
+                          </div>
+                          <div>
+                            <strong>Phone:</strong> {supplierDetails.supplier.phone || 'Not provided'}
+                          </div>
+                          <div>
+                            <strong>Contact Person:</strong> {supplierDetails.supplier.contactPerson || 'Not provided'}
+                          </div>
+                          <div>
+                            <strong>Integration Type:</strong> {supplierDetails.supplier.integrationType || 'Email'}
+                          </div>
+                        </div>
+                        
+                        {supplierDetails.supplier.address && (
+                          <div style={{marginTop: '15px'}}>
+                            <strong>Address:</strong><br />
+                            {supplierDetails.supplier.address}<br />
+                            {supplierDetails.supplier.city && `${supplierDetails.supplier.city}, `}
+                            {supplierDetails.supplier.state && `${supplierDetails.supplier.state} `}
+                            {supplierDetails.supplier.zipCode}<br />
+                            {supplierDetails.supplier.country}
+                          </div>
+                        )}
+                        
+                        {supplierDetails.supplier.notes && (
+                          <div style={{marginTop: '15px'}}>
+                            <strong>Notes:</strong><br />
+                            <div style={{padding: '10px', background: '#f8f9fa', borderRadius: '4px', marginTop: '5px'}}>
+                              {supplierDetails.supplier.notes}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* API Integration Info */}
+                      {supplierDetails.supplier.integrationType === 'api' && (
+                        <div style={{marginBottom: '30px'}}>
+                          <h4 style={{marginBottom: '15px', color: '#333', borderBottom: '2px solid #17a2b8', paddingBottom: '5px'}}>🔗 API Integration</h4>
+                          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '15px'}}>
+                            <div>
+                              <strong>API Endpoint:</strong> {supplierDetails.supplier.apiEndpoint || 'Not configured'}
+                            </div>
+                            <div>
+                              <strong>API Key:</strong> {supplierDetails.supplier.apiKey ? '••••••••••••' : 'Not configured'}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Associated Products */}
+                      <div style={{marginBottom: '30px'}}>
+                        <h4 style={{marginBottom: '15px', color: '#333', borderBottom: '2px solid #ffc107', paddingBottom: '5px'}}>📦 Associated Products ({supplierDetails.totalProducts})</h4>
+                        {supplierDetails.products.length > 0 ? (
+                          <div style={{overflowX: 'auto'}}>
+                            <table style={{width: '100%', borderCollapse: 'collapse'}}>
+                              <thead>
+                                <tr style={{backgroundColor: '#f5f5f5'}}>
+                                  <th style={{padding: '8px', textAlign: 'left', borderBottom: '1px solid #ddd'}}>Product</th>
+                                  <th style={{padding: '8px', textAlign: 'left', borderBottom: '1px solid #ddd'}}>Price</th>
+                                  <th style={{padding: '8px', textAlign: 'left', borderBottom: '1px solid #ddd'}}>Stock</th>
+                                  <th style={{padding: '8px', textAlign: 'left', borderBottom: '1px solid #ddd'}}>Status</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {supplierDetails.products.slice(0, 5).map((product, index) => (
+                                  <tr key={index} style={{borderBottom: '1px solid #eee'}}>
+                                    <td style={{padding: '8px'}}>{product.name}</td>
+                                    <td style={{padding: '8px'}}>€{product.price}</td>
+                                    <td style={{padding: '8px'}}>{product.stockQuantity}</td>
+                                    <td style={{padding: '8px'}}>
+                                      <span style={{
+                                        padding: '2px 6px',
+                                        borderRadius: '3px',
+                                        backgroundColor: product.status === 'active' ? '#d4edda' : '#f8d7da',
+                                        color: product.status === 'active' ? '#155724' : '#721c24',
+                                        fontSize: '12px'
+                                      }}>
+                                        {product.status}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                            {supplierDetails.products.length > 5 && (
+                              <p style={{textAlign: 'center', marginTop: '10px', color: '#666'}}>
+                                ... and {supplierDetails.products.length - 5} more products
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <p style={{color: '#666', fontStyle: 'italic'}}>No products associated with this supplier</p>
+                        )}
+                      </div>
+                      
+                      {/* Recent Orders */}
+                      <div style={{marginBottom: '30px'}}>
+                        <h4 style={{marginBottom: '15px', color: '#333', borderBottom: '2px solid #28a745', paddingBottom: '5px'}}>📋 Recent Orders ({supplierDetails.totalOrders})</h4>
+                        {supplierDetails.orders.length > 0 ? (
+                          <div style={{overflowX: 'auto'}}>
+                            <table style={{width: '100%', borderCollapse: 'collapse'}}>
+                              <thead>
+                                <tr style={{backgroundColor: '#f5f5f5'}}>
+                                  <th style={{padding: '8px', textAlign: 'left', borderBottom: '1px solid #ddd'}}>Order ID</th>
+                                  <th style={{padding: '8px', textAlign: 'left', borderBottom: '1px solid #ddd'}}>Date</th>
+                                  <th style={{padding: '8px', textAlign: 'left', borderBottom: '1px solid #ddd'}}>Amount</th>
+                                  <th style={{padding: '8px', textAlign: 'left', borderBottom: '1px solid #ddd'}}>Status</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {supplierDetails.orders.slice(0, 5).map((order, index) => (
+                                  <tr key={index} style={{borderBottom: '1px solid #eee'}}>
+                                    <td style={{padding: '8px'}}>#{order.id}</td>
+                                    <td style={{padding: '8px'}}>{new Date(order.createdAt).toLocaleDateString()}</td>
+                                    <td style={{padding: '8px'}}>€{order.totalAmount}</td>
+                                    <td style={{padding: '8px'}}>
+                                      <span style={{
+                                        padding: '2px 6px',
+                                        borderRadius: '3px',
+                                        backgroundColor: order.status === 'delivered' ? '#d4edda' : order.status === 'pending' ? '#fff3cd' : '#f8d7da',
+                                        color: order.status === 'delivered' ? '#155724' : order.status === 'pending' ? '#856404' : '#721c24',
+                                        fontSize: '12px'
+                                      }}>
+                                        {order.status}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                            {supplierDetails.orders.length > 5 && (
+                              <p style={{textAlign: 'center', marginTop: '10px', color: '#666'}}>
+                                ... and {supplierDetails.orders.length - 5} more orders
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <p style={{color: '#666', fontStyle: 'italic'}}>No orders from this supplier yet</p>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{textAlign: 'center', padding: '40px'}}>
+                      <div className="loading"></div>
+                      <p style={{marginTop: '20px', color: '#666'}}>Loading supplier details...</p>
+                    </div>
+                  )}
+                  
+                  <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px'}}>
+                    <button
+                      type="button"
+                      className="btn"
+                      style={{background: '#6c757d'}}
+                      onClick={() => {
+                        setShowViewSupplierModal(false);
+                        setViewingSupplier(null);
+                        setSupplierDetails(null);
+                      }}
+                    >
+                      Close
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
