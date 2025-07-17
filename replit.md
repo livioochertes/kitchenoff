@@ -33,6 +33,8 @@ Preferred communication style: Simple, everyday language.
 - COMPLETED: Fixed critical database field name mismatch - UI now uses snake_case (show_on_main_top, show_on_main_shop, sort_order) to match database schema
 - COMPLETED: Resolved homepage configuration display issue - categories now properly show their saved state in admin interface
 - COMPLETED: Fixed all JavaScript field references to use correct database column names throughout admin interface
+- COMPLETED: Fixed server-side admin routes to use correct snake_case field names in database update operations
+- COMPLETED: Homepage configuration save functionality now works correctly - categories properly persist to database with correct field names
 
 ### July 16, 2025
 - COMPLETED: Implemented comprehensive order acceptance flow with email notifications system
