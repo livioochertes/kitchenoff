@@ -5744,7 +5744,7 @@ TOTAL: $${selectedOrder.totalAmount}
                       <strong style={{color: '#1976d2'}}>Important:</strong>
                     </div>
                     <p style={{color: '#1976d2', fontSize: '14px', margin: '0'}}>
-                      Categories can be added to Main Top without restrictions. When you add a category to Shop Categories, it will be automatically removed from Main Top if it exists there.
+                      You can select categories for both sections while configuring. When you save, categories that appear in both sections will be kept in Main Top and automatically removed from Shop Categories.
                     </p>
                   </div>
                   
@@ -5821,7 +5821,6 @@ TOTAL: $${selectedOrder.totalAmount}
                             onChange={(e) => {
                               const categoryId = parseInt(e.target.value);
                               if (categoryId && !homepageConfig.mainTop.includes(categoryId)) {
-                                // Add to mainTop without removing from mainShop yet
                                 setHomepageConfig({
                                   ...homepageConfig,
                                   mainTop: [...homepageConfig.mainTop, categoryId]
@@ -5832,10 +5831,12 @@ TOTAL: $${selectedOrder.totalAmount}
                             value=""
                           >
                             <option value="">+ Add Category to Main Top</option>
-                            {categories.filter(cat => 
-                              !homepageConfig.mainTop.includes(cat.id)
-                            ).map(category => (
-                              <option key={category.id} value={category.id}>{category.name}</option>
+                            {categories.map(category => (
+                              <option key={category.id} value={category.id}>
+                                {category.name} 
+                                {homepageConfig.mainTop.includes(category.id) && ' (Already selected)'}
+                                {homepageConfig.mainShop.includes(category.id) && ' (In Shop section)'}
+                              </option>
                             ))}
                           </select>
                         )}
@@ -5912,13 +5913,8 @@ TOTAL: $${selectedOrder.totalAmount}
                             onChange={(e) => {
                               const categoryId = parseInt(e.target.value);
                               if (categoryId && !homepageConfig.mainShop.includes(categoryId)) {
-                                // Remove from mainTop if it exists there, then add to mainShop
-                                const newMainTop = homepageConfig.mainTop.includes(categoryId) 
-                                  ? homepageConfig.mainTop.filter(id => id !== categoryId)
-                                  : homepageConfig.mainTop;
                                 setHomepageConfig({
                                   ...homepageConfig,
-                                  mainTop: newMainTop,
                                   mainShop: [...homepageConfig.mainShop, categoryId]
                                 });
                               }
@@ -5927,10 +5923,12 @@ TOTAL: $${selectedOrder.totalAmount}
                             value=""
                           >
                             <option value="">+ Add Category to Shop Section</option>
-                            {categories.filter(cat => 
-                              !homepageConfig.mainShop.includes(cat.id)
-                            ).map(category => (
-                              <option key={category.id} value={category.id}>{category.name}</option>
+                            {categories.map(category => (
+                              <option key={category.id} value={category.id}>
+                                {category.name}
+                                {homepageConfig.mainShop.includes(category.id) && ' (Already selected)'}
+                                {homepageConfig.mainTop.includes(category.id) && ' (In Main Top)'}
+                              </option>
                             ))}
                           </select>
                         )}
@@ -5993,7 +5991,7 @@ TOTAL: $${selectedOrder.totalAmount}
                             },
                             body: JSON.stringify({
                               mainTopCategories: homepageConfig.mainTop,
-                              mainShopCategories: homepageConfig.mainShop
+                              mainShopCategories: homepageConfig.mainShop.filter(id => !homepageConfig.mainTop.includes(id))
                             })
                           });
                           
