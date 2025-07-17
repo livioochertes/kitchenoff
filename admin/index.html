@@ -488,6 +488,8 @@
       const [filteredProducts, setFilteredProducts] = useState([]);
       const [showProductAnalytics, setShowProductAnalytics] = useState(false);
       const [analyticsData, setAnalyticsData] = useState(null);
+      const [editingSupplier, setEditingSupplier] = useState(null);
+      const [showEditSupplierModal, setShowEditSupplierModal] = useState(false);
       
       useEffect(() => {
         fetchStats();
@@ -740,6 +742,30 @@
         } catch (error) {
           console.error('Error forwarding order:', error);
           alert('❌ Network error during order forwarding');
+        }
+      };
+
+      // Update supplier
+      const updateSupplier = async (supplierId, supplierData) => {
+        try {
+          const response = await fetch(`/admin/api/suppliers/${supplierId}`, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(supplierData)
+          });
+          const data = await response.json();
+          
+          if (response.ok) {
+            return { success: true, data };
+          } else {
+            return { success: false, message: data.message };
+          }
+        } catch (error) {
+          console.error('Error updating supplier:', error);
+          return { success: false, message: 'Network error during supplier update' };
         }
       };
 
@@ -2201,7 +2227,10 @@
                                     cursor: 'pointer',
                                     fontSize: '12px'
                                   }}
-                                  onClick={() => alert(`Edit supplier "${supplier.name}":\n\n• Update contact information\n• Modify API settings\n• Change integration type\n• Update status\n• Edit notes`)}
+                                  onClick={() => {
+                                    setEditingSupplier(supplier);
+                                    setShowEditSupplierModal(true);
+                                  }}
                                 >
                                   ✏️ Edit
                                 </button>
@@ -2789,6 +2818,61 @@
         const [uploadedImages, setUploadedImages] = useState([]);
         const [uploading, setUploading] = useState(false);
         const [uploadProgress, setUploadProgress] = useState(0);
+
+        const [supplierFormData, setSupplierFormData] = useState({
+          name: '',
+          email: '',
+          phone: '',
+          address: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          country: '',
+          contactPerson: '',
+          apiEndpoint: '',
+          apiKey: '',
+          integrationType: 'email',
+          notes: '',
+          isActive: true
+        });
+
+        // Populate supplier form when editing
+        useEffect(() => {
+          if (editingSupplier) {
+            setSupplierFormData({
+              name: editingSupplier.name || '',
+              email: editingSupplier.email || '',
+              phone: editingSupplier.phone || '',
+              address: editingSupplier.address || '',
+              city: editingSupplier.city || '',
+              state: editingSupplier.state || '',
+              zipCode: editingSupplier.zipCode || '',
+              country: editingSupplier.country || '',
+              contactPerson: editingSupplier.contactPerson || '',
+              apiEndpoint: editingSupplier.apiEndpoint || '',
+              apiKey: editingSupplier.apiKey || '',
+              integrationType: editingSupplier.integrationType || 'email',
+              notes: editingSupplier.notes || '',
+              isActive: editingSupplier.isActive !== undefined ? editingSupplier.isActive : true
+            });
+          }
+        }, [editingSupplier]);
+
+        // Handle supplier form submission
+        const handleSupplierSubmit = async (e) => {
+          e.preventDefault();
+          
+          const result = await updateSupplier(editingSupplier.id, supplierFormData);
+          
+          if (result.success) {
+            alert('✅ Supplier updated successfully!');
+            setShowEditSupplierModal(false);
+            setEditingSupplier(null);
+            fetchSuppliers(); // Refresh the suppliers list
+          } else {
+            alert(`❌ Error updating supplier: ${result.message}`);
+          }
+        };
 
         // Image upload function
         const uploadImages = async (files) => {
@@ -4047,6 +4131,317 @@ TOTAL: $${selectedOrder.totalAmount}
                       Cancel
                     </button>
                   </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Edit Supplier Modal */}
+            {showEditSupplierModal && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1000
+              }}>
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '30px',
+                  borderRadius: '8px',
+                  width: '90%',
+                  maxWidth: '800px',
+                  maxHeight: '80vh',
+                  overflow: 'auto'
+                }}>
+                  <h3 style={{marginBottom: '20px', color: '#333'}}>
+                    ✏️ Edit Supplier
+                  </h3>
+                  
+                  <form onSubmit={handleSupplierSubmit}>
+                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px'}}>
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
+                          Company Name *
+                        </label>
+                        <input
+                          type="text"
+                          value={supplierFormData.name}
+                          onChange={(e) => setSupplierFormData({...supplierFormData, name: e.target.value})}
+                          required
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
+                          Email *
+                        </label>
+                        <input
+                          type="email"
+                          value={supplierFormData.email}
+                          onChange={(e) => setSupplierFormData({...supplierFormData, email: e.target.value})}
+                          required
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
+                          Phone
+                        </label>
+                        <input
+                          type="tel"
+                          value={supplierFormData.phone}
+                          onChange={(e) => setSupplierFormData({...supplierFormData, phone: e.target.value})}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
+                          Contact Person
+                        </label>
+                        <input
+                          type="text"
+                          value={supplierFormData.contactPerson}
+                          onChange={(e) => setSupplierFormData({...supplierFormData, contactPerson: e.target.value})}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div style={{marginTop: '20px'}}>
+                      <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
+                        Address
+                      </label>
+                      <input
+                        type="text"
+                        value={supplierFormData.address}
+                        onChange={(e) => setSupplierFormData({...supplierFormData, address: e.target.value})}
+                        style={{
+                          width: '100%',
+                          padding: '8px',
+                          border: '1px solid #ddd',
+                          borderRadius: '4px'
+                        }}
+                      />
+                    </div>
+                    
+                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginTop: '20px'}}>
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
+                          City
+                        </label>
+                        <input
+                          type="text"
+                          value={supplierFormData.city}
+                          onChange={(e) => setSupplierFormData({...supplierFormData, city: e.target.value})}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
+                          State/Region
+                        </label>
+                        <input
+                          type="text"
+                          value={supplierFormData.state}
+                          onChange={(e) => setSupplierFormData({...supplierFormData, state: e.target.value})}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
+                          ZIP Code
+                        </label>
+                        <input
+                          type="text"
+                          value={supplierFormData.zipCode}
+                          onChange={(e) => setSupplierFormData({...supplierFormData, zipCode: e.target.value})}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
+                          Country
+                        </label>
+                        <input
+                          type="text"
+                          value={supplierFormData.country}
+                          onChange={(e) => setSupplierFormData({...supplierFormData, country: e.target.value})}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginTop: '20px'}}>
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
+                          Integration Type
+                        </label>
+                        <select
+                          value={supplierFormData.integrationType}
+                          onChange={(e) => setSupplierFormData({...supplierFormData, integrationType: e.target.value})}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        >
+                          <option value="email">Email</option>
+                          <option value="api">API</option>
+                          <option value="manual">Manual</option>
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
+                          Status
+                        </label>
+                        <select
+                          value={supplierFormData.isActive}
+                          onChange={(e) => setSupplierFormData({...supplierFormData, isActive: e.target.value === 'true'})}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        >
+                          <option value="true">Active</option>
+                          <option value="false">Inactive</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    {supplierFormData.integrationType === 'api' && (
+                      <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginTop: '20px'}}>
+                        <div>
+                          <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
+                            API Endpoint
+                          </label>
+                          <input
+                            type="url"
+                            value={supplierFormData.apiEndpoint}
+                            onChange={(e) => setSupplierFormData({...supplierFormData, apiEndpoint: e.target.value})}
+                            placeholder="https://api.supplier.com/v1/"
+                            style={{
+                              width: '100%',
+                              padding: '8px',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px'
+                            }}
+                          />
+                        </div>
+                        
+                        <div>
+                          <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
+                            API Key
+                          </label>
+                          <input
+                            type="password"
+                            value={supplierFormData.apiKey}
+                            onChange={(e) => setSupplierFormData({...supplierFormData, apiKey: e.target.value})}
+                            placeholder="Enter API key"
+                            style={{
+                              width: '100%',
+                              padding: '8px',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px'
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div style={{marginTop: '20px'}}>
+                      <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
+                        Notes
+                      </label>
+                      <textarea
+                        value={supplierFormData.notes}
+                        onChange={(e) => setSupplierFormData({...supplierFormData, notes: e.target.value})}
+                        rows="3"
+                        style={{
+                          width: '100%',
+                          padding: '8px',
+                          border: '1px solid #ddd',
+                          borderRadius: '4px',
+                          resize: 'vertical'
+                        }}
+                      />
+                    </div>
+                    
+                    <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px'}}>
+                      <button
+                        type="button"
+                        className="btn"
+                        style={{background: '#6c757d'}}
+                        onClick={() => {
+                          setShowEditSupplierModal(false);
+                          setEditingSupplier(null);
+                        }}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="btn"
+                        style={{background: '#007bff'}}
+                      >
+                        ✅ Update Supplier
+                      </button>
+                    </div>
+                  </form>
                 </div>
               </div>
             )}
