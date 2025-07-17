@@ -5998,7 +5998,7 @@ TOTAL: $${selectedOrder.totalAmount}
                             },
                             body: JSON.stringify({
                               mainTopCategories: homepageConfig.mainTop,
-                              mainShopCategories: homepageConfig.mainShop.filter(id => !homepageConfig.mainTop.includes(id))
+                              mainShopCategories: homepageConfig.mainShop
                             })
                           });
                           

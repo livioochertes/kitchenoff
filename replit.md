@@ -46,6 +46,8 @@ Preferred communication style: Simple, everyday language.
 - COMPLETED: Application restarted to refresh in-memory cache with updated database values
 - COMPLETED: Fixed sample data seeding to include permanent homepage category assignments (showOnMainTop, showOnMainShop, sortOrder)
 - COMPLETED: Homepage category assignments now persist across server restarts - no longer lost when database is reseeded
+- COMPLETED: Fixed homepage configuration modal bug where Shop Categories disappeared after updating settings
+- COMPLETED: Removed mutual exclusivity filter that was preventing categories from appearing in both Main Top and Shop sections
 
 ### July 16, 2025
 - COMPLETED: Implemented comprehensive order acceptance flow with email notifications system
