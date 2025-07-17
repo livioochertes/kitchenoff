@@ -115,7 +115,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {categories.filter(category => category.showOnMainShop).sort((a, b) => a.sortOrder - b.sortOrder).map((category) => (
               <Card key={category.id} className="category-card group cursor-pointer">
                 <Link href={`/products?category=${category.slug}`}>
