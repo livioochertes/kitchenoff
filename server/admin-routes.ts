@@ -2105,7 +2105,6 @@ export async function registerAdminRoutes(app: Express) {
       const mainTopPromises = mainTopCategories.map((categoryId, index) => 
         storage.updateCategory(parseInt(categoryId), { 
           showOnMainTop: true, 
-          showOnMainShop: false,
           sortOrder: index + 1 
         })
       );
@@ -2114,7 +2113,6 @@ export async function registerAdminRoutes(app: Express) {
       // Update main shop categories
       const mainShopPromises = mainShopCategories.map((categoryId, index) => 
         storage.updateCategory(parseInt(categoryId), { 
-          showOnMainTop: false, 
           showOnMainShop: true,
           sortOrder: index + 1 
         })

@@ -48,6 +48,8 @@ Preferred communication style: Simple, everyday language.
 - COMPLETED: Homepage category assignments now persist across server restarts - no longer lost when database is reseeded
 - COMPLETED: Fixed homepage configuration modal bug where Shop Categories disappeared after updating settings
 - COMPLETED: Removed mutual exclusivity filter that was preventing categories from appearing in both Main Top and Shop sections
+- COMPLETED: Fixed backend API endpoint bug that was forcing mutual exclusivity between Main Top and Shop categories
+- COMPLETED: Backend now allows categories to appear in both sections simultaneously without resetting the other section
 
 ### July 16, 2025
 - COMPLETED: Implemented comprehensive order acceptance flow with email notifications system
