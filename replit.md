@@ -42,7 +42,7 @@ Preferred communication style: Simple, everyday language.
 - COMPLETED: Verified admin API endpoints correctly return category data with homepage positioning fields (showOnMainTop, showOnMainShop, sortOrder)
 - COMPLETED: Database updated with correct homepage category assignments as requested by user
 - COMPLETED: Main Top Categories (4): Cleaning & Sanitizing, Food Labels, HACCP Equipment, Kitchen Supplies
-- COMPLETED: Shop Categories (1): Storage Solutions  
+- COMPLETED: Shop Categories (3): Cleaning & Sanitizing, Food Labels, HACCP Equipment  
 - COMPLETED: Application restarted to refresh in-memory cache with updated database values
 - COMPLETED: Fixed sample data seeding to include permanent homepage category assignments (showOnMainTop, showOnMainShop, sortOrder)
 - COMPLETED: Homepage category assignments now persist across server restarts - no longer lost when database is reseeded

@@ -21,7 +21,7 @@ export async function seedDatabase() {
         description: "Professional food labeling solutions for restaurants and food service",
         imageUrl: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
         showOnMainTop: true,
-        showOnMainShop: false,
+        showOnMainShop: true,
         sortOrder: 2
       },
       {
@@ -30,7 +30,7 @@ export async function seedDatabase() {
         description: "Essential equipment for HACCP compliance and food safety",
         imageUrl: "https://images.unsplash.com/photo-1584308972272-9e4e7685e80f?w=400&h=300&fit=crop",
         showOnMainTop: true,
-        showOnMainShop: false,
+        showOnMainShop: true,
         sortOrder: 3
       },
       {
@@ -48,7 +48,7 @@ export async function seedDatabase() {
         description: "Professional cleaning and sanitizing products for food service",
         imageUrl: "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400&h=300&fit=crop",
         showOnMainTop: true,
-        showOnMainShop: false,
+        showOnMainShop: true,
         sortOrder: 1
       },
       {
@@ -57,8 +57,8 @@ export async function seedDatabase() {
         description: "Food storage containers and organization systems",
         imageUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop",
         showOnMainTop: false,
-        showOnMainShop: true,
-        sortOrder: 1
+        showOnMainShop: false,
+        sortOrder: 0
       }
     ]).returning();
 
