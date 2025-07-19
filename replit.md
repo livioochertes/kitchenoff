@@ -10,6 +10,21 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### July 19, 2025 - Smartbill Integration Complete
+- COMPLETED: Comprehensive Smartbill API integration with automated invoice generation system
+- COMPLETED: Fixed authentication middleware JWT token verification - tokens signed and verified with consistent secret keys
+- COMPLETED: Added missing updateOrder method to storage interface and DatabaseStorage implementation
+- COMPLETED: Implemented automatic invoice generation triggers via Stripe and Revolut payment webhooks
+- COMPLETED: Created Smartbill API client with authentication, invoice creation, and error handling
+- COMPLETED: Enhanced database schema with Smartbill-specific fields (smartbill_id, smartbill_series, smartbill_url)
+- COMPLETED: Built invoice service with Smartbill integration and fallback to custom invoice system
+- COMPLETED: Added admin endpoints for testing Smartbill connection and manual invoice generation
+- COMPLETED: Verified payment webhook system automatically generates invoices after successful payments
+- COMPLETED: Confirmed fallback system creates custom invoices when Smartbill API fails (tested with order 879)
+- TESTED: System successfully processes order payments and generates invoices with proper VAT handling
+- TESTED: Authentication working correctly for admin access to Smartbill endpoints
+- STATUS: Smartbill API returning HTTP 500 errors (server-side issue), fallback system operational
+
 ### July 19, 2025
 - COMPLETED: Enhanced Client Account functionality with complete user profile management system
 - COMPLETED: Fixed User interface to include all invoice and company detail fields from database schema

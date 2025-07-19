@@ -9,6 +9,45 @@ import Stripe from "stripe";
 import OpenAI from "openai";
 import QRCode from "qrcode";
 import path from "path";
+import { createInvoiceService } from './invoice-service.js';
+
+// Authentication interfaces
+interface AuthRequest extends Request {
+  userId?: number;
+  isAdmin?: boolean;
+}
+
+// JWT authentication middleware
+const authenticateToken = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+      console.log('❌ No token provided in Authorization header');
+      return res.status(401).json({ message: "Access token required" });
+    }
+
+    console.log('🔍 Attempting to verify token:', token?.substring(0, 20) + '...');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key") as any;
+    console.log('✅ Token decoded successfully:', { id: decoded.id, email: decoded.email });
+    
+    // Get user to check admin status
+    const user = await storage.getUser(decoded.id);
+    if (!user) {
+      console.log('❌ User not found for id:', decoded.id);
+      return res.status(401).json({ message: "Invalid token" });
+    }
+
+    console.log('✅ User found:', { id: user.id, email: user.email, isAdmin: user.isAdmin });
+    req.userId = decoded.id;
+    req.isAdmin = user.isAdmin || false;
+    next();
+  } catch (error) {
+    console.log('❌ Token verification failed:', error.message);
+    return res.status(403).json({ message: "Invalid token" });
+  }
+};
 
 // Ultra-aggressive permanent in-memory cache
 const cache = new Map<string, any>();
@@ -18,6 +57,10 @@ const CACHE_REFRESH_INTERVAL = 300000; // 5 minutes
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+// Initialize Invoice Service with Smartbill enabled
+process.env.ENABLE_SMARTBILL = 'true';
+const invoiceService = createInvoiceService();
 
 function getCachedData(key: string) {
   return cache.get(key) || null;
@@ -86,36 +129,7 @@ setInterval(async () => {
   }
 }, CACHE_REFRESH_INTERVAL);
 
-// JWT middleware
-interface AuthRequest extends Request {
-  userId?: number;
-}
-
-const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({ message: "Access token required" });
-  }
-
-  // Try to verify as admin token first
-  jwt.verify(token, process.env.JWT_SECRET || "your-secret-key", async (err: any, user: any) => {
-    if (err) {
-      return res.status(403).json({ message: "Invalid token" });
-    }
-    
-    // Check if it's an admin token
-    if (user.isAdmin) {
-      req.userId = user.id;
-      return next();
-    }
-    
-    // Otherwise treat as regular user token
-    req.userId = user.id;
-    next();
-  });
-};
+// Remove duplicate - using the one defined above
 
 const requireAdmin = async (req: AuthRequest, res: Response, next: NextFunction) => {
   if (!req.userId) {
@@ -1096,7 +1110,7 @@ Always be helpful, professional, and focus on practical solutions. When recommen
   // Stripe Payment Routes
   app.post("/api/payments/stripe/create-payment-intent", async (req, res) => {
     try {
-      const { amount, currency } = req.body;
+      const { amount, currency, orderId } = req.body;
 
       if (!amount || !currency) {
         return res.status(400).json({ message: "Amount and currency are required" });
@@ -1111,7 +1125,8 @@ Always be helpful, professional, and focus on practical solutions. When recommen
         amount: Math.round(amount),
         currency: currency.toLowerCase(),
         metadata: {
-          source: 'kitchenpro-supply'
+          source: 'kitchenoff',
+          orderId: orderId?.toString() || ''
         }
       });
 
@@ -1119,6 +1134,66 @@ Always be helpful, professional, and focus on practical solutions. When recommen
     } catch (error) {
       console.error("Error creating Stripe payment intent:", error);
       res.status(500).json({ message: "Failed to create payment intent" });
+    }
+  });
+
+  // Stripe webhook for payment completion
+  app.post("/api/payments/stripe/webhook", async (req, res) => {
+    try {
+      const event = req.body;
+
+      console.log("Stripe webhook received:", event.type);
+
+      // Handle different webhook events
+      if (event.type === 'payment_intent.succeeded') {
+        const paymentIntent = event.data.object;
+        const orderId = paymentIntent.metadata.orderId;
+
+        if (orderId) {
+          console.log(`Payment succeeded for order ${orderId}`);
+          
+          // Update order status
+          await storage.updateOrder(parseInt(orderId), {
+            paymentStatus: 'paid',
+            status: 'processing'
+          });
+
+          // Generate invoice automatically via Smartbill API
+          try {
+            const invoice = await invoiceService.generateInvoiceAfterPayment(
+              parseInt(orderId),
+              {
+                status: 'succeeded',
+                paymentMethod: 'card',
+                paymentId: paymentIntent.id,
+                amount: paymentIntent.amount / 100 // Convert from cents
+              }
+            );
+
+            console.log(`Invoice generated automatically for order ${orderId}:`, invoice.invoiceNumber);
+          } catch (invoiceError) {
+            console.error(`Failed to generate invoice for order ${orderId}:`, invoiceError);
+            // Don't fail the webhook - invoice can be generated manually later
+          }
+        }
+      } else if (event.type === 'payment_intent.payment_failed') {
+        const paymentIntent = event.data.object;
+        const orderId = paymentIntent.metadata.orderId;
+
+        if (orderId) {
+          console.log(`Payment failed for order ${orderId}`);
+          
+          await storage.updateOrder(parseInt(orderId), {
+            paymentStatus: 'failed',
+            status: 'cancelled'
+          });
+        }
+      }
+
+      res.status(200).json({ received: true });
+    } catch (error) {
+      console.error("Error processing Stripe webhook:", error);
+      res.status(500).json({ message: "Webhook processing failed" });
     }
   });
 
@@ -1179,17 +1254,62 @@ Always be helpful, professional, and focus on practical solutions. When recommen
       // Handle different webhook events
       switch (event) {
         case "ORDER_PAYMENT_COMPLETED":
-          // Update order status in database
           console.log("Payment completed for order:", data.merchant_order_ext_ref);
+          
+          // Extract order ID from merchant reference
+          const orderIdMatch = data.merchant_order_ext_ref?.match(/order_(\d+)/);
+          if (orderIdMatch) {
+            const orderId = parseInt(orderIdMatch[1]);
+            
+            // Update order status
+            await storage.updateOrder(orderId, {
+              paymentStatus: 'paid',
+              status: 'processing'
+            });
+
+            // Generate invoice automatically via Smartbill API
+            try {
+              const invoice = await invoiceService.generateInvoiceAfterPayment(
+                orderId,
+                {
+                  status: 'completed',
+                  paymentMethod: 'revolut_pay',
+                  paymentId: data.id,
+                  amount: data.order_amount?.value / 100 || 0
+                }
+              );
+
+              console.log(`Invoice generated automatically for order ${orderId}:`, invoice.invoiceNumber);
+            } catch (invoiceError) {
+              console.error(`Failed to generate invoice for order ${orderId}:`, invoiceError);
+            }
+          }
           break;
+          
         case "ORDER_PAYMENT_FAILED":
-          // Handle payment failure
           console.log("Payment failed for order:", data.merchant_order_ext_ref);
+          
+          const failedOrderIdMatch = data.merchant_order_ext_ref?.match(/order_(\d+)/);
+          if (failedOrderIdMatch) {
+            await storage.updateOrder(parseInt(failedOrderIdMatch[1]), {
+              paymentStatus: 'failed',
+              status: 'cancelled'
+            });
+          }
           break;
+          
         case "ORDER_PAYMENT_CANCELLED":
-          // Handle payment cancellation
           console.log("Payment cancelled for order:", data.merchant_order_ext_ref);
+          
+          const cancelledOrderIdMatch = data.merchant_order_ext_ref?.match(/order_(\d+)/);
+          if (cancelledOrderIdMatch) {
+            await storage.updateOrder(parseInt(cancelledOrderIdMatch[1]), {
+              paymentStatus: 'cancelled',
+              status: 'cancelled'
+            });
+          }
           break;
+          
         default:
           console.log("Unknown webhook event:", event);
       }
@@ -1198,6 +1318,48 @@ Always be helpful, professional, and focus on practical solutions. When recommen
     } catch (error) {
       console.error("Error processing webhook:", error);
       res.status(500).json({ message: "Webhook processing failed" });
+    }
+  });
+
+  // Smartbill API Test endpoints
+  app.get("/api/smartbill/test", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      if (!req.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const connected = await invoiceService.testConnection();
+      res.json({ 
+        connected,
+        smartbillEnabled: process.env.ENABLE_SMARTBILL === 'true',
+        hasCredentials: !!(process.env.SMARTBILL_USERNAME && process.env.SMARTBILL_TOKEN && process.env.SMARTBILL_COMPANY_VAT)
+      });
+    } catch (error) {
+      console.error("Error testing Smartbill connection:", error);
+      res.status(500).json({ message: "Failed to test connection", error: error.message });
+    }
+  });
+
+  app.post("/api/orders/:orderId/generate-invoice-smartbill", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      if (!req.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const orderId = parseInt(req.params.orderId);
+      const { paymentMethod = 'card' } = req.body;
+
+      const invoice = await invoiceService.generateInvoiceAfterPayment(orderId, {
+        status: 'succeeded',
+        paymentMethod,
+        paymentId: `manual_${Date.now()}`,
+        amount: 0 // Will be calculated from order
+      });
+
+      res.json(invoice);
+    } catch (error) {
+      console.error("Error generating test invoice:", error);
+      res.status(500).json({ message: "Failed to generate invoice", error: error.message });
     }
   });
 

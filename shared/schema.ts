@@ -131,7 +131,7 @@ export const invoices = pgTable("invoices", {
   issueDate: timestamp("issue_date").defaultNow().notNull(),
   supplyDate: timestamp("supply_date"),
   dueDate: timestamp("due_date"),
-  status: varchar("status", { length: 50 }).default("pending").notNull(), // pending, paid, overdue, cancelled
+  status: varchar("status", { length: 50 }).default("pending").notNull(), // pending, paid, overdue, cancelled, issued
   subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
   vatAmount: decimal("vat_amount", { precision: 10, scale: 2 }).default("0.00"),
   totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
@@ -139,6 +139,11 @@ export const invoices = pgTable("invoices", {
   paymentMethod: varchar("payment_method", { length: 50 }), // card, wire_transfer, cash
   paymentLink: text("payment_link"), // For wire transfer QR codes
   notes: text("notes"),
+  // Smartbill integration fields
+  smartbillSeries: varchar("smartbill_series", { length: 50 }), // Smartbill document series
+  smartbillNumber: varchar("smartbill_number", { length: 50 }), // Smartbill document number
+  smartbillId: varchar("smartbill_id", { length: 100 }), // Smartbill internal ID
+  smartbillUrl: text("smartbill_url"), // Direct link to Smartbill invoice
   createdAt: timestamp("created_at").defaultNow(),
 });
 
