@@ -220,6 +220,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         firstName: user.firstName,
         lastName: user.lastName,
         isAdmin: user.isAdmin,
+        // Invoice details fields
+        companyName: user.companyName,
+        vatNumber: user.vatNumber,
+        registrationNumber: user.registrationNumber,
+        taxId: user.taxId,
+        companyAddress: user.companyAddress,
+        companyCity: user.companyCity,
+        companyState: user.companyState,
+        companyZip: user.companyZip,
+        companyCountry: user.companyCountry,
+        billingEmail: user.billingEmail,
+        billingPhone: user.billingPhone,
+        // Delivery address
+        deliveryAddress: user.deliveryAddress,
+        deliveryCity: user.deliveryCity,
+        deliveryState: user.deliveryState,
+        deliveryZip: user.deliveryZip,
+        deliveryCountry: user.deliveryCountry,
+        deliveryInstructions: user.deliveryInstructions,
       });
     } catch (error) {
       console.error("Get user error:", error);
@@ -250,7 +269,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email: updatedUser.email, 
         firstName: updatedUser.firstName, 
         lastName: updatedUser.lastName, 
-        isAdmin: updatedUser.isAdmin 
+        isAdmin: updatedUser.isAdmin,
+        // Include invoice fields in profile response too
+        companyName: updatedUser.companyName,
+        vatNumber: updatedUser.vatNumber,
+        registrationNumber: updatedUser.registrationNumber,
+        taxId: updatedUser.taxId,
+        companyAddress: updatedUser.companyAddress,
+        companyCity: updatedUser.companyCity,
+        companyState: updatedUser.companyState,
+        companyZip: updatedUser.companyZip,
+        companyCountry: updatedUser.companyCountry,
+        billingEmail: updatedUser.billingEmail,
+        billingPhone: updatedUser.billingPhone,
+        deliveryAddress: updatedUser.deliveryAddress,
+        deliveryCity: updatedUser.deliveryCity,
+        deliveryState: updatedUser.deliveryState,
+        deliveryZip: updatedUser.deliveryZip,
+        deliveryCountry: updatedUser.deliveryCountry,
+        deliveryInstructions: updatedUser.deliveryInstructions,
       });
     } catch (error) {
       console.error("Error updating profile:", error);

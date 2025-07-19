@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
@@ -50,7 +50,7 @@ type InvoiceFormData = z.infer<typeof invoiceSchema>;
 
 export default function Account() {
   const [activeTab, setActiveTab] = useState("profile");
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, updateUser } = useAuth();
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -68,25 +68,56 @@ export default function Account() {
   const invoiceForm = useForm<InvoiceFormData>({
     resolver: zodResolver(invoiceSchema),
     defaultValues: {
-      companyName: user?.companyName || "",
-      vatNumber: user?.vatNumber || "",
-      registrationNumber: user?.registrationNumber || "",
-      taxId: user?.taxId || "",
-      companyAddress: user?.companyAddress || "",
-      companyCity: user?.companyCity || "",
-      companyState: user?.companyState || "",
-      companyZip: user?.companyZip || "",
-      companyCountry: user?.companyCountry || "",
-      billingEmail: user?.billingEmail || "",
-      billingPhone: user?.billingPhone || "",
-      deliveryAddress: user?.deliveryAddress || "",
-      deliveryCity: user?.deliveryCity || "",
-      deliveryState: user?.deliveryState || "",
-      deliveryZip: user?.deliveryZip || "",
-      deliveryCountry: user?.deliveryCountry || "",
-      deliveryInstructions: user?.deliveryInstructions || "",
+      companyName: "",
+      vatNumber: "",
+      registrationNumber: "",
+      taxId: "",
+      companyAddress: "",
+      companyCity: "",
+      companyState: "",
+      companyZip: "",
+      companyCountry: "",
+      billingEmail: "",
+      billingPhone: "",
+      deliveryAddress: "",
+      deliveryCity: "",
+      deliveryState: "",
+      deliveryZip: "",
+      deliveryCountry: "",
+      deliveryInstructions: "",
     },
   });
+
+  // Update forms when user data changes
+  useEffect(() => {
+    if (user) {
+      profileForm.reset({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+      });
+      
+      invoiceForm.reset({
+        companyName: user.companyName || "",
+        vatNumber: user.vatNumber || "",
+        registrationNumber: user.registrationNumber || "",
+        taxId: user.taxId || "",
+        companyAddress: user.companyAddress || "",
+        companyCity: user.companyCity || "",
+        companyState: user.companyState || "",
+        companyZip: user.companyZip || "",
+        companyCountry: user.companyCountry || "",
+        billingEmail: user.billingEmail || "",
+        billingPhone: user.billingPhone || "",
+        deliveryAddress: user.deliveryAddress || "",
+        deliveryCity: user.deliveryCity || "",
+        deliveryState: user.deliveryState || "",
+        deliveryZip: user.deliveryZip || "",
+        deliveryCountry: user.deliveryCountry || "",
+        deliveryInstructions: user.deliveryInstructions || "",
+      });
+    }
+  }, [user, profileForm, invoiceForm]);
 
   // Redirect if not authenticated
   if (!isLoading && !isAuthenticated) {
@@ -106,12 +137,16 @@ export default function Account() {
       const response = await apiRequest("PUT", "/api/auth/profile", data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (updatedUser) => {
       toast({
         title: "Profile updated",
         description: "Your profile has been updated successfully.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      // Update the auth state with the new user data
+      if (updatedUser) {
+        updateUser(updatedUser);
+      }
     },
     onError: (error) => {
       toast({
@@ -128,12 +163,16 @@ export default function Account() {
       const response = await apiRequest("PUT", "/api/auth/invoice", data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (updatedUser) => {
       toast({
         title: "Invoice details updated",
         description: "Your invoice details have been updated successfully.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      // Update the auth state with the new user data
+      if (updatedUser) {
+        updateUser(updatedUser);
+      }
     },
     onError: (error) => {
       toast({

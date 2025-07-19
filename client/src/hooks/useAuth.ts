@@ -7,6 +7,25 @@ interface User {
   firstName: string;
   lastName: string;
   isAdmin: boolean;
+  // Invoice details fields
+  companyName?: string;
+  vatNumber?: string;
+  registrationNumber?: string;
+  taxId?: string;
+  companyAddress?: string;
+  companyCity?: string;
+  companyState?: string;
+  companyZip?: string;
+  companyCountry?: string;
+  billingEmail?: string;
+  billingPhone?: string;
+  // Delivery address
+  deliveryAddress?: string;
+  deliveryCity?: string;
+  deliveryState?: string;
+  deliveryZip?: string;
+  deliveryCountry?: string;
+  deliveryInstructions?: string;
 }
 
 interface AuthState {
