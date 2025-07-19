@@ -1349,6 +1349,7 @@
 
       const uploadCategoryImage = async (categoryId, file) => {
         try {
+          const token = localStorage.getItem('adminToken');
           console.log('uploadCategoryImage called with:', { categoryId, fileName: file.name, fileSize: file.size, fileType: file.type });
           console.log('Current token:', token);
           
