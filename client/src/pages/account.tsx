@@ -333,12 +333,51 @@ export default function Account() {
     }
   };
 
-  const downloadInvoice = (orderId: number) => {
-    // In a real app, this would download a PDF invoice
-    toast({
-      title: "Invoice downloaded",
-      description: `Invoice for order #${orderId} has been downloaded.`,
-    });
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
+
+  const downloadInvoice = async (orderId: number) => {
+    try {
+      // Find if there's an existing invoice for this order
+      const existingInvoice = invoices.find(inv => inv.orderId === orderId);
+      
+      if (existingInvoice) {
+        // Navigate to the existing invoice
+        navigate(`/invoice/${existingInvoice.invoiceNumber}`);
+      } else {
+        // Try to create an invoice from the order
+        const response = await fetch(`/api/orders/${orderId}/create-invoice`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const invoice = await response.json();
+          navigate(`/invoice/${invoice.invoiceNumber}`);
+        } else {
+          toast({
+            title: "Invoice not available",
+            description: "Invoice cannot be created for this order yet. Please contact support.",
+            variant: "destructive"
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error accessing invoice:', error);
+      toast({
+        title: "Error",
+        description: "Unable to access invoice. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const viewOrderDetails = (order: any) => {
+    setSelectedOrder(order);
+    setOrderDetailsOpen(true);
   };
 
   if (isLoading) {
@@ -735,7 +774,11 @@ export default function Account() {
                           </div>
                           
                           <div className="flex items-center gap-2">
-                            <Button variant="outline" size="sm">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => viewOrderDetails(order)}
+                            >
                               <Eye className="h-4 w-4 mr-2" />
                               {t('account.viewDetails')}
                             </Button>
@@ -1206,6 +1249,110 @@ export default function Account() {
           </Tabs>
         </div>
       </div>
+
+      {/* Order Details Modal */}
+      <Dialog open={orderDetailsOpen} onOpenChange={setOrderDetailsOpen}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            Order Details #{selectedOrder?.id}
+          </DialogTitle>
+        </DialogHeader>
+        {selectedOrder && (
+          <div className="space-y-6">
+            {/* Order Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm font-medium">Order Date:</span>
+                  <span className="text-sm">{format(new Date(selectedOrder.createdAt), "PPP")}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm font-medium">Status:</span>
+                  <Badge className={getOrderStatusColor(selectedOrder.status)}>
+                    {selectedOrder.status}
+                  </Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm font-medium">Payment Method:</span>
+                  <span className="text-sm capitalize">{selectedOrder.paymentMethod}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm font-medium">Payment Status:</span>
+                  <Badge variant={selectedOrder.paymentStatus === 'paid' ? 'default' : 'secondary'}>
+                    {selectedOrder.paymentStatus}
+                  </Badge>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm font-medium">Total Amount:</span>
+                  <span className="text-sm font-medium">${selectedOrder.totalAmount}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm font-medium">Items:</span>
+                  <span className="text-sm">{selectedOrder.items?.length || 0} items</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Shipping Address */}
+            {selectedOrder.shippingAddress && (
+              <div className="space-y-2">
+                <h4 className="font-medium">Shipping Address</h4>
+                <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
+                  <p>{selectedOrder.shippingAddress.name}</p>
+                  <p>{selectedOrder.shippingAddress.street}</p>
+                  <p>{selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state} {selectedOrder.shippingAddress.zipCode}</p>
+                  <p>{selectedOrder.shippingAddress.country}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Order Items */}
+            {selectedOrder.items && selectedOrder.items.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="font-medium">Order Items</h4>
+                <div className="border rounded-md">
+                  {selectedOrder.items.map((item: any, index: number) => (
+                    <div key={index} className="flex justify-between items-center p-3 border-b last:border-b-0">
+                      <div className="flex-1">
+                        <p className="font-medium">{item.productName || `Product #${item.productId}`}</p>
+                        <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium">${item.price}</p>
+                        <p className="text-sm text-gray-600">${(parseFloat(item.price) * item.quantity).toFixed(2)}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Notes */}
+            {selectedOrder.notes && (
+              <div className="space-y-2">
+                <h4 className="font-medium">Order Notes</h4>
+                <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">{selectedOrder.notes}</p>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setOrderDetailsOpen(false)}>
+                Close
+              </Button>
+              <Button onClick={() => downloadInvoice(selectedOrder.id)}>
+                <Download className="h-4 w-4 mr-2" />
+                View Invoice
+              </Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
     </div>
   );
 }
