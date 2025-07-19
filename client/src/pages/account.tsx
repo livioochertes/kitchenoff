@@ -344,32 +344,43 @@ export default function Account() {
       if (existingInvoice) {
         // Navigate to the existing invoice
         navigate(`/invoice/${existingInvoice.invoiceNumber}`);
-      } else {
-        // Try to create an invoice from the order
-        const response = await fetch(`/api/orders/${orderId}/create-invoice`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        if (response.ok) {
-          const invoice = await response.json();
-          navigate(`/invoice/${invoice.invoiceNumber}`);
-        } else {
-          toast({
-            title: "Invoice not available",
-            description: "Invoice cannot be created for this order yet. Please contact support.",
-            variant: "destructive"
-          });
+        return;
+      }
+
+      // Try to create an invoice from the order
+      const response = await fetch(`/api/orders/${orderId}/create-invoice`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
         }
+      });
+      
+      if (response.ok) {
+        const invoiceData = await response.json();
+        console.log('Invoice created:', invoiceData);
+        
+        if (invoiceData && invoiceData.invoiceNumber) {
+          // Navigate to the new invoice
+          navigate(`/invoice/${invoiceData.invoiceNumber}`);
+          
+          // Refresh invoices list
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        } else {
+          throw new Error('Invalid invoice data returned');
+        }
+      } else {
+        const errorData = await response.json();
+        console.error('Create invoice error:', errorData);
+        throw new Error(errorData.message || 'Failed to create invoice');
       }
     } catch (error) {
       console.error('Error accessing invoice:', error);
       toast({
-        title: "Error",
-        description: "Unable to access invoice. Please try again.",
+        title: "Invoice Error",
+        description: error.message || "Unable to access or create invoice. Please try again.",
         variant: "destructive"
       });
     }
@@ -1252,7 +1263,7 @@ export default function Account() {
 
       {/* Order Details Modal */}
       <Dialog open={orderDetailsOpen} onOpenChange={setOrderDetailsOpen}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
@@ -1302,10 +1313,33 @@ export default function Account() {
               <div className="space-y-2">
                 <h4 className="font-medium">Shipping Address</h4>
                 <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
-                  <p>{selectedOrder.shippingAddress.name}</p>
-                  <p>{selectedOrder.shippingAddress.street}</p>
-                  <p>{selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state} {selectedOrder.shippingAddress.zipCode}</p>
-                  <p>{selectedOrder.shippingAddress.country}</p>
+                  {selectedOrder.shippingAddress.name && <p className="font-medium">{selectedOrder.shippingAddress.name}</p>}
+                  {selectedOrder.shippingAddress.street && <p>{selectedOrder.shippingAddress.street}</p>}
+                  <p>
+                    {selectedOrder.shippingAddress.city}
+                    {selectedOrder.shippingAddress.state && `, ${selectedOrder.shippingAddress.state}`}
+                    {selectedOrder.shippingAddress.zipCode && ` ${selectedOrder.shippingAddress.zipCode}`}
+                  </p>
+                  {selectedOrder.shippingAddress.country && <p>{selectedOrder.shippingAddress.country}</p>}
+                  {selectedOrder.shippingAddress.phone && <p className="mt-2">📞 {selectedOrder.shippingAddress.phone}</p>}
+                </div>
+              </div>
+            )}
+
+            {/* Billing Address */}
+            {selectedOrder.billingAddress && (
+              <div className="space-y-2">
+                <h4 className="font-medium">Billing Address</h4>
+                <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
+                  {selectedOrder.billingAddress.name && <p className="font-medium">{selectedOrder.billingAddress.name}</p>}
+                  {selectedOrder.billingAddress.street && <p>{selectedOrder.billingAddress.street}</p>}
+                  <p>
+                    {selectedOrder.billingAddress.city}
+                    {selectedOrder.billingAddress.state && `, ${selectedOrder.billingAddress.state}`}
+                    {selectedOrder.billingAddress.zipCode && ` ${selectedOrder.billingAddress.zipCode}`}
+                  </p>
+                  {selectedOrder.billingAddress.country && <p>{selectedOrder.billingAddress.country}</p>}
+                  {selectedOrder.billingAddress.phone && <p className="mt-2">📞 {selectedOrder.billingAddress.phone}</p>}
                 </div>
               </div>
             )}
@@ -1316,17 +1350,50 @@ export default function Account() {
                 <h4 className="font-medium">Order Items</h4>
                 <div className="border rounded-md">
                   {selectedOrder.items.map((item: any, index: number) => (
-                    <div key={index} className="flex justify-between items-center p-3 border-b last:border-b-0">
-                      <div className="flex-1">
-                        <p className="font-medium">{item.productName || `Product #${item.productId}`}</p>
-                        <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                    <div key={index} className="flex items-center gap-4 p-3 border-b last:border-b-0">
+                      {/* Product Image */}
+                      {item.product?.imageUrl && (
+                        <div className="w-12 h-12 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                          <img 
+                            src={item.product.imageUrl} 
+                            alt={item.product.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      
+                      {/* Product Details */}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">
+                          {item.product?.name || item.productName || `Product #${item.productId}`}
+                        </p>
+                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                          <span>Qty: {item.quantity}</span>
+                          <span>Unit Price: ${parseFloat(item.price).toFixed(2)}</span>
+                          {item.product?.slug && (
+                            <button 
+                              onClick={() => navigate(`/product/${item.product.slug}`)}
+                              className="text-blue-600 hover:text-blue-800 underline"
+                            >
+                              View Product
+                            </button>
+                          )}
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-medium">${item.price}</p>
-                        <p className="text-sm text-gray-600">${(parseFloat(item.price) * item.quantity).toFixed(2)}</p>
+                      
+                      {/* Price */}
+                      <div className="text-right flex-shrink-0">
+                        <p className="font-medium">${parseFloat(item.totalPrice || (parseFloat(item.price) * item.quantity)).toFixed(2)}</p>
+                        <p className="text-sm text-gray-600">Total</p>
                       </div>
                     </div>
                   ))}
+                  
+                  {/* Order Total */}
+                  <div className="bg-gray-50 p-3 flex justify-between items-center font-medium">
+                    <span>Order Total:</span>
+                    <span>${parseFloat(selectedOrder.totalAmount).toFixed(2)}</span>
+                  </div>
                 </div>
               </div>
             )}
