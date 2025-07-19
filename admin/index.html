@@ -1283,8 +1283,9 @@
           });
 
       // Category management API functions
-      const fetchCategories = async () => {
+      window.fetchCategories = async () => {
         try {
+          const token = localStorage.getItem('adminToken');
           const response = await fetch('/admin/api/categories', {
             headers: {
               'Authorization': `Bearer ${token}`
@@ -1349,7 +1350,7 @@
         }
       };
 
-      const uploadCategoryImage = async (categoryId, file) => {
+      window.uploadCategoryImage = async (categoryId, file) => {
         try {
           const token = localStorage.getItem('adminToken');
           console.log('uploadCategoryImage called with:', { categoryId, fileName: file.name, fileSize: file.size, fileType: file.type });
