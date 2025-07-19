@@ -436,7 +436,7 @@
       }
     };
     
-    window.fetchCategories = async () => {
+    window.fetchCategories = async (setCategoriesCallback) => {
       try {
         const token = localStorage.getItem('adminToken');
         const response = await fetch('/admin/api/categories', {
@@ -447,7 +447,10 @@
         
         if (response.ok) {
           const data = await response.json();
-          // This will be handled by React component state
+          // Update React state if callback provided
+          if (setCategoriesCallback && typeof setCategoriesCallback === 'function') {
+            setCategoriesCallback(data);
+          }
           return data;
         }
       } catch (error) {
@@ -5870,13 +5873,15 @@ TOTAL: $${selectedOrder.totalAmount}
                                 
                                 if (uploadResult.success) {
                                   alert('Image uploaded successfully!');
-                                  // Refresh the category data
-                                  await fetchCategories();
-                                  // Update the editing category with new image
-                                  const updatedCategory = categories.find(c => c.id === editingCategory.id);
-                                  if (updatedCategory) {
-                                    setEditingCategory(updatedCategory);
-                                  }
+                                  // Update the current editing category with the new image URL
+                                  const updatedCategory = {
+                                    ...editingCategory,
+                                    imageUrl: uploadResult.imageUrl
+                                  };
+                                  setEditingCategory(updatedCategory);
+                                  
+                                  // Refresh categories list to update the main table
+                                  window.fetchCategories(setCategories);
                                 } else {
                                   alert('Error uploading image: ' + uploadResult.message);
                                 }
