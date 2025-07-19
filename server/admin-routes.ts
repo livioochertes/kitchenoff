@@ -36,9 +36,12 @@ interface AdminAuthRequest extends Request {
 // Admin authentication middleware
 const authenticateAdmin = async (req: AdminAuthRequest, res: Response, next: NextFunction) => {
   try {
-    const token = req.headers.authorization?.replace("Bearer ", "");
+    const authHeader = req.headers.authorization;
+    console.log("Auth header received:", authHeader);
+    const token = authHeader?.replace("Bearer ", "");
     
     if (!token) {
+      console.log("No token provided");
       return res.status(401).json({ message: "Admin authentication required" });
     }
 
@@ -1243,18 +1246,28 @@ export async function registerAdminRoutes(app: Express) {
   // Category image upload endpoint
   app.post("/admin/api/categories/:id/upload-image", authenticateAdmin, upload.single('image'), processImages, async (req: AdminAuthRequest, res: Response) => {
     try {
+      console.log("Category image upload request received");
+      console.log("Category ID:", req.params.id);
+      console.log("Admin user:", req.admin?.email);
+      console.log("Files received:", req.file ? "Yes" : "No");
+      console.log("Processed files:", req.processedFiles?.length || 0);
+      
       const categoryId = parseInt(req.params.id);
       
       if (!req.processedFiles || req.processedFiles.length === 0) {
+        console.log("No processed files found");
         return res.status(400).json({ message: "No image file provided" });
       }
 
       const processedFile = req.processedFiles[0];
+      console.log("Processed file URL:", processedFile.url);
       
       // Update category with new image URL
       const updatedCategory = await storage.updateCategory(categoryId, {
         imageUrl: processedFile.url
       });
+
+      console.log("Category updated successfully:", updatedCategory);
 
       // Refresh memory cache
       await loadAllDataIntoMemory();

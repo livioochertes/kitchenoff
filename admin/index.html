@@ -1363,6 +1363,9 @@
               'Authorization': `Bearer ${token}`
             },
             body: formData
+          }).catch(error => {
+            console.error('Fetch error:', error);
+            throw error;
           });
           
           console.log('Response status:', response.status);

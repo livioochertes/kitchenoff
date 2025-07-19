@@ -61,14 +61,21 @@ export const upload = multer({
 
 // Middleware to process uploaded images
 export const processImages = async (req: Request, res: Response, next: NextFunction) => {
+  console.log("processImages middleware called");
+  console.log("req.files:", req.files);
+  console.log("req.file:", req.file);
+  
   // Handle both single file and multiple files
   let files: Express.Multer.File[] = [];
   
   if (req.files && Array.isArray(req.files)) {
     files = req.files;
+    console.log("Using req.files array with", files.length, "files");
   } else if (req.file) {
     files = [req.file];
+    console.log("Using req.file single file");
   } else {
+    console.log("No files found, calling next()");
     return next();
   }
 
