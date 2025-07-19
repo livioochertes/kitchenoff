@@ -682,6 +682,7 @@
       // Create category
       const createCategory = async (categoryData) => {
         try {
+          const token = localStorage.getItem('adminToken');
           const response = await fetch('/admin/api/categories', {
             method: 'POST',
             headers: {
@@ -1325,6 +1326,7 @@
 
       const updateCategory = async (categoryId, categoryData) => {
         try {
+          const token = localStorage.getItem('adminToken');
           const response = await fetch(`/admin/api/categories/${categoryId}`, {
             method: 'PUT',
             headers: {
@@ -1423,6 +1425,7 @@
 
       const deleteCategory = async (categoryId) => {
         try {
+          const token = localStorage.getItem('adminToken');
           const response = await fetch(`/admin/api/categories/${categoryId}`, {
             method: 'DELETE',
             headers: {
@@ -1445,6 +1448,7 @@
 
       const updateHomepageCategories = async (mainTopCategories, mainShopCategories) => {
         try {
+          const token = localStorage.getItem('adminToken');
           const response = await fetch('/admin/api/categories/bulk/homepage', {
             method: 'PUT',
             headers: {
