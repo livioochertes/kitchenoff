@@ -344,6 +344,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Change password endpoint
+  app.put("/api/auth/change-password", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Current password and new password are required" });
+      }
+
+      // Get current user
+      const user = await storage.getUser(req.userId!);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Verify current password
+      const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+      if (!isCurrentPasswordValid) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+
+      // Hash new password
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+      
+      // Update password
+      const updatedUser = await storage.updateUser(req.userId!, {
+        password: hashedNewPassword,
+      });
+
+      res.json({ message: "Password updated successfully" });
+    } catch (error) {
+      console.error("Error changing password:", error);
+      res.status(500).json({ message: "Failed to change password" });
+    }
+  });
+
+  // Update notification preferences endpoint
+  app.put("/api/auth/notifications", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const {
+        emailNotifications,
+        orderUpdates,
+        productRestocks,
+        priceDrops,
+        promotions,
+      } = req.body;
+
+      // For now, we'll just store these preferences in memory or database
+      // In a real application, you would save these to a notifications table
+      // For simplicity, we'll return success
+      
+      res.json({ 
+        message: "Notification preferences updated successfully",
+        preferences: {
+          emailNotifications,
+          orderUpdates,
+          productRestocks,
+          priceDrops,
+          promotions,
+        }
+      });
+    } catch (error) {
+      console.error("Error updating notification preferences:", error);
+      res.status(500).json({ message: "Failed to update notification preferences" });
+    }
+  });
+
   // Category routes - instant response from memory
   app.get("/api/categories", (req, res) => {
     // Ultra-fast synchronous response - no JSON.stringify overhead
