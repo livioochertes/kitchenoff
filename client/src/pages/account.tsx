@@ -16,7 +16,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
-import { User, Package, CreditCard, Bell, Settings, Download, Eye } from "lucide-react";
+import { User, Package, CreditCard, Bell, Settings, Download, Eye, Receipt, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import Header from "@/components/header";
 import { useLocation } from "wouter";
@@ -175,6 +175,12 @@ export default function Account() {
     enabled: isAuthenticated,
   });
 
+  // Fetch invoices
+  const { data: invoices = [], isLoading: invoicesLoading } = useQuery({
+    queryKey: ["/api/invoices"],
+    enabled: isAuthenticated,
+  });
+
   // Update profile mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: ProfileFormData) => {
@@ -222,6 +228,30 @@ export default function Account() {
       toast({
         title: "Update failed",
         description: error.message || "Failed to update invoice details.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Create invoice from order mutation
+  const createInvoiceMutation = useMutation({
+    mutationFn: async (orderId: number) => {
+      const response = await apiRequest("POST", `/api/orders/${orderId}/invoice`, {
+        paymentMethod: 'wire_transfer'
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Invoice created",
+        description: "Invoice has been created successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/invoices"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Invoice creation failed",
+        description: error.message || "Failed to create invoice.",
         variant: "destructive",
       });
     },
@@ -735,41 +765,104 @@ export default function Account() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="h-5 w-5" />
-                    {t('account.invoicesBilling')}
+                    <Receipt className="h-5 w-5" />
+                    {t('account.invoices')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {orders.filter((order: any) => order.status === "delivered").length === 0 ? (
-                      <div className="text-center py-8">
-                        <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-600">{t('account.noInvoices')}</p>
-                      </div>
-                    ) : (
-                      orders
-                        .filter((order: any) => order.status === "delivered")
-                        .map((order: any) => (
-                          <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
-                            <div>
-                              <h3 className="font-medium">{t('account.invoiceNumber')}{order.id}</h3>
-                              <p className="text-sm text-gray-600">
-                                {format(new Date(order.createdAt), "PPP")}
-                              </p>
+                  {invoicesLoading ? (
+                    <div className="text-center py-8">
+                      <p className="text-gray-600">Loading invoices...</p>
+                    </div>
+                  ) : invoices.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Receipt className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600 mb-4">No invoices created yet</p>
+                      <p className="text-sm text-gray-500">Create invoices from your delivered orders below</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4 mb-6">
+                      {invoices.map((invoice: any) => (
+                        <div key={invoice.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-medium">{invoice.invoiceNumber}</h3>
+                              <Badge variant="outline" className="text-xs">
+                                {invoice.paymentMethod === 'wire_transfer' ? 'Wire Transfer' : invoice.paymentMethod}
+                              </Badge>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium">${order.total}</span>
+                            <p className="text-sm text-gray-600 mb-1">
+                              Order #{invoice.orderId} • {format(new Date(invoice.supplyDate), "PPP")}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {invoice.items?.length || 0} items • €{invoice.totalAmount}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => navigate(`/invoice/${invoice.invoiceNumber}`)}
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              View
+                            </Button>
+                            {invoice.paymentLink && (
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                onClick={() => downloadInvoice(order.id)}
+                                onClick={() => window.open(invoice.paymentLink, '_blank')}
                               >
-                                <Download className="h-4 w-4 mr-2" />
-                                {t('account.download')}
+                                <ExternalLink className="h-4 w-4 mr-2" />
+                                Pay
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Create invoices from orders section */}
+                  <div className="border-t pt-6">
+                    <h3 className="text-lg font-semibold mb-4">Create Invoices</h3>
+                    {orders.filter((order: any) => 
+                      order.status === "delivered" && 
+                      !invoices.some((invoice: any) => invoice.orderId === order.id)
+                    ).length === 0 ? (
+                      <div className="text-center py-4">
+                        <p className="text-sm text-gray-500">
+                          No orders available for invoice creation
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          Only delivered orders without existing invoices can be converted
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {orders
+                          .filter((order: any) => 
+                            order.status === "delivered" && 
+                            !invoices.some((invoice: any) => invoice.orderId === order.id)
+                          )
+                          .map((order: any) => (
+                            <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                              <div>
+                                <h4 className="font-medium">Order #{order.id}</h4>
+                                <p className="text-sm text-gray-600">
+                                  {format(new Date(order.createdAt), "PPP")} • €{order.totalAmount}
+                                </p>
+                              </div>
+                              <Button 
+                                size="sm"
+                                onClick={() => createInvoiceMutation.mutate(order.id)}
+                                disabled={createInvoiceMutation.isPending}
+                              >
+                                {createInvoiceMutation.isPending ? "Creating..." : "Create Invoice"}
                               </Button>
                             </div>
-                          </div>
-                        ))
+                          ))}
+                      </div>
                     )}
                   </div>
                 </CardContent>

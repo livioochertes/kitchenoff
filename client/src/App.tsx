@@ -18,6 +18,7 @@ import About from "@/pages/about";
 import B2B from "@/pages/b2b";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
+import Invoice from "@/pages/invoice";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -36,6 +37,7 @@ function Router() {
       <Route path="/b2b" component={B2B} />
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
+      <Route path="/invoice/:invoiceId" component={Invoice} />
       <Route component={NotFound} />
     </Switch>
   );

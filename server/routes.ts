@@ -1,12 +1,13 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertCategorySchema, insertProductSchema, insertOrderSchema, insertCartItemSchema, insertReviewSchema } from "@shared/schema";
+import { insertUserSchema, insertCategorySchema, insertProductSchema, insertOrderSchema, insertCartItemSchema, insertReviewSchema, insertInvoiceSchema, insertInvoiceItemSchema } from "@shared/schema";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import Stripe from "stripe";
 import OpenAI from "openai";
+import QRCode from "qrcode";
 import path from "path";
 
 // Ultra-aggressive permanent in-memory cache
@@ -408,6 +409,149 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating notification preferences:", error);
       res.status(500).json({ message: "Failed to update notification preferences" });
+    }
+  });
+
+  // Invoice routes
+  app.get("/api/invoices", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const invoices = await storage.getInvoices(userId);
+      res.json(invoices);
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      res.status(500).json({ message: "Failed to fetch invoices" });
+    }
+  });
+
+  app.get("/api/invoices/:id", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const invoiceId = parseInt(req.params.id);
+      const invoice = await storage.getInvoice(invoiceId);
+      
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      // Check if user owns this invoice or is admin
+      if (invoice.userId !== req.userId && !req.isAdmin) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      res.json(invoice);
+    } catch (error) {
+      console.error("Error fetching invoice:", error);
+      res.status(500).json({ message: "Failed to fetch invoice" });
+    }
+  });
+
+  app.get("/api/invoices/number/:invoiceNumber", async (req, res) => {
+    try {
+      const invoiceNumber = req.params.invoiceNumber;
+      const invoice = await storage.getInvoiceByNumber(invoiceNumber);
+      
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      res.json(invoice);
+    } catch (error) {
+      console.error("Error fetching invoice by number:", error);
+      res.status(500).json({ message: "Failed to fetch invoice" });
+    }
+  });
+
+  // Create invoice from order
+  app.post("/api/orders/:orderId/invoice", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const { paymentMethod = 'wire_transfer' } = req.body;
+      
+      // Get the order with items
+      const order = await storage.getOrder(orderId);
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      // Check if user owns this order or is admin
+      if (order.userId !== req.userId && !req.isAdmin) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      // Generate unique invoice number
+      const invoiceNumber = `INV-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
+      
+      // Create payment link for wire transfer
+      let paymentLink = '';
+      if (paymentMethod === 'wire_transfer') {
+        paymentLink = `https://www.kitchenoff.app/pay/invoice/${invoiceNumber}`;
+      }
+
+      // Calculate totals
+      const subtotal = parseFloat(order.totalAmount);
+      const vatRate = 0; // 0% VAT as per your template
+      const vatAmount = (subtotal * vatRate) / 100;
+      const totalAmount = subtotal + vatAmount;
+
+      // Create invoice
+      const invoiceData = {
+        invoiceNumber,
+        orderId,
+        userId: order.userId,
+        supplyDate: new Date(),
+        subtotal: subtotal.toString(),
+        vatAmount: vatAmount.toString(),
+        totalAmount: totalAmount.toString(),
+        currency: 'EUR',
+        paymentMethod,
+        paymentLink: paymentLink || null,
+        notes: paymentMethod === 'wire_transfer' ? 'Reverse charge – Article 196 of Council Directive 2006/112/EC' : null,
+      };
+
+      // Create invoice items
+      const invoiceItems = order.items.map(item => ({
+        productId: item.productId,
+        productName: item.product.name,
+        productCode: item.product.productCode || null,
+        quantity: item.quantity,
+        unitPrice: item.price,
+        vatRate: '0.00',
+        lineTotal: item.totalPrice,
+      }));
+
+      const invoice = await storage.createInvoice(invoiceData, invoiceItems);
+      
+      // Get the full invoice with items for response
+      const fullInvoice = await storage.getInvoice(invoice.id);
+      
+      res.json(fullInvoice);
+    } catch (error) {
+      console.error("Error creating invoice:", error);
+      res.status(500).json({ message: "Failed to create invoice" });
+    }
+  });
+
+  // Download invoice as PDF (placeholder for now)
+  app.get("/api/invoices/:id/download", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const invoiceId = parseInt(req.params.id);
+      const invoice = await storage.getInvoice(invoiceId);
+      
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      // Check if user owns this invoice or is admin
+      if (invoice.userId !== req.userId && !req.isAdmin) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      // For now, return a message that PDF generation is not implemented
+      // In a real application, you would generate a PDF here using a library like puppeteer
+      res.status(501).json({ message: "PDF generation not yet implemented" });
+    } catch (error) {
+      console.error("Error downloading invoice:", error);
+      res.status(500).json({ message: "Failed to download invoice" });
     }
   });
 
