@@ -792,7 +792,7 @@ export default function Account() {
                               </Badge>
                             </div>
                             <p className="text-sm text-gray-600 mb-1">
-                              Order #{invoice.orderId} • {format(new Date(invoice.supplyDate), "PPP")}
+                              Order #{invoice.orderId} • {format(new Date(invoice.issueDate), "PPP")}
                             </p>
                             <p className="text-xs text-gray-500">
                               {invoice.items?.length || 0} items • €{invoice.totalAmount}
