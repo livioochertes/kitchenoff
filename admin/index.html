@@ -1350,6 +1350,7 @@
         }
       };
 
+      console.log('Defining uploadCategoryImage function on window object');
       window.uploadCategoryImage = async (categoryId, file) => {
         try {
           const token = localStorage.getItem('adminToken');
@@ -5851,7 +5852,13 @@ TOTAL: $${selectedOrder.totalAmount}
                               console.log('File selected:', file.name, file.size, file.type);
                               
                               try {
-                                const uploadResult = await uploadCategoryImage(editingCategory.id, file);
+                                console.log('Checking if uploadCategoryImage function exists:', typeof window.uploadCategoryImage);
+                                if (typeof window.uploadCategoryImage !== 'function') {
+                                  console.error('uploadCategoryImage function not found on window object');
+                                  alert('Upload function not available. Please refresh the page.');
+                                  return;
+                                }
+                                const uploadResult = await window.uploadCategoryImage(editingCategory.id, file);
                                 console.log('Upload result:', uploadResult);
                                 
                                 if (uploadResult.success) {
