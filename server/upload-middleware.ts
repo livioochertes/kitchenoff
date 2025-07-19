@@ -108,13 +108,16 @@ export const processImages = async (req: Request, res: Response, next: NextFunct
       // Remove original file
       await fs.unlink(inputPath);
 
+      // Determine upload type based on request path
+      const uploadType = req.path.includes('categories') ? 'categories' : 'products';
+      
       processedFiles.push({
         filename: `processed-${file.filename}`,
         thumbnail: `thumb-${file.filename.replace(/\.[^/.]+$/, '')}.webp`,
         originalName: file.originalname,
         size: file.size,
-        url: `/uploads/products/processed-${file.filename}`,
-        thumbnailUrl: `/uploads/products/thumb-${file.filename.replace(/\.[^/.]+$/, '')}.webp`
+        url: `/uploads/${uploadType}/processed-${file.filename}`,
+        thumbnailUrl: `/uploads/${uploadType}/thumb-${file.filename.replace(/\.[^/.]+$/, '')}.webp`
       });
     }
 

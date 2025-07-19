@@ -81,6 +81,9 @@ app.use((req, res, next) => {
   // Serve static assets first
   app.use('/attached_assets', express.static('attached_assets'));
   
+  // Serve uploaded files
+  app.use('/uploads', express.static('uploads'));
+  
   // Register admin routes FIRST before any other middleware
   await registerAdminRoutes(app);
   
