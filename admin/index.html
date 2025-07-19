@@ -1349,40 +1349,74 @@
 
       const uploadCategoryImage = async (categoryId, file) => {
         try {
-          console.log('uploadCategoryImage called with:', { categoryId, fileName: file.name, fileSize: file.size });
+          console.log('uploadCategoryImage called with:', { categoryId, fileName: file.name, fileSize: file.size, fileType: file.type });
+          console.log('Current token:', token);
+          
+          // Validate file
+          if (!file) {
+            return { success: false, message: 'No file provided' };
+          }
+          
+          if (!file.type.startsWith('image/')) {
+            return { success: false, message: 'File must be an image' };
+          }
           
           const formData = new FormData();
           formData.append('image', file);
           
-          console.log('Making request to:', `/admin/api/categories/${categoryId}/upload-image`);
-          console.log('FormData contents:', [...formData.entries()]);
+          console.log('FormData created successfully');
+          console.log('FormData entries:', [...formData.entries()].map(([key, value]) => [key, value instanceof File ? `File: ${value.name}` : value]));
           
-          const response = await fetch(`/admin/api/categories/${categoryId}/upload-image`, {
+          const url = `/admin/api/categories/${categoryId}/upload-image`;
+          console.log('Making request to:', url);
+          
+          // Test if the URL is reachable first
+          try {
+            const testResponse = await fetch(url, {
+              method: 'OPTIONS',
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            console.log('OPTIONS request status:', testResponse.status);
+          } catch (optionsError) {
+            console.error('OPTIONS request failed:', optionsError);
+          }
+          
+          const response = await fetch(url, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`
             },
             body: formData
-          }).catch(error => {
-            console.error('Fetch error:', error);
-            throw error;
           });
           
+          console.log('POST response received');
           console.log('Response status:', response.status);
+          console.log('Response ok:', response.ok);
           console.log('Response headers:', Object.fromEntries(response.headers.entries()));
           
+          const responseText = await response.text();
+          console.log('Response text:', responseText);
+          
           if (response.ok) {
-            const result = await response.json();
+            const result = JSON.parse(responseText);
             console.log('Upload successful, result:', result);
             return { success: true, message: result.message, imageUrl: result.imageUrl };
           } else {
-            const error = await response.json();
-            console.log('Upload failed, error:', error);
-            return { success: false, message: error.message };
+            try {
+              const error = JSON.parse(responseText);
+              console.log('Upload failed, error:', error);
+              return { success: false, message: error.message };
+            } catch (parseError) {
+              console.log('Failed to parse error response:', parseError);
+              return { success: false, message: `HTTP ${response.status}: ${responseText}` };
+            }
           }
         } catch (error) {
           console.error('Error uploading category image:', error);
-          return { success: false, message: 'Network error' };
+          console.error('Error stack:', error.stack);
+          return { success: false, message: `Network error: ${error.message}` };
         }
       };
 
