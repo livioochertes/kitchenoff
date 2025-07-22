@@ -14,6 +14,15 @@ export class InvoiceService {
 
   constructor(config: InvoiceServiceConfig) {
     this.config = config;
+    console.log('🔧 InvoiceService constructor - Config received:', {
+      enableSmartbill: config.enableSmartbill,
+      defaultSeries: config.defaultSeries,
+      smartbill: {
+        username: config.smartbill.username,
+        tokenLength: config.smartbill.token?.length || 0,
+        companyVat: config.smartbill.companyVat
+      }
+    });
     this.smartbillApi = new SmartbillAPI(config.smartbill);
   }
 
@@ -369,16 +378,27 @@ export async function createInvoiceService(): Promise<InvoiceService> {
   // Get company settings for invoice configuration
   const companySettings = await getCompanySettings();
   
+  console.log('🏭 Company settings for invoice service:', {
+    name: companySettings.name,
+    vatNumber: companySettings.vatNumber
+  });
+  
   const config: InvoiceServiceConfig = {
     smartbill: {
-      username: process.env.SMARTBILL_USERNAME || 'liviu.chertes@gmail.com',
-      token: process.env.SMARTBILL_TOKEN || '001|2af8fcdc3ea579cb7a81093ca404b31e',
-      companyVat: companySettings.vatNumber || process.env.SMARTBILL_COMPANY_VAT || 'RO16582983',
+      username: 'liviu.chertes@gmail.com', // Use hardcoded credentials
+      token: '001|2af8fcdc3ea579cb7a81093ca404b31e', // Use hardcoded credentials
+      companyVat: 'RO16582983', // Use hardcoded credentials with RO prefix
     },
-    defaultSeries: process.env.SMARTBILL_SERIES || 'KTO',
-    enableSmartbill: process.env.ENABLE_SMARTBILL === 'true' || true, // Force enable Smartbill for testing
+    defaultSeries: 'KTO', // Use hardcoded series
+    enableSmartbill: true, // Force enable Smartbill
     companyInfo: companySettings
   };
+
+  console.log('📋 Final InvoiceService config:', {
+    enableSmartbill: config.enableSmartbill,
+    defaultSeries: config.defaultSeries,
+    smartbill: config.smartbill
+  });
 
   return new InvoiceService(config);
 }
