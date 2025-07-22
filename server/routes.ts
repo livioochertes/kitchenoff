@@ -154,11 +154,11 @@ const requireAdmin = async (req: AuthRequest, res: Response, next: NextFunction)
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Admin interface route
+  // Optimized admin interface route (fast loading)
   app.get("/admin", (req, res) => {
     try {
-      const adminPath = path.resolve('./admin/index.html');
-      console.log('Serving admin interface from:', adminPath);
+      const adminPath = path.resolve('./admin/admin-optimized.html');
+      console.log('Serving optimized admin interface from:', adminPath);
       
       // Set cache headers for better performance
       res.set({
@@ -172,8 +172,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.sendFile(adminPath);
     } catch (error) {
-      console.error('Error serving admin interface:', error);
+      console.error('Error serving optimized admin interface:', error);
       res.status(500).send('Admin interface not available');
+    }
+  });
+
+  // Full admin interface route (complete functionality)
+  app.get("/admin-full", (req, res) => {
+    try {
+      const adminPath = path.resolve('./admin/index.html');
+      console.log('Serving full admin interface from:', adminPath);
+      
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'DENY',
+        'X-XSS-Protection': '1; mode=block'
+      });
+      
+      res.sendFile(adminPath);
+    } catch (error) {
+      console.error('Error serving full admin interface:', error);
+      res.status(500).send('Full admin interface not available');
     }
   });
 
