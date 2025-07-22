@@ -2398,9 +2398,25 @@ export async function registerAdminRoutes(app: Express) {
             continue;
           }
 
+          // Try to find category by ID first, then by name if provided
+          let finalCategoryId = categoryId;
+          const categoryName = row['Category Name']?.toString()?.trim();
+          
           if (!categoryMap.has(categoryId)) {
-            errors.push(`Row ${rowNumber}: Category ID ${categoryId} does not exist`);
-            continue;
+            // If category ID doesn't exist, try to find by name
+            if (categoryName) {
+              const categoryByName = categories.find(cat => cat.name.toLowerCase() === categoryName.toLowerCase());
+              if (categoryByName) {
+                finalCategoryId = categoryByName.id;
+                console.log(`✅ Found category by name: "${categoryName}" (ID: ${finalCategoryId})`);
+              } else {
+                errors.push(`Row ${rowNumber}: Category ID ${categoryId} and Category Name "${categoryName}" do not exist`);
+                continue;
+              }
+            } else {
+              errors.push(`Row ${rowNumber}: Category ID ${categoryId} does not exist`);
+              continue;
+            }
           }
 
           // Extract optional fields with defaults
@@ -2460,7 +2476,7 @@ export async function registerAdminRoutes(app: Express) {
             description: description,
             price: price.toString(),
             compareAtPrice: (price * 1.2).toString(), // 20% higher than regular price
-            categoryId: categoryId,
+            categoryId: finalCategoryId,
             supplierId: supplierId,
             stockQuantity: stockQuantity,
             featured: false,
