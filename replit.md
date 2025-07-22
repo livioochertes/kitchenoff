@@ -24,7 +24,7 @@ Preferred communication style: Simple, everyday language.
 - COMPLETED: All notification switches now work with automatic saving and email confirmations
 - TESTED: Notification preference changes trigger immediate database updates and email delivery
 - TESTED: Order acceptance email system working - both customer confirmation and logistics notifications delivered successfully
-- VERIFIED: Email system fully operational using verified sender address (no-replay@eatoff.app)
+- VERIFIED: Email system fully operational using verified sender address (info@kitchen-off.com)
 - VERIFIED: All emails delivered to liviu.chertes@gmail.com as configured for testing
 - STATUS: Email system fully operational and ready for production use
 
