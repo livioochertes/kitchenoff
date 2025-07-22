@@ -34,6 +34,9 @@ Preferred communication style: Simple, everyday language.
 - VERIFIED: Fixed invoice loading performance issues - eliminated double reloads with proper caching
 - VERIFIED: All company information updates immediately reflect on newly generated invoices
 - CONFIRMED: User tested system and confirmed "Work good!" - all requested features functioning perfectly
+- COMPLETED: Added IBAN and Logistics Email fields to Basic Information section in Company Settings display
+- COMPLETED: Enhanced Company Settings page with better field visibility and monospace IBAN formatting
+- VERIFIED: User confirmed "OK!" - all company settings fields properly visible and functional
 - STATUS: Complete company information management system with dynamic invoice integration ready for production use
 
 ### July 22, 2025 - Notification System and Email Fixes
