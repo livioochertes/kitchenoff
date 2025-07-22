@@ -3966,7 +3966,7 @@
           featured: false,
           vatValue: '',
           vatPercentage: '19.00',
-          currency: 'EUR',
+          currency: 'RON',
           productCode: '',
           ncCode: '',
           cpvCode: '',
@@ -4688,7 +4688,7 @@
                         <label className="form-label">Currency</label>
                         <select
                           className="form-input"
-                          value={productFormData.currency || 'EUR'}
+                          value={productFormData.currency}
                           onChange={(e) => setProductFormData({...productFormData, currency: e.target.value})}
                         >
                           <option value="EUR">EUR (Euro)</option>
@@ -4791,7 +4791,7 @@
                             featured: false,
                             vatValue: '',
                             vatPercentage: '19.00',
-                            currency: 'EUR',
+                            currency: 'RON',
                             productCode: '',
                             ncCode: '',
                             cpvCode: '',
