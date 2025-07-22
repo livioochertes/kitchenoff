@@ -240,14 +240,16 @@ export class InvoiceService {
       if (this.config.enableSmartbill) {
         try {
           // Try to get next invoice number from Smartbill
-          const seriesData = await this.smartbillApi.getSeries(this.config.smartbill.companyVat);
-          const ktoSeries = seriesData.find((s: any) => s.name === 'KTO');
+          const seriesResponse = await this.smartbillApi.getSeries(this.config.smartbill.companyVat);
+          const seriesData = seriesResponse.list || seriesResponse; // Handle both response formats
+          const ktoSeries = seriesData.find((s: any) => s.name === 'KTO' && s.type === 'f'); // 'f' = factura (invoice)
           if (ktoSeries && ktoSeries.nextNumber) {
             smartbillNumber = ktoSeries.nextNumber.toString();
             invoiceNumber = `KTO ${smartbillNumber}`;
             console.log(`📋 Got next invoice number from Smartbill: ${invoiceNumber}`);
           } else {
             console.log(`⚠️ KTO series not found in Smartbill, using fallback numbering`);
+            console.log(`   Available series:`, JSON.stringify(seriesData, null, 2));
           }
         } catch (error) {
           console.log(`⚠️ Failed to get Smartbill series data, using fallback numbering: ${error}`);
