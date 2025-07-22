@@ -2324,6 +2324,7 @@
                         
                         // Fetch company defaults and pre-populate form
                         const defaults = await fetchCompanyDefaults();
+                        console.log('Company defaults loaded:', defaults);
                         setEditingProduct({
                           name: '',
                           description: '',
@@ -2340,6 +2341,27 @@
                           currency: defaults.currency,
                           supplierId: '',
                           status: 'active'
+                        });
+                        
+                        // Also set the productFormData to match
+                        setProductFormData({
+                          name: '',
+                          description: '',
+                          price: '',
+                          compareAtPrice: '',
+                          categoryId: '',
+                          supplierId: '',
+                          imageUrl: '',
+                          stockQuantity: '',
+                          featured: false,
+                          vatValue: '',
+                          vatPercentage: defaults.vatPercentage,
+                          currency: defaults.currency,
+                          productCode: '',
+                          ncCode: '',
+                          cpvCode: '',
+                          status: 'active',
+                          images: []
                         });
                         
                         setShowAddProductModal(true);
