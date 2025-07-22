@@ -528,6 +528,8 @@ export async function seedDatabase() {
     const productsWithNewFields = sampleProducts.map((product, index) => ({
       ...product,
       vatValue: product.vatValue || "19.00",
+      vatPercentage: product.vatPercentage || "19.00", // Default VAT percentage
+      currency: product.currency || "EUR", // Default currency
       productCode: product.productCode || `PROD-${String(index + 1).padStart(3, '0')}`,
       ncCode: product.ncCode || "9999.99.99",
       cpvCode: product.cpvCode || "39000000-0"

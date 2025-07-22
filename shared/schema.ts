@@ -76,6 +76,8 @@ export const products = pgTable("products", {
   rating: decimal("rating", { precision: 3, scale: 2 }).default("0"),
   reviewCount: integer("review_count").default(0),
   vatValue: decimal("vat_value", { precision: 5, scale: 2 }).default("0"),
+  vatPercentage: decimal("vat_percentage", { precision: 5, scale: 2 }).default("19.00"), // VAT % for each product
+  currency: varchar("currency", { length: 3 }).default("EUR"), // Currency for each product
   productCode: varchar("product_code", { length: 50 }),
   ncCode: varchar("nc_code", { length: 50 }),
   cpvCode: varchar("cpv_code", { length: 50 }),
@@ -183,6 +185,33 @@ export const suppliers = pgTable("suppliers", {
   integrationType: varchar("integration_type", { length: 50 }).default("email"), // email, api, manual
   notes: text("notes"),
   isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Company settings table
+export const companySettings = pgTable("company_settings", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  logisticsEmail: varchar("logistics_email", { length: 255 }),
+  phone: varchar("phone", { length: 50 }),
+  address: text("address"),
+  city: varchar("city", { length: 100 }),
+  state: varchar("state", { length: 100 }),
+  zipCode: varchar("zip_code", { length: 20 }),
+  country: varchar("country", { length: 100 }),
+  contactPerson: varchar("contact_person", { length: 255 }),
+  website: varchar("website", { length: 255 }),
+  vatNumber: varchar("vat_number", { length: 50 }),
+  registrationNumber: varchar("registration_number", { length: 50 }),
+  bankName: varchar("bank_name", { length: 255 }),
+  iban: varchar("iban", { length: 50 }),
+  description: text("description"),
+  // New fields for currency and VAT management
+  defaultCurrency: varchar("default_currency", { length: 3 }).default("EUR"),
+  defaultVatPercentage: decimal("default_vat_percentage", { precision: 5, scale: 2 }).default("19.00"),
+  reverseChargeVat: decimal("reverse_charge_vat", { precision: 5, scale: 2 }).default("0.00"), // For international invoices
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -334,6 +363,12 @@ export const insertInvoiceItemSchema = createInsertSchema(invoiceItems).omit({
   id: true,
 });
 
+export const insertCompanySettingsSchema = createInsertSchema(companySettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -355,6 +390,8 @@ export type Invoice = typeof invoices.$inferSelect;
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
 export type InvoiceItem = typeof invoiceItems.$inferSelect;
 export type InsertInvoiceItem = z.infer<typeof insertInvoiceItemSchema>;
+export type CompanySettings = typeof companySettings.$inferSelect;
+export type InsertCompanySettings = z.infer<typeof insertCompanySettingsSchema>;
 
 // Additional types for API responses
 export type ProductWithCategory = Product & { category: Category | null; supplier: Supplier | null };

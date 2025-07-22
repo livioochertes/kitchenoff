@@ -2639,6 +2639,8 @@ export async function registerAdminRoutes(app: Express) {
             featured: false,
             images: [],
             vatValue: vatValue.toString(),
+            vatPercentage: vatValue.toString(), // Use same value for backwards compatibility
+            currency: 'EUR', // Default currency for Excel imports
             productCode: productCode,
             ncCode: ncCode,
             cpvCode: cpvCode,

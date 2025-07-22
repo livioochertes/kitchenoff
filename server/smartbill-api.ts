@@ -538,23 +538,31 @@ export function orderToSmartbillInvoice(
     regCom: user.registrationNumber || '', // Can be empty for B2C
   };
 
-  // Format products with consistent currency and reverse charge VAT
-  const products: SmartbillProduct[] = order.items.map((item: any) => ({
-    name: item.product.name,
-    code: item.product.productCode || `KO-${item.productId}`,
-    isDiscount: false,
-    measuringUnitName: 'buc',
-    currency: 'EUR', // Keep consistent with invoice currency
-    quantity: item.quantity,
-    price: parseFloat(item.price),
-    isTaxIncluded: false, // Prices are without VAT for reverse charge
-    taxName: 'Scutit', // Exempt for reverse charge
-    taxPercentage: 0, // 0% for reverse charge
-    vatPercentage: 0, // 0% VAT
-    vatAmount: 0, // No VAT amount
-    saveToDb: false,
-    isService: false
-  }));
+  // Format products using product-specific currency and VAT settings
+  const products: SmartbillProduct[] = order.items.map((item: any) => {
+    const productVatPercentage = parseFloat(item.product.vatPercentage || '0');
+    const productCurrency = item.product.currency || 'EUR';
+    const isReverseCharge = productVatPercentage === 0;
+    
+    console.log(`📦 Product ${item.product.name}: VAT=${productVatPercentage}%, Currency=${productCurrency}, ReverseCharge=${isReverseCharge}`);
+    
+    return {
+      name: item.product.name,
+      code: item.product.productCode || `KO-${item.productId}`,
+      isDiscount: false,
+      measuringUnitName: 'buc',
+      currency: productCurrency,
+      quantity: item.quantity,
+      price: parseFloat(item.price),
+      isTaxIncluded: !isReverseCharge, // Include tax if not reverse charge
+      taxName: isReverseCharge ? 'Scutit' : 'Normala',
+      taxPercentage: productVatPercentage,
+      vatPercentage: productVatPercentage,
+      vatAmount: isReverseCharge ? 0 : (parseFloat(item.price) * item.quantity * productVatPercentage / 100),
+      saveToDb: false,
+      isService: false
+    };
+  });
 
   console.log('📋 Smartbill client data:', client);
   console.log('📦 Smartbill products data:', products);
