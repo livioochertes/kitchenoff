@@ -648,17 +648,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Initialize InvoiceService with Smartbill configuration
-      const { InvoiceService } = await import('./invoice-service.js');
-      const invoiceService = new InvoiceService({
-        smartbill: {
-          username: process.env.SMARTBILL_USERNAME!,
-          token: process.env.SMARTBILL_TOKEN!,
-          companyVat: `RO${process.env.SMARTBILL_COMPANY_VAT}`,
-        },
-        defaultSeries: process.env.SMARTBILL_SERIES || 'KTO',
-        enableSmartbill: process.env.ENABLE_SMARTBILL === 'true'
-      });
+      // Initialize InvoiceService with corrected Smartbill configuration
+      const { createInvoiceService } = await import('./invoice-service.js');
+      const invoiceService = await createInvoiceService();
 
       console.log(`📋 Smartbill enabled: ${process.env.ENABLE_SMARTBILL === 'true'}, Series: ${process.env.SMARTBILL_SERIES}`);
 
