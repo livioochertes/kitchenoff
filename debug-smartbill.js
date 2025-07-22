@@ -1,7 +1,7 @@
-// Debug Smartbill API directly
-const username = process.env.SMARTBILL_USERNAME;
-const token = process.env.SMARTBILL_TOKEN;
-const companyVat = process.env.SMARTBILL_COMPANY_VAT;
+// Debug Smartbill API directly with correct credentials
+const username = 'liviu.chertes@gmail.com';
+const token = '001|2af8fcdc3ea579cb7a81093ca404b31e';
+const companyVat = 'RO16582983';
 
 console.log('🔍 Debugging Smartbill API...');
 console.log('Environment variables:');
