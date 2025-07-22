@@ -1322,9 +1322,12 @@ export async function registerAdminRoutes(app: Express) {
       
       console.log('Updated product result:', updatedProduct);
 
-      // Note: Memory cache will be refreshed periodically, no need to refresh immediately
-
-      res.json({ message: "Product updated successfully", product: updatedProduct });
+      res.json({ 
+        message: "Product updated successfully", 
+        product: updatedProduct,
+        // Signal to frontend that data should be refreshed
+        refreshRequired: true
+      });
     } catch (error) {
       console.error("Error updating product:", error);
       res.status(500).json({ message: "Failed to update product" });

@@ -4190,10 +4190,13 @@
               images: []
             });
             setUploadedImages([]);
-            // Refresh products after a short delay to get updated data with images
+            // Force immediate refresh to show updated currency/VAT values
+            console.log('Product updated successfully, refreshing list...');
+            fetchProducts();
+            // Also refresh after a delay to ensure cache is updated
             setTimeout(() => {
               fetchProducts();
-            }, 1000);
+            }, 1500);
           } else {
             alert('Error: ' + result.message);
           }
