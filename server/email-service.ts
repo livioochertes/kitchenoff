@@ -93,7 +93,9 @@ export async function sendOrderConfirmationEmail(
           <strong>Order Details:</strong><br>
           Order ID: #${order.id}<br>
           Order Date: ${new Date(order.createdAt!).toLocaleDateString()}<br>
-          Status: <span style="color: #27ae60; font-weight: bold;">Accepted</span>
+          Status: <span style="color: #27ae60; font-weight: bold;">Accepted</span><br>
+          Customer Email: ${user.email}<br>
+          Contact Phone: ${shippingAddress.phone}
         </div>
       </div>
 
@@ -126,12 +128,13 @@ export async function sendOrderConfirmationEmail(
 
       <div style="display: flex; gap: 20px; margin-bottom: 20px;">
         <div style="flex: 1; background-color: #f8f9fa; padding: 15px; border-radius: 8px;">
-          <h4 style="margin-top: 0; color: #2c3e50;">Shipping Address</h4>
+          <h4 style="margin-top: 0; color: #2c3e50;">Delivery Address</h4>
           <p style="margin: 0; line-height: 1.5;">
             ${shippingAddress.firstName} ${shippingAddress.lastName}<br>
-            ${shippingAddress.streetAddress}<br>
+            ${shippingAddress.address}<br>
             ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.zipCode}<br>
-            ${shippingAddress.country}
+            ${shippingAddress.country}<br>
+            <strong>Phone:</strong> ${shippingAddress.phone}
           </p>
         </div>
         
@@ -139,9 +142,10 @@ export async function sendOrderConfirmationEmail(
           <h4 style="margin-top: 0; color: #2c3e50;">Billing Address</h4>
           <p style="margin: 0; line-height: 1.5;">
             ${billingAddress.firstName} ${billingAddress.lastName}<br>
-            ${billingAddress.streetAddress}<br>
+            ${billingAddress.address}<br>
             ${billingAddress.city}, ${billingAddress.state} ${billingAddress.zipCode}<br>
-            ${billingAddress.country}
+            ${billingAddress.country}<br>
+            <strong>Phone:</strong> ${billingAddress.phone}
           </p>
         </div>
       </div>
@@ -179,7 +183,23 @@ export async function sendOrderConfirmationEmail(
     - Order ID: #${order.id}
     - Order Date: ${new Date(order.createdAt!).toLocaleDateString()}
     - Status: Accepted
+    - Customer Email: ${user.email}
+    - Contact Phone: ${shippingAddress.phone}
     - Total Amount: $${order.totalAmount}
+    
+    Delivery Address:
+    ${shippingAddress.firstName} ${shippingAddress.lastName}
+    ${shippingAddress.address}
+    ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.zipCode}
+    ${shippingAddress.country}
+    Phone: ${shippingAddress.phone}
+    
+    Billing Address:
+    ${billingAddress.firstName} ${billingAddress.lastName}
+    ${billingAddress.address}
+    ${billingAddress.city}, ${billingAddress.state} ${billingAddress.zipCode}
+    ${billingAddress.country}
+    Phone: ${billingAddress.phone}
     
     Your order will be prepared for shipping and you'll receive tracking information soon.
     
@@ -224,7 +244,9 @@ export async function sendLogisticsNotificationEmail(
         <h3 style="margin-top: 0; color: #856404;">Order Accepted - Ready for Processing</h3>
         <p><strong>Order ID:</strong> #${order.id}</p>
         <p><strong>Order Date:</strong> ${new Date(order.createdAt!).toLocaleDateString()}</p>
-        <p><strong>Customer:</strong> ${user.firstName} ${user.lastName} (${user.email})</p>
+        <p><strong>Customer:</strong> ${user.firstName} ${user.lastName}</p>
+        <p><strong>Customer Email:</strong> ${user.email}</p>
+        <p><strong>Customer Phone:</strong> ${shippingAddress.phone}</p>
         <p><strong>Total Amount:</strong> $${order.totalAmount}</p>
         <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
         <p><strong>Payment Status:</strong> ${order.paymentStatus}</p>
@@ -302,7 +324,9 @@ export async function sendLogisticsNotificationEmail(
     Order Details:
     - Order ID: #${order.id}
     - Order Date: ${new Date(order.createdAt!).toLocaleDateString()}
-    - Customer: ${user.firstName} ${user.lastName} (${user.email})
+    - Customer: ${user.firstName} ${user.lastName}
+    - Customer Email: ${user.email}
+    - Customer Phone: ${shippingAddress.phone}
     - Total Amount: $${order.totalAmount}
     - Payment Method: ${order.paymentMethod}
     - Payment Status: ${order.paymentStatus}
@@ -312,9 +336,10 @@ export async function sendLogisticsNotificationEmail(
     
     Shipping Address:
     ${shippingAddress.firstName} ${shippingAddress.lastName}
-    ${shippingAddress.streetAddress}
+    ${shippingAddress.address}
     ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.zipCode}
     ${shippingAddress.country}
+    Phone: ${shippingAddress.phone}
     
     ${order.notes ? `Special Notes: ${order.notes}` : ''}
     
