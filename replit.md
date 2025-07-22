@@ -12,6 +12,7 @@ Preferred communication style: Simple, everyday language.
 
 ### July 22, 2025 - Complete Company-Level Default VAT & Currency System
 - COMPLETED: Enhanced Company Settings with comprehensive default VAT and currency management system
+- FIXED: Company default currency saving issue - PUT endpoint was missing currency fields in database update query
 - COMPLETED: Added default currency dropdown with EUR, RON, USD, GBP options for new products
 - COMPLETED: Added default VAT percentage selector with options: 0%, 5%, 9%, 19%, 21%, 24%
 - COMPLETED: Added 21% VAT option for Romanian market effective 01.08.2025 compliance
@@ -29,6 +30,8 @@ Preferred communication style: Simple, everyday language.
 - VERIFIED: New product forms automatically pre-populate with company defaults while remaining fully editable
 - VERIFIED: Visual display shows all default settings clearly with professional blue theme and descriptive labels
 - STATUS: Complete company-level default system operational - ready for Romanian VAT change to 21% from August 2025
+- FIXED: Currency update functionality - added defaultCurrency, defaultVatPercentage, reverseChargeVat fields to company settings PUT endpoint
+- VERIFIED: Currency changes now save properly - tested RON to USD conversion working correctly
 - FIXED: Currency update issue resolved - products now properly save and display updated currency and VAT values
 - VERIFIED: Currency change from EUR to RON working correctly with immediate display refresh in admin interface
 

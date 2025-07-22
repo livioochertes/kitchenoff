@@ -2400,8 +2400,11 @@ export async function registerAdminRoutes(app: Express) {
     try {
       const { 
         name, email, logisticsEmail, phone, address, city, state, zipCode, country, 
-        contactPerson, website, vatNumber, registrationNumber, bankName, iban, description 
+        contactPerson, website, vatNumber, registrationNumber, bankName, iban, description,
+        defaultCurrency, defaultVatPercentage, reverseChargeVat 
       } = req.body;
+      
+      console.log('Updating company settings with currency:', defaultCurrency, 'VAT:', defaultVatPercentage);
 
       if (!name || !email) {
         return res.status(400).json({ message: "Company name and email are required" });
@@ -2417,11 +2420,14 @@ export async function registerAdminRoutes(app: Express) {
           SET name = $1, email = $2, logistics_email = $3, phone = $4, address = $5, city = $6, 
               state = $7, zip_code = $8, country = $9, contact_person = $10, 
               website = $11, vat_number = $12, registration_number = $13, 
-              bank_name = $14, iban = $15, description = $16, updated_at = CURRENT_TIMESTAMP
-          WHERE id = $17
+              bank_name = $14, iban = $15, description = $16,
+              default_currency = $17, default_vat_percentage = $18, reverse_charge_vat = $19,
+              updated_at = CURRENT_TIMESTAMP
+          WHERE id = $20
         `, [
           name, email, logisticsEmail, phone, address, city, state, zipCode, country,
           contactPerson, website, vatNumber, registrationNumber, bankName, iban, description,
+          defaultCurrency, defaultVatPercentage, reverseChargeVat,
           existingResult.rows[0].id
         ]);
       } else {
@@ -2429,11 +2435,13 @@ export async function registerAdminRoutes(app: Express) {
         await pool.query(`
           INSERT INTO company_settings (
             name, email, logistics_email, phone, address, city, state, zip_code, country, 
-            contact_person, website, vat_number, registration_number, bank_name, iban, description
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+            contact_person, website, vat_number, registration_number, bank_name, iban, description,
+            default_currency, default_vat_percentage, reverse_charge_vat
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
         `, [
           name, email, logisticsEmail, phone, address, city, state, zipCode, country,
-          contactPerson, website, vatNumber, registrationNumber, bankName, iban, description
+          contactPerson, website, vatNumber, registrationNumber, bankName, iban, description,
+          defaultCurrency, defaultVatPercentage, reverseChargeVat
         ]);
       }
 
