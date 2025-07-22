@@ -5,6 +5,7 @@ export interface InvoiceServiceConfig {
   smartbill: SmartbillConfig;
   defaultSeries: string;
   enableSmartbill: boolean;
+  companyInfo?: any;
 }
 
 export class InvoiceService {
@@ -294,16 +295,69 @@ export class InvoiceService {
 }
 
 // Initialize invoice service with configuration
-export function createInvoiceService(): InvoiceService {
+export async function createInvoiceService(): Promise<InvoiceService> {
+  // Get company settings for invoice configuration
+  const companySettings = await getCompanySettings();
+  
   const config: InvoiceServiceConfig = {
     smartbill: {
       username: process.env.SMARTBILL_USERNAME || '',
       token: process.env.SMARTBILL_TOKEN || '',
-      companyVat: process.env.SMARTBILL_COMPANY_VAT || 'RO12345678', // Default Romanian VAT format
+      companyVat: companySettings.vatNumber || process.env.SMARTBILL_COMPANY_VAT || 'RO12345678',
     },
     defaultSeries: process.env.SMARTBILL_SERIES || 'FACT',
-    enableSmartbill: process.env.ENABLE_SMARTBILL === 'true'
+    enableSmartbill: process.env.ENABLE_SMARTBILL === 'true',
+    companyInfo: companySettings
   };
 
   return new InvoiceService(config);
+}
+
+// Helper function to get company settings
+async function getCompanySettings() {
+  const { pool } = await import('./db.js');
+  try {
+    const result = await pool.query(`
+      SELECT 
+        name, email, logistics_email as "logisticsEmail", phone, address, city, state, zip_code as "zipCode", 
+        country, contact_person as "contactPerson", website, 
+        vat_number as "vatNumber", registration_number as "registrationNumber", 
+        description
+      FROM company_settings 
+      ORDER BY created_at DESC 
+      LIMIT 1
+    `);
+    
+    if (result.rows.length > 0) {
+      return result.rows[0];
+    } else {
+      // Return default company settings
+      return {
+        name: 'KitchenOff',
+        email: 'info@kitchen-off.com',
+        logisticsEmail: 'logistics@kitchen-off.com',
+        phone: '+40 123 456 789',
+        address: 'Calea Mosilor 158',
+        city: 'Bucharest',
+        state: 'Bucuresti',
+        zipCode: '020883',
+        country: 'Romania',
+        contactPerson: 'Company Administrator',
+        website: 'https://kitchen-off.com',
+        vatNumber: '',
+        registrationNumber: '',
+        description: 'Professional kitchen equipment and supplies for the HORECA industry.'
+      };
+    }
+  } catch (error) {
+    console.error('Error fetching company settings for invoice:', error);
+    // Return defaults on error
+    return {
+      name: 'KitchenOff',
+      email: 'info@kitchen-off.com',
+      logisticsEmail: 'logistics@kitchen-off.com',
+      vatNumber: '',
+      registrationNumber: ''
+    };
+  }
 }

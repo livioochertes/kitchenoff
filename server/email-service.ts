@@ -220,8 +220,12 @@ export async function sendOrderConfirmationEmail(
 export async function sendLogisticsNotificationEmail(
   order: OrderWithItems,
   user: User,
-  logisticsEmail: string = 'liviu.chertes@gmail.com' // Send to test email for now
+  logisticsEmail?: string
 ): Promise<boolean> {
+  // Get logistics email from company settings if not provided
+  if (!logisticsEmail) {
+    logisticsEmail = await getLogisticsEmailFromSettings() || 'liviu.chertes@gmail.com';
+  }
   const shippingAddress = order.shippingAddress as any;
   const orderItemsText = order.items
     .map(item => `- ${item.product.name} (Qty: ${item.quantity}) - $${item.totalPrice}`)
@@ -360,6 +364,18 @@ export async function sendLogisticsNotificationEmail(
     text: textContent,
     html: html,
   });
+}
+
+// Helper function to get logistics email from company settings
+async function getLogisticsEmailFromSettings(): Promise<string | null> {
+  try {
+    const { pool } = await import('./db.js');
+    const result = await pool.query('SELECT logistics_email FROM company_settings ORDER BY created_at DESC LIMIT 1');
+    return result.rows.length > 0 ? result.rows[0].logistics_email : null;
+  } catch (error) {
+    console.error('Error fetching logistics email from settings:', error);
+    return null;
+  }
 }
 
 export async function sendNotificationPreferencesEmail(

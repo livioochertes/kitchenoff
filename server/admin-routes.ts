@@ -2183,7 +2183,7 @@ export async function registerAdminRoutes(app: Express) {
     try {
       const result = await pool.query(`
         SELECT 
-          name, email, phone, address, city, state, zip_code as "zipCode", 
+          name, email, logistics_email as "logisticsEmail", phone, address, city, state, zip_code as "zipCode", 
           country, contact_person as "contactPerson", website, 
           vat_number as "vatNumber", registration_number as "registrationNumber", 
           description
@@ -2199,6 +2199,7 @@ export async function registerAdminRoutes(app: Express) {
         res.json({
           name: 'KitchenOff',
           email: 'info@kitchen-off.com',
+          logisticsEmail: 'logistics@kitchen-off.com',
           phone: '+40 123 456 789',
           address: 'Calea Mosilor 158',
           city: 'Bucharest',
@@ -2221,7 +2222,7 @@ export async function registerAdminRoutes(app: Express) {
   app.put("/admin/api/company-settings", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
     try {
       const { 
-        name, email, phone, address, city, state, zipCode, country, 
+        name, email, logisticsEmail, phone, address, city, state, zipCode, country, 
         contactPerson, website, vatNumber, registrationNumber, description 
       } = req.body;
 
@@ -2236,13 +2237,13 @@ export async function registerAdminRoutes(app: Express) {
         // Update existing settings
         await pool.query(`
           UPDATE company_settings 
-          SET name = $1, email = $2, phone = $3, address = $4, city = $5, 
-              state = $6, zip_code = $7, country = $8, contact_person = $9, 
-              website = $10, vat_number = $11, registration_number = $12, 
-              description = $13, updated_at = CURRENT_TIMESTAMP
-          WHERE id = $14
+          SET name = $1, email = $2, logistics_email = $3, phone = $4, address = $5, city = $6, 
+              state = $7, zip_code = $8, country = $9, contact_person = $10, 
+              website = $11, vat_number = $12, registration_number = $13, 
+              description = $14, updated_at = CURRENT_TIMESTAMP
+          WHERE id = $15
         `, [
-          name, email, phone, address, city, state, zipCode, country,
+          name, email, logisticsEmail, phone, address, city, state, zipCode, country,
           contactPerson, website, vatNumber, registrationNumber, description,
           existingResult.rows[0].id
         ]);
@@ -2250,14 +2251,17 @@ export async function registerAdminRoutes(app: Express) {
         // Insert new settings
         await pool.query(`
           INSERT INTO company_settings (
-            name, email, phone, address, city, state, zip_code, country, 
+            name, email, logistics_email, phone, address, city, state, zip_code, country, 
             contact_person, website, vat_number, registration_number, description
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
         `, [
-          name, email, phone, address, city, state, zipCode, country,
+          name, email, logisticsEmail, phone, address, city, state, zipCode, country,
           contactPerson, website, vatNumber, registrationNumber, description
         ]);
       }
+
+      // After updating company settings, ensure company exists as a supplier
+      await ensureCompanySupplier(name, email, phone, address, city, state, zipCode, country, contactPerson);
 
       res.json({ message: "Company settings updated successfully" });
     } catch (error) {
@@ -2265,4 +2269,37 @@ export async function registerAdminRoutes(app: Express) {
       res.status(500).json({ message: "Failed to update company settings" });
     }
   });
+
+  // Helper function to ensure company exists as a supplier
+  async function ensureCompanySupplier(name: string, email: string, phone: string, address: string, city: string, state: string, zipCode: string, country: string, contactPerson: string) {
+    try {
+      // Check if company supplier already exists
+      const existingSupplier = await pool.query('SELECT id FROM suppliers WHERE name = $1 AND email = $2', [name, email]);
+      
+      if (existingSupplier.rows.length === 0) {
+        // Create company as supplier
+        await pool.query(`
+          INSERT INTO suppliers (
+            name, email, phone, address, city, state, zip_code, country, 
+            contact_person, integration_type, notes, is_active
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        `, [
+          name, email, phone, address, city, state, zipCode, country,
+          contactPerson, 'internal', 'Company warehouse - direct fulfillment', true
+        ]);
+        console.log(`✅ Created company supplier: ${name}`);
+      } else {
+        // Update existing company supplier
+        await pool.query(`
+          UPDATE suppliers 
+          SET phone = $3, address = $4, city = $5, state = $6, zip_code = $7, 
+              country = $8, contact_person = $9, updated_at = CURRENT_TIMESTAMP
+          WHERE name = $1 AND email = $2
+        `, [name, email, phone, address, city, state, zipCode, country, contactPerson]);
+        console.log(`✅ Updated company supplier: ${name}`);
+      }
+    } catch (error) {
+      console.error('Error ensuring company supplier:', error);
+    }
+  }
 }

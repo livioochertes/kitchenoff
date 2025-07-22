@@ -6456,6 +6456,7 @@ TOTAL: $${selectedOrder.totalAmount}
                     const settingsData = {
                       name: formData.get('name'),
                       email: formData.get('email'),
+                      logisticsEmail: formData.get('logisticsEmail'),
                       phone: formData.get('phone'),
                       address: formData.get('address'),
                       city: formData.get('city'),
@@ -6504,6 +6505,22 @@ TOTAL: $${selectedOrder.totalAmount}
                           name="email"
                           defaultValue={companySettings.email}
                           required
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#333'}}>Logistics Email</label>
+                        <input
+                          type="email"
+                          name="logisticsEmail"
+                          defaultValue={companySettings.logisticsEmail}
+                          placeholder="Email for order notifications"
                           style={{
                             width: '100%',
                             padding: '8px',

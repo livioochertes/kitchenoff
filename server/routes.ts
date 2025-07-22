@@ -69,7 +69,7 @@ const openai = new OpenAI({
 
 // Initialize Invoice Service with Smartbill enabled
 process.env.ENABLE_SMARTBILL = 'true';
-const invoiceService = createInvoiceService();
+let invoiceService: any;
 
 function getCachedData(key: string) {
   return cache.get(key) || null;
@@ -1273,6 +1273,11 @@ Always be helpful, professional, and focus on practical solutions. When recommen
 
           // Generate invoice automatically via Smartbill API
           try {
+            // Initialize invoice service if needed
+            if (!invoiceService) {
+              invoiceService = await createInvoiceService();
+            }
+            
             const invoice = await invoiceService.generateInvoiceAfterPayment(
               parseInt(orderId),
               {
@@ -1382,6 +1387,11 @@ Always be helpful, professional, and focus on practical solutions. When recommen
 
             // Generate invoice automatically via Smartbill API
             try {
+              // Initialize invoice service if needed
+              if (!invoiceService) {
+                invoiceService = await createInvoiceService();
+              }
+              
               const invoice = await invoiceService.generateInvoiceAfterPayment(
                 orderId,
                 {
@@ -1441,6 +1451,11 @@ Always be helpful, professional, and focus on practical solutions. When recommen
         return res.status(403).json({ message: "Admin access required" });
       }
 
+      // Initialize invoice service if needed
+      if (!invoiceService) {
+        invoiceService = await createInvoiceService();
+      }
+      
       const connected = await invoiceService.testConnection();
       res.json({ 
         connected,
@@ -1462,6 +1477,11 @@ Always be helpful, professional, and focus on practical solutions. When recommen
       const orderId = parseInt(req.params.orderId);
       const { paymentMethod = 'card' } = req.body;
 
+      // Initialize invoice service if needed
+      if (!invoiceService) {
+        invoiceService = await createInvoiceService();
+      }
+      
       const invoice = await invoiceService.generateInvoiceAfterPayment(orderId, {
         status: 'succeeded',
         paymentMethod,
