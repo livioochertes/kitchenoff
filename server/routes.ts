@@ -484,6 +484,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get the order with items
       const order = await storage.getOrder(orderId);
+      console.log(`Fetched order ${orderId}:`, JSON.stringify(order, null, 2));
+      
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
@@ -491,6 +493,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user owns this order or is admin
       if (order.userId !== req.userId && !req.isAdmin) {
         return res.status(403).json({ message: "Access denied" });
+      }
+
+      // Check if order has items
+      if (!order.items || order.items.length === 0) {
+        console.error(`Order ${orderId} has no items:`, order.items);
+        return res.status(400).json({ message: "Order has no items to create invoice" });
       }
 
       // Generate unique invoice number
