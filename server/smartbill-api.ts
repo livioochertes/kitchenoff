@@ -71,10 +71,27 @@ export class SmartbillAPI {
    */
   async testConnection(): Promise<boolean> {
     try {
+      console.log('🔍 Testing Smartbill API connection...');
+      console.log('   Base URL:', this.baseUrl);
+      console.log('   Company VAT:', this.config.companyVat);
+      console.log('   Username:', this.config.username);
+      console.log('   Token length:', this.config.token?.length || 0);
+      
       const response = await fetch(`${this.baseUrl}/series?cif=${encodeURIComponent(this.config.companyVat)}`, {
         method: 'GET',
         headers: this.getHeaders()
       });
+      
+      console.log('   Response status:', response.status);
+      console.log('   Response ok:', response.ok);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log('   Error response:', errorText);
+      } else {
+        const data = await response.json();
+        console.log('   Available series:', JSON.stringify(data, null, 2));
+      }
       
       return response.ok;
     } catch (error) {
@@ -88,7 +105,17 @@ export class SmartbillAPI {
    */
   async createInvoice(invoiceData: SmartbillInvoiceData): Promise<any> {
     try {
-      console.log('Creating Smartbill invoice:', JSON.stringify(invoiceData, null, 2));
+      console.log('🌐 Creating Smartbill invoice...');
+      console.log('📋 Request headers:', JSON.stringify(this.getHeaders(), null, 2));
+      console.log('📋 Invoice data:', JSON.stringify(invoiceData, null, 2));
+      
+      // First test the connection
+      const connectionOk = await this.testConnection();
+      console.log('🔗 Connection test result:', connectionOk);
+      
+      if (!connectionOk) {
+        throw new Error('Smartbill API connection failed - check credentials');
+      }
       
       const response = await fetch(`${this.baseUrl}/invoice`, {
         method: 'POST',
@@ -96,17 +123,31 @@ export class SmartbillAPI {
         body: JSON.stringify(invoiceData)
       });
 
+      console.log('📤 Response status:', response.status);
+      console.log('📤 Response headers:', JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2));
+
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Smartbill API error response:', response.status, errorText);
+        console.error('❌ Smartbill API error response:', response.status, errorText);
+        
+        // Try to parse more specific error information
+        if (response.status === 401) {
+          throw new Error('Smartbill API authentication failed - check username and token');
+        } else if (response.status === 400) {
+          throw new Error(`Smartbill API validation error: ${errorText}`);
+        } else if (response.status === 500) {
+          console.log('🔍 Analyzing 500 error - likely field validation issue');
+          throw new Error(`Smartbill API server error - field validation failed: ${errorText}`);
+        }
+        
         throw new Error(`Smartbill API error: ${response.status} - ${errorText}`);
       }
 
       const result = await response.json();
-      console.log('Smartbill invoice created successfully:', result);
+      console.log('✅ Smartbill invoice created successfully:', result);
       return result;
     } catch (error) {
-      console.error('Error creating Smartbill invoice:', error);
+      console.error('💥 Error creating Smartbill invoice:', error);
       throw error;
     }
   }
