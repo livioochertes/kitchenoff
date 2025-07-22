@@ -1282,46 +1282,122 @@ export default function Account() {
                     <Bell className="h-5 w-5" />
                     Notifications & Alerts
                   </CardTitle>
+                  <p className="text-sm text-gray-600">Configure your notification preferences</p>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <h3 className="font-medium">Order Updates</h3>
-                        <p className="text-sm text-gray-600">Get notified about order status changes</p>
+                  <Form {...notificationForm}>
+                    <form onSubmit={notificationForm.handleSubmit(handleNotificationSubmit)} className="space-y-6">
+                      <FormField
+                        control={notificationForm.control}
+                        name="emailNotifications"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base font-medium">Email notifications</FormLabel>
+                              <div className="text-sm text-muted-foreground">
+                                Receive email notifications for account activities
+                              </div>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={notificationForm.control}
+                        name="orderUpdates"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base font-medium">Order updates</FormLabel>
+                              <div className="text-sm text-muted-foreground">
+                                Get notified about order status changes and shipping updates
+                              </div>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={notificationForm.control}
+                        name="productRestocks"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base font-medium">Product restocks</FormLabel>
+                              <div className="text-sm text-muted-foreground">
+                                Alert when out-of-stock items become available
+                              </div>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={notificationForm.control}
+                        name="priceDrops"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base font-medium">Price drops</FormLabel>
+                              <div className="text-sm text-muted-foreground">
+                                Get notified when prices drop on favorite items
+                              </div>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={notificationForm.control}
+                        name="promotions"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base font-medium">Promotions</FormLabel>
+                              <div className="text-sm text-muted-foreground">
+                                Receive promotional offers and special discounts
+                              </div>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <div className="flex justify-end pt-4 border-t">
+                        <Button 
+                          type="submit" 
+                          disabled={updateNotificationsMutation.isPending}
+                        >
+                          {updateNotificationsMutation.isPending ? "Saving..." : "Save Changes"}
+                        </Button>
                       </div>
-                      <Button variant="outline" size="sm">
-                        Enabled
-                      </Button>
-                    </div>
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <h3 className="font-medium">Product Restocks</h3>
-                        <p className="text-sm text-gray-600">Alert when out-of-stock items are available</p>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        Configure
-                      </Button>
-                    </div>
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <h3 className="font-medium">Price Drops</h3>
-                        <p className="text-sm text-gray-600">Get notified when prices drop on favorite items</p>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        Configure
-                      </Button>
-                    </div>
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <h3 className="font-medium">Promotions</h3>
-                        <p className="text-sm text-gray-600">Receive promotional offers and discounts</p>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        Enabled
-                      </Button>
-                    </div>
-                  </div>
+                    </form>
+                  </Form>
                 </CardContent>
               </Card>
             </TabsContent>
