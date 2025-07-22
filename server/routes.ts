@@ -154,11 +154,11 @@ const requireAdmin = async (req: AuthRequest, res: Response, next: NextFunction)
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Admin interface route (original flow)
+  // Admin interface route (production - no Babel)
   app.get("/admin", (req, res) => {
     try {
-      const adminPath = path.resolve('./admin/index.html');
-      console.log('Serving admin interface from:', adminPath);
+      const adminPath = path.resolve('./admin/admin-production.html');
+      console.log('Serving production admin interface from:', adminPath);
       
       // Set cache headers for better performance
       res.set({
@@ -172,16 +172,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.sendFile(adminPath);
     } catch (error) {
-      console.error('Error serving admin interface:', error);
+      console.error('Error serving production admin interface:', error);
       res.status(500).send('Admin interface not available');
     }
   });
 
-  // Optimized admin interface route (fast loading alternative)
-  app.get("/admin-fast", (req, res) => {
+  // Full admin interface route (complete features with Babel)
+  app.get("/admin-full", (req, res) => {
     try {
-      const adminPath = path.resolve('./admin/admin-optimized.html');
-      console.log('Serving optimized admin interface from:', adminPath);
+      const adminPath = path.resolve('./admin/index.html');
+      console.log('Serving full admin interface from:', adminPath);
       
       res.set({
         'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -194,8 +194,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.sendFile(adminPath);
     } catch (error) {
-      console.error('Error serving optimized admin interface:', error);
-      res.status(500).send('Optimized admin interface not available');
+      console.error('Error serving full admin interface:', error);
+      res.status(500).send('Full admin interface not available');
     }
   });
 
