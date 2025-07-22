@@ -1049,6 +1049,7 @@ const translations: Record<Language, TranslationKeys> = {
     'account.password': 'Contraseña',
     'account.passwordDesc': 'Cambiar contraseña de cuenta',
     'account.change': 'Cambiar',
+    'account.createInvoice': 'Crear Factura',
     
     // Auth
     'auth.login': 'Iniciar Sesión',
@@ -1318,6 +1319,7 @@ const translations: Record<Language, TranslationKeys> = {
     'account.password': 'Mot de Passe',
     'account.passwordDesc': 'Changer votre mot de passe de compte',
     'account.change': 'Changer',
+    'account.createInvoice': 'Créer une Facture',
     
     // Auth
     'auth.login': 'Se connecter',
@@ -1607,6 +1609,7 @@ const translations: Record<Language, TranslationKeys> = {
     'account.password': 'Passwort',
     'account.passwordDesc': 'Ihr Kontopasswort ändern',
     'account.change': 'Ändern',
+    'account.createInvoice': 'Rechnung Erstellen',
     'auth.login': 'Anmelden',
     'auth.register': 'Registrieren',
     'auth.email': 'E-Mail',
@@ -1906,6 +1909,7 @@ const translations: Record<Language, TranslationKeys> = {
     'account.password': 'Parolă',
     'account.passwordDesc': 'Schimbă parola contului tău',
     'account.change': 'Schimbă',
+    'account.createInvoice': 'Crează Factură',
     
     // Auth
     'auth.login': 'Autentificare',
@@ -2258,6 +2262,7 @@ const translations: Record<Language, TranslationKeys> = {
     'account.password': 'Password',
     'account.passwordDesc': 'Cambia la password del tuo account',
     'account.change': 'Cambia',
+    'account.createInvoice': 'Crea Fattura',
     
     // Contact form
     'contact.title': 'Contattaci',
@@ -2428,6 +2433,7 @@ const translations: Record<Language, TranslationKeys> = {
     'account.password': 'Senha',
     'account.passwordDesc': 'Altere a senha da sua conta',
     'account.change': 'Alterar',
+    'account.createInvoice': 'Criar Fatura',
     
     // Contact form
     'contact.title': 'Entre em Contato',
@@ -2598,6 +2604,7 @@ const translations: Record<Language, TranslationKeys> = {
     'account.password': '密码',
     'account.passwordDesc': '更改您的账户密码',
     'account.change': '更改',
+    'account.createInvoice': '创建发票',
     
     // Contact form
     'contact.title': '联系我们',
@@ -2768,6 +2775,7 @@ const translations: Record<Language, TranslationKeys> = {
     'account.password': 'パスワード',
     'account.passwordDesc': 'アカウントのパスワードを変更',
     'account.change': '変更',
+    'account.createInvoice': '請求書を作成',
     
     // Contact form
     'contact.title': 'お問い合わせ',
@@ -2932,6 +2940,7 @@ const translations: Record<Language, TranslationKeys> = {
     'account.password': '비밀번호',
     'account.passwordDesc': '계정 비밀번호 변경',
     'account.change': '변경',
+    'account.createInvoice': '인보이스 생성',
     
     // Contact form
     'contact.title': '문의하기',
@@ -3104,6 +3113,7 @@ const translations: Record<Language, TranslationKeys> = {
     'account.password': 'كلمة المرور',
     'account.passwordDesc': 'تغيير كلمة مرور حسابك',
     'account.change': 'تغيير',
+    'account.createInvoice': 'إنشاء فاتورة',
     
     // Footer
     'footer.support': 'الدعم',
