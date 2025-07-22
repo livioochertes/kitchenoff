@@ -233,8 +233,13 @@ export class InvoiceService {
    */
   private async generateLocalInvoice(order: any, user: any, paymentData: any): Promise<any> {
     try {
-      // Generate unique invoice number
-      const invoiceNumber = `INV-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
+      // Generate invoice number using KTO series format like Smartbill
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const timestamp = String(Date.now()).slice(-6); // Use last 6 digits for uniqueness
+      const invoiceNumber = `KTO-${year}-${timestamp}`;
+      
+      console.log(`📋 Generating local invoice with KTO series format: ${invoiceNumber}`);
       
       // Calculate totals with 19% VAT for RON
       const subtotal = parseFloat(order.totalAmount);
@@ -257,7 +262,10 @@ export class InvoiceService {
         paymentMethod: paymentData.paymentMethod || 'card',
         paymentLink: null,
         notes: 'Factura cu TVA 19% conform legislației române',
-        status: 'issued'
+        status: 'issued',
+        // Add Smartbill-compatible fields for consistency
+        smartbillSeries: 'KTO',
+        smartbillNumber: `${year}-${timestamp}`
       };
 
       // Create invoice items with 19% VAT
