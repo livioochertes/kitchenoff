@@ -74,11 +74,26 @@ export default function Account() {
   const [activeTab, setActiveTab] = useState("profile");
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
+  const [downloadingInvoice, setDownloadingInvoice] = useState<number | null>(null);
   const { user, isAuthenticated, isLoading, updateUser } = useAuth();
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+
+  // Fetch orders
+  const { data: orders = [], isLoading: ordersLoading } = useQuery<any[]>({
+    queryKey: ["/api/orders"],
+    enabled: isAuthenticated,
+  });
+
+  // Fetch invoices
+  const { data: invoices = [], isLoading: invoicesLoading } = useQuery<any[]>({
+    queryKey: ["/api/invoices"],
+    enabled: isAuthenticated,
+  });
 
   const profileForm = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -160,26 +175,16 @@ export default function Account() {
         deliveryCountry: user.deliveryCountry || "",
         deliveryInstructions: user.deliveryInstructions || "",
       });
+
+      notificationForm.reset({
+        emailNotifications: user.emailNotifications ?? true,
+        orderUpdates: user.orderUpdates ?? true,
+        productRestocks: user.productRestocks ?? false,
+        priceDrops: user.priceDrops ?? false,
+        promotions: user.promotions ?? true,
+      });
     }
-  }, [user, profileForm, invoiceForm]);
-
-  // Redirect if not authenticated
-  if (!isLoading && !isAuthenticated) {
-    navigate("/login");
-    return null;
-  }
-
-  // Fetch orders
-  const { data: orders = [], isLoading: ordersLoading } = useQuery({
-    queryKey: ["/api/orders"],
-    enabled: isAuthenticated,
-  });
-
-  // Fetch invoices
-  const { data: invoices = [], isLoading: invoicesLoading } = useQuery({
-    queryKey: ["/api/invoices"],
-    enabled: isAuthenticated,
-  });
+  }, [user, profileForm, invoiceForm, notificationForm]);
 
   // Update profile mutation
   const updateProfileMutation = useMutation({
@@ -294,12 +299,24 @@ export default function Account() {
       const response = await apiRequest("PUT", "/api/auth/notifications", data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       toast({
         title: "Notification preferences updated",
         description: "Your notification settings have been saved.",
       });
       setNotificationDialogOpen(false);
+      
+      // Update the user state with new notification preferences
+      if (user) {
+        updateUser({
+          ...user,
+          emailNotifications: result.preferences.emailNotifications,
+          orderUpdates: result.preferences.orderUpdates,
+          productRestocks: result.preferences.productRestocks,
+          priceDrops: result.preferences.priceDrops,
+          promotions: result.preferences.promotions,
+        });
+      }
     },
     onError: (error) => {
       toast({
@@ -318,6 +335,18 @@ export default function Account() {
     updateNotificationsMutation.mutate(data);
   };
 
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      navigate("/login");
+    }
+  }, [isLoading, isAuthenticated, navigate]);
+
+  // Don't render anything if not authenticated
+  if (!isLoading && !isAuthenticated) {
+    return null;
+  }
+
   const getOrderStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "delivered":
@@ -333,9 +362,7 @@ export default function Account() {
     }
   };
 
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
-  const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
-  const [downloadingInvoice, setDownloadingInvoice] = useState<number | null>(null);
+
 
   const downloadInvoice = async (orderId: number) => {
     setDownloadingInvoice(orderId);

@@ -1,7 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertCategorySchema, insertProductSchema, insertOrderSchema, insertCartItemSchema, insertReviewSchema, insertInvoiceSchema, insertInvoiceItemSchema } from "@shared/schema";
+import { insertUserSchema, insertCategorySchema, insertProductSchema, insertOrderSchema, insertCartItemSchema, insertReviewSchema, insertInvoiceSchema, insertInvoiceItemSchema, users } from "@shared/schema";
+import { eq } from "drizzle-orm";
+import { db } from "./db";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
@@ -15,6 +17,11 @@ import { createInvoiceService } from './invoice-service.js';
 interface AuthRequest extends Request {
   userId?: number;
   isAdmin?: boolean;
+  user?: {
+    id: number;
+    email: string;
+    isAdmin?: boolean;
+  };
 }
 
 // JWT authentication middleware
@@ -42,6 +49,7 @@ const authenticateToken = async (req: AuthRequest, res: Response, next: NextFunc
     console.log('✅ User found:', { id: user.id, email: user.email, isAdmin: user.isAdmin });
     req.userId = decoded.id;
     req.isAdmin = user.isAdmin || false;
+    req.user = { id: user.id, email: user.email, isAdmin: user.isAdmin };
     next();
   } catch (error) {
     console.log('❌ Token verification failed:', error.message);
@@ -406,18 +414,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         promotions,
       } = req.body;
 
-      // For now, we'll just store these preferences in memory or database
-      // In a real application, you would save these to a notifications table
-      // For simplicity, we'll return success
-      
-      res.json({ 
-        message: "Notification preferences updated successfully",
-        preferences: {
+      // Update user notification preferences in the database
+      const [updatedUser] = await db
+        .update(users)
+        .set({
           emailNotifications,
           orderUpdates,
           productRestocks,
           priceDrops,
           promotions,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, req.user!.id))
+        .returning();
+
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({ 
+        message: "Notification preferences updated successfully",
+        preferences: {
+          emailNotifications: updatedUser.emailNotifications,
+          orderUpdates: updatedUser.orderUpdates,
+          productRestocks: updatedUser.productRestocks,
+          priceDrops: updatedUser.priceDrops,
+          promotions: updatedUser.promotions,
         }
       });
     } catch (error) {

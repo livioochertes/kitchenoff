@@ -34,6 +34,12 @@ export const users = pgTable("users", {
   deliveryZip: varchar("delivery_zip", { length: 20 }),
   deliveryCountry: varchar("delivery_country", { length: 100 }),
   deliveryInstructions: text("delivery_instructions"),
+  // Notification preferences
+  emailNotifications: boolean("email_notifications").default(true),
+  orderUpdates: boolean("order_updates").default(true),
+  productRestocks: boolean("product_restocks").default(false),
+  priceDrops: boolean("price_drops").default(false),
+  promotions: boolean("promotions").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

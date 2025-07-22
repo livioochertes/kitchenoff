@@ -26,6 +26,12 @@ interface User {
   deliveryZip?: string;
   deliveryCountry?: string;
   deliveryInstructions?: string;
+  // Notification preferences
+  emailNotifications?: boolean;
+  orderUpdates?: boolean;
+  productRestocks?: boolean;
+  priceDrops?: boolean;
+  promotions?: boolean;
 }
 
 interface AuthState {
