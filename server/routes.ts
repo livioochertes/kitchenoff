@@ -476,6 +476,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create invoice from order
+  // Create invoice from order - both endpoints for compatibility
+  app.post("/api/orders/:orderId/create-invoice", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const { paymentMethod = 'wire_transfer' } = req.body;
+      
+      // Get the order with items
+      const order = await storage.getOrder(orderId);
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      // Check if user owns this order or is admin
+      if (order.userId !== req.userId && !req.isAdmin) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      // Generate unique invoice number
+      const invoiceNumber = `INV-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
+      
+      // Create payment link for wire transfer
+      let paymentLink = '';
+      if (paymentMethod === 'wire_transfer') {
+        paymentLink = `https://www.kitchenoff.app/pay/invoice/${invoiceNumber}`;
+      }
+
+      // Calculate totals
+      const subtotal = parseFloat(order.totalAmount);
+      const vatRate = 0; // 0% VAT as per your template
+      const vatAmount = (subtotal * vatRate) / 100;
+      const totalAmount = subtotal + vatAmount;
+
+      // Create invoice
+      const invoiceData = {
+        invoiceNumber,
+        orderId,
+        userId: order.userId || req.userId,
+        issueDate: new Date(),
+        supplyDate: new Date(),
+        subtotal: subtotal.toString(),
+        vatAmount: vatAmount.toString(),
+        totalAmount: totalAmount.toString(),
+        currency: 'EUR',
+        paymentMethod,
+        paymentLink: paymentLink || null,
+        notes: paymentMethod === 'wire_transfer' ? 'Reverse charge – Article 196 of Council Directive 2006/112/EC' : null,
+      };
+
+      // Create invoice items
+      const invoiceItems = order.items.map(item => ({
+        productId: item.productId,
+        productName: item.product.name,
+        productCode: item.product.productCode || null,
+        quantity: item.quantity,
+        unitPrice: item.price,
+        vatRate: '0.00',
+        lineTotal: item.totalPrice,
+      }));
+
+      const invoice = await storage.createInvoice(invoiceData, invoiceItems);
+      
+      // Get the full invoice with items for response
+      const fullInvoice = await storage.getInvoice(invoice.id);
+      
+      res.json(fullInvoice);
+    } catch (error) {
+      console.error("Error creating invoice:", error);
+      res.status(500).json({ message: "Failed to create invoice" });
+    }
+  });
+
   app.post("/api/orders/:orderId/invoice", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const orderId = parseInt(req.params.orderId);
@@ -511,7 +582,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const invoiceData = {
         invoiceNumber,
         orderId,
-        userId: order.userId,
+        userId: order.userId || req.userId,
         issueDate: new Date(),
         supplyDate: new Date(),
         subtotal: subtotal.toString(),

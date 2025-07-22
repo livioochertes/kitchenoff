@@ -335,8 +335,11 @@ export default function Account() {
 
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
+  const [downloadingInvoice, setDownloadingInvoice] = useState<number | null>(null);
 
   const downloadInvoice = async (orderId: number) => {
+    setDownloadingInvoice(orderId);
+    
     try {
       // Find if there's an existing invoice for this order
       const existingInvoice = invoices.find(inv => inv.orderId === orderId);
@@ -344,6 +347,7 @@ export default function Account() {
       if (existingInvoice) {
         // Navigate to the existing invoice
         navigate(`/invoice/${existingInvoice.invoiceNumber}`);
+        setDownloadingInvoice(null);
         return;
       }
 
@@ -364,30 +368,57 @@ export default function Account() {
           // Navigate to the new invoice
           navigate(`/invoice/${invoiceData.invoiceNumber}`);
           
-          // Refresh invoices list
+          // Show success message
+          toast({
+            title: "Invoice Created",
+            description: "Invoice has been created successfully. Redirecting...",
+          });
+          
+          // Refresh invoices list after a short delay
           setTimeout(() => {
             window.location.reload();
-          }, 1000);
+          }, 1500);
         } else {
-          throw new Error('Invalid invoice data returned');
+          throw new Error('Invalid invoice data returned from server');
         }
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         console.error('Create invoice error:', errorData);
-        throw new Error(errorData.message || 'Failed to create invoice');
+        throw new Error(errorData.message || `Server returned error: ${response.status}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error accessing invoice:', error);
       toast({
         title: "Invoice Error",
         description: error.message || "Unable to access or create invoice. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setDownloadingInvoice(null);
     }
   };
 
-  const viewOrderDetails = (order: any) => {
-    setSelectedOrder(order);
+  const viewOrderDetails = async (order: any) => {
+    try {
+      // Fetch complete order details with product information
+      const response = await fetch(`/api/orders/${order.id}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        }
+      });
+      
+      if (response.ok) {
+        const fullOrder = await response.json();
+        setSelectedOrder(fullOrder);
+      } else {
+        console.error('Failed to fetch order details');
+        setSelectedOrder(order); // Fallback to basic order data
+      }
+    } catch (error) {
+      console.error('Error fetching order details:', error);
+      setSelectedOrder(order); // Fallback to basic order data
+    }
+    
     setOrderDetailsOpen(true);
   };
 
@@ -777,7 +808,7 @@ export default function Account() {
                               </Badge>
                             </div>
                             <div className="text-right">
-                              <p className="font-medium">${order.total}</p>
+                              <p className="font-medium">${order.totalAmount}</p>
                               <p className="text-sm text-gray-600">
                                 {order.items?.length || 0} {t('account.items')}
                               </p>
@@ -797,9 +828,19 @@ export default function Account() {
                               variant="outline" 
                               size="sm"
                               onClick={() => downloadInvoice(order.id)}
+                              disabled={downloadingInvoice === order.id}
                             >
-                              <Download className="h-4 w-4 mr-2" />
-                              {t('account.invoice')}
+                              {downloadingInvoice === order.id ? (
+                                <>
+                                  <div className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
+                                  Creating...
+                                </>
+                              ) : (
+                                <>
+                                  <Download className="h-4 w-4 mr-2" />
+                                  {t('account.invoice')}
+                                </>
+                              )}
                             </Button>
                             {order.status.toLowerCase() === "delivered" && (
                               <Button variant="outline" size="sm">
