@@ -7,7 +7,14 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Load Excel library only when needed -->
+  <script>
+    // Preload Excel library asynchronously for later use
+    const xlsxScript = document.createElement('script');
+    xlsxScript.src = 'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js';
+    xlsxScript.async = true;
+    document.head.appendChild(xlsxScript);
+  </script>
   <style>
     * {
       margin: 0;
@@ -7147,26 +7154,34 @@ TOTAL: $${selectedOrder.totalAmount}
       );
     }
     
-    // Main Admin App Component
+    // Main Admin App Component - Optimized for speed
     function AdminApp() {
-      const [isAuthenticated, setIsAuthenticated] = useState(false);
-      const [token, setToken] = useState(null);
-      const [admin, setAdmin] = useState(null);
-      const [loading, setLoading] = useState(true);
+      // Initialize state synchronously to avoid delays
+      const [token, setToken] = useState(localStorage.getItem('adminToken'));
+      const [admin, setAdmin] = useState(() => {
+        try {
+          const savedAdmin = localStorage.getItem('adminUser');
+          return savedAdmin ? JSON.parse(savedAdmin) : null;
+        } catch {
+          return null;
+        }
+      });
+      const [isAuthenticated, setIsAuthenticated] = useState(
+        !!(localStorage.getItem('adminToken') && localStorage.getItem('adminUser'))
+      );
+      const [loading, setLoading] = useState(false); // Start with false for immediate render
       
       useEffect(() => {
-        // Check for existing session
-        const savedToken = localStorage.getItem('adminToken');
-        const savedAdmin = localStorage.getItem('adminUser');
-        
-        if (savedToken && savedAdmin) {
-          setToken(savedToken);
-          setAdmin(JSON.parse(savedAdmin));
+        // Minimal async validation - only if needed
+        if (token && admin && !isAuthenticated) {
           setIsAuthenticated(true);
+        } else if (!token || !admin) {
+          // Clean up invalid state
+          localStorage.removeItem('adminToken');
+          localStorage.removeItem('adminUser');
+          setIsAuthenticated(false);
         }
-        
-        setLoading(false);
-      }, []);
+      }, [token, admin, isAuthenticated]);
       
       const handleLoginSuccess = (token, admin) => {
         setToken(token);
@@ -7185,17 +7200,7 @@ TOTAL: $${selectedOrder.totalAmount}
         setIsAuthenticated(false);
       };
       
-      if (loading) {
-        return (
-          <div className="container">
-            <div className="text-center">
-              <div className="loading"></div>
-              <p>Loading...</p>
-            </div>
-          </div>
-        );
-      }
-      
+      // Render immediately without loading screen
       if (!isAuthenticated) {
         return <AdminLogin onLoginSuccess={handleLoginSuccess} />;
       }
@@ -7203,17 +7208,15 @@ TOTAL: $${selectedOrder.totalAmount}
       return <AdminDashboard token={token} admin={admin} onLogout={handleLogout} />;
     }
     
-    // Render the app
+    // Hide loading indicator immediately and render app
+    const loadingElement = document.getElementById('loading');
+    if (loadingElement) {
+      loadingElement.style.display = 'none';
+    }
+    
+    // Render the app immediately
     const root = ReactDOM.createRoot(document.getElementById('admin-root'));
     root.render(<AdminApp />);
-    
-    // Hide loading indicator once React is ready
-    setTimeout(() => {
-      const loadingElement = document.getElementById('loading');
-      if (loadingElement) {
-        loadingElement.style.display = 'none';
-      }
-    }, 100);
   </script>
 </body>
 </html>
