@@ -1156,6 +1156,55 @@ export async function registerAdminRoutes(app: Express) {
     }
   });
 
+  app.post("/admin/api/smartbill/create-series", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { seriesName, startNumber = 1 } = req.body;
+      
+      if (!seriesName) {
+        return res.status(400).json({ message: "Series name is required" });
+      }
+
+      // Test creating a new series via Smartbill API
+      const credentials = Buffer.from(`${process.env.SMARTBILL_USERNAME}:${process.env.SMARTBILL_TOKEN}`).toString('base64');
+      
+      const seriesData = {
+        name: seriesName,
+        startNumber: startNumber,
+        type: 'factura' // Invoice type
+      };
+      
+      const response = await fetch('https://ws.smartbill.ro/SBORO/api/series', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Basic ${credentials}`
+        },
+        body: JSON.stringify(seriesData)
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        res.json({
+          success: true,
+          message: `Series ${seriesName} created successfully`,
+          series: result
+        });
+      } else {
+        const errorText = await response.text();
+        res.json({
+          success: false,
+          message: "Series creation not supported via API",
+          note: "Create new series manually in Smartbill Dashboard: Settings > Document Series"
+        });
+      }
+      
+    } catch (error) {
+      console.error("Error creating series:", error);
+      res.status(500).json({ message: "Failed to create series" });
+    }
+  });
+
   app.post("/admin/api/smartbill/update-credentials", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
     try {
       const { username, token, companyVat, series } = req.body;
