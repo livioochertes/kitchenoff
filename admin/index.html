@@ -2325,6 +2325,8 @@
                         // Fetch company defaults and pre-populate form
                         const defaults = await fetchCompanyDefaults();
                         console.log('Company defaults loaded:', defaults);
+                        console.log('Setting currency to:', defaults.currency);
+                        console.log('Setting VAT to:', defaults.vatPercentage);
                         setEditingProduct({
                           name: '',
                           description: '',

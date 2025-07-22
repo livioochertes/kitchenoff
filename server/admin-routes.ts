@@ -2348,17 +2348,21 @@ export async function registerAdminRoutes(app: Express) {
 
   // Company Settings Routes (also accessible for invoice display)
   app.get("/admin/api/company-settings", async (req: Request, res: Response) => {
+    console.log('Company settings API endpoint called');
     try {
       const result = await pool.query(`
         SELECT 
           name, email, logistics_email as "logisticsEmail", phone, address, city, state, zip_code as "zipCode", 
           country, contact_person as "contactPerson", website, 
           vat_number as "vatNumber", registration_number as "registrationNumber", 
-          bank_name as "bankName", iban, description
+          bank_name as "bankName", iban, description,
+          default_currency as "defaultCurrency", default_vat_percentage as "defaultVatPercentage", reverse_charge_vat as "reverseChargeVat"
         FROM company_settings 
         ORDER BY created_at DESC 
         LIMIT 1
       `);
+      
+      console.log('Company settings query result:', result.rows[0]);
       
       if (result.rows.length > 0) {
         res.json(result.rows[0]);
@@ -2380,7 +2384,10 @@ export async function registerAdminRoutes(app: Express) {
           registrationNumber: 'J40/12345/2020',
           bankName: 'Banca Comercială Română',
           iban: 'RO49 AAAA 1B31 0075 9384 0000',
-          description: 'Professional kitchen equipment and supplies for the HORECA industry.'
+          description: 'Professional kitchen equipment and supplies for the HORECA industry.',
+          defaultCurrency: 'RON',
+          defaultVatPercentage: '19.00',
+          reverseChargeVat: '0.00'
         });
       }
     } catch (error) {
