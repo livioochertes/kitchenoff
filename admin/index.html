@@ -601,6 +601,22 @@
         mainTop: [],
         mainShop: []
       });
+      const [companySettings, setCompanySettings] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        address: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: '',
+        contactPerson: '',
+        website: '',
+        vatNumber: '',
+        registrationNumber: '',
+        description: ''
+      });
+      const [showCompanySettingsModal, setShowCompanySettingsModal] = useState(false);
       
       useEffect(() => {
         fetchStats();
@@ -1499,6 +1515,67 @@
         }
       };
 
+      // Fetch company settings
+      const fetchCompanySettings = async () => {
+        try {
+          const response = await fetch('/admin/api/company-settings', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok && data) {
+            setCompanySettings(data);
+          } else {
+            // Set default values if no company settings exist
+            setCompanySettings({
+              name: 'KitchenOff',
+              email: 'info@kitchen-off.com',
+              phone: '+40 123 456 789',
+              address: 'Calea Mosilor 158',
+              city: 'Bucharest',
+              state: 'Bucuresti',
+              zipCode: '020883',
+              country: 'Romania',
+              contactPerson: 'Company Administrator',
+              website: 'https://kitchen-off.com',
+              vatNumber: '',
+              registrationNumber: '',
+              description: 'Professional kitchen equipment and supplies for the HORECA industry.'
+            });
+          }
+        } catch (err) {
+          console.error('Network error fetching company settings:', err);
+        }
+      };
+
+      // Update company settings
+      const updateCompanySettings = async (settingsData) => {
+        try {
+          const response = await fetch('/admin/api/company-settings', {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(settingsData)
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            return { success: true, message: 'Company settings updated successfully' };
+          } else {
+            return { success: false, message: data.message || 'Failed to update company settings' };
+          }
+        } catch (error) {
+          console.error('Error updating company settings:', error);
+          return { success: false, message: 'Network error. Please try again.' };
+        }
+      };
+
       const handleViewChange = (view) => {
         setActiveView(view);
         if (view === 'users' && users.length === 0) {
@@ -1516,6 +1593,8 @@
           fetchCategories();
         } else if (view === 'suppliers' && suppliers.length === 0) {
           fetchSuppliers();
+        } else if (view === 'company-settings') {
+          fetchCompanySettings();
         }
       };
       
@@ -2935,6 +3014,105 @@
                     </button>
                   </div>
                 )}
+              </div>
+            );
+          
+          case 'company-settings':
+            return (
+              <div style={{background: 'white', padding: '30px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+                  <h3 style={{color: '#333', margin: '0'}}>🏢 Company Settings</h3>
+                  <button 
+                    className="btn" 
+                    style={{background: '#007bff', width: 'auto', padding: '8px 16px'}}
+                    onClick={() => setShowCompanySettingsModal(true)}
+                  >
+                    ✏️ Edit Company Info
+                  </button>
+                </div>
+                
+                <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px'}}>
+                  {/* Basic Information */}
+                  <div style={{background: '#f8f9fa', padding: '20px', borderRadius: '6px', border: '1px solid #dee2e6'}}>
+                    <h4 style={{color: '#333', marginBottom: '15px', borderBottom: '2px solid #007bff', paddingBottom: '5px'}}>Basic Information</h4>
+                    <div style={{marginBottom: '10px'}}>
+                      <strong style={{color: '#495057'}}>Company Name:</strong>
+                      <p style={{margin: '5px 0', color: '#6c757d'}}>{companySettings.name || 'Not set'}</p>
+                    </div>
+                    <div style={{marginBottom: '10px'}}>
+                      <strong style={{color: '#495057'}}>Email:</strong>
+                      <p style={{margin: '5px 0', color: '#6c757d'}}>{companySettings.email || 'Not set'}</p>
+                    </div>
+                    <div style={{marginBottom: '10px'}}>
+                      <strong style={{color: '#495057'}}>Phone:</strong>
+                      <p style={{margin: '5px 0', color: '#6c757d'}}>{companySettings.phone || 'Not set'}</p>
+                    </div>
+                    <div style={{marginBottom: '10px'}}>
+                      <strong style={{color: '#495057'}}>Website:</strong>
+                      <p style={{margin: '5px 0', color: '#6c757d'}}>{companySettings.website || 'Not set'}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Address Information */}
+                  <div style={{background: '#f8f9fa', padding: '20px', borderRadius: '6px', border: '1px solid #dee2e6'}}>
+                    <h4 style={{color: '#333', marginBottom: '15px', borderBottom: '2px solid #28a745', paddingBottom: '5px'}}>Address</h4>
+                    <div style={{marginBottom: '10px'}}>
+                      <strong style={{color: '#495057'}}>Street Address:</strong>
+                      <p style={{margin: '5px 0', color: '#6c757d'}}>{companySettings.address || 'Not set'}</p>
+                    </div>
+                    <div style={{marginBottom: '10px'}}>
+                      <strong style={{color: '#495057'}}>City:</strong>
+                      <p style={{margin: '5px 0', color: '#6c757d'}}>{companySettings.city || 'Not set'}</p>
+                    </div>
+                    <div style={{marginBottom: '10px'}}>
+                      <strong style={{color: '#495057'}}>State/Province:</strong>
+                      <p style={{margin: '5px 0', color: '#6c757d'}}>{companySettings.state || 'Not set'}</p>
+                    </div>
+                    <div style={{marginBottom: '10px'}}>
+                      <strong style={{color: '#495057'}}>ZIP/Postal Code:</strong>
+                      <p style={{margin: '5px 0', color: '#6c757d'}}>{companySettings.zipCode || 'Not set'}</p>
+                    </div>
+                    <div style={{marginBottom: '10px'}}>
+                      <strong style={{color: '#495057'}}>Country:</strong>
+                      <p style={{margin: '5px 0', color: '#6c757d'}}>{companySettings.country || 'Not set'}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Legal & Business Information */}
+                  <div style={{background: '#f8f9fa', padding: '20px', borderRadius: '6px', border: '1px solid #dee2e6'}}>
+                    <h4 style={{color: '#333', marginBottom: '15px', borderBottom: '2px solid #ffc107', paddingBottom: '5px'}}>Legal & Business</h4>
+                    <div style={{marginBottom: '10px'}}>
+                      <strong style={{color: '#495057'}}>Contact Person:</strong>
+                      <p style={{margin: '5px 0', color: '#6c757d'}}>{companySettings.contactPerson || 'Not set'}</p>
+                    </div>
+                    <div style={{marginBottom: '10px'}}>
+                      <strong style={{color: '#495057'}}>VAT Number:</strong>
+                      <p style={{margin: '5px 0', color: '#6c757d'}}>{companySettings.vatNumber || 'Not set'}</p>
+                    </div>
+                    <div style={{marginBottom: '10px'}}>
+                      <strong style={{color: '#495057'}}>Registration Number:</strong>
+                      <p style={{margin: '5px 0', color: '#6c757d'}}>{companySettings.registrationNumber || 'Not set'}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Company Description */}
+                  <div style={{background: '#f8f9fa', padding: '20px', borderRadius: '6px', border: '1px solid #dee2e6', gridColumn: 'span 2'}}>
+                    <h4 style={{color: '#333', marginBottom: '15px', borderBottom: '2px solid #dc3545', paddingBottom: '5px'}}>Company Description</h4>
+                    <p style={{margin: '0', color: '#6c757d', lineHeight: '1.6'}}>
+                      {companySettings.description || 'No description available. Click "Edit Company Info" to add your company description.'}
+                    </p>
+                  </div>
+                </div>
+                
+                <div style={{marginTop: '30px', padding: '20px', background: '#e8f4f8', borderRadius: '6px', border: '1px solid #bee5eb'}}>
+                  <h4 style={{color: '#333', marginBottom: '10px'}}>📝 Important Notes</h4>
+                  <ul style={{margin: '0', paddingLeft: '20px', color: '#495057'}}>
+                    <li style={{marginBottom: '5px'}}>This information is used throughout the system for invoices, emails, and customer communications</li>
+                    <li style={{marginBottom: '5px'}}>VAT Number and Registration Number are required for proper invoice generation</li>
+                    <li style={{marginBottom: '5px'}}>Contact information will be displayed to customers for support inquiries</li>
+                    <li>All changes are automatically saved and will be reflected in new orders and communications</li>
+                  </ul>
+                </div>
               </div>
             );
           
@@ -6245,6 +6423,284 @@ TOTAL: $${selectedOrder.totalAmount}
                 </div>
               </div>
             )}
+            
+            {/* Company Settings Modal */}
+            {showCompanySettingsModal && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1000
+              }}>
+                <div style={{
+                  background: 'white',
+                  borderRadius: '8px',
+                  padding: '30px',
+                  maxWidth: '600px',
+                  width: '90%',
+                  maxHeight: '90vh',
+                  overflowY: 'auto',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
+                }}>
+                  <h3 style={{marginBottom: '20px', color: '#333'}}>🏢 Edit Company Settings</h3>
+                  
+                  <form onSubmit={async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.target);
+                    const settingsData = {
+                      name: formData.get('name'),
+                      email: formData.get('email'),
+                      phone: formData.get('phone'),
+                      address: formData.get('address'),
+                      city: formData.get('city'),
+                      state: formData.get('state'),
+                      zipCode: formData.get('zipCode'),
+                      country: formData.get('country'),
+                      contactPerson: formData.get('contactPerson'),
+                      website: formData.get('website'),
+                      vatNumber: formData.get('vatNumber'),
+                      registrationNumber: formData.get('registrationNumber'),
+                      description: formData.get('description')
+                    };
+                    
+                    const result = await updateCompanySettings(settingsData);
+                    
+                    if (result.success) {
+                      alert('✅ Company settings updated successfully!');
+                      setCompanySettings(settingsData);
+                      setShowCompanySettingsModal(false);
+                    } else {
+                      alert(`❌ Error updating company settings: ${result.message}`);
+                    }
+                  }}>
+                    
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px'}}>
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#333'}}>Company Name *</label>
+                        <input
+                          type="text"
+                          name="name"
+                          defaultValue={companySettings.name}
+                          required
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#333'}}>Email *</label>
+                        <input
+                          type="email"
+                          name="email"
+                          defaultValue={companySettings.email}
+                          required
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#333'}}>Phone</label>
+                        <input
+                          type="text"
+                          name="phone"
+                          defaultValue={companySettings.phone}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#333'}}>Website</label>
+                        <input
+                          type="url"
+                          name="website"
+                          defaultValue={companySettings.website}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#333'}}>Street Address</label>
+                        <input
+                          type="text"
+                          name="address"
+                          defaultValue={companySettings.address}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#333'}}>City</label>
+                        <input
+                          type="text"
+                          name="city"
+                          defaultValue={companySettings.city}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#333'}}>State/Province</label>
+                        <input
+                          type="text"
+                          name="state"
+                          defaultValue={companySettings.state}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#333'}}>ZIP/Postal Code</label>
+                        <input
+                          type="text"
+                          name="zipCode"
+                          defaultValue={companySettings.zipCode}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#333'}}>Country</label>
+                        <input
+                          type="text"
+                          name="country"
+                          defaultValue={companySettings.country}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#333'}}>Contact Person</label>
+                        <input
+                          type="text"
+                          name="contactPerson"
+                          defaultValue={companySettings.contactPerson}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#333'}}>VAT Number</label>
+                        <input
+                          type="text"
+                          name="vatNumber"
+                          defaultValue={companySettings.vatNumber}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#333'}}>Registration Number</label>
+                        <input
+                          type="text"
+                          name="registrationNumber"
+                          defaultValue={companySettings.registrationNumber}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div style={{marginBottom: '20px'}}>
+                      <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#333'}}>Company Description</label>
+                      <textarea
+                        name="description"
+                        defaultValue={companySettings.description}
+                        rows="4"
+                        style={{
+                          width: '100%',
+                          padding: '8px',
+                          border: '1px solid #ddd',
+                          borderRadius: '4px',
+                          resize: 'vertical'
+                        }}
+                      />
+                    </div>
+                    
+                    <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                      <button
+                        type="button"
+                        className="btn"
+                        style={{background: '#6c757d'}}
+                        onClick={() => setShowCompanySettingsModal(false)}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="btn"
+                        style={{background: '#007bff'}}
+                      >
+                        💾 Save Settings
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
           </>
         );
       };
@@ -6305,10 +6761,10 @@ TOTAL: $${selectedOrder.totalAmount}
               🏢 Suppliers
             </button>
             <button 
-              className={`nav-tab ${activeView === 'settings' ? 'active' : ''}`}
-              onClick={() => handleViewChange('settings')}
+              className={`nav-tab ${activeView === 'company-settings' ? 'active' : ''}`}
+              onClick={() => handleViewChange('company-settings')}
             >
-              ⚙️ Settings
+              🏢 Company Settings
             </button>
           </div>
           

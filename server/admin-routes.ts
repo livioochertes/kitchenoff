@@ -2176,4 +2176,92 @@ export async function registerAdminRoutes(app: Express) {
       res.status(500).json({ message: "Failed to update homepage categories" });
     }
   });
+
+  // Company Settings Routes
+  app.get("/admin/api/company-settings", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const result = await storage.db.query(`
+        SELECT 
+          name, email, phone, address, city, state, zip_code as "zipCode", 
+          country, contact_person as "contactPerson", website, 
+          vat_number as "vatNumber", registration_number as "registrationNumber", 
+          description
+        FROM company_settings 
+        ORDER BY created_at DESC 
+        LIMIT 1
+      `);
+      
+      if (result.rows.length > 0) {
+        res.json(result.rows[0]);
+      } else {
+        // Return default company settings if none exist
+        res.json({
+          name: 'KitchenOff',
+          email: 'info@kitchen-off.com',
+          phone: '+40 123 456 789',
+          address: 'Calea Mosilor 158',
+          city: 'Bucharest',
+          state: 'Bucuresti',
+          zipCode: '020883',
+          country: 'Romania',
+          contactPerson: 'Company Administrator',
+          website: 'https://kitchen-off.com',
+          vatNumber: '',
+          registrationNumber: '',
+          description: 'Professional kitchen equipment and supplies for the HORECA industry.'
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching company settings:", error);
+      res.status(500).json({ message: "Failed to fetch company settings" });
+    }
+  });
+
+  app.put("/admin/api/company-settings", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { 
+        name, email, phone, address, city, state, zipCode, country, 
+        contactPerson, website, vatNumber, registrationNumber, description 
+      } = req.body;
+
+      if (!name || !email) {
+        return res.status(400).json({ message: "Company name and email are required" });
+      }
+
+      // Check if company settings exist
+      const existingResult = await storage.db.query('SELECT id FROM company_settings LIMIT 1');
+      
+      if (existingResult.rows.length > 0) {
+        // Update existing settings
+        await storage.db.query(`
+          UPDATE company_settings 
+          SET name = $1, email = $2, phone = $3, address = $4, city = $5, 
+              state = $6, zip_code = $7, country = $8, contact_person = $9, 
+              website = $10, vat_number = $11, registration_number = $12, 
+              description = $13, updated_at = CURRENT_TIMESTAMP
+          WHERE id = $14
+        `, [
+          name, email, phone, address, city, state, zipCode, country,
+          contactPerson, website, vatNumber, registrationNumber, description,
+          existingResult.rows[0].id
+        ]);
+      } else {
+        // Insert new settings
+        await storage.db.query(`
+          INSERT INTO company_settings (
+            name, email, phone, address, city, state, zip_code, country, 
+            contact_person, website, vat_number, registration_number, description
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        `, [
+          name, email, phone, address, city, state, zipCode, country,
+          contactPerson, website, vatNumber, registrationNumber, description
+        ]);
+      }
+
+      res.json({ message: "Company settings updated successfully" });
+    } catch (error) {
+      console.error("Error updating company settings:", error);
+      res.status(500).json({ message: "Failed to update company settings" });
+    }
+  });
 }
