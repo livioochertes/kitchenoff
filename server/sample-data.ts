@@ -563,20 +563,24 @@ export async function seedDatabase() {
         status: "pending",
         totalAmount: "94.97",
         shippingAddress: {
-          name: "Liviu Chertes",
-          street: "Calea Mosilor 158",
+          firstName: "Liviu",
+          lastName: "Chertes",
+          address: "Calea Mosilor 158",
           city: "Bucharest",
           state: "Bucharest",
           zipCode: "020883",
-          country: "Romania"
+          country: "Romania",
+          phone: "+40 745 009 000"
         },
         billingAddress: {
-          name: "Liviu Chertes",
-          street: "Calea Mosilor 158",
+          firstName: "Liviu",
+          lastName: "Chertes",
+          address: "Calea Mosilor 158",
           city: "Bucharest",
           state: "Bucharest",
           zipCode: "020883",
-          country: "Romania"
+          country: "Romania",
+          phone: "+40 745 009 000"
         },
         paymentMethod: "credit_card",
         paymentStatus: "pending",
@@ -587,20 +591,24 @@ export async function seedDatabase() {
         status: "processing",
         totalAmount: "349.99",
         shippingAddress: {
-          name: "Restaurant Luna",
-          street: "Strada Republicii 25",
+          firstName: "Maria",
+          lastName: "Popescu",
+          address: "Strada Republicii 25",
           city: "Cluj-Napoca",
           state: "Cluj",
           zipCode: "400015",
-          country: "Romania"
+          country: "Romania",
+          phone: "+40 264 123 456"
         },
         billingAddress: {
-          name: "Restaurant Luna SRL",
-          street: "Strada Republicii 25",
+          firstName: "Maria",
+          lastName: "Popescu",
+          address: "Strada Republicii 25",
           city: "Cluj-Napoca",
           state: "Cluj",
           zipCode: "400015",
-          country: "Romania"
+          country: "Romania",
+          phone: "+40 264 123 456"
         },
         paymentMethod: "bank_transfer",
         paymentStatus: "paid",
@@ -611,20 +619,24 @@ export async function seedDatabase() {
         status: "shipped",
         totalAmount: "189.97",
         shippingAddress: {
-          name: "Bistro Central",
-          street: "Bulevardul Unirii 12",
+          firstName: "Alexandru",
+          lastName: "Ionescu",
+          address: "Bulevardul Unirii 12",
           city: "Iași",
           state: "Iași",
           zipCode: "700056",
-          country: "Romania"
+          country: "Romania",
+          phone: "+40 232 987 654"
         },
         billingAddress: {
-          name: "Bistro Central SRL",
-          street: "Bulevardul Unirii 12",  
+          firstName: "Alexandru",
+          lastName: "Ionescu",
+          address: "Bulevardul Unirii 12",  
           city: "Iași",
           state: "Iași",
           zipCode: "700056",
-          country: "Romania"
+          country: "Romania",
+          phone: "+40 232 987 654"
         },
         paymentMethod: "credit_card",
         paymentStatus: "paid",
@@ -635,20 +647,24 @@ export async function seedDatabase() {
         status: "delivered",
         totalAmount: "124.98",
         shippingAddress: {
-          name: "Pizzeria Napoli",
-          street: "Strada Lipscani 45",
+          firstName: "Giuseppe",
+          lastName: "Romano",
+          address: "Strada Lipscani 45",
           city: "Bucharest",
           state: "Bucharest",
           zipCode: "030167",
-          country: "Romania"
+          country: "Romania",
+          phone: "+40 21 555 1234"
         },
         billingAddress: {
-          name: "Pizzeria Napoli SRL",
-          street: "Strada Lipscani 45",
+          firstName: "Giuseppe",
+          lastName: "Romano",
+          address: "Strada Lipscani 45",
           city: "Bucharest", 
           state: "Bucharest",
           zipCode: "030167",
-          country: "Romania"
+          country: "Romania",
+          phone: "+40 21 555 1234"
         },
         paymentMethod: "credit_card",
         paymentStatus: "paid",
@@ -659,20 +675,24 @@ export async function seedDatabase() {
         status: "cancelled",
         totalAmount: "79.99",
         shippingAddress: {
-          name: "Café Aroma",
-          street: "Piața Sfatului 10",
+          firstName: "Ana",
+          lastName: "Dumitrescu",
+          address: "Piața Sfatului 10",
           city: "Brașov",
           state: "Brașov",
           zipCode: "500025",
-          country: "Romania"
+          country: "Romania",
+          phone: "+40 268 111 222"
         },
         billingAddress: {
-          name: "Café Aroma SRL",
-          street: "Piața Sfatului 10",
+          firstName: "Ana",
+          lastName: "Dumitrescu",
+          address: "Piața Sfatului 10",
           city: "Brașov",
           state: "Brașov", 
           zipCode: "500025",
-          country: "Romania"
+          country: "Romania",
+          phone: "+40 268 111 222"
         },
         paymentMethod: "credit_card",
         paymentStatus: "refunded",
