@@ -114,10 +114,10 @@ export class InvoiceService {
       };
 
       if (this.config.enableSmartbill) {
-        console.log(`📋 Using Smartbill API for invoice creation`);
+        console.log(`📋 ✅ ATTEMPTING SMARTBILL INVOICE CREATION - Series: ${this.config.defaultSeries}`);
         return await this.generateSmartbillInvoice(order, user, paymentData);
       } else {
-        console.log(`📋 Using local invoice generation`);
+        console.log(`📋 ⚠️ USING LOCAL INVOICE GENERATION - Smartbill disabled`);
         return await this.generateLocalInvoice(order, user, paymentData);
       }
 
@@ -126,15 +126,18 @@ export class InvoiceService {
       
       // If Smartbill fails, try local generation as fallback
       if (this.config.enableSmartbill) {
-        console.log('🔄 Smartbill failed, falling back to local invoice generation');
+        console.log('🔄 ⚠️ SMARTBILL FAILED - FALLING BACK TO LOCAL GENERATION');
+        console.log(`   Smartbill error: ${error instanceof Error ? error.message : String(error)}`);
         try {
           const paymentData = { 
             paymentMethod: options.paymentMethod || 'wire_transfer',
             status: 'fallback_creation'
           };
-          return await this.generateLocalInvoice(order, user, paymentData);
+          const localInvoice = await this.generateLocalInvoice(order, user, paymentData);
+          console.log(`📋 ✅ FALLBACK INVOICE CREATED: ${localInvoice.invoiceNumber}`);
+          return localInvoice;
         } catch (fallbackError) {
-          console.error('❌ Fallback invoice generation also failed:', fallbackError);
+          console.error('❌ FALLBACK INVOICE GENERATION FAILED:', fallbackError);
           throw fallbackError;
         }
       }
@@ -148,6 +151,9 @@ export class InvoiceService {
    */
   private async generateSmartbillInvoice(order: any, user: any, paymentData: any): Promise<any> {
     try {
+      console.log(`🚀 STARTING SMARTBILL INVOICE GENERATION for order ${order.id}`);
+      console.log(`   User: ${user.email}, Series: ${this.config.defaultSeries}`);
+      
       // Convert order to Smartbill format
       const smartbillInvoiceData = orderToSmartbillInvoice(
         order,
@@ -155,8 +161,11 @@ export class InvoiceService {
         this.config.smartbill,
         this.config.defaultSeries
       );
+      
+      console.log(`📋 Smartbill invoice data prepared:`, JSON.stringify(smartbillInvoiceData, null, 2));
 
       // Create invoice via Smartbill API
+      console.log(`🌐 Sending request to Smartbill API...`);
       const smartbillResult = await this.smartbillApi.createInvoice(smartbillInvoiceData);
 
       // Store invoice reference in local database
@@ -191,6 +200,11 @@ export class InvoiceService {
       }));
 
       const localInvoice = await storage.createInvoice(invoiceData, invoiceItems);
+
+      console.log(`🎉 ✅ SMARTBILL INVOICE SUCCESSFULLY CREATED!`);
+      console.log(`   Invoice Number: ${smartbillResult.series}-${smartbillResult.number}`);
+      console.log(`   Smartbill ID: ${smartbillResult.id}`);
+      console.log(`   Local Invoice ID: ${localInvoice.id}`);
 
       return {
         ...localInvoice,

@@ -627,7 +627,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const orderId = parseInt(req.params.orderId);
       const { paymentMethod = 'wire_transfer' } = req.body;
       
-      console.log(`🧾 Creating invoice for order ${orderId} using Smartbill integration`);
+      console.log(`🧾 CREATING INVOICE for order ${orderId} using Smartbill integration`);
+      console.log(`📋 Smartbill Configuration: enabled=${process.env.ENABLE_SMARTBILL === 'true'}, series=${process.env.SMARTBILL_SERIES}`);
       
       // Get the order with items
       const order = await storage.getOrder(orderId);

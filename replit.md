@@ -44,7 +44,12 @@ Preferred communication style: Simple, everyday language.
 - VERIFIED: Invoice creation system working with both Smartbill API and local fallback
 - VERIFIED: Product synchronization maintaining data integrity between systems
 - VERIFIED: Credentials updated to correct format with proper username and VAT number
-- STATUS: Smartbill integration FULLY OPERATIONAL - authentication confirmed working, real invoices successfully created (KTO series #10001), automatic invoice generation ready for production use
+- UPDATED: Fixed invoice creation endpoint to use Smartbill integration instead of local fallback system
+- UPDATED: Added createInvoiceForOrder method to InvoiceService for proper Smartbill invoice creation
+- UPDATED: Fixed VAT number format to include RO prefix (RO16582983) for Smartbill API compliance
+- UPDATED: Enhanced invoice endpoint logging to track Smartbill vs local invoice creation
+- ISSUE DETECTED: Smartbill API endpoints returning HTTP 500 errors (server-side issue), system configured for fallback
+- STATUS: Integration code ready - when Smartbill API is stable, invoices will use KTO series automatically
 
 ### July 22, 2025 - Excel Bulk Product Import System Complete
 - COMPLETED: Implemented comprehensive Excel bulk product import functionality for admin Products section
