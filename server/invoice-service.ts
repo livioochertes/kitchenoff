@@ -43,7 +43,7 @@ export class InvoiceService {
       }
 
       // Get user details
-      const user = await storage.getUser(order.userId);
+      const user = order.userId ? await storage.getUser(order.userId) : null;
       if (!user) {
         throw new Error(`User ${order.userId} not found`);
       }
@@ -73,11 +73,18 @@ export class InvoiceService {
       console.error(`Error generating invoice for order ${orderId}:`, error);
       
       // If Smartbill fails, try local generation as fallback
-      if (this.config.enableSmartbill && error.message.includes('Smartbill')) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (this.config.enableSmartbill && errorMessage.includes('Smartbill')) {
         console.log('Smartbill failed, falling back to local invoice generation');
         try {
           const order = await storage.getOrder(orderId);
-          const user = await storage.getUser(order.userId);
+          if (!order) {
+            throw new Error(`Order ${orderId} not found`);
+          }
+          const user = order.userId ? await storage.getUser(order.userId) : null;
+          if (!user) {
+            throw new Error(`User ${order.userId} not found`);
+          }
           return await this.generateLocalInvoice(order, user, paymentData);
         } catch (fallbackError) {
           console.error('Fallback invoice generation also failed:', fallbackError);
@@ -146,7 +153,8 @@ export class InvoiceService {
 
     } catch (error) {
       console.error('Smartbill invoice generation failed:', error);
-      throw new Error(`Smartbill invoice generation failed: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Smartbill invoice generation failed: ${errorMessage}`);
     }
   }
 
@@ -284,7 +292,7 @@ export class InvoiceService {
       }
 
       // For local invoices, check payment status from order
-      const order = await storage.getOrder(invoice.orderId);
+      const order = invoice.orderId ? await storage.getOrder(invoice.orderId) : null;
       return order?.paymentStatus === 'paid';
 
     } catch (error) {

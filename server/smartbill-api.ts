@@ -272,6 +272,241 @@ export class SmartbillAPI {
       return [];
     }
   }
+
+  /**
+   * Get product stock from Smartbill
+   */
+  async getProductStock(companyVat: string, productCode?: string): Promise<any[]> {
+    try {
+      const url = productCode 
+        ? `${this.baseUrl}/stocks?cif=${companyVat}&productCode=${productCode}`
+        : `${this.baseUrl}/stocks?cif=${companyVat}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: this.getHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get product stock: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return Array.isArray(result) ? result : [result];
+    } catch (error) {
+      console.error('Error getting product stock:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Update product stock in Smartbill
+   */
+  async updateProductStock(companyVat: string, stockUpdates: {
+    productCode: string;
+    quantity: number;
+    operation: 'add' | 'subtract' | 'set';
+    warehouseCode?: string;
+    documentType?: string;
+    documentSeries?: string;
+    documentNumber?: string;
+    notes?: string;
+  }[]): Promise<boolean> {
+    try {
+      console.log('Updating Smartbill stock:', JSON.stringify(stockUpdates, null, 2));
+      
+      const response = await fetch(`${this.baseUrl}/stocks`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({
+          cif: companyVat,
+          stockMovements: stockUpdates
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Smartbill stock update error:', response.status, errorText);
+        throw new Error(`Smartbill stock update failed: ${response.status} - ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('Smartbill stock updated successfully:', result);
+      return true;
+    } catch (error) {
+      console.error('Error updating Smartbill stock:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get products from Smartbill
+   */
+  async getProducts(companyVat: string): Promise<any[]> {
+    try {
+      const response = await fetch(`${this.baseUrl}/products?cif=${companyVat}`, {
+        method: 'GET',
+        headers: this.getHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get products: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return Array.isArray(result) ? result : [];
+    } catch (error) {
+      console.error('Error getting products from Smartbill:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Create or update product in Smartbill
+   */
+  async createOrUpdateProduct(companyVat: string, productData: {
+    name: string;
+    code: string;
+    um: string;
+    price?: number;
+    currency?: string;
+    vatPercentage?: number;
+    category?: string;
+    description?: string;
+    barcode?: string;
+  }): Promise<any> {
+    try {
+      console.log('Creating/updating Smartbill product:', JSON.stringify(productData, null, 2));
+      
+      const response = await fetch(`${this.baseUrl}/products`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({
+          cif: companyVat,
+          ...productData
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Smartbill product creation error:', response.status, errorText);
+        throw new Error(`Smartbill product creation failed: ${response.status} - ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('Smartbill product created/updated successfully:', result);
+      return result;
+    } catch (error) {
+      console.error('Error creating/updating Smartbill product:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Sync all products from local database to Smartbill
+   */
+  async syncProductsToSmartbill(companyVat: string, products: any[]): Promise<{
+    success: number;
+    failed: number;
+    errors: string[];
+  }> {
+    const results = {
+      success: 0,
+      failed: 0,
+      errors: [] as string[]
+    };
+
+    console.log(`Starting sync of ${products.length} products to Smartbill...`);
+
+    for (const product of products) {
+      try {
+        await this.createOrUpdateProduct(companyVat, {
+          name: product.name,
+          code: product.productCode || product.id.toString(),
+          um: 'buc', // pieces in Romanian
+          price: parseFloat(product.price || '0'),
+          currency: 'EUR',
+          vatPercentage: parseFloat(product.vatValue || '0'),
+          category: product.category?.name || 'General',
+          description: product.description || '',
+          barcode: product.productCode || ''
+        });
+
+        results.success++;
+        console.log(`✓ Synced product: ${product.name}`);
+      } catch (error) {
+        results.failed++;
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        results.errors.push(`Failed to sync "${product.name}": ${errorMessage}`);
+        console.error(`✗ Failed to sync product "${product.name}":`, error);
+      }
+
+      // Add small delay to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    console.log(`Product sync completed: ${results.success} success, ${results.failed} failed`);
+    return results;
+  }
+
+  /**
+   * Sync stock levels from Smartbill to local database
+   */
+  async syncStockFromSmartbill(companyVat: string, productMappings: Map<string, number>): Promise<{
+    success: number;
+    failed: number;
+    errors: string[];
+    stockUpdates: Array<{ productId: number; oldStock: number; newStock: number; productCode: string; }>;
+  }> {
+    const results = {
+      success: 0,
+      failed: 0,
+      errors: [] as string[],
+      stockUpdates: [] as Array<{ productId: number; oldStock: number; newStock: number; productCode: string; }>
+    };
+
+    try {
+      console.log('Fetching stock levels from Smartbill...');
+      const stockData = await this.getProductStock(companyVat);
+
+      for (const stockItem of stockData) {
+        try {
+          const productCode = stockItem.productCode || stockItem.code;
+          const productId = productMappings.get(productCode);
+          
+          if (!productId) {
+            console.log(`No mapping found for product code: ${productCode}`);
+            continue;
+          }
+
+          const newStock = parseInt(stockItem.quantity || stockItem.stock || '0');
+          
+          // Here you would update your local database stock
+          // This is a placeholder - you'll need to implement the actual database update
+          results.stockUpdates.push({
+            productId,
+            oldStock: 0, // You'd get this from your database
+            newStock,
+            productCode
+          });
+
+          results.success++;
+          console.log(`✓ Updated stock for product ${productCode}: ${newStock}`);
+        } catch (error) {
+          results.failed++;
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          results.errors.push(`Failed to update stock for ${stockItem.productCode}: ${errorMessage}`);
+        }
+      }
+
+    } catch (error) {
+      console.error('Error syncing stock from Smartbill:', error);
+      results.errors.push(`Failed to fetch stock data: ${error}`);
+    }
+
+    console.log(`Stock sync completed: ${results.success} success, ${results.failed} failed`);
+    return results;
+  }
 }
 
 /**

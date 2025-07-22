@@ -2531,4 +2531,329 @@ export async function registerAdminRoutes(app: Express) {
       });
     }
   });
+
+  // Smartbill Integration Routes
+  app.get("/admin/api/smartbill/test", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { createInvoiceService } = await import('./invoice-service.js');
+      const invoiceService = await createInvoiceService();
+      
+      const isConnected = await invoiceService.testConnection();
+      
+      res.json({
+        success: isConnected,
+        message: isConnected ? "Smartbill connection successful" : "Smartbill connection failed",
+        enabled: process.env.ENABLE_SMARTBILL === 'true',
+        series: process.env.SMARTBILL_SERIES || 'FACT'
+      });
+    } catch (error) {
+      console.error("Smartbill test error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to test Smartbill connection",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  app.post("/admin/api/smartbill/sync-products", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { SmartbillAPI } = await import('./smartbill-api.js');
+      const { createInvoiceService } = await import('./invoice-service.js');
+      const invoiceService = await createInvoiceService();
+      
+      if (process.env.ENABLE_SMARTBILL !== 'true') {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Smartbill integration is not enabled" 
+        });
+      }
+
+      // Get all products from local database
+      const products = await storage.getProducts();
+      
+      // Initialize Smartbill API
+      const smartbillConfig = {
+        username: process.env.SMARTBILL_USERNAME || '',
+        token: process.env.SMARTBILL_TOKEN || '',
+        companyVat: process.env.SMARTBILL_COMPANY_VAT || ''
+      };
+      
+      const smartbillApi = new SmartbillAPI(smartbillConfig);
+      
+      // Sync products to Smartbill
+      const syncResults = await smartbillApi.syncProductsToSmartbill(
+        smartbillConfig.companyVat,
+        products
+      );
+      
+      res.json({
+        success: true,
+        message: `Product sync completed: ${syncResults.success} successful, ${syncResults.failed} failed`,
+        data: syncResults
+      });
+      
+    } catch (error) {
+      console.error("Product sync error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to sync products to Smartbill",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  app.post("/admin/api/smartbill/sync-stock", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { SmartbillAPI } = await import('./smartbill-api.js');
+      
+      if (process.env.ENABLE_SMARTBILL !== 'true') {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Smartbill integration is not enabled" 
+        });
+      }
+
+      // Get all products to create product code mapping
+      const products = await storage.getProducts();
+      const productMappings = new Map<string, number>();
+      
+      for (const product of products) {
+        const productCode = product.productCode || product.id.toString();
+        productMappings.set(productCode, product.id);
+      }
+      
+      // Initialize Smartbill API
+      const smartbillConfig = {
+        username: process.env.SMARTBILL_USERNAME || '',
+        token: process.env.SMARTBILL_TOKEN || '',
+        companyVat: process.env.SMARTBILL_COMPANY_VAT || ''
+      };
+      
+      const smartbillApi = new SmartbillAPI(smartbillConfig);
+      
+      // Sync stock from Smartbill
+      const syncResults = await smartbillApi.syncStockFromSmartbill(
+        smartbillConfig.companyVat,
+        productMappings
+      );
+      
+      // Update local database with stock changes
+      for (const stockUpdate of syncResults.stockUpdates) {
+        try {
+          await storage.updateProductStock(stockUpdate.productId, stockUpdate.newStock);
+          console.log(`Updated local stock for product ${stockUpdate.productId}: ${stockUpdate.newStock}`);
+        } catch (error) {
+          console.error(`Failed to update local stock for product ${stockUpdate.productId}:`, error);
+        }
+      }
+      
+      // Refresh memory cache
+      await loadAllDataIntoMemory();
+      
+      res.json({
+        success: true,
+        message: `Stock sync completed: ${syncResults.success} successful, ${syncResults.failed} failed`,
+        data: syncResults
+      });
+      
+    } catch (error) {
+      console.error("Stock sync error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to sync stock from Smartbill",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  app.post("/admin/api/smartbill/create-invoice/:orderId", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      
+      if (isNaN(orderId)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid order ID" 
+        });
+      }
+
+      const { createInvoiceService } = await import('./invoice-service.js');
+      const invoiceService = await createInvoiceService();
+      
+      // Get order details
+      const order = await storage.getOrder(orderId);
+      if (!order) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Order not found" 
+        });
+      }
+
+      // Create invoice via Smartbill
+      const invoice = await invoiceService.generateInvoiceAfterPayment(orderId, {
+        status: 'completed',
+        paymentMethod: 'manual_admin'
+      });
+      
+      res.json({
+        success: true,
+        message: "Invoice created successfully via Smartbill",
+        data: invoice
+      });
+      
+    } catch (error) {
+      console.error("Manual invoice creation error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to create invoice via Smartbill",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  app.get("/admin/api/smartbill/invoice/:invoiceId/pdf", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const invoiceId = parseInt(req.params.invoiceId);
+      
+      if (isNaN(invoiceId)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid invoice ID" 
+        });
+      }
+
+      const { createInvoiceService } = await import('./invoice-service.js');
+      const invoiceService = await createInvoiceService();
+      
+      // Get PDF from Smartbill
+      const pdfBuffer = await invoiceService.getInvoicePdf(invoiceId);
+      
+      if (!pdfBuffer) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Invoice PDF not available" 
+        });
+      }
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="invoice-${invoiceId}.pdf"`);
+      res.send(pdfBuffer);
+      
+    } catch (error) {
+      console.error("PDF download error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to download invoice PDF",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  app.post("/admin/api/smartbill/invoice/:invoiceId/send-email", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const invoiceId = parseInt(req.params.invoiceId);
+      const { email } = req.body;
+      
+      if (isNaN(invoiceId)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid invoice ID" 
+        });
+      }
+
+      const { createInvoiceService } = await import('./invoice-service.js');
+      const invoiceService = await createInvoiceService();
+      
+      // Send invoice via email through Smartbill
+      const sent = await invoiceService.sendInvoiceByEmail(invoiceId, email);
+      
+      res.json({
+        success: sent,
+        message: sent ? "Invoice sent successfully" : "Failed to send invoice"
+      });
+      
+    } catch (error) {
+      console.error("Email sending error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to send invoice via email",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  app.get("/admin/api/smartbill/products", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { SmartbillAPI } = await import('./smartbill-api.js');
+      
+      if (process.env.ENABLE_SMARTBILL !== 'true') {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Smartbill integration is not enabled" 
+        });
+      }
+
+      const smartbillConfig = {
+        username: process.env.SMARTBILL_USERNAME || '',
+        token: process.env.SMARTBILL_TOKEN || '',
+        companyVat: process.env.SMARTBILL_COMPANY_VAT || ''
+      };
+      
+      const smartbillApi = new SmartbillAPI(smartbillConfig);
+      const products = await smartbillApi.getProducts(smartbillConfig.companyVat);
+      
+      res.json({
+        success: true,
+        data: products
+      });
+      
+    } catch (error) {
+      console.error("Get Smartbill products error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to get products from Smartbill",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  app.get("/admin/api/smartbill/stock", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { SmartbillAPI } = await import('./smartbill-api.js');
+      const { productCode } = req.query;
+      
+      if (process.env.ENABLE_SMARTBILL !== 'true') {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Smartbill integration is not enabled" 
+        });
+      }
+
+      const smartbillConfig = {
+        username: process.env.SMARTBILL_USERNAME || '',
+        token: process.env.SMARTBILL_TOKEN || '',
+        companyVat: process.env.SMARTBILL_COMPANY_VAT || ''
+      };
+      
+      const smartbillApi = new SmartbillAPI(smartbillConfig);
+      const stock = await smartbillApi.getProductStock(
+        smartbillConfig.companyVat,
+        productCode as string
+      );
+      
+      res.json({
+        success: true,
+        data: stock
+      });
+      
+    } catch (error) {
+      console.error("Get Smartbill stock error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to get stock from Smartbill",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
 }

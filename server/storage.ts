@@ -60,6 +60,7 @@ export interface IStorage {
   getProductBySlug(slug: string): Promise<ProductWithCategory | undefined>;
   createProduct(product: InsertProduct): Promise<Product>;
   updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product>;
+  updateProductStock(id: number, stockQuantity: number): Promise<Product>;
   deleteProduct(id: number): Promise<void>;
 
   // Order operations
@@ -375,6 +376,15 @@ export class DatabaseStorage implements IStorage {
     const [updatedProduct] = await db
       .update(products)
       .set({ ...product, updatedAt: new Date() })
+      .where(eq(products.id, id))
+      .returning();
+    return updatedProduct;
+  }
+
+  async updateProductStock(id: number, stockQuantity: number): Promise<Product> {
+    const [updatedProduct] = await db
+      .update(products)
+      .set({ stockQuantity, updatedAt: new Date() })
       .where(eq(products.id, id))
       .returning();
     return updatedProduct;
