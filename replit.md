@@ -10,6 +10,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### July 22, 2025 - Smartbill Integration Authentication Issue IDENTIFIED
+- ISSUE IDENTIFIED: Environment variables not updating correctly after secret changes
+- CONFIRMED: Direct API test with correct credentials (liviu.chertes@gmail.com, 001|2af8fcdc3ea579cb7a81093ca404b31e, RO16582983) works perfectly
+- CONFIRMED: Available series "KTO" with next number 10002 retrieved successfully
+- ISSUE: Server still reading old environment variables despite secret updates
+- SOLUTION NEEDED: Force environment variable refresh or hardcode credentials temporarily
+- STATUS: Authentication works in direct tests but fails in server application due to environment variable lag
+
 ### July 22, 2025 - Complete Company-Level Default VAT & Currency System
 - COMPLETED: Enhanced Company Settings with comprehensive default VAT and currency management system
 - FIXED: Company default currency saving issue - PUT endpoint was missing currency fields in database update query

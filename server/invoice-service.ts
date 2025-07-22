@@ -371,11 +371,11 @@ export async function createInvoiceService(): Promise<InvoiceService> {
   
   const config: InvoiceServiceConfig = {
     smartbill: {
-      username: process.env.SMARTBILL_USERNAME || '',
-      token: process.env.SMARTBILL_TOKEN || '',
-      companyVat: companySettings.vatNumber || process.env.SMARTBILL_COMPANY_VAT || 'RO12345678',
+      username: process.env.SMARTBILL_USERNAME || 'liviu.chertes@gmail.com',
+      token: process.env.SMARTBILL_TOKEN || '001|2af8fcdc3ea579cb7a81093ca404b31e',
+      companyVat: companySettings.vatNumber || process.env.SMARTBILL_COMPANY_VAT || 'RO16582983',
     },
-    defaultSeries: process.env.SMARTBILL_SERIES || 'FACT',
+    defaultSeries: process.env.SMARTBILL_SERIES || 'KTO',
     enableSmartbill: process.env.ENABLE_SMARTBILL === 'true',
     companyInfo: companySettings
   };
