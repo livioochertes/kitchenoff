@@ -1753,12 +1753,43 @@
               website: 'https://kitchen-off.com',
               vatNumber: '',
               registrationNumber: '',
+              defaultCurrency: 'EUR',
+              defaultVatPercentage: '19.00',
+              reverseChargeVat: '0.00',
               description: 'Professional kitchen equipment and supplies for the HORECA industry.'
             });
           }
         } catch (err) {
           console.error('Network error fetching company settings:', err);
         }
+      };
+      
+      // Fetch company defaults for new products
+      const fetchCompanyDefaults = async () => {
+        try {
+          const response = await fetch('/admin/api/company-settings', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok && data) {
+            return {
+              currency: data.defaultCurrency || 'EUR',
+              vatPercentage: data.defaultVatPercentage || '19.00'
+            };
+          }
+        } catch (err) {
+          console.error('Error fetching company defaults:', err);
+        }
+        
+        // Return defaults if fetch fails
+        return {
+          currency: 'EUR',
+          vatPercentage: '19.00'
+        };
       };
 
       // Update company settings
@@ -2287,9 +2318,30 @@
                     <button 
                       className="btn" 
                       style={{background: '#28a745', width: 'auto', padding: '8px 16px'}}
-                      onClick={() => {
+                      onClick={async () => {
                         fetchCategories();
                         fetchSuppliers();
+                        
+                        // Fetch company defaults and pre-populate form
+                        const defaults = await fetchCompanyDefaults();
+                        setEditingProduct({
+                          name: '',
+                          description: '',
+                          price: '',
+                          compareAtPrice: '',
+                          stockQuantity: '',
+                          categoryId: '',
+                          slug: '',
+                          images: [],
+                          productCode: '',
+                          ncCode: '',
+                          cpvCode: '',
+                          vatPercentage: defaults.vatPercentage,
+                          currency: defaults.currency,
+                          supplierId: '',
+                          status: 'active'
+                        });
+                        
                         setShowAddProductModal(true);
                       }}
                     >
@@ -3331,8 +3383,28 @@
                     </div>
                   </div>
                   
+                  {/* Default Product Settings */}
+                  <div style={{background: '#f0f8ff', padding: '20px', borderRadius: '6px', border: '1px solid #007bff'}}>
+                    <h4 style={{color: '#007bff', marginBottom: '15px', borderBottom: '2px solid #007bff', paddingBottom: '5px'}}>💰 Default Product Settings</h4>
+                    <div style={{marginBottom: '10px'}}>
+                      <strong style={{color: '#495057'}}>Default Currency:</strong>
+                      <p style={{margin: '5px 0', color: '#007bff', fontWeight: '500'}}>{companySettings.defaultCurrency || 'EUR'}</p>
+                    </div>
+                    <div style={{marginBottom: '10px'}}>
+                      <strong style={{color: '#495057'}}>Default VAT Percentage:</strong>
+                      <p style={{margin: '5px 0', color: '#007bff', fontWeight: '500'}}>{companySettings.defaultVatPercentage || '19.00'}%</p>
+                    </div>
+                    <div style={{marginBottom: '10px'}}>
+                      <strong style={{color: '#495057'}}>Reverse Charge VAT:</strong>
+                      <p style={{margin: '5px 0', color: '#007bff', fontWeight: '500'}}>{companySettings.reverseChargeVat || '0.00'}%</p>
+                    </div>
+                    <p style={{fontSize: '12px', color: '#666', marginTop: '10px', fontStyle: 'italic'}}>
+                      Used as defaults when creating new products
+                    </p>
+                  </div>
+                  
                   {/* Company Description */}
-                  <div style={{background: '#f8f9fa', padding: '20px', borderRadius: '6px', border: '1px solid #dee2e6', gridColumn: 'span 2'}}>
+                  <div style={{background: '#f8f9fa', padding: '20px', borderRadius: '6px', border: '1px solid #dee2e6'}}>
                     <h4 style={{color: '#333', marginBottom: '15px', borderBottom: '2px solid #dc3545', paddingBottom: '5px'}}>Company Description</h4>
                     <p style={{margin: '0', color: '#6c757d', lineHeight: '1.6'}}>
                       {companySettings.description || 'No description available. Click "Edit Company Info" to add your company description.'}
@@ -6742,6 +6814,9 @@ TOTAL: $${selectedOrder.totalAmount}
                       registrationNumber: formData.get('registrationNumber'),
                       bankName: formData.get('bankName'),
                       iban: formData.get('iban'),
+                      defaultCurrency: formData.get('defaultCurrency'),
+                      defaultVatPercentage: formData.get('defaultVatPercentage'),
+                      reverseChargeVat: formData.get('reverseChargeVat'),
                       description: formData.get('description')
                     };
                     
@@ -6986,6 +7061,71 @@ TOTAL: $${selectedOrder.totalAmount}
                           }}
                         />
                       </div>
+                    </div>
+                    
+                    {/* Default VAT & Currency Settings */}
+                    <div style={{marginBottom: '20px', padding: '15px', background: '#f0f8ff', border: '1px solid #007bff', borderRadius: '6px'}}>
+                      <h4 style={{color: '#007bff', marginBottom: '15px', fontSize: '16px'}}>💰 Default Product Settings</h4>
+                      <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px'}}>
+                        <div>
+                          <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#333'}}>Default Currency</label>
+                          <select
+                            name="defaultCurrency"
+                            defaultValue={companySettings.defaultCurrency || 'EUR'}
+                            style={{
+                              width: '100%',
+                              padding: '8px',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px'
+                            }}
+                          >
+                            <option value="EUR">EUR (Euro)</option>
+                            <option value="RON">RON (Romanian Leu)</option>
+                            <option value="USD">USD (US Dollar)</option>
+                            <option value="GBP">GBP (British Pound)</option>
+                          </select>
+                        </div>
+                        
+                        <div>
+                          <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#333'}}>Default VAT %</label>
+                          <select
+                            name="defaultVatPercentage"
+                            defaultValue={companySettings.defaultVatPercentage || '19.00'}
+                            style={{
+                              width: '100%',
+                              padding: '8px',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px'
+                            }}
+                          >
+                            <option value="0.00">0% (Reverse Charge)</option>
+                            <option value="5.00">5% (Reduced VAT)</option>
+                            <option value="9.00">9% (Reduced VAT)</option>
+                            <option value="19.00">19% (Standard VAT)</option>
+                            <option value="24.00">24% (Luxury VAT)</option>
+                          </select>
+                        </div>
+                        
+                        <div>
+                          <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#333'}}>Reverse Charge VAT %</label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            name="reverseChargeVat"
+                            defaultValue={companySettings.reverseChargeVat || '0.00'}
+                            placeholder="0.00"
+                            style={{
+                              width: '100%',
+                              padding: '8px',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px'
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <p style={{fontSize: '12px', color: '#666', marginTop: '10px', fontStyle: 'italic'}}>
+                        These values will be used as defaults when creating new products. You can still modify them per product.
+                      </p>
                     </div>
                     
                     <div style={{marginBottom: '20px'}}>
