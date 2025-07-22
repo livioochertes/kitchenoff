@@ -1094,6 +1094,114 @@ export async function registerAdminRoutes(app: Express) {
     }
   });
 
+  // Smartbill Credentials Management
+  app.get("/admin/api/smartbill/credentials", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      // Return current credentials (masked for security)
+      const credentials = {
+        username: process.env.SMARTBILL_USERNAME,
+        token: process.env.SMARTBILL_TOKEN ? process.env.SMARTBILL_TOKEN.substring(0, 10) + '...' : 'Not set',
+        companyVat: process.env.SMARTBILL_COMPANY_VAT,
+        series: process.env.SMARTBILL_SERIES,
+        enabled: process.env.ENABLE_SMARTBILL === 'true'
+      };
+      
+      res.json(credentials);
+    } catch (error) {
+      console.error("Error fetching Smartbill credentials:", error);
+      res.status(500).json({ message: "Failed to fetch credentials" });
+    }
+  });
+
+  app.post("/admin/api/smartbill/test-credentials", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { username, token } = req.body;
+      
+      if (!username || !token) {
+        return res.status(400).json({ message: "Username and token are required" });
+      }
+
+      // Test the provided credentials
+      const credentials = Buffer.from(`${username}:${token}`).toString('base64');
+      const response = await fetch('https://ws.smartbill.ro/SBORO/api/series', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Basic ${credentials}`
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        res.json({
+          success: true,
+          message: 'Credentials are valid!',
+          availableSeries: result.map((s: any) => ({ name: s.name, type: s.type }))
+        });
+      } else {
+        const errorText = await response.text();
+        res.json({
+          success: false,
+          message: 'Authentication failed',
+          error: errorText
+        });
+      }
+    } catch (error) {
+      console.error("Error testing Smartbill credentials:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Connection error",
+        error: error.message 
+      });
+    }
+  });
+
+  app.post("/admin/api/smartbill/update-credentials", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { username, token, companyVat, series } = req.body;
+      
+      if (!username || !token) {
+        return res.status(400).json({ message: "Username and token are required" });
+      }
+
+      // Test credentials before updating
+      const credentials = Buffer.from(`${username}:${token}`).toString('base64');
+      const testResponse = await fetch('https://ws.smartbill.ro/SBORO/api/series', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Basic ${credentials}`
+        }
+      });
+
+      if (!testResponse.ok) {
+        return res.status(400).json({
+          message: "Invalid credentials",
+          error: "Authentication test failed"
+        });
+      }
+
+      // Update environment variables (this would require a restart in production)
+      process.env.SMARTBILL_USERNAME = username;
+      process.env.SMARTBILL_TOKEN = token;
+      if (companyVat) process.env.SMARTBILL_COMPANY_VAT = companyVat;
+      if (series) process.env.SMARTBILL_SERIES = series;
+      
+      const result = await testResponse.json();
+      
+      res.json({
+        success: true,
+        message: "Credentials updated successfully!",
+        note: "Credentials updated for current session. For permanent changes, update your Replit Secrets.",
+        availableSeries: result.map((s: any) => ({ name: s.name, type: s.type }))
+      });
+      
+    } catch (error) {
+      console.error("Error updating Smartbill credentials:", error);
+      res.status(500).json({ message: "Failed to update credentials" });
+    }
+  });
+
   // Admin Product Management Routes
   app.get("/admin/api/products", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
     try {
