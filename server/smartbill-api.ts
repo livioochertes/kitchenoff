@@ -51,6 +51,11 @@ export class SmartbillAPI {
 
   constructor(config: SmartbillConfig) {
     this.config = config;
+    console.log('🔧 SmartbillAPI initialized with config:', {
+      username: config.username,
+      tokenLength: config.token?.length || 0,
+      companyVat: config.companyVat
+    });
   }
 
   private getAuthHeader(): string {

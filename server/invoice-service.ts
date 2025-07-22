@@ -376,7 +376,7 @@ export async function createInvoiceService(): Promise<InvoiceService> {
       companyVat: companySettings.vatNumber || process.env.SMARTBILL_COMPANY_VAT || 'RO16582983',
     },
     defaultSeries: process.env.SMARTBILL_SERIES || 'KTO',
-    enableSmartbill: process.env.ENABLE_SMARTBILL === 'true',
+    enableSmartbill: process.env.ENABLE_SMARTBILL === 'true' || true, // Force enable Smartbill for testing
     companyInfo: companySettings
   };
 
