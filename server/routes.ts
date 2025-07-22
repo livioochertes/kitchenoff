@@ -627,6 +627,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const orderId = parseInt(req.params.orderId);
       const { paymentMethod = 'wire_transfer' } = req.body;
       
+      console.log(`🧾 Creating invoice for order ${orderId} using Smartbill integration`);
+      
       // Get the order with items
       const order = await storage.getOrder(orderId);
       if (!order) {
@@ -638,56 +640,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Access denied" });
       }
 
-      // Generate unique invoice number
-      const invoiceNumber = `INV-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
-      
-      // Create payment link for wire transfer
-      let paymentLink = '';
-      if (paymentMethod === 'wire_transfer') {
-        paymentLink = `https://www.kitchenoff.app/pay/invoice/${invoiceNumber}`;
+      // Get user details for Smartbill invoice
+      const user = await storage.getUser(order.userId!);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
 
-      // Calculate totals
-      const subtotal = parseFloat(order.totalAmount);
-      const vatRate = 0; // 0% VAT as per your template
-      const vatAmount = (subtotal * vatRate) / 100;
-      const totalAmount = subtotal + vatAmount;
+      // Initialize InvoiceService with Smartbill configuration
+      const { InvoiceService } = await import('./invoice-service.js');
+      const invoiceService = new InvoiceService({
+        smartbill: {
+          username: process.env.SMARTBILL_USERNAME!,
+          token: process.env.SMARTBILL_TOKEN!,
+          companyVat: `RO${process.env.SMARTBILL_COMPANY_VAT}`,
+        },
+        defaultSeries: process.env.SMARTBILL_SERIES || 'KTO',
+        enableSmartbill: process.env.ENABLE_SMARTBILL === 'true'
+      });
 
-      // Create invoice
-      const invoiceData = {
-        invoiceNumber,
-        orderId,
-        userId: order.userId || req.userId,
-        issueDate: new Date(),
-        supplyDate: new Date(),
-        subtotal: subtotal.toString(),
-        vatAmount: vatAmount.toString(),
-        totalAmount: totalAmount.toString(),
-        currency: 'EUR',
-        paymentMethod,
-        paymentLink: paymentLink || null,
-        notes: paymentMethod === 'wire_transfer' ? 'Reverse charge – Article 196 of Council Directive 2006/112/EC' : null,
-      };
+      console.log(`📋 Smartbill enabled: ${process.env.ENABLE_SMARTBILL === 'true'}, Series: ${process.env.SMARTBILL_SERIES}`);
 
-      // Create invoice items
-      const invoiceItems = order.items.map(item => ({
-        productId: item.productId,
-        productName: item.product.name,
-        productCode: item.product.productCode || null,
-        quantity: item.quantity,
-        unitPrice: item.price,
-        vatRate: '0.00',
-        lineTotal: item.totalPrice,
-      }));
-
-      const invoice = await storage.createInvoice(invoiceData, invoiceItems);
+      // Create invoice using InvoiceService (will use Smartbill if enabled)
+      const invoice = await invoiceService.createInvoiceForOrder(order, user, { paymentMethod });
       
-      // Get the full invoice with items for response
-      const fullInvoice = await storage.getInvoice(invoice.id);
+      console.log(`✅ Invoice created successfully:`, {
+        id: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        smartbillId: invoice.smartbillId,
+        source: invoice.smartbillId ? 'Smartbill' : 'Local'
+      });
       
-      res.json(fullInvoice);
+      res.json(invoice);
     } catch (error) {
-      console.error("Error creating invoice:", error);
+      console.error(`❌ Error creating invoice for order ${req.params.orderId}:`, error);
       res.status(500).json({ message: "Failed to create invoice" });
     }
   });

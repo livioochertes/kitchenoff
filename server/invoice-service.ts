@@ -97,6 +97,53 @@ export class InvoiceService {
   }
 
   /**
+   * Create invoice for an order (main method for manual invoice creation)
+   */
+  async createInvoiceForOrder(order: any, user: any, options: { paymentMethod?: string } = {}): Promise<any> {
+    try {
+      console.log(`🧾 Creating invoice for order ${order.id}, Smartbill enabled: ${this.config.enableSmartbill}`);
+      
+      // Check if order has items
+      if (!order.items || order.items.length === 0) {
+        throw new Error(`Order ${order.id} has no items to create invoice`);
+      }
+
+      const paymentData = { 
+        paymentMethod: options.paymentMethod || 'wire_transfer',
+        status: 'manual_creation'
+      };
+
+      if (this.config.enableSmartbill) {
+        console.log(`📋 Using Smartbill API for invoice creation`);
+        return await this.generateSmartbillInvoice(order, user, paymentData);
+      } else {
+        console.log(`📋 Using local invoice generation`);
+        return await this.generateLocalInvoice(order, user, paymentData);
+      }
+
+    } catch (error) {
+      console.error(`❌ Error creating invoice for order ${order.id}:`, error);
+      
+      // If Smartbill fails, try local generation as fallback
+      if (this.config.enableSmartbill) {
+        console.log('🔄 Smartbill failed, falling back to local invoice generation');
+        try {
+          const paymentData = { 
+            paymentMethod: options.paymentMethod || 'wire_transfer',
+            status: 'fallback_creation'
+          };
+          return await this.generateLocalInvoice(order, user, paymentData);
+        } catch (fallbackError) {
+          console.error('❌ Fallback invoice generation also failed:', fallbackError);
+          throw fallbackError;
+        }
+      }
+      
+      throw error;
+    }
+  }
+
+  /**
    * Generate invoice via Smartbill API
    */
   private async generateSmartbillInvoice(order: any, user: any, paymentData: any): Promise<any> {
