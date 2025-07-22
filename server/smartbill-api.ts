@@ -527,14 +527,13 @@ export function orderToSmartbillInvoice(
   // Format client data with proper address mapping
   const client: SmartbillClient = {
     name: user.companyName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email.split('@')[0],
-    email: user.email,
-    address: order.billingAddress?.address || order.shippingAddress?.address || 'Address not provided',
-    city: order.billingAddress?.city || order.shippingAddress?.city || 'City not provided',
+    vatCode: user.vatNumber || '',
+    regCom: user.registrationNumber || '',
+    address: order.billingAddress?.address || order.shippingAddress?.address || 'Strada Exemple 123',
+    isTaxPayer: false,
+    city: order.billingAddress?.city || order.shippingAddress?.city || 'Bucharest',
     country: order.billingAddress?.country || order.shippingAddress?.country || 'Romania',
-    phone: user.billingPhone || order.billingAddress?.phone || order.shippingAddress?.phone || '+40123456789',
-    contact: user.companyName ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : undefined,
-    vatCode: user.vatNumber || '', // Can be empty for B2C
-    regCom: user.registrationNumber || '', // Can be empty for B2C
+    email: user.email
   };
 
   // Format products using Romanian tax settings
@@ -572,17 +571,17 @@ export function orderToSmartbillInvoice(
   const dueDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
   const invoiceData = {
-    companyVat: config.companyVat,
-    seriesName,
+    companyVatCode: config.companyVat,
     client,
     issueDate,
+    seriesName,
+    isDraft: false,
     dueDate,
-    products,
-    language: 'RO',
-    currency: 'RON',
-    precision: 2,
     mentions: 'Factura cu TVA 19% conform legislației române',
-    sendEmail: false // Don't auto-send email, let user decide
+    observations: '',
+    deliveryDate: issueDate,
+    precision: 2,
+    products
   };
 
   console.log('✅ Final Smartbill invoice data:', JSON.stringify(invoiceData, null, 2));
