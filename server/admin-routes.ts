@@ -2317,7 +2317,7 @@ export async function registerAdminRoutes(app: Express) {
           file.originalname.toLowerCase().endsWith('.xls')) {
         cb(null, true);
       } else {
-        cb(new Error('Only Excel files (.xlsx, .xls) are allowed'), false);
+        cb(new Error('Only Excel files (.xlsx, .xls) are allowed'));
       }
     },
     limits: {
@@ -2336,13 +2336,14 @@ export async function registerAdminRoutes(app: Express) {
       const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      const jsonData = XLSX.utils.sheet_to_json(worksheet) as Array<Record<string, any>>;
 
       if (!jsonData || jsonData.length === 0) {
         return res.status(400).json({ message: "Excel file is empty or invalid" });
       }
 
       console.log(`📤 Processing ${jsonData.length} rows from Excel file`);
+      console.log('First row data:', JSON.stringify(jsonData[0], null, 2));
 
       let imported = 0;
       let errors = [];
@@ -2366,11 +2367,15 @@ export async function registerAdminRoutes(app: Express) {
         const rowNumber = i + 2; // Excel row number (header is row 1)
 
         try {
+          console.log(`Processing row ${rowNumber}:`, JSON.stringify(row, null, 2));
+          
           // Extract and validate required fields
           const productName = row['Product Name']?.toString()?.trim();
           const price = parseFloat(row['Price']?.toString()?.replace(',', '.') || '0');
           const stockQuantity = parseInt(row['Stock Quantity']?.toString() || '0');
           const categoryId = parseInt(row['Category ID']?.toString() || '0');
+          
+          console.log(`Row ${rowNumber} parsed:`, { productName, price, stockQuantity, categoryId });
 
           // Validation
           if (!productName) {
@@ -2450,14 +2455,14 @@ export async function registerAdminRoutes(app: Express) {
             name: productName,
             slug: slug,
             description: description,
-            price: price,
-            compareAtPrice: price * 1.2, // 20% higher than regular price
+            price: price.toString(),
+            compareAtPrice: (price * 1.2).toString(), // 20% higher than regular price
             categoryId: categoryId,
             supplierId: supplierId,
             stockQuantity: stockQuantity,
             featured: false,
             images: [],
-            vatValue: vatValue,
+            vatValue: vatValue.toString(),
             productCode: productCode,
             ncCode: ncCode,
             cpvCode: cpvCode,
@@ -2469,8 +2474,9 @@ export async function registerAdminRoutes(app: Express) {
           existingNames.add(productName.toLowerCase()); // Add to set to prevent duplicates in same import
 
           console.log(`✅ Imported product: ${productName}`);
-        } catch (error) {
+        } catch (error: any) {
           console.error(`❌ Error processing row ${rowNumber}:`, error);
+          console.error('Error details:', error.stack);
           errors.push(`Row ${rowNumber}: ${error.message}`);
         }
       }
@@ -2487,7 +2493,7 @@ export async function registerAdminRoutes(app: Express) {
         duplicates: duplicates
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Excel import error:", error);
       res.status(500).json({ 
         message: "Failed to import Excel file", 
