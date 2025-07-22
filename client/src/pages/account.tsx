@@ -468,7 +468,7 @@ export default function Account() {
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading your account...</p>
+              <p className="text-gray-600">{t('common.loading')}</p>
             </div>
           </div>
         </div>
@@ -485,7 +485,7 @@ export default function Account() {
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">{t('account.title')}</h1>
             <p className="text-gray-600 mt-2">
-              Welcome back, {user?.firstName}! Manage your account and orders.
+              {t('account.welcomeBack').replace('{name}', user?.firstName || '')}
             </p>
           </div>
 
@@ -599,7 +599,7 @@ export default function Account() {
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-[425px]">
                           <DialogHeader>
-                            <DialogTitle>Email Notification Settings</DialogTitle>
+                            <DialogTitle>{t('account.notifications.title')}</DialogTitle>
                           </DialogHeader>
                           <Form {...notificationForm}>
                             <form onSubmit={notificationForm.handleSubmit(handleNotificationSubmit)} className="space-y-4">
@@ -609,9 +609,9 @@ export default function Account() {
                                 render={({ field }) => (
                                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                                     <div className="space-y-0.5">
-                                      <FormLabel className="text-base">Email notifications</FormLabel>
+                                      <FormLabel className="text-base">{t('account.notifications.emailTitle')}</FormLabel>
                                       <div className="text-sm text-muted-foreground">
-                                        Receive email notifications
+                                        {t('account.notifications.emailDesc')}
                                       </div>
                                     </div>
                                     <FormControl>
@@ -629,9 +629,9 @@ export default function Account() {
                                 render={({ field }) => (
                                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                                     <div className="space-y-0.5">
-                                      <FormLabel className="text-base">Order updates</FormLabel>
+                                      <FormLabel className="text-base">{t('account.notifications.orderTitle')}</FormLabel>
                                       <div className="text-sm text-muted-foreground">
-                                        Get notified about order status changes
+                                        {t('account.notifications.orderDesc')}
                                       </div>
                                     </div>
                                     <FormControl>
@@ -649,9 +649,9 @@ export default function Account() {
                                 render={({ field }) => (
                                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                                     <div className="space-y-0.5">
-                                      <FormLabel className="text-base">Product restocks</FormLabel>
+                                      <FormLabel className="text-base">{t('account.notifications.restockTitle')}</FormLabel>
                                       <div className="text-sm text-muted-foreground">
-                                        Alert when out-of-stock items are available
+                                        {t('account.notifications.restockDesc')}
                                       </div>
                                     </div>
                                     <FormControl>
@@ -669,9 +669,9 @@ export default function Account() {
                                 render={({ field }) => (
                                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                                     <div className="space-y-0.5">
-                                      <FormLabel className="text-base">Price drops</FormLabel>
+                                      <FormLabel className="text-base">{t('account.notifications.priceTitle')}</FormLabel>
                                       <div className="text-sm text-muted-foreground">
-                                        Get notified when prices drop on favorite items
+                                        {t('account.notifications.priceDesc')}
                                       </div>
                                     </div>
                                     <FormControl>
@@ -689,9 +689,9 @@ export default function Account() {
                                 render={({ field }) => (
                                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                                     <div className="space-y-0.5">
-                                      <FormLabel className="text-base">Promotions</FormLabel>
+                                      <FormLabel className="text-base">{t('account.notifications.promosTitle')}</FormLabel>
                                       <div className="text-sm text-muted-foreground">
-                                        Receive promotional offers and discounts
+                                        {t('account.notifications.promosDesc')}
                                       </div>
                                     </div>
                                     <FormControl>
@@ -709,13 +709,13 @@ export default function Account() {
                                   variant="outline" 
                                   onClick={() => setNotificationDialogOpen(false)}
                                 >
-                                  Cancel
+                                  {t('common.cancel')}
                                 </Button>
                                 <Button 
                                   type="submit" 
                                   disabled={updateNotificationsMutation.isPending}
                                 >
-                                  {updateNotificationsMutation.isPending ? "Saving..." : "Save Settings"}
+                                  {updateNotificationsMutation.isPending ? t('account.notifications.saving') : t('account.notifications.saveSettings')}
                                 </Button>
                               </div>
                             </form>
@@ -736,7 +736,7 @@ export default function Account() {
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-[425px]">
                           <DialogHeader>
-                            <DialogTitle>Change Password</DialogTitle>
+                            <DialogTitle>{t('account.passwordChange.title')}</DialogTitle>
                           </DialogHeader>
                           <Form {...passwordForm}>
                             <form onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)} className="space-y-4">
@@ -745,9 +745,9 @@ export default function Account() {
                                 name="currentPassword"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Current Password</FormLabel>
+                                    <FormLabel>{t('account.passwordChange.current')}</FormLabel>
                                     <FormControl>
-                                      <Input type="password" placeholder="Enter current password" {...field} />
+                                      <Input type="password" placeholder={t('account.passwordChange.currentPlaceholder')} {...field} />
                                     </FormControl>
                                     <FormMessage />
                                   </FormItem>
@@ -758,9 +758,9 @@ export default function Account() {
                                 name="newPassword"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>New Password</FormLabel>
+                                    <FormLabel>{t('account.passwordChange.new')}</FormLabel>
                                     <FormControl>
-                                      <Input type="password" placeholder="Enter new password" {...field} />
+                                      <Input type="password" placeholder={t('account.passwordChange.newPlaceholder')} {...field} />
                                     </FormControl>
                                     <FormMessage />
                                   </FormItem>
@@ -771,9 +771,9 @@ export default function Account() {
                                 name="confirmPassword"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Confirm New Password</FormLabel>
+                                    <FormLabel>{t('account.passwordChange.confirm')}</FormLabel>
                                     <FormControl>
-                                      <Input type="password" placeholder="Confirm new password" {...field} />
+                                      <Input type="password" placeholder={t('account.passwordChange.confirmPlaceholder')} {...field} />
                                     </FormControl>
                                     <FormMessage />
                                   </FormItem>
@@ -785,13 +785,13 @@ export default function Account() {
                                   variant="outline" 
                                   onClick={() => setPasswordDialogOpen(false)}
                                 >
-                                  Cancel
+                                  {t('common.cancel')}
                                 </Button>
                                 <Button 
                                   type="submit" 
                                   disabled={changePasswordMutation.isPending}
                                 >
-                                  {changePasswordMutation.isPending ? "Changing..." : "Change Password"}
+                                  {changePasswordMutation.isPending ? t('account.passwordChange.changing') : t('account.passwordChange.changeButton')}
                                 </Button>
                               </div>
                             </form>

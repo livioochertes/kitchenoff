@@ -101,6 +101,7 @@ export interface TranslationKeys {
   'account.password': string;
   'account.passwordDesc': string;
   'account.change': string;
+  'account.welcomeBack': string;
   
   // Auth
   'auth.login': string;
@@ -317,6 +318,32 @@ export interface TranslationKeys {
   'b2b.cta.getQuote': string;
   'b2b.cta.viewProducts': string;
   
+  // Account Settings - Notification Dialog
+  'account.notifications.title': string;
+  'account.notifications.emailTitle': string;
+  'account.notifications.emailDesc': string;
+  'account.notifications.orderTitle': string;
+  'account.notifications.orderDesc': string;
+  'account.notifications.restockTitle': string;
+  'account.notifications.restockDesc': string;
+  'account.notifications.priceTitle': string;
+  'account.notifications.priceDesc': string;
+  'account.notifications.promosTitle': string;
+  'account.notifications.promosDesc': string;
+  'account.notifications.saving': string;
+  'account.notifications.saveSettings': string;
+
+  // Account Settings - Password Dialog
+  'account.passwordChange.title': string;
+  'account.passwordChange.current': string;
+  'account.passwordChange.currentPlaceholder': string;
+  'account.passwordChange.new': string;
+  'account.passwordChange.newPlaceholder': string;
+  'account.passwordChange.confirm': string;
+  'account.passwordChange.confirmPlaceholder': string;
+  'account.passwordChange.changing': string;
+  'account.passwordChange.changeButton': string;
+
   // Terms and Conditions page
   'terms.hero.title': string;
   'terms.hero.subtitle': string;
@@ -476,6 +503,7 @@ const translations: Record<Language, TranslationKeys> = {
     'account.password': 'Password',
     'account.passwordDesc': 'Change your account password',
     'account.change': 'Change',
+    'account.welcomeBack': 'Welcome back, {name}! Manage your account and orders.',
     
     // Auth
     'auth.login': 'Login',
@@ -687,6 +715,32 @@ const translations: Record<Language, TranslationKeys> = {
     'contact.categories.technical': 'Technical Support',
     'contact.categories.billing': 'Billing & Payments',
     'contact.categories.partnership': 'Partnership',
+    
+    // Account Settings - Notification Dialog
+    'account.notifications.title': 'Email Notification Settings',
+    'account.notifications.emailTitle': 'Email notifications',
+    'account.notifications.emailDesc': 'Receive email notifications',
+    'account.notifications.orderTitle': 'Order updates',
+    'account.notifications.orderDesc': 'Get notified about order status changes',
+    'account.notifications.restockTitle': 'Product restocks',
+    'account.notifications.restockDesc': 'Alert when out-of-stock items are available',
+    'account.notifications.priceTitle': 'Price drops',
+    'account.notifications.priceDesc': 'Get notified when prices drop on favorite items',
+    'account.notifications.promosTitle': 'Promotions',
+    'account.notifications.promosDesc': 'Receive promotional offers and discounts',
+    'account.notifications.saving': 'Saving...',
+    'account.notifications.saveSettings': 'Save Settings',
+
+    // Account Settings - Password Dialog
+    'account.passwordChange.title': 'Change Password',
+    'account.passwordChange.current': 'Current Password',
+    'account.passwordChange.currentPlaceholder': 'Enter current password',
+    'account.passwordChange.new': 'New Password',
+    'account.passwordChange.newPlaceholder': 'Enter new password',
+    'account.passwordChange.confirm': 'Confirm New Password',
+    'account.passwordChange.confirmPlaceholder': 'Confirm new password',
+    'account.passwordChange.changing': 'Changing...',
+    'account.passwordChange.changeButton': 'Change Password',
     
     // About page
     'about.hero.title': 'About KitchenOff',
