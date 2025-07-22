@@ -60,7 +60,14 @@ export class SmartbillAPI {
 
   private getAuthHeader(): string {
     const credentials = `${this.config.username}:${this.config.token}`;
-    return `Basic ${Buffer.from(credentials).toString('base64')}`;
+    const base64Credentials = Buffer.from(credentials).toString('base64');
+    console.log('🔐 Auth header details:', {
+      username: this.config.username,
+      tokenLength: this.config.token?.length || 0,
+      credentials: `${this.config.username}:${this.config.token?.substring(0, 10)}...`,
+      base64Length: base64Credentials.length
+    });
+    return `Basic ${base64Credentials}`;
   }
 
   private getHeaders(contentType: string = 'application/json'): Record<string, string> {
@@ -82,9 +89,16 @@ export class SmartbillAPI {
       console.log('   Username:', this.config.username);
       console.log('   Token length:', this.config.token?.length || 0);
       
-      const response = await fetch(`${this.baseUrl}/series?cif=${encodeURIComponent(this.config.companyVat)}`, {
+      const url = `${this.baseUrl}/series?cif=${encodeURIComponent(this.config.companyVat)}`;
+      const headers = this.getHeaders();
+      
+      console.log('🌐 Making test connection request:');
+      console.log('   URL:', url);
+      console.log('   Headers:', JSON.stringify(headers, null, 2));
+      
+      const response = await fetch(url, {
         method: 'GET',
-        headers: this.getHeaders()
+        headers: headers
       });
       
       console.log('   Response status:', response.status);
