@@ -905,13 +905,13 @@ export default function Account() {
                 <CardContent>
                   {invoicesLoading ? (
                     <div className="text-center py-8">
-                      <p className="text-gray-600">Loading invoices...</p>
+                      <p className="text-gray-600">{t('account.loadingInvoices')}</p>
                     </div>
                   ) : invoices.length === 0 ? (
                     <div className="text-center py-8">
                       <Receipt className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600 mb-4">No invoices created yet</p>
-                      <p className="text-sm text-gray-500">Create invoices from your delivered orders below</p>
+                      <p className="text-gray-600 mb-4">{t('account.noInvoices')}</p>
+                      <p className="text-sm text-gray-500">{t('account.createInvoicesFromOrders')}</p>
                     </div>
                   ) : (
                     <div className="space-y-4 mb-6">
@@ -1075,14 +1075,14 @@ export default function Account() {
 
                       {/* Company Address Section */}
                       <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-900">Company Address</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">{t('account.companyAddress')}</h3>
                         <div className="grid grid-cols-1 gap-4">
                           <FormField
                             control={invoiceForm.control}
                             name="companyAddress"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Street Address</FormLabel>
+                                <FormLabel>{t('account.streetAddress')}</FormLabel>
                                 <FormControl>
                                   <Input placeholder="123 Business Street" {...field} />
                                 </FormControl>
@@ -1096,7 +1096,7 @@ export default function Account() {
                               name="companyCity"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>City</FormLabel>
+                                  <FormLabel>{t('account.city')}</FormLabel>
                                   <FormControl>
                                     <Input placeholder="London" {...field} />
                                   </FormControl>
@@ -1109,7 +1109,7 @@ export default function Account() {
                               name="companyState"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>State/Province</FormLabel>
+                                  <FormLabel>{t('account.stateProvince')}</FormLabel>
                                   <FormControl>
                                     <Input placeholder="England" {...field} />
                                   </FormControl>
@@ -1122,7 +1122,7 @@ export default function Account() {
                               name="companyZip"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>ZIP/Postal Code</FormLabel>
+                                  <FormLabel>{t('account.zipCode')}</FormLabel>
                                   <FormControl>
                                     <Input placeholder="SW1A 1AA" {...field} />
                                   </FormControl>
@@ -1136,7 +1136,7 @@ export default function Account() {
                             name="companyCountry"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Country</FormLabel>
+                                <FormLabel>{t('account.country')}</FormLabel>
                                 <FormControl>
                                   <Input placeholder="United Kingdom" {...field} />
                                 </FormControl>
@@ -1149,14 +1149,14 @@ export default function Account() {
 
                       {/* Contact Information Section */}
                       <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-900">Billing Contact Information</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">{t('account.billingContact')}</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <FormField
                             control={invoiceForm.control}
                             name="billingEmail"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Billing Email</FormLabel>
+                                <FormLabel>{t('account.billingEmail')}</FormLabel>
                                 <FormControl>
                                   <Input type="email" placeholder="billing@company.com" {...field} />
                                 </FormControl>
@@ -1169,7 +1169,7 @@ export default function Account() {
                             name="billingPhone"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Billing Phone</FormLabel>
+                                <FormLabel>{t('account.billingPhone')}</FormLabel>
                                 <FormControl>
                                   <Input placeholder="+44 20 7123 4567" {...field} />
                                 </FormControl>
@@ -1182,14 +1182,14 @@ export default function Account() {
 
                       {/* Delivery Address Section */}
                       <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-900">Delivery Address (if different from company address)</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">{t('account.deliveryAddress')}</h3>
                         <div className="grid grid-cols-1 gap-4">
                           <FormField
                             control={invoiceForm.control}
                             name="deliveryAddress"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Delivery Street Address</FormLabel>
+                                <FormLabel>{t('account.deliveryStreetAddress')}</FormLabel>
                                 <FormControl>
                                   <Input placeholder="456 Delivery Street" {...field} />
                                 </FormControl>
@@ -1203,7 +1203,7 @@ export default function Account() {
                               name="deliveryCity"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>City</FormLabel>
+                                  <FormLabel>{t('account.city')}</FormLabel>
                                   <FormControl>
                                     <Input placeholder="London" {...field} />
                                   </FormControl>
@@ -1216,7 +1216,7 @@ export default function Account() {
                               name="deliveryState"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>State/Province</FormLabel>
+                                  <FormLabel>{t('account.stateProvince')}</FormLabel>
                                   <FormControl>
                                     <Input placeholder="England" {...field} />
                                   </FormControl>
@@ -1229,7 +1229,7 @@ export default function Account() {
                               name="deliveryZip"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>ZIP/Postal Code</FormLabel>
+                                  <FormLabel>{t('account.zipCode')}</FormLabel>
                                   <FormControl>
                                     <Input placeholder="SW1A 1AA" {...field} />
                                   </FormControl>
@@ -1243,7 +1243,7 @@ export default function Account() {
                             name="deliveryCountry"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Country</FormLabel>
+                                <FormLabel>{t('account.country')}</FormLabel>
                                 <FormControl>
                                   <Input placeholder="United Kingdom" {...field} />
                                 </FormControl>
@@ -1256,7 +1256,7 @@ export default function Account() {
                             name="deliveryInstructions"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Delivery Instructions</FormLabel>
+                                <FormLabel>{t('account.deliveryInstructions')}</FormLabel>
                                 <FormControl>
                                   <textarea 
                                     className="flex min-h-[60px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"

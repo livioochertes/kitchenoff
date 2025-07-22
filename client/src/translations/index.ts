@@ -129,6 +129,23 @@ export interface TranslationKeys {
   // Common actions
   'common.creating': string;
   
+  // Invoice and Settings Form Fields
+  'account.loadingInvoices': string;
+  'account.noInvoices': string;
+  'account.createInvoicesFromOrders': string;
+  'account.companyAddress': string;
+  'account.billingContact': string;
+  'account.deliveryAddress': string;
+  'account.streetAddress': string;
+  'account.city': string;
+  'account.stateProvince': string;
+  'account.zipCode': string;
+  'account.country': string;
+  'account.billingEmail': string;
+  'account.billingPhone': string;
+  'account.deliveryStreetAddress': string;
+  'account.deliveryInstructions': string;
+  
   // Auth
   'auth.login': string;
   'auth.register': string;
@@ -556,6 +573,23 @@ const translations: Record<Language, TranslationKeys> = {
     
     // Common actions
     'common.creating': 'Creating...',
+    
+    // Invoice and Settings Form Fields
+    'account.loadingInvoices': 'Loading invoices...',
+    'account.noInvoices': 'No invoices created yet',
+    'account.createInvoicesFromOrders': 'Create invoices from your delivered orders below',
+    'account.companyAddress': 'Company Address',
+    'account.billingContact': 'Billing Contact Information',
+    'account.deliveryAddress': 'Delivery Address (if different from company address)',
+    'account.streetAddress': 'Street Address',
+    'account.city': 'City',
+    'account.stateProvince': 'State/Province',
+    'account.zipCode': 'ZIP/Postal Code',
+    'account.country': 'Country',
+    'account.billingEmail': 'Billing Email',
+    'account.billingPhone': 'Billing Phone',
+    'account.deliveryStreetAddress': 'Delivery Street Address',
+    'account.deliveryInstructions': 'Delivery Instructions',
     
     // Auth
     'auth.login': 'Login',
