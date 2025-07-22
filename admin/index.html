@@ -2591,6 +2591,7 @@
                           <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Stock</th>
                           <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Status</th>
                           <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>VAT %</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Currency</th>
                           <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Product Code</th>
                           <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>NC Code</th>
                           <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>CPV Code</th>
@@ -2703,7 +2704,8 @@
                                 {product.status || 'active'}
                               </span>
                             </td>
-                            <td style={{padding: '12px', color: '#6c757d', fontSize: '14px'}}>{product.vatValue || 'N/A'}%</td>
+                            <td style={{padding: '12px', color: '#6c757d', fontSize: '14px'}}>{product.vatPercentage || product.vatValue || 'N/A'}%</td>
+                            <td style={{padding: '12px', color: '#007bff', fontSize: '14px', fontWeight: '500'}}>{product.currency || 'EUR'}</td>
                             <td style={{padding: '12px', color: '#6c757d', fontSize: '14px', fontFamily: 'monospace'}}>{product.productCode || 'N/A'}</td>
                             <td style={{padding: '12px', color: '#6c757d', fontSize: '14px', fontFamily: 'monospace'}}>{product.ncCode || 'N/A'}</td>
                             <td style={{padding: '12px', color: '#6c757d', fontSize: '14px', fontFamily: 'monospace'}}>{product.cpvCode || 'N/A'}</td>
@@ -3869,6 +3871,8 @@
           stockQuantity: '',
           featured: false,
           vatValue: '',
+          vatPercentage: '19.00',
+          currency: 'EUR',
           productCode: '',
           ncCode: '',
           cpvCode: '',
@@ -4100,6 +4104,8 @@
               stockQuantity: '',
               featured: false,
               vatValue: '',
+              vatPercentage: '19.00',
+              currency: 'EUR',
               productCode: '',
               ncCode: '',
               cpvCode: '',
@@ -4142,6 +4148,8 @@
               stockQuantity: editingProduct.stockQuantity || '',
               featured: editingProduct.featured || false,
               vatValue: editingProduct.vatValue || '',
+              vatPercentage: editingProduct.vatPercentage || '19.00',
+              currency: editingProduct.currency || 'EUR',
               productCode: editingProduct.productCode || '',
               ncCode: editingProduct.ncCode || '',
               cpvCode: editingProduct.cpvCode || '',
@@ -4558,7 +4566,34 @@
                         onChange={(e) => setProductFormData({...productFormData, stockQuantity: e.target.value})}
                       />
                     </div>
-                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px'}}>
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px'}}>
+                      <div className="form-group">
+                        <label className="form-label">VAT Percentage (%)</label>
+                        <select
+                          className="form-input"
+                          value={productFormData.vatPercentage || '19.00'}
+                          onChange={(e) => setProductFormData({...productFormData, vatPercentage: e.target.value})}
+                        >
+                          <option value="0.00">0% (Reverse Charge)</option>
+                          <option value="5.00">5% (Reduced VAT)</option>
+                          <option value="9.00">9% (Reduced VAT)</option>
+                          <option value="19.00">19% (Standard VAT)</option>
+                          <option value="24.00">24% (Luxury VAT)</option>
+                        </select>
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Currency</label>
+                        <select
+                          className="form-input"
+                          value={productFormData.currency || 'EUR'}
+                          onChange={(e) => setProductFormData({...productFormData, currency: e.target.value})}
+                        >
+                          <option value="EUR">EUR (Euro)</option>
+                          <option value="RON">RON (Romanian Leu)</option>
+                          <option value="USD">USD (US Dollar)</option>
+                          <option value="GBP">GBP (British Pound)</option>
+                        </select>
+                      </div>
                       <div className="form-group">
                         <label className="form-label">VAT Value (%)</label>
                         <input
@@ -4570,6 +4605,8 @@
                           placeholder="19.00"
                         />
                       </div>
+                    </div>
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '15px'}}>
                       <div className="form-group">
                         <label className="form-label">Product Code</label>
                         <input
@@ -4650,6 +4687,8 @@
                             stockQuantity: '',
                             featured: false,
                             vatValue: '',
+                            vatPercentage: '19.00',
+                            currency: 'EUR',
                             productCode: '',
                             ncCode: '',
                             cpvCode: '',
