@@ -189,6 +189,11 @@
       font-size: 28px;
       font-weight: bold;
       color: #667eea;
+      transition: opacity 0.3s ease;
+    }
+    
+    .logo:hover {
+      opacity: 0.8;
     }
     
     .logo img {
@@ -7121,15 +7126,12 @@ TOTAL: $${selectedOrder.totalAmount}
       return (
         <div className="container">
           <div className="admin-header">
-            <div className="logo">
+            <div className="logo" onClick={() => setActiveView('dashboard')} style={{cursor: 'pointer'}}>
               <img src="/attached_assets/KitchenOff_Logo_Background_Removed_1752520997429.png" alt="KitchenOff Logo" />
               <span>KitchenOff Admin</span>
             </div>
             <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
               <span style={{fontSize: '14px', color: '#666'}}>Welcome, {admin?.firstName || 'Admin'}</span>
-              <button onClick={() => setActiveView('dashboard')} className="btn btn-secondary" style={{padding: '8px 16px', fontSize: '14px', width: 'auto'}}>
-                🏠 Dashboard
-              </button>
               <button onClick={handleLogout} className="btn btn-secondary" style={{padding: '8px 16px', fontSize: '14px', width: 'auto'}}>
                 Logout
               </button>
