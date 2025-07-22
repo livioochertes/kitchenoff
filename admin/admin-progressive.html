@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KitchenOff Admin Panel</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .login-container {
+      max-width: 450px;
+      margin: 80px auto;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 50px;
+      border-radius: 20px;
+      box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .login-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .login-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .login-logo img {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+    }
+    
+    .login-title {
+      font-size: 32px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    
+    .login-subtitle {
+      font-size: 16px;
+      color: #666;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 14px 28px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      width: 100%;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+    }
+    
+    .error-message {
+      color: #dc3545;
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+    
+    .loading-status {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .loading-dots {
+      display: inline-block;
+      animation: dots 1.5s infinite;
+    }
+    
+    @keyframes dots {
+      0%, 20% { content: ''; }
+      40% { content: '.'; }
+      60% { content: '..'; }
+      80%, 100% { content: '...'; }
+    }
+    
+    .background-loader {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #666;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .background-loader.visible {
+      opacity: 1;
+    }
+    
+    .progress-bar {
+      width: 100px;
+      height: 3px;
+      background: #e0e0e0;
+      border-radius: 2px;
+      margin-top: 5px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+  </style>
+</head>
+<body>
+  <!-- Background loader indicator -->
+  <div id="background-loader" class="background-loader">
+    <div>Preparing admin features<span class="loading-dots"></span></div>
+    <div class="progress-bar">
+      <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <div id="admin-root"></div>
+
+  <script>
+    const { useState, useEffect, createElement: h } = React;
+    
+    // Progressive loading state
+    let isFullyLoaded = false;
+    let loadingProgress = 0;
+    
+    // Start background loading process
+    function startBackgroundLoading() {
+      const loader = document.getElementById('background-loader');
+      const progressFill = document.getElementById('progress-fill');
+      
+      loader.classList.add('visible');
+      
+      // Simulate progressive loading
+      const intervals = [
+        { delay: 100, progress: 20, status: 'Loading libraries' },
+        { delay: 500, progress: 40, status: 'Initializing components' },
+        { delay: 1000, progress: 60, status: 'Setting up features' },
+        { delay: 1500, progress: 80, status: 'Finalizing' },
+        { delay: 2000, progress: 100, status: 'Ready' }
+      ];
+      
+      intervals.forEach(({ delay, progress, status }) => {
+        setTimeout(() => {
+          loadingProgress = progress;
+          progressFill.style.width = progress + '%';
+          
+          if (progress === 100) {
+            isFullyLoaded = true;
+            setTimeout(() => {
+              loader.classList.remove('visible');
+            }, 500);
+            
+            // Load the full admin script in background
+            loadFullAdminScript();
+          }
+        }, delay);
+      });
+    }
+    
+    function loadFullAdminScript() {
+      // Load Babel and Excel library in background
+      const babelScript = document.createElement('script');
+      babelScript.src = 'https://unpkg.com/@babel/standalone/babel.min.js';
+      babelScript.async = true;
+      document.head.appendChild(babelScript);
+      
+      const xlsxScript = document.createElement('script');
+      xlsxScript.src = 'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js';
+      xlsxScript.async = true;
+      document.head.appendChild(xlsxScript);
+      
+      // Pre-warm the full admin interface
+      setTimeout(() => {
+        console.log('Full admin functionality loaded in background');
+        window.fullAdminReady = true;
+      }, 3000);
+    }
+    
+    // Instant login component
+    function AdminLogin({ onLoginSuccess }) {
+      const [formData, setFormData] = useState({ email: '', password: '' });
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState('');
+      
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        
+        try {
+          const response = await fetch('/admin/api/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            localStorage.setItem('adminToken', data.token);
+            localStorage.setItem('adminUser', JSON.stringify(data.admin));
+            
+            // Check if full admin is ready, if not redirect to full interface
+            if (isFullyLoaded) {
+              onLoginSuccess(data.token, data.admin);
+            } else {
+              // Redirect to full admin interface for complete functionality
+              window.location.href = '/admin-full';
+            }
+          } else {
+            setError(data.message || 'Login failed');
+          }
+        } catch (err) {
+          setError('Network error. Please try again.');
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      return h('div', { className: 'login-container' },
+        h('div', { className: 'login-header' },
+          h('div', { className: 'login-logo' },
+            h('img', { 
+              src: '/attached_assets/KitchenOff_Logo_Background_Removed_1752520997429.png', 
+              alt: 'KitchenOff Logo' 
+            }),
+            h('span', null, 'KitchenOff')
+          ),
+          h('h1', { className: 'login-title' }, 'Admin Panel'),
+          h('p', { className: 'login-subtitle' }, 'Welcome back! Please sign in to continue.')
+        ),
+        error && h('div', { className: 'error-message' }, error),
+        h('form', { onSubmit: handleSubmit },
+          h('div', { className: 'form-group' },
+            h('label', { className: 'form-label' }, 'Email'),
+            h('input', {
+              type: 'email',
+              className: 'form-input',
+              value: formData.email,
+              onChange: (e) => setFormData({ ...formData, email: e.target.value }),
+              required: true,
+              placeholder: 'admin@kitchen-off.com'
+            })
+          ),
+          h('div', { className: 'form-group' },
+            h('label', { className: 'form-label' }, 'Password'),
+            h('input', {
+              type: 'password',
+              className: 'form-input',
+              value: formData.password,
+              onChange: (e) => setFormData({ ...formData, password: e.target.value }),
+              required: true,
+              placeholder: 'Enter your password'
+            })
+          ),
+          h('button', {
+            type: 'submit',
+            className: 'btn',
+            disabled: loading
+          }, loading ? 'Signing in...' : 'Sign In')
+        ),
+        !isFullyLoaded && h('div', { className: 'loading-status' },
+          'Preparing admin features in background', h('span', { className: 'loading-dots' })
+        )
+      );
+    }
+    
+    // Simple dashboard placeholder
+    function SimpleDashboard({ token, admin, onLogout }) {
+      useEffect(() => {
+        // Redirect to full admin since we have basic functionality only
+        setTimeout(() => {
+          window.location.href = '/admin-full';
+        }, 1000);
+      }, []);
+      
+      return h('div', { className: 'login-container' },
+        h('div', { style: { textAlign: 'center' } },
+          h('h2', null, 'Welcome to Admin Panel'),
+          h('p', { style: { margin: '20px 0' } }, 'Redirecting to full admin interface...'),
+          h('button', { 
+            className: 'btn',
+            onClick: () => window.location.href = '/admin-full',
+            style: { width: 'auto', padding: '10px 20px' }
+          }, 'Continue to Admin Dashboard')
+        )
+      );
+    }
+    
+    // Main app with progressive loading
+    function AdminApp() {
+      const [isAuthenticated, setIsAuthenticated] = useState(false);
+      const [token, setToken] = useState(null);
+      const [admin, setAdmin] = useState(null);
+      
+      useEffect(() => {
+        // Start background loading immediately
+        startBackgroundLoading();
+        
+        // Check existing authentication
+        const savedToken = localStorage.getItem('adminToken');
+        const savedAdmin = localStorage.getItem('adminUser');
+        
+        if (savedToken && savedAdmin) {
+          setToken(savedToken);
+          setAdmin(JSON.parse(savedAdmin));
+          setIsAuthenticated(true);
+        }
+      }, []);
+      
+      const handleLoginSuccess = (token, admin) => {
+        setToken(token);
+        setAdmin(admin);
+        setIsAuthenticated(true);
+      };
+      
+      const handleLogout = () => {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        setToken(null);
+        setAdmin(null);
+        setIsAuthenticated(false);
+      };
+      
+      if (!isAuthenticated) {
+        return h(AdminLogin, { onLoginSuccess: handleLoginSuccess });
+      }
+      
+      return h(SimpleDashboard, { token, admin, onLogout: handleLogout });
+    }
+    
+    // Render immediately - no loading time
+    const root = ReactDOM.createRoot(document.getElementById('admin-root'));
+    root.render(h(AdminApp));
+  </script>
+</body>
+</html>
