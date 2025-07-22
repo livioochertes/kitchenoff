@@ -5,8 +5,17 @@ if (!process.env.SENDGRID_API_KEY) {
   throw new Error("SENDGRID_API_KEY environment variable must be set");
 }
 
+if (!process.env.SENDGRID_FROM_EMAIL) {
+  throw new Error("SENDGRID_FROM_EMAIL environment variable must be set");
+}
+
 const mailService = new MailService();
 mailService.setApiKey(process.env.SENDGRID_API_KEY);
+
+// Get the verified sender email from environment
+const VERIFIED_SENDER = process.env.SENDGRID_FROM_EMAIL;
+
+console.log(`🔧 Email service initialized with verified sender: ${VERIFIED_SENDER}`);
 
 interface EmailParams {
   to: string;
@@ -181,7 +190,7 @@ export async function sendOrderConfirmationEmail(
 
   return await sendEmail({
     to: user.email,
-    from: 'liviu.chertes@gmail.com', // Use verified sender email
+    from: VERIFIED_SENDER,
     subject: `Order Confirmation #${order.id} - KitchenOff`,
     text: textContent,
     html: html,
@@ -321,7 +330,7 @@ export async function sendLogisticsNotificationEmail(
 
   return await sendEmail({
     to: logisticsEmail,
-    from: 'liviu.chertes@gmail.com', // Use verified sender email
+    from: VERIFIED_SENDER,
     subject: `New Order #${order.id} - Ready for Processing`,
     text: textContent,
     html: html,
@@ -413,7 +422,7 @@ export async function sendNotificationPreferencesEmail(
 
   return await sendEmail({
     to: user.email,
-    from: 'liviu.chertes@gmail.com', // Use verified sender email
+    from: VERIFIED_SENDER,
     subject: 'Notification Preferences Updated - KitchenOff',
     html,
     text: `Hello ${user.firstName}, your notification preferences have been updated successfully. Email notifications: ${preferences.emailNotifications ? 'Enabled' : 'Disabled'}, Order updates: ${preferences.orderUpdates ? 'Enabled' : 'Disabled'}, Product restocks: ${preferences.productRestocks ? 'Enabled' : 'Disabled'}, Price drops: ${preferences.priceDrops ? 'Enabled' : 'Disabled'}, Promotions: ${preferences.promotions ? 'Enabled' : 'Disabled'}.`
