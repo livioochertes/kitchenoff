@@ -10,6 +10,19 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### July 22, 2025 - Company Settings Management System Complete
+- COMPLETED: Fixed supplier dropdown functionality in product forms for both add/edit operations  
+- COMPLETED: Created "KitchenOff Direct" supplier entry for company's own products
+- COMPLETED: Added comprehensive Company Settings tab to admin interface with complete business information management
+- COMPLETED: Created company_settings database table with all required fields (contact_person, vat_number, registration_number, etc.)
+- COMPLETED: Built complete modal form for editing company information with business details, address, legal information, and Contact Person field
+- COMPLETED: Implemented Company Settings API endpoints (GET/PUT) with proper database integration using PostgreSQL pool
+- COMPLETED: Fixed backend database connection issues - replaced incorrect storage.db calls with proper pool.query methods
+- COMPLETED: Added default KitchenOff company values for new installations (name, email, address, contact person, etc.)
+- COMPLETED: All company information fields now save and load correctly including Contact Person, VAT Number, Registration Number
+- VERIFIED: Company Settings functionality fully operational - user confirmed "Now is OK"
+- STATUS: Complete company information management system ready for production use
+
 ### July 22, 2025 - Notification System and Email Fixes
 - COMPLETED: Fixed notification preferences to save automatically when switches are toggled (removed manual Save Changes button)
 - COMPLETED: Enhanced notification settings with immediate saving and loading indicators
