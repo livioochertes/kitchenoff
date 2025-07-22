@@ -385,7 +385,7 @@ export async function createInvoiceService(): Promise<InvoiceService> {
   
   const config: InvoiceServiceConfig = {
     smartbill: {
-      username: 'liviu.chertes@gmail.com', // Use hardcoded credentials
+      username: 'liviu.chertes@gmail.com', // Corrected username - was @kitchen-off.com
       token: '001|2af8fcdc3ea579cb7a81093ca404b31e', // Use hardcoded credentials
       companyVat: 'RO16582983', // Use hardcoded credentials with RO prefix
     },
