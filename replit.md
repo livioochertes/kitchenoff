@@ -10,6 +10,26 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### July 22, 2025 - Complete Company-Level Default VAT & Currency System
+- COMPLETED: Enhanced Company Settings with comprehensive default VAT and currency management system
+- COMPLETED: Added default currency dropdown with EUR, RON, USD, GBP options for new products
+- COMPLETED: Added default VAT percentage selector with options: 0%, 5%, 9%, 19%, 21%, 24%
+- COMPLETED: Added 21% VAT option for Romanian market effective 01.08.2025 compliance
+- COMPLETED: Added reverse charge VAT field for international invoice handling
+- COMPLETED: Created beautiful blue-themed "Default Product Settings" section in Company Settings
+- COMPLETED: Implemented automatic form pre-population system for new products
+- COMPLETED: Added fetchCompanyDefaults() function to retrieve default values from company settings
+- COMPLETED: Modified "Add New Product" button to automatically populate VAT and currency from company defaults
+- COMPLETED: Enhanced visual display showing current defaults clearly in Company Settings page
+- COMPLETED: Added professional styling with clear explanations and helper text
+- COMPLETED: Database schema updated with defaultCurrency, defaultVatPercentage, reverseChargeVat fields
+- COMPLETED: All VAT dropdowns updated across admin interface to include 21% option with Romanian compliance note
+- COMPLETED: System maintains full flexibility - defaults speed up data entry while allowing per-product customization
+- VERIFIED: Company defaults properly save and load with current values: EUR currency, 19.00% VAT, 0.00% reverse charge
+- VERIFIED: New product forms automatically pre-populate with company defaults while remaining fully editable
+- VERIFIED: Visual display shows all default settings clearly with professional blue theme and descriptive labels
+- STATUS: Complete company-level default system operational - ready for Romanian VAT change to 21% from August 2025
+
 ### July 22, 2025 - Smartbill Production Integration Complete
 - COMPLETED: Enhanced Smartbill API integration with comprehensive stock synchronization functionality
 - COMPLETED: Added production credentials configuration with ENABLE_SMARTBILL=true and SMARTBILL_SERIES=KTO  
