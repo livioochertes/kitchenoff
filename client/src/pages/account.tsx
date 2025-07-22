@@ -408,8 +408,8 @@ export default function Account() {
           
           // Show success message
           toast({
-            title: "Invoice Created",
-            description: "Invoice has been created successfully. Redirecting...",
+            title: t('account.invoiceCreated'),
+            description: t('account.invoiceCreatedDesc'),
           });
           
           // Refresh invoices list after a short delay
@@ -427,8 +427,8 @@ export default function Account() {
     } catch (error: any) {
       console.error('Error accessing invoice:', error);
       toast({
-        title: "Invoice Error",
-        description: error.message || "Unable to access or create invoice. Please try again.",
+        title: t('account.invoiceError'),
+        description: error.message || t('account.invoiceErrorDesc'),
         variant: "destructive"
       });
     } finally {
@@ -958,17 +958,17 @@ export default function Account() {
 
                   {/* Create invoices from orders section */}
                   <div className="border-t pt-6">
-                    <h3 className="text-lg font-semibold mb-4">Create Invoices</h3>
+                    <h3 className="text-lg font-semibold mb-4">{t('account.createInvoice')}</h3>
                     {orders.filter((order: any) => 
                       order.status === "delivered" && 
                       !invoices.some((invoice: any) => invoice.orderId === order.id)
                     ).length === 0 ? (
                       <div className="text-center py-4">
                         <p className="text-sm text-gray-500">
-                          No orders available for invoice creation
+                          {t('account.noOrdersForInvoice')}
                         </p>
                         <p className="text-xs text-gray-400 mt-1">
-                          Only delivered orders without existing invoices can be converted
+                          {t('account.onlyDeliveredOrders')}
                         </p>
                       </div>
                     ) : (
@@ -991,7 +991,7 @@ export default function Account() {
                                 onClick={() => createInvoiceMutation.mutate(order.id)}
                                 disabled={createInvoiceMutation.isPending}
                               >
-                                {createInvoiceMutation.isPending ? "Creating..." : "Create Invoice"}
+                                {createInvoiceMutation.isPending ? t('common.creating') : t('account.createInvoice')}
                               </Button>
                             </div>
                           ))}
@@ -1291,9 +1291,9 @@ export default function Account() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Bell className="h-5 w-5" />
-                    Notifications & Alerts
+                    {t('account.alertsTitle')}
                   </CardTitle>
-                  <p className="text-sm text-gray-600">Configure your notification preferences</p>
+                  <p className="text-sm text-gray-600">{t('account.alertsDesc')}</p>
                 </CardHeader>
                 <CardContent>
                   <Form {...notificationForm}>
@@ -1304,9 +1304,9 @@ export default function Account() {
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
-                              <FormLabel className="text-base font-medium">Email notifications</FormLabel>
+                              <FormLabel className="text-base font-medium">{t('account.alertsEmailTitle')}</FormLabel>
                               <div className="text-sm text-muted-foreground">
-                                Receive email notifications for account activities
+                                {t('account.alertsEmailDesc')}
                               </div>
                             </div>
                             <FormControl>
@@ -1324,9 +1324,9 @@ export default function Account() {
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
-                              <FormLabel className="text-base font-medium">Order updates</FormLabel>
+                              <FormLabel className="text-base font-medium">{t('account.alertsOrderTitle')}</FormLabel>
                               <div className="text-sm text-muted-foreground">
-                                Get notified about order status changes and shipping updates
+                                {t('account.alertsOrderDesc')}
                               </div>
                             </div>
                             <FormControl>
@@ -1344,9 +1344,9 @@ export default function Account() {
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
-                              <FormLabel className="text-base font-medium">Product restocks</FormLabel>
+                              <FormLabel className="text-base font-medium">{t('account.alertsRestockTitle')}</FormLabel>
                               <div className="text-sm text-muted-foreground">
-                                Alert when out-of-stock items become available
+                                {t('account.alertsRestockDesc')}
                               </div>
                             </div>
                             <FormControl>
@@ -1364,9 +1364,9 @@ export default function Account() {
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
-                              <FormLabel className="text-base font-medium">Price drops</FormLabel>
+                              <FormLabel className="text-base font-medium">{t('account.alertsPriceTitle')}</FormLabel>
                               <div className="text-sm text-muted-foreground">
-                                Get notified when prices drop on favorite items
+                                {t('account.alertsPriceDesc')}
                               </div>
                             </div>
                             <FormControl>
@@ -1384,9 +1384,9 @@ export default function Account() {
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
-                              <FormLabel className="text-base font-medium">Promotions</FormLabel>
+                              <FormLabel className="text-base font-medium">{t('account.alertsPromosTitle')}</FormLabel>
                               <div className="text-sm text-muted-foreground">
-                                Receive promotional offers and special discounts
+                                {t('account.alertsPromosDesc')}
                               </div>
                             </div>
                             <FormControl>
@@ -1401,7 +1401,7 @@ export default function Account() {
                       
                       {updateNotificationsMutation.isPending && (
                         <div className="flex justify-center pt-2">
-                          <p className="text-sm text-gray-600">Saving preferences...</p>
+                          <p className="text-sm text-gray-600">{t('account.notifications.saving')}</p>
                         </div>
                       )}
                     </div>

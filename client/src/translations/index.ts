@@ -103,6 +103,32 @@ export interface TranslationKeys {
   'account.change': string;
   'account.welcomeBack': string;
   
+  // Account Alerts Tab
+  'account.alertsTitle': string;
+  'account.alertsDesc': string;
+  'account.alertsEmailTitle': string;
+  'account.alertsEmailDesc': string;
+  'account.alertsOrderTitle': string;
+  'account.alertsOrderDesc': string;
+  'account.alertsRestockTitle': string;
+  'account.alertsRestockDesc': string;
+  'account.alertsPriceTitle': string;
+  'account.alertsPriceDesc': string;
+  'account.alertsPromosTitle': string;
+  'account.alertsPromosDesc': string;
+  
+  // Invoice Creation
+  'account.createInvoice': string;
+  'account.invoiceCreated': string;
+  'account.invoiceCreatedDesc': string;
+  'account.invoiceError': string;
+  'account.invoiceErrorDesc': string;
+  'account.noOrdersForInvoice': string;
+  'account.onlyDeliveredOrders': string;
+  
+  // Common actions
+  'common.creating': string;
+  
   // Auth
   'auth.login': string;
   'auth.register': string;
@@ -504,6 +530,32 @@ const translations: Record<Language, TranslationKeys> = {
     'account.passwordDesc': 'Change your account password',
     'account.change': 'Change',
     'account.welcomeBack': 'Welcome back, {name}! Manage your account and orders.',
+    
+    // Account Alerts Tab
+    'account.alertsTitle': 'Notifications & Alerts',
+    'account.alertsDesc': 'Configure your notification preferences',
+    'account.alertsEmailTitle': 'Email notifications',
+    'account.alertsEmailDesc': 'Receive email notifications for account activities',
+    'account.alertsOrderTitle': 'Order updates',
+    'account.alertsOrderDesc': 'Get notified about order status changes and shipping updates',
+    'account.alertsRestockTitle': 'Product restocks',
+    'account.alertsRestockDesc': 'Alert when out-of-stock items are available again',
+    'account.alertsPriceTitle': 'Price drops',
+    'account.alertsPriceDesc': 'Get notified when prices drop on your favorite items',
+    'account.alertsPromosTitle': 'Promotions & Offers',
+    'account.alertsPromosDesc': 'Receive promotional offers and exclusive discounts',
+    
+    // Invoice Creation
+    'account.createInvoice': 'Create Invoice',
+    'account.invoiceCreated': 'Invoice Created',
+    'account.invoiceCreatedDesc': 'Invoice has been created successfully. Redirecting...',
+    'account.invoiceError': 'Invoice Error',
+    'account.invoiceErrorDesc': 'Unable to access or create invoice. Please try again.',
+    'account.noOrdersForInvoice': 'No orders available for invoice creation',
+    'account.onlyDeliveredOrders': 'Only delivered orders without existing invoices can be converted',
+    
+    // Common actions
+    'common.creating': 'Creating...',
     
     // Auth
     'auth.login': 'Login',
