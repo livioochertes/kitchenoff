@@ -10,6 +10,21 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### July 22, 2025 - Notification System and Email Fixes
+- COMPLETED: Fixed notification preferences to save automatically when switches are toggled (removed manual Save Changes button)
+- COMPLETED: Enhanced notification settings with immediate saving and loading indicators
+- COMPLETED: Fixed all React hooks compliance issues by moving hooks before conditional returns
+- COMPLETED: Integrated SendGrid email service for notification preference confirmations
+- COMPLETED: Added email confirmation system that sends test emails to liviu.chertes@gmail.com
+- COMPLETED: Fixed SendGrid sender verification issues by using verified email addresses throughout system
+- COMPLETED: Updated all email functions to use liviu.chertes@gmail.com as sender address
+- COMPLETED: Fixed order acceptance email system - both customer confirmation and logistics notifications
+- COMPLETED: Enhanced email error handling with detailed SendGrid error logging
+- COMPLETED: Fixed logistics email configuration to send notifications to test email address
+- COMPLETED: All notification switches now work with automatic saving and email confirmations
+- TESTED: Notification preference changes trigger immediate database updates and email delivery
+- STATUS: Email system operational with verified sender addresses, ready for production with proper domain setup
+
 ### July 22, 2025 - Order Items and Invoice System Fixed
 - COMPLETED: Fixed critical database seeding foreign key constraint errors by updating deletion order
 - COMPLETED: Orders now properly populated with items - resolved "Order has no items" issue during invoice creation

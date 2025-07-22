@@ -22,12 +22,25 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
       to: params.to,
       from: params.from,
       subject: params.subject,
-      text: params.text,
-      html: params.html,
+      text: params.text || '',
+      html: params.html || '',
     });
+    console.log(`✅ Email sent successfully to: ${params.to}`);
     return true;
-  } catch (error) {
-    console.error('SendGrid email error:', error);
+  } catch (error: any) {
+    console.error('SendGrid email error:', {
+      code: error.code,
+      message: error.message,
+      response: error.response?.body,
+      to: params.to,
+      from: params.from
+    });
+    
+    // More detailed error information for debugging
+    if (error.response?.body?.errors) {
+      console.error('SendGrid error details:', error.response.body.errors);
+    }
+    
     return false;
   }
 }
@@ -168,7 +181,7 @@ export async function sendOrderConfirmationEmail(
 
   return await sendEmail({
     to: user.email,
-    from: 'orders@kitchen-off.com',
+    from: 'liviu.chertes@gmail.com', // Use verified sender email
     subject: `Order Confirmation #${order.id} - KitchenOff`,
     text: textContent,
     html: html,
@@ -178,7 +191,7 @@ export async function sendOrderConfirmationEmail(
 export async function sendLogisticsNotificationEmail(
   order: OrderWithItems,
   user: User,
-  logisticsEmail: string = 'logistics@kitchen-off.com'
+  logisticsEmail: string = 'liviu.chertes@gmail.com' // Send to test email for now
 ): Promise<boolean> {
   const shippingAddress = order.shippingAddress as any;
   const orderItemsText = order.items
@@ -308,7 +321,7 @@ export async function sendLogisticsNotificationEmail(
 
   return await sendEmail({
     to: logisticsEmail,
-    from: 'orders@kitchen-off.com',
+    from: 'liviu.chertes@gmail.com', // Use verified sender email
     subject: `New Order #${order.id} - Ready for Processing`,
     text: textContent,
     html: html,
@@ -400,7 +413,7 @@ export async function sendNotificationPreferencesEmail(
 
   return await sendEmail({
     to: user.email,
-    from: 'info@kitchen-off.com',
+    from: 'liviu.chertes@gmail.com', // Use verified sender email
     subject: 'Notification Preferences Updated - KitchenOff',
     html,
     text: `Hello ${user.firstName}, your notification preferences have been updated successfully. Email notifications: ${preferences.emailNotifications ? 'Enabled' : 'Disabled'}, Order updates: ${preferences.orderUpdates ? 'Enabled' : 'Disabled'}, Product restocks: ${preferences.productRestocks ? 'Enabled' : 'Disabled'}, Price drops: ${preferences.priceDrops ? 'Enabled' : 'Disabled'}, Promotions: ${preferences.promotions ? 'Enabled' : 'Disabled'}.`
