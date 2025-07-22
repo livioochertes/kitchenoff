@@ -187,12 +187,17 @@
 
   <div id="admin-root"></div>
 
+  <!-- Load Babel and Excel library in background immediately -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js" async></script>
+  <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js" async></script>
+
   <script>
     const { useState, useEffect, createElement: h } = React;
     
     // Progressive loading state
     let isFullyLoaded = false;
     let loadingProgress = 0;
+    let fullAdminComponent = null;
     
     // Start background loading process
     function startBackgroundLoading() {
@@ -201,50 +206,48 @@
       
       loader.classList.add('visible');
       
-      // Simulate progressive loading
+      // Real background loading of admin components
       const intervals = [
-        { delay: 100, progress: 20, status: 'Loading libraries' },
-        { delay: 500, progress: 40, status: 'Initializing components' },
-        { delay: 1000, progress: 60, status: 'Setting up features' },
-        { delay: 1500, progress: 80, status: 'Finalizing' },
-        { delay: 2000, progress: 100, status: 'Ready' }
+        { delay: 100, progress: 20 },
+        { delay: 800, progress: 40 },
+        { delay: 1500, progress: 60 },
+        { delay: 2200, progress: 80 },
+        { delay: 3000, progress: 100 }
       ];
       
-      intervals.forEach(({ delay, progress, status }) => {
+      intervals.forEach(({ delay, progress }) => {
         setTimeout(() => {
           loadingProgress = progress;
           progressFill.style.width = progress + '%';
           
           if (progress === 100) {
-            isFullyLoaded = true;
+            loadFullAdminComponents();
             setTimeout(() => {
               loader.classList.remove('visible');
             }, 500);
-            
-            // Load the full admin script in background
-            loadFullAdminScript();
           }
         }, delay);
       });
     }
     
-    function loadFullAdminScript() {
-      // Load Babel and Excel library in background
-      const babelScript = document.createElement('script');
-      babelScript.src = 'https://unpkg.com/@babel/standalone/babel.min.js';
-      babelScript.async = true;
-      document.head.appendChild(babelScript);
-      
-      const xlsxScript = document.createElement('script');
-      xlsxScript.src = 'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js';
-      xlsxScript.async = true;
-      document.head.appendChild(xlsxScript);
-      
-      // Pre-warm the full admin interface
-      setTimeout(() => {
-        console.log('Full admin functionality loaded in background');
-        window.fullAdminReady = true;
-      }, 3000);
+    function loadFullAdminComponents() {
+      // Load the full admin script content and prepare components
+      fetch('/admin-full')
+        .then(response => response.text())
+        .then(html => {
+          // Extract and prepare the full admin JavaScript
+          const scriptMatch = html.match(/<script type="text\/babel">([\s\S]*?)<\/script>/);
+          if (scriptMatch) {
+            // Store the full admin script for later execution
+            window.fullAdminScript = scriptMatch[1];
+            isFullyLoaded = true;
+            console.log('Full admin functionality loaded in background');
+          }
+        })
+        .catch(error => {
+          console.error('Error loading full admin:', error);
+          isFullyLoaded = true; // Continue anyway
+        });
     }
     
     // Instant login component
@@ -273,13 +276,8 @@
             localStorage.setItem('adminToken', data.token);
             localStorage.setItem('adminUser', JSON.stringify(data.admin));
             
-            // Check if full admin is ready, if not redirect to full interface
-            if (isFullyLoaded) {
-              onLoginSuccess(data.token, data.admin);
-            } else {
-              // Redirect to full admin interface for complete functionality
-              window.location.href = '/admin-full';
-            }
+            // Always transition to full admin interface on same page
+            onLoginSuccess(data.token, data.admin);
           } else {
             setError(data.message || 'Login failed');
           }
@@ -338,26 +336,97 @@
       );
     }
     
-    // Simple dashboard placeholder
-    function SimpleDashboard({ token, admin, onLogout }) {
+    // Full admin dashboard - loads the complete interface
+    function FullAdminDashboard({ token, admin, onLogout }) {
+      const [isLoading, setIsLoading] = useState(true);
+      
       useEffect(() => {
-        // Redirect to full admin since we have basic functionality only
-        setTimeout(() => {
-          window.location.href = '/admin-full';
-        }, 1000);
+        // Wait for full admin components to be ready, then render them
+        const checkAndLoadAdmin = () => {
+          if (isFullyLoaded && window.fullAdminScript) {
+            try {
+              // Replace the current page content with full admin interface
+              document.body.innerHTML = '';
+              
+              // Load the complete admin HTML structure
+              fetch('/admin-full')
+                .then(response => response.text())
+                .then(html => {
+                  // Parse and insert the admin interface
+                  const parser = new DOMParser();
+                  const doc = parser.parseFromString(html, 'text/html');
+                  
+                  // Copy head elements (styles, scripts)
+                  Array.from(doc.head.children).forEach(child => {
+                    if (child.tagName !== 'SCRIPT' || !child.src.includes('babel')) {
+                      document.head.appendChild(child.cloneNode(true));
+                    }
+                  });
+                  
+                  // Copy body content
+                  document.body.innerHTML = doc.body.innerHTML;
+                  
+                  // Execute the admin script
+                  const script = document.createElement('script');
+                  script.type = 'text/babel';
+                  script.textContent = window.fullAdminScript;
+                  document.body.appendChild(script);
+                  
+                  // Process with Babel
+                  if (window.Babel) {
+                    window.Babel.transformScriptTags();
+                  }
+                })
+                .catch(error => {
+                  console.error('Error loading full admin interface:', error);
+                  setIsLoading(false);
+                });
+            } catch (error) {
+              console.error('Error transitioning to full admin:', error);
+              setIsLoading(false);
+            }
+          } else {
+            // Keep checking until admin is ready
+            setTimeout(checkAndLoadAdmin, 500);
+          }
+        };
+        
+        checkAndLoadAdmin();
       }, []);
       
-      return h('div', { className: 'login-container' },
-        h('div', { style: { textAlign: 'center' } },
-          h('h2', null, 'Welcome to Admin Panel'),
-          h('p', { style: { margin: '20px 0' } }, 'Redirecting to full admin interface...'),
-          h('button', { 
-            className: 'btn',
-            onClick: () => window.location.href = '/admin-full',
-            style: { width: 'auto', padding: '10px 20px' }
-          }, 'Continue to Admin Dashboard')
-        )
-      );
+      if (isLoading) {
+        return h('div', { className: 'login-container' },
+          h('div', { style: { textAlign: 'center' } },
+            h('div', { className: 'login-logo' },
+              h('img', { 
+                src: '/attached_assets/KitchenOff_Logo_Background_Removed_1752520997429.png', 
+                alt: 'KitchenOff Logo',
+                style: { width: '60px', height: '60px' }
+              })
+            ),
+            h('h2', { style: { margin: '20px 0 10px' } }, 'Loading Admin Dashboard'),
+            h('p', { style: { color: '#666', marginBottom: '30px' } }, 'Preparing your admin interface...'),
+            h('div', { style: { 
+              width: '200px', 
+              height: '4px', 
+              background: '#e0e0e0', 
+              borderRadius: '2px', 
+              margin: '0 auto', 
+              overflow: 'hidden' 
+            }},
+              h('div', { style: { 
+                height: '100%', 
+                background: 'linear-gradient(90deg, #667eea, #764ba2)', 
+                borderRadius: '2px',
+                width: loadingProgress + '%',
+                transition: 'width 0.5s ease'
+              }})
+            )
+          )
+        );
+      }
+      
+      return h('div', null, 'Loading...');
     }
     
     // Main app with progressive loading
@@ -399,7 +468,7 @@
         return h(AdminLogin, { onLoginSuccess: handleLoginSuccess });
       }
       
-      return h(SimpleDashboard, { token, admin, onLogout: handleLogout });
+      return h(FullAdminDashboard, { token, admin, onLogout: handleLogout });
     }
     
     // Render immediately - no loading time
