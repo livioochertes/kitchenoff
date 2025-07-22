@@ -518,41 +518,53 @@ export function orderToSmartbillInvoice(
   config: SmartbillConfig,
   seriesName: string = 'FACT'
 ): SmartbillInvoiceData {
-  // Format client data
+  console.log('🔧 Converting order to Smartbill format:', {
+    orderId: order.id,
+    userEmail: user.email,
+    seriesName: seriesName,
+    itemCount: order.items?.length || 0
+  });
+
+  // Format client data with proper address mapping
   const client: SmartbillClient = {
-    name: user.companyName || `${user.firstName} ${user.lastName}`,
+    name: user.companyName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email.split('@')[0],
     email: user.email,
-    address: order.billingAddress?.street || order.shippingAddress?.street,
-    city: order.billingAddress?.city || order.shippingAddress?.city,
-    country: order.billingAddress?.country || order.shippingAddress?.country,
-    phone: user.billingPhone,
-    contact: user.companyName ? `${user.firstName} ${user.lastName}` : undefined,
-    vatCode: user.vatNumber,
-    regCom: user.registrationNumber,
+    address: order.billingAddress?.address || order.shippingAddress?.address || 'Address not provided',
+    city: order.billingAddress?.city || order.shippingAddress?.city || 'City not provided',
+    country: order.billingAddress?.country || order.shippingAddress?.country || 'Romania',
+    phone: user.billingPhone || order.billingAddress?.phone || order.shippingAddress?.phone || '+40123456789',
+    contact: user.companyName ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : undefined,
+    vatCode: user.vatNumber || '', // Can be empty for B2C
+    regCom: user.registrationNumber || '', // Can be empty for B2C
   };
 
-  // Format products
+  // Format products with consistent currency and reverse charge VAT
   const products: SmartbillProduct[] = order.items.map((item: any) => ({
     name: item.product.name,
-    code: item.product.productCode || `KO-${item.productId}`, // Generate KitchenOff code if not available
+    code: item.product.productCode || `KO-${item.productId}`,
     isDiscount: false,
-    measuringUnitName: 'buc', // pieces in Romanian
-    currency: 'RON', // Use RON instead of EUR
+    measuringUnitName: 'buc',
+    currency: 'EUR', // Keep consistent with invoice currency
     quantity: item.quantity,
     price: parseFloat(item.price),
-    isTaxIncluded: true,
-    taxName: 'Normala',
-    taxPercentage: 19, // Standard VAT for Romania
+    isTaxIncluded: false, // Prices are without VAT for reverse charge
+    taxName: 'Scutit', // Exempt for reverse charge
+    taxPercentage: 0, // 0% for reverse charge
+    vatPercentage: 0, // 0% VAT
+    vatAmount: 0, // No VAT amount
     saveToDb: false,
     isService: false
   }));
 
+  console.log('📋 Smartbill client data:', client);
+  console.log('📦 Smartbill products data:', products);
+
   // Format dates
   const now = new Date();
-  const issueDate = now.toISOString().split('T')[0]; // YYYY-MM-DD format
-  const dueDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // 30 days later
+  const issueDate = now.toISOString().split('T')[0];
+  const dueDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-  return {
+  const invoiceData = {
     companyVat: config.companyVat,
     seriesName,
     client,
@@ -563,6 +575,9 @@ export function orderToSmartbillInvoice(
     currency: 'EUR',
     precision: 2,
     mentions: 'Reverse charge – Article 196 of Council Directive 2006/112/EC',
-    sendEmail: true
+    sendEmail: false // Don't auto-send email, let user decide
   };
+
+  console.log('✅ Final Smartbill invoice data:', JSON.stringify(invoiceData, null, 2));
+  return invoiceData;
 }
