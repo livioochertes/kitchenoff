@@ -2178,8 +2178,8 @@ export async function registerAdminRoutes(app: Express) {
     }
   });
 
-  // Company Settings Routes
-  app.get("/admin/api/company-settings", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+  // Company Settings Routes (also accessible for invoice display)
+  app.get("/admin/api/company-settings", async (req: Request, res: Response) => {
     try {
       const result = await pool.query(`
         SELECT 

@@ -28,6 +28,22 @@ export default function Invoice() {
       return response.json();
     },
     enabled: !!invoiceNumber,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Fetch company settings for dynamic invoice display
+  const { data: companySettings } = useQuery({
+    queryKey: ['/admin/api/company-settings'],
+    queryFn: async () => {
+      const response = await fetch('/admin/api/company-settings');
+      if (!response.ok) {
+        throw new Error('Company settings not found');
+      }
+      return response.json();
+    },
+    staleTime: 10 * 60 * 1000,
   });
 
   // Generate QR code for payment link
@@ -97,12 +113,19 @@ export default function Invoice() {
                   className="h-12 mb-4"
                 />
                 <div className="space-y-1">
-                  <p className="font-medium">NAMARTE CCL SRL</p>
-                  <p className="text-sm text-gray-600">Calea Mosilor 158</p>
-                  <p className="text-sm text-gray-600">020883 Bucharest, Romania</p>
-                  <p className="text-sm text-gray-600">VAT: RO12345678</p>
-                  <p className="text-sm text-gray-600">Reg. No.: J40/12345/2020</p>
-                  <p className="text-sm text-gray-600">info@kitchen-off.com</p>
+                  <p className="font-medium">{companySettings?.name || 'Namarte CCL SRL'}</p>
+                  <p className="text-sm text-gray-600">{companySettings?.address || 'Calea Mosilor 158'}</p>
+                  <p className="text-sm text-gray-600">{companySettings?.zipCode || '020883'} {companySettings?.city || 'Bucharest'}, {companySettings?.country || 'Romania'}</p>
+                  {companySettings?.vatNumber && (
+                    <p className="text-sm text-gray-600">VAT: {companySettings.vatNumber}</p>
+                  )}
+                  {companySettings?.registrationNumber && (
+                    <p className="text-sm text-gray-600">Reg. No.: {companySettings.registrationNumber}</p>
+                  )}
+                  <p className="text-sm text-gray-600">{companySettings?.email || 'info@kitchen-off.com'}</p>
+                  {companySettings?.phone && (
+                    <p className="text-sm text-gray-600">{companySettings.phone}</p>
+                  )}
                 </div>
               </div>
               <div className="text-right">
@@ -219,9 +242,9 @@ export default function Invoice() {
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-3">Payment Information:</h3>
                   <div className="space-y-2 text-sm">
-                    <p><strong>Bank:</strong> BCR (Romanian Commercial Bank)</p>
-                    <p><strong>Account Name:</strong> NAMARTE</p>
-                    <p><strong>IBAN:</strong> RO89RNCB0082004530040001</p>
+                    <p><strong>Bank:</strong> {companySettings?.bankName || 'BCR (Romanian Commercial Bank)'}</p>
+                    <p><strong>Account Name:</strong> {companySettings?.name || 'NAMARTE CCL SRL'}</p>
+                    <p><strong>IBAN:</strong> {companySettings?.iban || 'RO89RNCB0082004530040001'}</p>
                     <p><strong>SWIFT/BIC:</strong> RNCBROBU</p>
                     <p><strong>Reference:</strong> {invoice.invoiceNumber}</p>
                   </div>
@@ -265,7 +288,7 @@ export default function Invoice() {
             <div className="mt-8 pt-6 border-t text-center text-sm text-gray-500">
               <p>Thank you for your business!</p>
               <p className="mt-2">
-                For questions about this invoice, please contact us at info@kitchen-off.com
+                For questions about this invoice, please contact us at {companySettings?.email || 'info@kitchen-off.com'}
               </p>
             </div>
           </CardContent>
