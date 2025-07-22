@@ -577,11 +577,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         paymentLink = `https://www.kitchenoff.app/pay/invoice/${invoiceNumber}`;
       }
 
-      // Calculate totals
+      // Calculate totals with 19% VAT for RON
       const subtotal = parseFloat(order.totalAmount);
-      const vatRate = 0; // 0% VAT as per your template
-      const vatAmount = (subtotal * vatRate) / 100;
-      const totalAmount = subtotal + vatAmount;
+      const vatRate = 19; // 19% VAT for Romanian invoices
+      const vatAmount = (subtotal * vatRate) / (100 + vatRate); // Extract VAT from total
+      const subtotalWithoutVat = subtotal - vatAmount;
+      const totalAmount = subtotal; // Total already includes VAT
 
       // Create invoice
       const invoiceData = {
@@ -590,13 +591,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: order.userId || req.userId,
         issueDate: new Date(),
         supplyDate: new Date(),
-        subtotal: subtotal.toString(),
-        vatAmount: vatAmount.toString(),
-        totalAmount: totalAmount.toString(),
-        currency: 'EUR',
+        subtotal: subtotalWithoutVat.toFixed(2),
+        vatAmount: vatAmount.toFixed(2),
+        totalAmount: totalAmount.toFixed(2),
+        currency: 'RON',
         paymentMethod,
         paymentLink: paymentLink || null,
-        notes: paymentMethod === 'wire_transfer' ? 'Reverse charge – Article 196 of Council Directive 2006/112/EC' : null,
+        notes: 'Factura cu TVA 19% conform legislației române',
       };
 
       // Create invoice items
@@ -606,7 +607,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         productCode: item.product.productCode || null,
         quantity: item.quantity,
         unitPrice: item.price,
-        vatRate: '0.00',
+        vatRate: '19.00',
         lineTotal: item.totalPrice,
       }));
 

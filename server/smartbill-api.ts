@@ -537,11 +537,11 @@ export function orderToSmartbillInvoice(
     regCom: user.registrationNumber || '', // Can be empty for B2C
   };
 
-  // Format products using product-specific currency and VAT settings
+  // Format products using Romanian tax settings
   const products: SmartbillProduct[] = order.items.map((item: any) => {
-    const productVatPercentage = parseFloat(item.product.vatPercentage || '0');
-    const productCurrency = item.product.currency || 'EUR';
-    const isReverseCharge = productVatPercentage === 0;
+    const productVatPercentage = parseFloat(item.product.vatPercentage || '19');
+    const productCurrency = item.product.currency || 'RON';
+    const isReverseCharge = false; // Use standard VAT for Romanian invoices
     
     console.log(`📦 Product ${item.product.name}: VAT=${productVatPercentage}%, Currency=${productCurrency}, ReverseCharge=${isReverseCharge}`);
     
@@ -553,11 +553,11 @@ export function orderToSmartbillInvoice(
       currency: productCurrency,
       quantity: item.quantity,
       price: parseFloat(item.price),
-      isTaxIncluded: !isReverseCharge, // Include tax if not reverse charge
-      taxName: isReverseCharge ? 'Scutit' : 'Normala',
+      isTaxIncluded: true, // VAT included in price for Romanian invoices
+      taxName: 'Normala',
       taxPercentage: productVatPercentage,
       vatPercentage: productVatPercentage,
-      vatAmount: isReverseCharge ? 0 : (parseFloat(item.price) * item.quantity * productVatPercentage / 100),
+      vatAmount: (parseFloat(item.price) * item.quantity * productVatPercentage / (100 + productVatPercentage)),
       saveToDb: false,
       isService: false
     };
@@ -579,9 +579,9 @@ export function orderToSmartbillInvoice(
     dueDate,
     products,
     language: 'RO',
-    currency: 'EUR',
+    currency: 'RON',
     precision: 2,
-    mentions: 'Reverse charge – Article 196 of Council Directive 2006/112/EC',
+    mentions: 'Factura cu TVA 19% conform legislației române',
     sendEmail: false // Don't auto-send email, let user decide
   };
 

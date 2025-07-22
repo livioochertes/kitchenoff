@@ -74,8 +74,14 @@ Preferred communication style: Simple, everyday language.
 - UPDATED: Added createInvoiceForOrder method to InvoiceService for proper Smartbill invoice creation
 - UPDATED: Fixed VAT number format to include RO prefix (RO16582983) for Smartbill API compliance
 - UPDATED: Enhanced invoice endpoint logging to track Smartbill vs local invoice creation
-- ISSUE DETECTED: Smartbill API endpoints returning HTTP 500 errors (server-side issue), system configured for fallback
-- STATUS: Integration code ready - when Smartbill API is stable, invoices will use KTO series automatically
+- ISSUE IDENTIFIED: Smartbill integration was failing due to currency/VAT mismatch (EUR/0% instead of RON/19%)
+- COMPLETED: Updated all products to use RON currency and 19% VAT for Romanian tax compliance
+- COMPLETED: Fixed invoice generation system to properly calculate 19% VAT for Romanian invoices
+- COMPLETED: Updated Smartbill integration to use RON currency and 19% VAT instead of EUR/reverse charge
+- COMPLETED: Modified invoice creation logic to extract VAT from prices (price includes VAT in Romanian system)
+- COMPLETED: Updated all invoice descriptions to Romanian: "Factura cu TVA 19% conform legislației române"
+- COMPLETED: Fixed both invoice creation endpoints to use consistent RON/19% VAT system
+- STATUS: All systems now use RON currency with 19% VAT - ready for successful Smartbill integration
 
 ### July 22, 2025 - Excel Bulk Product Import System Complete
 - COMPLETED: Implemented comprehensive Excel bulk product import functionality for admin Products section
