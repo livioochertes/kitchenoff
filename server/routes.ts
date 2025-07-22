@@ -154,34 +154,11 @@ const requireAdmin = async (req: AuthRequest, res: Response, next: NextFunction)
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Fast admin interface route (instant loading)
+  // Admin interface route
   app.get("/admin", (req, res) => {
     try {
-      const adminPath = path.resolve('./admin/fast.html');
-      console.log('Serving fast admin interface from:', adminPath);
-      
-      // Set cache headers for better performance
-      res.set({
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-        'X-Content-Type-Options': 'nosniff',
-        'X-Frame-Options': 'DENY',
-        'X-XSS-Protection': '1; mode=block'
-      });
-      
-      res.sendFile(adminPath);
-    } catch (error) {
-      console.error('Error serving admin interface:', error);
-      res.status(500).send('Admin interface not available');
-    }
-  });
-
-  // Full admin interface route (with all features)
-  app.get("/admin/full", (req, res) => {
-    try {
       const adminPath = path.resolve('./admin/index.html');
-      console.log('Serving full admin interface from:', adminPath);
+      console.log('Serving admin interface from:', adminPath);
       
       // Set cache headers for better performance
       res.set({
