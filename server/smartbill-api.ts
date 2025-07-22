@@ -534,12 +534,17 @@ export function orderToSmartbillInvoice(
   // Format products
   const products: SmartbillProduct[] = order.items.map((item: any) => ({
     name: item.product.name,
-    code: item.product.productCode || item.productId.toString(),
-    um: 'buc', // pieces in Romanian
+    code: item.product.productCode || `KO-${item.productId}`, // Generate KitchenOff code if not available
+    isDiscount: false,
+    measuringUnitName: 'buc', // pieces in Romanian
+    currency: 'RON', // Use RON instead of EUR
     quantity: item.quantity,
     price: parseFloat(item.price),
-    vatPercentage: 0, // Reverse charge
-    currency: 'EUR'
+    isTaxIncluded: true,
+    taxName: 'Normala',
+    taxPercentage: 19, // Standard VAT for Romania
+    saveToDb: false,
+    isService: false
   }));
 
   // Format dates
