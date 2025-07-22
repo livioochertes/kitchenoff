@@ -29,6 +29,8 @@ Preferred communication style: Simple, everyday language.
 - VERIFIED: New product forms automatically pre-populate with company defaults while remaining fully editable
 - VERIFIED: Visual display shows all default settings clearly with professional blue theme and descriptive labels
 - STATUS: Complete company-level default system operational - ready for Romanian VAT change to 21% from August 2025
+- FIXED: Currency update issue resolved - products now properly save and display updated currency and VAT values
+- VERIFIED: Currency change from EUR to RON working correctly with immediate display refresh in admin interface
 
 ### July 22, 2025 - Smartbill Production Integration Complete
 - COMPLETED: Enhanced Smartbill API integration with comprehensive stock synchronization functionality
