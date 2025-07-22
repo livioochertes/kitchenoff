@@ -262,6 +262,10 @@
       flex: 1;
       padding: 12px 20px;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
       background: transparent;
       border: none;
       border-radius: 8px;
@@ -6787,43 +6791,50 @@ TOTAL: $${selectedOrder.totalAmount}
               className={`nav-tab ${activeView === 'dashboard' ? 'active' : ''}`}
               onClick={() => handleViewChange('dashboard')}
             >
-              📊 Dashboard
+              <span style={{fontSize: '18px'}}>📊</span>
+              <span style={{fontSize: '12px'}}>Dashboard</span>
             </button>
             <button 
               className={`nav-tab ${activeView === 'orders' ? 'active' : ''}`}
               onClick={() => handleViewChange('orders')}
             >
-              📋 Orders
+              <span style={{fontSize: '18px'}}>📋</span>
+              <span style={{fontSize: '12px'}}>Orders</span>
             </button>
             <button 
               className={`nav-tab ${activeView === 'users' ? 'active' : ''}`}
               onClick={() => handleViewChange('users')}
             >
-              👥 Users
+              <span style={{fontSize: '18px'}}>👥</span>
+              <span style={{fontSize: '12px'}}>Users</span>
             </button>
             <button 
               className={`nav-tab ${activeView === 'products' ? 'active' : ''}`}
               onClick={() => handleViewChange('products')}
             >
-              📦 Products
+              <span style={{fontSize: '18px'}}>📦</span>
+              <span style={{fontSize: '12px'}}>Products</span>
             </button>
             <button 
               className={`nav-tab ${activeView === 'categories' ? 'active' : ''}`}
               onClick={() => handleViewChange('categories')}
             >
-              📁 Categories
+              <span style={{fontSize: '18px'}}>📁</span>
+              <span style={{fontSize: '12px'}}>Categories</span>
             </button>
             <button 
               className={`nav-tab ${activeView === 'suppliers' ? 'active' : ''}`}
               onClick={() => handleViewChange('suppliers')}
             >
-              🏢 Suppliers
+              <span style={{fontSize: '18px'}}>🏢</span>
+              <span style={{fontSize: '12px'}}>Suppliers</span>
             </button>
             <button 
               className={`nav-tab ${activeView === 'company-settings' ? 'active' : ''}`}
               onClick={() => handleViewChange('company-settings')}
             >
-              🏢 Company Settings
+              <span style={{fontSize: '18px'}}>⚙️</span>
+              <span style={{fontSize: '12px'}}>Company Settings</span>
             </button>
           </div>
           
