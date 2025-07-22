@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { storage } from "./storage";
+import { db, pool } from "./db";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import speakeasy from "speakeasy";
@@ -2180,7 +2181,7 @@ export async function registerAdminRoutes(app: Express) {
   // Company Settings Routes
   app.get("/admin/api/company-settings", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
     try {
-      const result = await storage.db.query(`
+      const result = await pool.query(`
         SELECT 
           name, email, phone, address, city, state, zip_code as "zipCode", 
           country, contact_person as "contactPerson", website, 
@@ -2229,11 +2230,11 @@ export async function registerAdminRoutes(app: Express) {
       }
 
       // Check if company settings exist
-      const existingResult = await storage.db.query('SELECT id FROM company_settings LIMIT 1');
+      const existingResult = await pool.query('SELECT id FROM company_settings LIMIT 1');
       
       if (existingResult.rows.length > 0) {
         // Update existing settings
-        await storage.db.query(`
+        await pool.query(`
           UPDATE company_settings 
           SET name = $1, email = $2, phone = $3, address = $4, city = $5, 
               state = $6, zip_code = $7, country = $8, contact_person = $9, 
@@ -2247,7 +2248,7 @@ export async function registerAdminRoutes(app: Express) {
         ]);
       } else {
         // Insert new settings
-        await storage.db.query(`
+        await pool.query(`
           INSERT INTO company_settings (
             name, email, phone, address, city, state, zip_code, country, 
             contact_person, website, vat_number, registration_number, description

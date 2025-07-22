@@ -1,0 +1,61 @@
+Products filtered: {searchTerm: '', categoryFilter: 'all', statusFilter: 'all', totalProducts: 0, filteredProducts: 0}
+Inline Babel script:1162  GET https://6d9958df-a81b-48ee-9cf7-b3a6ef7d067d-00-ojanisghrpy5.kirk.repl.co/admin/api/company-settings 500 (Internal Server Error)
+window.fetch @ Network.js:219
+(anonymous) @ Inline Babel script:1162
+(anonymous) @ Inline Babel script:2
+(anonymous) @ Inline Babel script:2
+asyncGeneratorStep @ Inline Babel script:2
+_next @ Inline Babel script:2
+(anonymous) @ Inline Babel script:2
+(anonymous) @ Inline Babel script:2
+fetchCompanySettings @ Inline Babel script:1160
+handleViewChange @ Inline Babel script:1238
+onClick @ Inline Babel script:6406
+callCallback @ react-dom.development.js:4151
+invokeGuardedCallbackDev @ react-dom.development.js:4200
+invokeGuardedCallback @ react-dom.development.js:4264
+invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:4278
+executeDispatch @ react-dom.development.js:9051
+processDispatchQueueItemsInOrder @ react-dom.development.js:9083
+processDispatchQueue @ react-dom.development.js:9096
+dispatchEventsForPlugins @ react-dom.development.js:9107
+(anonymous) @ react-dom.development.js:9298
+batchedUpdates$1 @ react-dom.development.js:26189
+batchedUpdates @ react-dom.development.js:3978
+dispatchEventForPluginEventSystem @ react-dom.development.js:9297
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6475
+dispatchEvent @ react-dom.development.js:6467
+dispatchDiscreteEvent @ react-dom.development.js:6440Understand this error
+Inline Babel script:1198  PUT https://6d9958df-a81b-48ee-9cf7-b3a6ef7d067d-00-ojanisghrpy5.kirk.repl.co/admin/api/company-settings 500 (Internal Server Error)
+window.fetch @ Network.js:219
+(anonymous) @ Inline Babel script:1198
+(anonymous) @ Inline Babel script:2
+(anonymous) @ Inline Babel script:2
+asyncGeneratorStep @ Inline Babel script:2
+_next @ Inline Babel script:2
+(anonymous) @ Inline Babel script:2
+(anonymous) @ Inline Babel script:2
+updateCompanySettings @ Inline Babel script:1196
+(anonymous) @ Inline Babel script:6113
+(anonymous) @ Inline Babel script:2
+(anonymous) @ Inline Babel script:2
+asyncGeneratorStep @ Inline Babel script:2
+_next @ Inline Babel script:2
+(anonymous) @ Inline Babel script:2
+(anonymous) @ Inline Babel script:2
+ModalsComponent.React.createElement.React.createElement.React.createElement.React.createElement.onSubmit @ Inline Babel script:6122
+callCallback @ react-dom.development.js:4151
+invokeGuardedCallbackDev @ react-dom.development.js:4200
+invokeGuardedCallback @ react-dom.development.js:4264
+invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:4278
+executeDispatch @ react-dom.development.js:9051
+processDispatchQueueItemsInOrder @ react-dom.development.js:9083
+processDispatchQueue @ react-dom.development.js:9096
+dispatchEventsForPlugins @ react-dom.development.js:9107
+(anonymous) @ react-dom.development.js:9298
+batchedUpdates$1 @ react-dom.development.js:26189
+batchedUpdates @ react-dom.development.js:3978
+dispatchEventForPluginEventSystem @ react-dom.development.js:9297
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6475
+dispatchEvent @ react-dom.development.js:6467
+dispatchDiscreteEvent @ react-dom.development.js:6440Understand this error
