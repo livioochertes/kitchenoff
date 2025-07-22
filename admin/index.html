@@ -4157,6 +4157,11 @@
             images: uploadedImages
           };
           
+          // Debug logging to see what data is being sent
+          console.log('Product form data being submitted:', productData);
+          console.log('Currency value:', productData.currency);
+          console.log('VAT percentage:', productData.vatPercentage);
+          
           const result = editingProduct 
             ? await updateProduct(editingProduct.id, productData)
             : await createProduct(productData);

@@ -1308,6 +1308,10 @@ export async function registerAdminRoutes(app: Express) {
       const productId = parseInt(req.params.id);
       const productData = req.body;
       
+      console.log(`Updating product ${productId} with data:`, productData);
+      console.log('Currency field:', productData.currency);
+      console.log('VAT percentage field:', productData.vatPercentage);
+      
       const updatedProduct = await storage.updateProduct(productId, {
         ...productData,
         price: productData.price ? parseFloat(productData.price) : undefined,
@@ -1315,6 +1319,8 @@ export async function registerAdminRoutes(app: Express) {
         stockQuantity: productData.stockQuantity ? parseInt(productData.stockQuantity) : undefined,
         images: productData.images || []  // Ensure images are properly saved
       });
+      
+      console.log('Updated product result:', updatedProduct);
 
       // Note: Memory cache will be refreshed periodically, no need to refresh immediately
 
