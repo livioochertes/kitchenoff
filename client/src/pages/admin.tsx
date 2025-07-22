@@ -21,7 +21,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/header";
-import type { Category, ProductWithCategory, OrderWithItems } from "@shared/schema";
+import type { Category, ProductWithCategory, OrderWithItems, Supplier } from "@shared/schema";
 
 const productSchema = z.object({
   name: z.string().min(1, "Product name is required"),
@@ -30,6 +30,7 @@ const productSchema = z.object({
   price: z.string().min(1, "Price is required"),
   compareAtPrice: z.string().optional(),
   categoryId: z.number().min(1, "Category is required"),
+  supplierId: z.number().optional(),
   imageUrl: z.string().url("Must be a valid URL").optional(),
   inStock: z.boolean().default(true),
   stockQuantity: z.number().min(0, "Stock quantity must be positive"),
@@ -195,6 +196,10 @@ export default function Admin() {
     queryKey: ["/api/categories"],
   });
 
+  const { data: suppliers = [] } = useQuery<Supplier[]>({
+    queryKey: ["/admin/api/suppliers"],
+  });
+
   const { data: orders = [], isLoading: ordersLoading } = useQuery<OrderWithItems[]>({
     queryKey: ["/api/orders"],
   });
@@ -209,6 +214,7 @@ export default function Admin() {
       price: "",
       compareAtPrice: "",
       categoryId: 0,
+      supplierId: undefined,
       imageUrl: "",
       inStock: true,
       stockQuantity: 0,
@@ -385,6 +391,7 @@ export default function Admin() {
       price: product.price,
       compareAtPrice: product.compareAtPrice || "",
       categoryId: product.categoryId || 0,
+      supplierId: product.supplierId || undefined,
       imageUrl: product.imageUrl || "",
       inStock: product.inStock || false,
       stockQuantity: product.stockQuantity || 0,
@@ -745,6 +752,33 @@ export default function Admin() {
                                 </FormItem>
                               )}
                             />
+                            <FormField
+                              control={productForm.control}
+                              name="supplierId"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Supplier</FormLabel>
+                                  <Select onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)} value={field.value?.toString() || ""}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select a supplier" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="">No Supplier</SelectItem>
+                                      {suppliers.map((supplier) => (
+                                        <SelectItem key={supplier.id} value={supplier.id.toString()}>
+                                          {supplier.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 gap-4">
                             <FormField
                               control={productForm.control}
                               name="stockQuantity"
