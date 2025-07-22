@@ -209,6 +209,123 @@
     .logout-btn:hover {
       background: #c82333;
     }
+    
+    /* Navigation Tabs */
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+      padding: 20px 30px 0;
+      border-bottom: 1px solid #e1e5e9;
+    }
+    
+    .nav-tab {
+      background: none;
+      border: none;
+      padding: 15px 20px;
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      min-width: 80px;
+    }
+    
+    .nav-tab:hover {
+      background: #f8f9fa;
+    }
+    
+    .nav-tab.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .content-area {
+      padding: 30px;
+      min-height: 400px;
+    }
+    
+    /* Table Styles */
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .table th,
+    .table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #e1e5e9;
+    }
+    
+    .table th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .table tbody tr:hover {
+      background: #f8f9fa;
+    }
+    
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 14px;
+      margin: 0 2px;
+    }
+    
+    .btn-primary {
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .btn-success {
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .status-accepted {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .status-delivered {
+      background: #cce5ff;
+      color: #004085;
+    }
   </style>
 </head>
 <body>
@@ -297,23 +414,25 @@
       );
     }
     
-    // Admin Dashboard Component
+    // Admin Dashboard Component with Full Functionality
     function AdminDashboard({ token, admin, onLogout }) {
+      const [activeView, setActiveView] = useState('overview');
       const [stats, setStats] = useState({ users: 0, orders: 0, products: 0 });
+      const [orders, setOrders] = useState([]);
+      const [products, setProducts] = useState([]);
       const [loading, setLoading] = useState(true);
       
       useEffect(() => {
         fetchStats();
-      }, []);
+        if (activeView === 'orders') fetchOrders();
+        if (activeView === 'products') fetchProducts();
+      }, [activeView]);
       
       const fetchStats = async () => {
         try {
           const response = await fetch('/admin/api/stats', {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
           });
-          
           if (response.ok) {
             const data = await response.json();
             setStats(data);
@@ -325,37 +444,162 @@
         }
       };
       
+      const fetchOrders = async () => {
+        try {
+          const response = await fetch('/admin/api/orders', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setOrders(data);
+          }
+        } catch (error) {
+          console.error('Error fetching orders:', error);
+        }
+      };
+      
+      const fetchProducts = async () => {
+        try {
+          const response = await fetch('/admin/api/products', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setProducts(data);
+          }
+        } catch (error) {
+          console.error('Error fetching products:', error);
+        }
+      };
+      
       const handleRedirect = () => {
-        // Redirect to the full admin interface
         window.location.href = '/admin-full';
+      };
+      
+      const renderOverview = () => h('div', null,
+        h('div', { className: 'stats-grid' },
+          h('div', { className: 'stat-card' },
+            h('div', { className: 'stat-number' }, stats.users),
+            h('div', { className: 'stat-label' }, 'Total Users')
+          ),
+          h('div', { className: 'stat-card' },
+            h('div', { className: 'stat-number' }, stats.orders),
+            h('div', { className: 'stat-label' }, 'Total Orders')
+          ),
+          h('div', { className: 'stat-card' },
+            h('div', { className: 'stat-number' }, stats.products),
+            h('div', { className: 'stat-label' }, 'Total Products')
+          )
+        ),
+        h('div', { style: { textAlign: 'center', marginTop: '30px' } },
+          h('p', { style: { marginBottom: '15px', color: '#666' } }, 
+            'For advanced features like Excel import, bulk operations, and detailed management:'
+          ),
+          h('button', { 
+            className: 'btn', 
+            onClick: handleRedirect,
+            style: { width: 'auto', fontSize: '16px', padding: '15px 30px' }
+          }, '🚀 Open Full Admin Interface')
+        )
+      );
+      
+      const renderOrders = () => h('div', null,
+        h('h3', { style: { marginBottom: '20px' } }, 'Recent Orders'),
+        h('table', { className: 'table' },
+          h('thead', null,
+            h('tr', null,
+              h('th', null, 'Order ID'),
+              h('th', null, 'Customer'),
+              h('th', null, 'Total'),
+              h('th', null, 'Status'),
+              h('th', null, 'Date')
+            )
+          ),
+          h('tbody', null,
+            orders.slice(0, 10).map(order => 
+              h('tr', { key: order.id },
+                h('td', null, `#${order.id}`),
+                h('td', null, `${order.billingFirstName} ${order.billingLastName}`),
+                h('td', null, `€${order.totalAmount}`),
+                h('td', null, 
+                  h('span', { 
+                    className: `status-badge status-${order.status}` 
+                  }, order.status)
+                ),
+                h('td', null, new Date(order.createdAt).toLocaleDateString())
+              )
+            )
+          )
+        )
+      );
+      
+      const renderProducts = () => h('div', null,
+        h('h3', { style: { marginBottom: '20px' } }, 'Products Overview'),
+        h('table', { className: 'table' },
+          h('thead', null,
+            h('tr', null,
+              h('th', null, 'Name'),
+              h('th', null, 'Price'),
+              h('th', null, 'Stock'),
+              h('th', null, 'Status')
+            )
+          ),
+          h('tbody', null,
+            products.slice(0, 10).map(product => 
+              h('tr', { key: product.id },
+                h('td', null, product.name),
+                h('td', null, `€${product.price}`),
+                h('td', null, product.stockQuantity),
+                h('td', null, 
+                  h('span', { 
+                    className: `status-badge status-${product.status || 'active'}` 
+                  }, product.status || 'active')
+                )
+              )
+            )
+          )
+        )
+      );
+      
+      const renderContent = () => {
+        switch (activeView) {
+          case 'orders': return renderOrders();
+          case 'products': return renderProducts();
+          default: return renderOverview();
+        }
       };
       
       return h('div', { className: 'container' },
         h('div', { className: 'dashboard' },
           h('div', { className: 'dashboard-header' },
             h('h1', { className: 'dashboard-title' }, 'Admin Dashboard'),
-            h('div', null,
-              h('button', { 
-                className: 'btn', 
-                onClick: handleRedirect,
-                style: { width: 'auto', marginRight: '10px' }
-              }, 'Open Full Admin'),
-              h('button', { className: 'logout-btn', onClick: onLogout }, 'Logout')
+            h('button', { className: 'logout-btn', onClick: onLogout }, 'Logout')
+          ),
+          h('div', { className: 'nav-tabs' },
+            h('button', { 
+              className: `nav-tab ${activeView === 'overview' ? 'active' : ''}`,
+              onClick: () => setActiveView('overview')
+            },
+              h('span', { style: { fontSize: '18px' } }, '📊'),
+              h('span', { style: { fontSize: '12px' } }, 'Overview')
+            ),
+            h('button', { 
+              className: `nav-tab ${activeView === 'orders' ? 'active' : ''}`,
+              onClick: () => setActiveView('orders')
+            },
+              h('span', { style: { fontSize: '18px' } }, '📋'),
+              h('span', { style: { fontSize: '12px' } }, 'Orders')
+            ),
+            h('button', { 
+              className: `nav-tab ${activeView === 'products' ? 'active' : ''}`,
+              onClick: () => setActiveView('products')
+            },
+              h('span', { style: { fontSize: '18px' } }, '📦'),
+              h('span', { style: { fontSize: '12px' } }, 'Products')
             )
           ),
-          h('div', { className: 'stats-grid' },
-            h('div', { className: 'stat-card' },
-              h('div', { className: 'stat-number' }, stats.users),
-              h('div', { className: 'stat-label' }, 'Total Users')
-            ),
-            h('div', { className: 'stat-card' },
-              h('div', { className: 'stat-number' }, stats.orders),
-              h('div', { className: 'stat-label' }, 'Total Orders')
-            ),
-            h('div', { className: 'stat-card' },
-              h('div', { className: 'stat-number' }, stats.products),
-              h('div', { className: 'stat-label' }, 'Total Products')
-            )
+          h('div', { className: 'content-area' },
+            renderContent()
           )
         )
       );
