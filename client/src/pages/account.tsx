@@ -335,6 +335,17 @@ export default function Account() {
     updateNotificationsMutation.mutate(data);
   };
 
+  const handleNotificationChange = (field: keyof NotificationFormData, value: boolean) => {
+    const currentValues = notificationForm.getValues();
+    const updatedData = { ...currentValues, [field]: value };
+    
+    // Update form state immediately
+    notificationForm.setValue(field, value);
+    
+    // Save to backend automatically
+    updateNotificationsMutation.mutate(updatedData);
+  };
+
   // Redirect if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -1286,7 +1297,7 @@ export default function Account() {
                 </CardHeader>
                 <CardContent>
                   <Form {...notificationForm}>
-                    <form onSubmit={notificationForm.handleSubmit(handleNotificationSubmit)} className="space-y-6">
+                    <div className="space-y-6">
                       <FormField
                         control={notificationForm.control}
                         name="emailNotifications"
@@ -1301,7 +1312,7 @@ export default function Account() {
                             <FormControl>
                               <Switch
                                 checked={field.value}
-                                onCheckedChange={field.onChange}
+                                onCheckedChange={(value) => handleNotificationChange('emailNotifications', value)}
                               />
                             </FormControl>
                           </FormItem>
@@ -1321,7 +1332,7 @@ export default function Account() {
                             <FormControl>
                               <Switch
                                 checked={field.value}
-                                onCheckedChange={field.onChange}
+                                onCheckedChange={(value) => handleNotificationChange('orderUpdates', value)}
                               />
                             </FormControl>
                           </FormItem>
@@ -1341,7 +1352,7 @@ export default function Account() {
                             <FormControl>
                               <Switch
                                 checked={field.value}
-                                onCheckedChange={field.onChange}
+                                onCheckedChange={(value) => handleNotificationChange('productRestocks', value)}
                               />
                             </FormControl>
                           </FormItem>
@@ -1361,7 +1372,7 @@ export default function Account() {
                             <FormControl>
                               <Switch
                                 checked={field.value}
-                                onCheckedChange={field.onChange}
+                                onCheckedChange={(value) => handleNotificationChange('priceDrops', value)}
                               />
                             </FormControl>
                           </FormItem>
@@ -1381,22 +1392,19 @@ export default function Account() {
                             <FormControl>
                               <Switch
                                 checked={field.value}
-                                onCheckedChange={field.onChange}
+                                onCheckedChange={(value) => handleNotificationChange('promotions', value)}
                               />
                             </FormControl>
                           </FormItem>
                         )}
                       />
                       
-                      <div className="flex justify-end pt-4 border-t">
-                        <Button 
-                          type="submit" 
-                          disabled={updateNotificationsMutation.isPending}
-                        >
-                          {updateNotificationsMutation.isPending ? "Saving..." : "Save Changes"}
-                        </Button>
-                      </div>
-                    </form>
+                      {updateNotificationsMutation.isPending && (
+                        <div className="flex justify-center pt-2">
+                          <p className="text-sm text-gray-600">Saving preferences...</p>
+                        </div>
+                      )}
+                    </div>
                   </Form>
                 </CardContent>
               </Card>

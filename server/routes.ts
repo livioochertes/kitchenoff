@@ -12,6 +12,7 @@ import OpenAI from "openai";
 import QRCode from "qrcode";
 import path from "path";
 import { createInvoiceService } from './invoice-service.js';
+import { sendNotificationPreferencesEmail } from './email-service.js';
 
 // Authentication interfaces
 interface AuthRequest extends Request {
@@ -431,16 +432,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!updatedUser) {
         return res.status(404).json({ message: "User not found" });
       }
+
+      // Send confirmation email to test user (liviu.chertes@gmail.com)
+      const preferences = {
+        emailNotifications: updatedUser.emailNotifications,
+        orderUpdates: updatedUser.orderUpdates,
+        productRestocks: updatedUser.productRestocks,
+        priceDrops: updatedUser.priceDrops,
+        promotions: updatedUser.promotions,
+      };
+
+      try {
+        await sendNotificationPreferencesEmail(updatedUser, preferences);
+        console.log('✅ Notification preferences email sent successfully to:', updatedUser.email);
+      } catch (emailError) {
+        console.error('❌ Failed to send notification preferences email:', emailError);
+        // Continue with success response even if email fails
+      }
       
       res.json({ 
         message: "Notification preferences updated successfully",
-        preferences: {
-          emailNotifications: updatedUser.emailNotifications,
-          orderUpdates: updatedUser.orderUpdates,
-          productRestocks: updatedUser.productRestocks,
-          priceDrops: updatedUser.priceDrops,
-          promotions: updatedUser.promotions,
-        }
+        preferences
       });
     } catch (error) {
       console.error("Error updating notification preferences:", error);

@@ -314,3 +314,95 @@ export async function sendLogisticsNotificationEmail(
     html: html,
   });
 }
+
+export async function sendNotificationPreferencesEmail(
+  user: User,
+  preferences: {
+    emailNotifications: boolean;
+    orderUpdates: boolean;
+    productRestocks: boolean;
+    priceDrops: boolean;
+    promotions: boolean;
+  }
+): Promise<boolean> {
+  const preferencesHtml = `
+    <ul style="list-style-type: none; padding: 0;">
+      <li style="padding: 8px 0; border-bottom: 1px solid #eee;">
+        <strong>Email notifications:</strong> 
+        <span style="color: ${preferences.emailNotifications ? '#27ae60' : '#e74c3c'};">
+          ${preferences.emailNotifications ? 'Enabled' : 'Disabled'}
+        </span>
+      </li>
+      <li style="padding: 8px 0; border-bottom: 1px solid #eee;">
+        <strong>Order updates:</strong> 
+        <span style="color: ${preferences.orderUpdates ? '#27ae60' : '#e74c3c'};">
+          ${preferences.orderUpdates ? 'Enabled' : 'Disabled'}
+        </span>
+      </li>
+      <li style="padding: 8px 0; border-bottom: 1px solid #eee;">
+        <strong>Product restocks:</strong> 
+        <span style="color: ${preferences.productRestocks ? '#27ae60' : '#e74c3c'};">
+          ${preferences.productRestocks ? 'Enabled' : 'Disabled'}
+        </span>
+      </li>
+      <li style="padding: 8px 0; border-bottom: 1px solid #eee;">
+        <strong>Price drops:</strong> 
+        <span style="color: ${preferences.priceDrops ? '#27ae60' : '#e74c3c'};">
+          ${preferences.priceDrops ? 'Enabled' : 'Disabled'}
+        </span>
+      </li>
+      <li style="padding: 8px 0;">
+        <strong>Promotions:</strong> 
+        <span style="color: ${preferences.promotions ? '#27ae60' : '#e74c3c'};">
+          ${preferences.promotions ? 'Enabled' : 'Disabled'}
+        </span>
+      </li>
+    </ul>
+  `;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Notification Preferences Updated - KitchenOff</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #2c3e50; margin-bottom: 10px;">KitchenOff</h1>
+        <h2 style="color: #27ae60; margin-top: 0;">Notification Preferences Updated</h2>
+      </div>
+      
+      <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <h3 style="margin-top: 0; color: #2c3e50;">Hello ${user.firstName} ${user.lastName},</h3>
+        <p>Your notification preferences have been successfully updated. Here are your current settings:</p>
+      </div>
+
+      <div style="margin-bottom: 20px; background-color: #f8f9fa; padding: 15px; border-radius: 8px;">
+        <h3 style="margin-top: 0; color: #2c3e50;">Current Notification Settings:</h3>
+        ${preferencesHtml}
+      </div>
+
+      <div style="margin-top: 30px; padding: 15px; background-color: #e8f5e8; border-radius: 8px;">
+        <p style="margin: 0; color: #2c3e50;">
+          <strong>Need to make changes?</strong><br>
+          You can update your notification preferences anytime by visiting your account settings.
+        </p>
+      </div>
+      
+      <div style="margin-top: 30px; text-align: center; color: #666; font-size: 12px;">
+        <p>This is a confirmation email from KitchenOff.</p>
+        <p>© 2025 KitchenOff. All rights reserved.</p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return await sendEmail({
+    to: user.email,
+    from: 'info@kitchen-off.com',
+    subject: 'Notification Preferences Updated - KitchenOff',
+    html,
+    text: `Hello ${user.firstName}, your notification preferences have been updated successfully. Email notifications: ${preferences.emailNotifications ? 'Enabled' : 'Disabled'}, Order updates: ${preferences.orderUpdates ? 'Enabled' : 'Disabled'}, Product restocks: ${preferences.productRestocks ? 'Enabled' : 'Disabled'}, Price drops: ${preferences.priceDrops ? 'Enabled' : 'Disabled'}, Promotions: ${preferences.promotions ? 'Enabled' : 'Disabled'}.`
+  });
+}
