@@ -591,6 +591,7 @@ export function orderToSmartbillInvoice(
     regCom: user.registrationNumber || '',
     address: order.billingAddress?.address || order.shippingAddress?.address || 'Strada Exemple 123',
     isTaxPayer: false,
+    saveToDb: true, // Allow Smartbill to save client information
     city: order.billingAddress?.city || order.shippingAddress?.city || 'Bucharest',
     country: order.billingAddress?.country || order.shippingAddress?.country || 'Romania',
     email: user.email
@@ -617,7 +618,7 @@ export function orderToSmartbillInvoice(
       taxPercentage: productVatPercentage,
       vatPercentage: productVatPercentage,
       vatAmount: (parseFloat(item.price) * item.quantity * productVatPercentage / (100 + productVatPercentage)),
-      saveToDb: false,
+      saveToDb: true, // Allow Smartbill to create products automatically
       isService: false
     };
   });
