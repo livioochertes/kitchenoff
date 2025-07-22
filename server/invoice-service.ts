@@ -177,9 +177,9 @@ export class InvoiceService {
       console.log(`🌐 Sending request to Smartbill API...`);
       const smartbillResult = await this.smartbillApi.createInvoice(smartbillInvoiceData);
 
-      // Store invoice reference in local database
+      // Store invoice reference in local database with proper KTO format
       const invoiceData = {
-        invoiceNumber: `${smartbillResult.series}-${smartbillResult.number}`,
+        invoiceNumber: `${smartbillResult.series} ${smartbillResult.number}`,
         orderId: order.id,
         userId: order.userId,
         issueDate: new Date(),
@@ -192,7 +192,7 @@ export class InvoiceService {
         paymentLink: null,
         notes: 'Generated via Smartbill API - TVA 19% conform legislației române',
         smartbillSeries: smartbillResult.series,
-        smartbillNumber: smartbillResult.number,
+        smartbillNumber: smartbillResult.number.toString(),
         smartbillId: smartbillResult.id,
         status: 'issued'
       };
@@ -229,17 +229,37 @@ export class InvoiceService {
   }
 
   /**
-   * Generate invoice locally (fallback method)
+   * Generate invoice locally (fallback method) with proper Smartbill numbering
    */
   private async generateLocalInvoice(order: any, user: any, paymentData: any): Promise<any> {
     try {
-      // Generate invoice number using KTO series format like Smartbill
-      const currentDate = new Date();
-      const year = currentDate.getFullYear();
-      const timestamp = String(Date.now()).slice(-6); // Use last 6 digits for uniqueness
-      const invoiceNumber = `KTO-${year}-${timestamp}`;
+      // Get next invoice number from Smartbill series format: KTO 10001, KTO 10002, etc.
+      let invoiceNumber = 'KTO 10001'; // Default fallback
+      let smartbillNumber = '10001';
       
-      console.log(`📋 Generating local invoice with KTO series format: ${invoiceNumber}`);
+      if (this.config.enableSmartbill) {
+        try {
+          // Try to get next invoice number from Smartbill
+          const seriesData = await this.smartbillApi.getSeries(this.config.smartbill.companyVat);
+          const ktoSeries = seriesData.find((s: any) => s.name === 'KTO');
+          if (ktoSeries && ktoSeries.nextNumber) {
+            smartbillNumber = ktoSeries.nextNumber.toString();
+            invoiceNumber = `KTO ${smartbillNumber}`;
+            console.log(`📋 Got next invoice number from Smartbill: ${invoiceNumber}`);
+          } else {
+            console.log(`⚠️ KTO series not found in Smartbill, using fallback numbering`);
+          }
+        } catch (error) {
+          console.log(`⚠️ Failed to get Smartbill series data, using fallback numbering: ${error}`);
+          // Fallback: Use timestamp-based numbering starting from 10001
+          const timestamp = Date.now();
+          const lastDigits = parseInt(timestamp.toString().slice(-4));
+          smartbillNumber = (10001 + (lastDigits % 1000)).toString();
+          invoiceNumber = `KTO ${smartbillNumber}`;
+        }
+      }
+      
+      console.log(`📋 Generating local invoice with Smartbill format: ${invoiceNumber}`);
       
       // Calculate totals with 19% VAT for RON
       const subtotal = parseFloat(order.totalAmount);
@@ -248,7 +268,7 @@ export class InvoiceService {
       const subtotalWithoutVat = subtotal - vatAmount;
       const totalAmount = subtotal; // Total already includes VAT
 
-      // Create invoice
+      // Create invoice with proper Smartbill numbering format
       const invoiceData = {
         invoiceNumber,
         orderId: order.id,
@@ -263,9 +283,9 @@ export class InvoiceService {
         paymentLink: null,
         notes: 'Factura cu TVA 19% conform legislației române',
         status: 'issued',
-        // Add Smartbill-compatible fields for consistency
+        // Use proper Smartbill series format
         smartbillSeries: 'KTO',
-        smartbillNumber: `${year}-${timestamp}`
+        smartbillNumber: smartbillNumber
       };
 
       // Create invoice items with 19% VAT

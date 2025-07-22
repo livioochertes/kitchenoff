@@ -79,6 +79,36 @@ export class SmartbillAPI {
   }
 
   /**
+   * Get document series from Smartbill API
+   */
+  async getSeries(companyVat: string): Promise<any[]> {
+    try {
+      console.log('📋 Fetching Smartbill document series...');
+      
+      const url = `${this.baseUrl}/series?cif=${encodeURIComponent(companyVat)}`;
+      const headers = this.getHeaders();
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: headers
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log('❌ Series fetch error:', errorText);
+        throw new Error(`Failed to fetch series: ${response.status} ${errorText}`);
+      }
+      
+      const data = await response.json();
+      console.log('✅ Series data fetched successfully:', JSON.stringify(data, null, 2));
+      return data;
+    } catch (error) {
+      console.error('Failed to get Smartbill series:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Test API connection by attempting to get document series
    */
   async testConnection(): Promise<boolean> {
