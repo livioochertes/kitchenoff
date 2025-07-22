@@ -1277,7 +1277,7 @@ export default function Account() {
                           disabled={updateInvoiceMutation.isPending}
                           className="min-w-[120px]"
                         >
-                          {updateInvoiceMutation.isPending ? "Updating..." : "Update Invoice Settings"}
+                          {updateInvoiceMutation.isPending ? t('account.updating') : t('account.updateInvoiceSettings')}
                         </Button>
                       </div>
                     </form>
