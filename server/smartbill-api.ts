@@ -67,14 +67,13 @@ export class SmartbillAPI {
   }
 
   /**
-   * Test API connection
+   * Test API connection by attempting to get document series
    */
   async testConnection(): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/test`, {
-        method: 'POST',
-        headers: this.getHeaders(),
-        body: JSON.stringify({ test: true })
+      const response = await fetch(`${this.baseUrl}/series?cif=${encodeURIComponent(this.config.companyVat)}`, {
+        method: 'GET',
+        headers: this.getHeaders()
       });
       
       return response.ok;
