@@ -1,10 +1,12 @@
 import { db } from "./db";
-import { categories, products, users, orders, orderItems } from "../shared/schema";
+import { categories, products, users, orders, orderItems, invoices, invoiceItems } from "../shared/schema";
 import bcrypt from "bcrypt";
 
 export async function seedDatabase() {
   try {
-    // Clear existing data
+    // Clear existing data in correct order to handle foreign key constraints
+    await db.delete(invoiceItems);
+    await db.delete(invoices);
     await db.delete(orderItems);
     await db.delete(orders);
     await db.delete(products);
@@ -745,7 +747,9 @@ export async function seedDatabase() {
       }
     ];
 
-    await db.insert(orderItems).values(sampleOrderItems);
+    // Insert all order items
+    const insertedOrderItems = await db.insert(orderItems).values(sampleOrderItems).returning();
+    console.log(`Inserted ${insertedOrderItems.length} order items for ${insertedOrders.length} orders`);
 
     console.log("Database seeded successfully!");
   } catch (error) {
