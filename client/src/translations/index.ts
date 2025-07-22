@@ -131,7 +131,6 @@ export interface TranslationKeys {
   
   // Invoice and Settings Form Fields
   'account.loadingInvoices': string;
-  'account.noInvoices': string;
   'account.createInvoicesFromOrders': string;
   'account.companyAddress': string;
   'account.billingContact': string;
@@ -533,7 +532,7 @@ const translations: Record<Language, TranslationKeys> = {
     'account.invoice': 'Invoice',
     'account.reorder': 'Reorder',
     'account.invoicesBilling': 'Invoices & Billing',
-    'account.noInvoices': 'No invoices available',
+    'account.noInvoices': 'No invoices created yet',
     'account.invoiceNumber': 'Invoice #',
     'account.download': 'Download',
     'account.invoiceDetails': 'Invoice Details & Company Information',
@@ -576,7 +575,6 @@ const translations: Record<Language, TranslationKeys> = {
     
     // Invoice and Settings Form Fields
     'account.loadingInvoices': 'Loading invoices...',
-    'account.noInvoices': 'No invoices created yet',
     'account.createInvoicesFromOrders': 'Create invoices from your delivered orders below',
     'account.companyAddress': 'Company Address',
     'account.billingContact': 'Billing Contact Information',
