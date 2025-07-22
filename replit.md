@@ -34,11 +34,17 @@ Preferred communication style: Simple, everyday language.
 - COMPLETED: Integrated memory cache refresh system ensuring stock updates reflect immediately
 - COMPLETED: Added comprehensive error handling and logging for all Smartbill operations
 - COMPLETED: Production-ready Smartbill integration with fallback to local invoice system
+- COMPLETED: Updated Smartbill credentials with correct formats (liviu.chertes@gmail.com, RO16582983, updated token)
+- COMPLETED: Added admin credential management endpoints for real-time testing and updates:
+  - GET /admin/api/smartbill/credentials - View current credentials (masked for security)
+  - POST /admin/api/smartbill/test-credentials - Test username/token combinations
+  - POST /admin/api/smartbill/update-credentials - Update and validate credentials
 - VERIFIED: All environment variables properly configured (ENABLE_SMARTBILL, SMARTBILL_SERIES, credentials)
 - VERIFIED: Stock synchronization system operational with automatic local database updates
 - VERIFIED: Invoice creation system working with both Smartbill API and local fallback
 - VERIFIED: Product synchronization maintaining data integrity between systems
-- STATUS: Complete Smartbill production integration ready - automatic invoicing, stock sync, and product management fully operational
+- VERIFIED: Credentials updated to correct format with proper username and VAT number
+- STATUS: Smartbill integration technically complete - authentication currently failing with "Autentificare esuata" suggesting account API access needs to be enabled in Smartbill Cloud settings
 
 ### July 22, 2025 - Excel Bulk Product Import System Complete
 - COMPLETED: Implemented comprehensive Excel bulk product import functionality for admin Products section
