@@ -2425,7 +2425,9 @@ export async function registerAdminRoutes(app: Express) {
           const supplier = suppliers.find(s => s.name.toLowerCase() === supplierName.toLowerCase());
           if (supplier) {
             supplierId = supplier.id;
+            console.log(`✅ Found existing supplier: ${supplierName} (ID: ${supplierId})`);
           } else {
+            console.log(`🔄 Creating new supplier: ${supplierName}`);
             // Create new supplier if it doesn't exist
             const newSupplier = await storage.createSupplier({
               name: supplierName,
@@ -2441,6 +2443,7 @@ export async function registerAdminRoutes(app: Express) {
               isActive: true
             });
             supplierId = newSupplier.id;
+            console.log(`✅ Created new supplier: ${supplierName} (ID: ${supplierId})`);
           }
 
           // Generate slug
@@ -2469,7 +2472,9 @@ export async function registerAdminRoutes(app: Express) {
             status: status
           };
 
-          await storage.createProduct(productData);
+          console.log(`🔄 Creating product with data:`, JSON.stringify(productData, null, 2));
+          const createdProduct = await storage.createProduct(productData);
+          console.log(`✅ Product created successfully:`, createdProduct);
           imported++;
           existingNames.add(productName.toLowerCase()); // Add to set to prevent duplicates in same import
 
@@ -2483,6 +2488,15 @@ export async function registerAdminRoutes(app: Express) {
 
       // Refresh memory cache
       await loadAllDataIntoMemory();
+
+      console.log('📊 Import Summary:', {
+        total: jsonData.length,
+        imported: imported,
+        errors: errors.length,
+        duplicates: duplicates.length,
+        errorDetails: errors,
+        duplicateDetails: duplicates
+      });
 
       res.json({
         success: true,
