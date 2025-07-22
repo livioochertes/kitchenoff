@@ -10,7 +10,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### July 22, 2025 - Company Settings Management System Complete
+### July 22, 2025 - Complete Company Settings Integration System
 - COMPLETED: Fixed supplier dropdown functionality in product forms for both add/edit operations  
 - COMPLETED: Created "KitchenOff Direct" supplier entry for company's own products
 - COMPLETED: Added comprehensive Company Settings tab to admin interface with complete business information management
@@ -20,8 +20,16 @@ Preferred communication style: Simple, everyday language.
 - COMPLETED: Fixed backend database connection issues - replaced incorrect storage.db calls with proper pool.query methods
 - COMPLETED: Added default KitchenOff company values for new installations (name, email, address, contact person, etc.)
 - COMPLETED: All company information fields now save and load correctly including Contact Person, VAT Number, Registration Number
+- COMPLETED: Updated company name from "Namarte" to "Namarte CCL SRL" throughout system
+- COMPLETED: Added Bank Name and IBAN fields to company settings database and admin interface
+- COMPLETED: Enhanced invoice display to show VAT Number and Registration Number from company settings
+- COMPLETED: Fixed invoice service to dynamically load company information from database
+- COMPLETED: Updated default company data with proper VAT (RO12345678) and Registration (J40/12345/2020) numbers
+- COMPLETED: Added banking information fields (Bank Name: Banca Comercială Română, IBAN: RO49 AAAA 1B31 0075 9384 0000)
+- COMPLETED: Enhanced invoice generation to use company settings for all business information
 - VERIFIED: Company Settings functionality fully operational - user confirmed "Now is OK"
-- STATUS: Complete company information management system ready for production use
+- VERIFIED: Invoice generation now shows complete company information including VAT and Registration numbers
+- STATUS: Complete company information management system with banking details and invoice integration ready for production use
 
 ### July 22, 2025 - Notification System and Email Fixes
 - COMPLETED: Fixed notification preferences to save automatically when switches are toggled (removed manual Save Changes button)

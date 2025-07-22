@@ -2186,7 +2186,7 @@ export async function registerAdminRoutes(app: Express) {
           name, email, logistics_email as "logisticsEmail", phone, address, city, state, zip_code as "zipCode", 
           country, contact_person as "contactPerson", website, 
           vat_number as "vatNumber", registration_number as "registrationNumber", 
-          description
+          bank_name as "bankName", iban, description
         FROM company_settings 
         ORDER BY created_at DESC 
         LIMIT 1
@@ -2197,7 +2197,7 @@ export async function registerAdminRoutes(app: Express) {
       } else {
         // Return default company settings if none exist
         res.json({
-          name: 'KitchenOff',
+          name: 'Namarte CCL SRL',
           email: 'info@kitchen-off.com',
           logisticsEmail: 'logistics@kitchen-off.com',
           phone: '+40 123 456 789',
@@ -2208,8 +2208,10 @@ export async function registerAdminRoutes(app: Express) {
           country: 'Romania',
           contactPerson: 'Company Administrator',
           website: 'https://kitchen-off.com',
-          vatNumber: '',
-          registrationNumber: '',
+          vatNumber: 'RO12345678',
+          registrationNumber: 'J40/12345/2020',
+          bankName: 'Banca Comercială Română',
+          iban: 'RO49 AAAA 1B31 0075 9384 0000',
           description: 'Professional kitchen equipment and supplies for the HORECA industry.'
         });
       }
@@ -2223,7 +2225,7 @@ export async function registerAdminRoutes(app: Express) {
     try {
       const { 
         name, email, logisticsEmail, phone, address, city, state, zipCode, country, 
-        contactPerson, website, vatNumber, registrationNumber, description 
+        contactPerson, website, vatNumber, registrationNumber, bankName, iban, description 
       } = req.body;
 
       if (!name || !email) {
@@ -2240,11 +2242,11 @@ export async function registerAdminRoutes(app: Express) {
           SET name = $1, email = $2, logistics_email = $3, phone = $4, address = $5, city = $6, 
               state = $7, zip_code = $8, country = $9, contact_person = $10, 
               website = $11, vat_number = $12, registration_number = $13, 
-              description = $14, updated_at = CURRENT_TIMESTAMP
-          WHERE id = $15
+              bank_name = $14, iban = $15, description = $16, updated_at = CURRENT_TIMESTAMP
+          WHERE id = $17
         `, [
           name, email, logisticsEmail, phone, address, city, state, zipCode, country,
-          contactPerson, website, vatNumber, registrationNumber, description,
+          contactPerson, website, vatNumber, registrationNumber, bankName, iban, description,
           existingResult.rows[0].id
         ]);
       } else {
@@ -2252,11 +2254,11 @@ export async function registerAdminRoutes(app: Express) {
         await pool.query(`
           INSERT INTO company_settings (
             name, email, logistics_email, phone, address, city, state, zip_code, country, 
-            contact_person, website, vat_number, registration_number, description
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+            contact_person, website, vat_number, registration_number, bank_name, iban, description
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
         `, [
           name, email, logisticsEmail, phone, address, city, state, zipCode, country,
-          contactPerson, website, vatNumber, registrationNumber, description
+          contactPerson, website, vatNumber, registrationNumber, bankName, iban, description
         ]);
       }
 

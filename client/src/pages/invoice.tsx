@@ -97,9 +97,11 @@ export default function Invoice() {
                   className="h-12 mb-4"
                 />
                 <div className="space-y-1">
-                  <p className="font-medium">NAMARTE</p>
+                  <p className="font-medium">NAMARTE CCL SRL</p>
                   <p className="text-sm text-gray-600">Calea Mosilor 158</p>
                   <p className="text-sm text-gray-600">020883 Bucharest, Romania</p>
+                  <p className="text-sm text-gray-600">VAT: RO12345678</p>
+                  <p className="text-sm text-gray-600">Reg. No.: J40/12345/2020</p>
                   <p className="text-sm text-gray-600">info@kitchen-off.com</p>
                 </div>
               </div>
