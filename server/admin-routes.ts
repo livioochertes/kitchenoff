@@ -10,6 +10,8 @@ import rateLimit from "express-rate-limit";
 import { Request, Response, NextFunction } from "express";
 import { upload, processImages, serveUploads, deleteUploadedFile } from "./upload-middleware";
 import { loadAllDataIntoMemory } from "./routes";
+import multer from "multer";
+import * as XLSX from "xlsx";
 
 // Rate limiting for admin login attempts
 const adminLoginLimiter = rateLimit({
@@ -2304,4 +2306,193 @@ export async function registerAdminRoutes(app: Express) {
       console.error('Error ensuring company supplier:', error);
     }
   }
+
+  // Configure multer for Excel file uploads
+  const excelUpload = multer({
+    storage: multer.memoryStorage(),
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+          file.mimetype === 'application/vnd.ms-excel' ||
+          file.originalname.toLowerCase().endsWith('.xlsx') ||
+          file.originalname.toLowerCase().endsWith('.xls')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only Excel files (.xlsx, .xls) are allowed'), false);
+      }
+    },
+    limits: {
+      fileSize: 10 * 1024 * 1024 // 10MB limit
+    }
+  });
+
+  // Excel product import endpoint
+  app.post("/admin/api/products/import-excel", authenticateAdmin, excelUpload.single('excelFile'), async (req: AdminAuthRequest, res: Response) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No Excel file uploaded" });
+      }
+
+      // Parse Excel file
+      const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      if (!jsonData || jsonData.length === 0) {
+        return res.status(400).json({ message: "Excel file is empty or invalid" });
+      }
+
+      console.log(`📤 Processing ${jsonData.length} rows from Excel file`);
+
+      let imported = 0;
+      let errors = [];
+      let duplicates = [];
+
+      // Get all categories for validation
+      const categories = await storage.getCategories();
+      const categoryMap = new Map();
+      categories.forEach(cat => {
+        categoryMap.set(cat.id, cat);
+        categoryMap.set(cat.name, cat);
+      });
+
+      // Get existing products to check for duplicates
+      const existingProducts = await storage.getProducts();
+      const existingNames = new Set(existingProducts.map(p => p.name.toLowerCase()));
+
+      // Process each row
+      for (let i = 0; i < jsonData.length; i++) {
+        const row = jsonData[i];
+        const rowNumber = i + 2; // Excel row number (header is row 1)
+
+        try {
+          // Extract and validate required fields
+          const productName = row['Product Name']?.toString()?.trim();
+          const price = parseFloat(row['Price']?.toString()?.replace(',', '.') || '0');
+          const stockQuantity = parseInt(row['Stock Quantity']?.toString() || '0');
+          const categoryId = parseInt(row['Category ID']?.toString() || '0');
+
+          // Validation
+          if (!productName) {
+            errors.push(`Row ${rowNumber}: Product Name is required`);
+            continue;
+          }
+
+          if (existingNames.has(productName.toLowerCase())) {
+            duplicates.push(`Row ${rowNumber}: Product "${productName}" already exists`);
+            continue;
+          }
+
+          if (price <= 0) {
+            errors.push(`Row ${rowNumber}: Price must be greater than 0`);
+            continue;
+          }
+
+          if (stockQuantity < 0) {
+            errors.push(`Row ${rowNumber}: Stock Quantity cannot be negative`);
+            continue;
+          }
+
+          if (!categoryMap.has(categoryId)) {
+            errors.push(`Row ${rowNumber}: Category ID ${categoryId} does not exist`);
+            continue;
+          }
+
+          // Extract optional fields with defaults
+          const description = row['Description']?.toString()?.trim() || '';
+          const status = row['Status']?.toString()?.toLowerCase()?.trim() || 'active';
+          const vatValue = parseFloat(row['VAT %']?.toString()?.replace('%', '').replace(',', '.') || '19');
+          const productCode = row['Product Code']?.toString()?.trim() || '';
+          const ncCode = row['NC Code']?.toString()?.trim() || '';
+          const cpvCode = row['CPV Code']?.toString()?.trim() || '';
+          const supplierName = row['Supplier Name']?.toString()?.trim() || 'KitchenOff Direct';
+
+          // Validate status
+          const validStatuses = ['active', 'inactive', 'draft', 'discontinued'];
+          if (!validStatuses.includes(status)) {
+            errors.push(`Row ${rowNumber}: Status must be one of: ${validStatuses.join(', ')}`);
+            continue;
+          }
+
+          // Find or create supplier
+          let supplierId = null;
+          const suppliers = await storage.getSuppliers();
+          const supplier = suppliers.find(s => s.name.toLowerCase() === supplierName.toLowerCase());
+          if (supplier) {
+            supplierId = supplier.id;
+          } else {
+            // Create new supplier if it doesn't exist
+            const newSupplier = await storage.createSupplier({
+              name: supplierName,
+              email: `contact@${supplierName.toLowerCase().replace(/\s+/g, '')}.com`,
+              phone: '',
+              address: '',
+              city: '',
+              state: '',
+              zipCode: '',
+              country: '',
+              contactPerson: '',
+              integrationType: 'email',
+              isActive: true
+            });
+            supplierId = newSupplier.id;
+          }
+
+          // Generate slug
+          const slug = productName.toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim();
+
+          // Create product
+          const productData = {
+            name: productName,
+            slug: slug,
+            description: description,
+            price: price,
+            compareAtPrice: price * 1.2, // 20% higher than regular price
+            categoryId: categoryId,
+            supplierId: supplierId,
+            stockQuantity: stockQuantity,
+            featured: false,
+            images: [],
+            vatValue: vatValue,
+            productCode: productCode,
+            ncCode: ncCode,
+            cpvCode: cpvCode,
+            status: status
+          };
+
+          await storage.createProduct(productData);
+          imported++;
+          existingNames.add(productName.toLowerCase()); // Add to set to prevent duplicates in same import
+
+          console.log(`✅ Imported product: ${productName}`);
+        } catch (error) {
+          console.error(`❌ Error processing row ${rowNumber}:`, error);
+          errors.push(`Row ${rowNumber}: ${error.message}`);
+        }
+      }
+
+      // Refresh memory cache
+      await loadAllDataIntoMemory();
+
+      res.json({
+        success: true,
+        message: `Import completed: ${imported} products imported`,
+        total: jsonData.length,
+        imported: imported,
+        errors: errors,
+        duplicates: duplicates
+      });
+
+    } catch (error) {
+      console.error("Excel import error:", error);
+      res.status(500).json({ 
+        message: "Failed to import Excel file", 
+        error: error.message 
+      });
+    }
+  });
 }

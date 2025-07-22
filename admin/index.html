@@ -7,6 +7,7 @@
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     * {
       margin: 0;
@@ -621,6 +622,9 @@
         description: ''
       });
       const [showCompanySettingsModal, setShowCompanySettingsModal] = useState(false);
+      const [showExcelImportModal, setShowExcelImportModal] = useState(false);
+      const [excelFile, setExcelFile] = useState(null);
+      const [importResults, setImportResults] = useState(null);
       
       useEffect(() => {
         fetchStats();
@@ -1267,6 +1271,122 @@
           }
         } catch (err) {
           return { success: false, message: 'Network error' };
+        }
+      };
+
+      // Download Excel template for bulk product import
+      const downloadExcelTemplate = () => {
+        // Create sample data structure for Excel template
+        const templateData = [
+          {
+            'Product Name': 'Example Product',
+            'Description': 'This is an example product description',
+            'Price': '29.99',
+            'Stock Quantity': '100',
+            'Category ID': '1',
+            'Category Name': 'Cleaning & Sanitizing',
+            'Status': 'active',
+            'VAT %': '19',
+            'Product Code': 'KO001',
+            'NC Code': '3924100000',
+            'CPV Code': '39830000-9',
+            'Supplier Name': 'KitchenOff Direct'
+          },
+          {
+            'Product Name': 'Another Product',
+            'Description': 'Second example product',
+            'Price': '45.50',
+            'Stock Quantity': '50',
+            'Category ID': '2',
+            'Category Name': 'Food Labels',
+            'Status': 'active',
+            'VAT %': '19',
+            'Product Code': 'KO002',
+            'NC Code': '4821100000',
+            'CPV Code': '30199700-3',
+            'Supplier Name': 'KitchenOff Direct'
+          }
+        ];
+
+        // Create workbook and worksheet
+        const ws = XLSX.utils.json_to_sheet(templateData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Products');
+
+        // Add instructions sheet
+        const instructionsData = [
+          { Field: 'Product Name', Required: 'Yes', Description: 'Unique product name' },
+          { Field: 'Description', Required: 'No', Description: 'Product description' },
+          { Field: 'Price', Required: 'Yes', Description: 'Product price in decimal format (e.g., 29.99)' },
+          { Field: 'Stock Quantity', Required: 'Yes', Description: 'Available stock quantity' },
+          { Field: 'Category ID', Required: 'Yes', Description: 'Category ID number from system' },
+          { Field: 'Category Name', Required: 'No', Description: 'Category name for reference only' },
+          { Field: 'Status', Required: 'No', Description: 'Product status: active, inactive, draft, discontinued' },
+          { Field: 'VAT %', Required: 'No', Description: 'VAT percentage (default: 19)' },
+          { Field: 'Product Code', Required: 'No', Description: 'Alphanumeric product code' },
+          { Field: 'NC Code', Required: 'No', Description: 'Nomenclature code' },
+          { Field: 'CPV Code', Required: 'No', Description: 'Common Procurement Vocabulary code' },
+          { Field: 'Supplier Name', Required: 'No', Description: 'Supplier name (default: KitchenOff Direct)' }
+        ];
+
+        const instructionsWs = XLSX.utils.json_to_sheet(instructionsData);
+        XLSX.utils.book_append_sheet(wb, instructionsWs, 'Instructions');
+
+        // Download file
+        XLSX.writeFile(wb, 'KitchenOff_Products_Import_Template.xlsx');
+        alert('✅ Excel template downloaded successfully!\\n\\nPlease fill in the template with your product data and use "Import from Excel" to upload it.');
+      };
+
+      // Import products from Excel file
+      const importProductsFromExcel = async (file) => {
+        if (!file) {
+          alert('Please select an Excel file to import.');
+          return;
+        }
+
+        try {
+          setImportResults({ loading: true });
+          
+          const formData = new FormData();
+          formData.append('excelFile', file);
+
+          const response = await fetch('/admin/api/products/import-excel', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            },
+            body: formData
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            setImportResults({
+              success: true,
+              imported: result.imported || 0,
+              errors: result.errors || [],
+              duplicates: result.duplicates || [],
+              total: result.total || 0
+            });
+            
+            // Refresh products list
+            fetchProducts();
+            
+            alert(`✅ Import completed!\\n\\nImported: ${result.imported}\\nErrors: ${result.errors?.length || 0}\\nDuplicates: ${result.duplicates?.length || 0}`);
+          } else {
+            setImportResults({
+              success: false,
+              message: result.message || 'Import failed'
+            });
+            alert('❌ Import failed: ' + (result.message || 'Unknown error'));
+          }
+        } catch (error) {
+          console.error('Error importing Excel:', error);
+          setImportResults({
+            success: false,
+            message: 'Network error during import'
+          });
+          alert('❌ Network error during import');
         }
       };
 
@@ -2070,17 +2190,26 @@
               <div style={{background: 'white', padding: '30px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'}}>
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
                   <h3 style={{color: '#333', margin: '0'}}>📦 Product Management</h3>
-                  <button 
-                    className="btn" 
-                    style={{background: '#28a745', width: 'auto', padding: '8px 16px'}}
-                    onClick={() => {
-                      fetchCategories();
-                      fetchSuppliers();
-                      setShowAddProductModal(true);
-                    }}
-                  >
-                    ➕ Add New Product
-                  </button>
+                  <div style={{display: 'flex', gap: '10px'}}>
+                    <button 
+                      className="btn" 
+                      style={{background: '#fd7e14', width: 'auto', padding: '8px 16px'}}
+                      onClick={() => setShowExcelImportModal(true)}
+                    >
+                      📤 Import from Excel
+                    </button>
+                    <button 
+                      className="btn" 
+                      style={{background: '#28a745', width: 'auto', padding: '8px 16px'}}
+                      onClick={() => {
+                        fetchCategories();
+                        fetchSuppliers();
+                        setShowAddProductModal(true);
+                      }}
+                    >
+                      ➕ Add New Product
+                    </button>
+                  </div>
                 </div>
                 
                 <div style={{marginBottom: '20px'}}>
@@ -2125,6 +2254,20 @@
                       }}
                     >
                       📊 Analytics
+                    </button>
+                    <button 
+                      className="btn" 
+                      style={{background: '#28a745', width: 'auto', padding: '8px 16px'}}
+                      onClick={downloadExcelTemplate}
+                    >
+                      📥 Download Excel Template
+                    </button>
+                    <button 
+                      className="btn" 
+                      style={{background: '#fd7e14', width: 'auto', padding: '8px 16px'}}
+                      onClick={() => setShowExcelImportModal(true)}
+                    >
+                      📤 Import from Excel
                     </button>
                   </div>
                 </div>
@@ -6761,6 +6904,139 @@ TOTAL: $${selectedOrder.totalAmount}
                       </button>
                     </div>
                   </form>
+                </div>
+              </div>
+            )}
+            
+            {/* Excel Import Modal */}
+            {showExcelImportModal && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1000
+              }}>
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '30px',
+                  borderRadius: '8px',
+                  width: '90%',
+                  maxWidth: '600px',
+                  maxHeight: '80vh',
+                  overflow: 'auto'
+                }}>
+                  <h3 style={{marginBottom: '20px', color: '#333'}}>📤 Import Products from Excel</h3>
+                  
+                  <div style={{marginBottom: '20px', padding: '15px', background: '#e7f3ff', borderRadius: '6px', border: '1px solid #b8daff'}}>
+                    <h4 style={{color: '#0c5460', marginBottom: '10px'}}>📋 Import Instructions</h4>
+                    <ul style={{color: '#0c5460', margin: '0', paddingLeft: '20px'}}>
+                      <li>Download the Excel template first using the "Download Excel Template" button</li>
+                      <li>Fill in your product data following the template format</li>
+                      <li>Required fields: Product Name, Price, Stock Quantity, Category ID</li>
+                      <li>Optional fields: Description, Status, VAT %, Product Code, NC Code, CPV Code</li>
+                      <li>Category ID must match existing categories in the system</li>
+                      <li>Price should be in decimal format (e.g., 29.99)</li>
+                    </ul>
+                  </div>
+
+                  <div style={{marginBottom: '20px'}}>
+                    <label style={{display: 'block', marginBottom: '10px', fontWeight: 'bold', color: '#333'}}>
+                      Select Excel File (.xlsx)
+                    </label>
+                    <input
+                      type="file"
+                      accept=".xlsx,.xls"
+                      onChange={(e) => setExcelFile(e.target.files[0])}
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        border: '2px dashed #ddd',
+                        borderRadius: '6px',
+                        background: '#f8f9fa'
+                      }}
+                    />
+                    {excelFile && (
+                      <p style={{marginTop: '8px', color: '#28a745', fontSize: '14px'}}>
+                        📁 Selected: {excelFile.name}
+                      </p>
+                    )}
+                  </div>
+
+                  {importResults && importResults.loading && (
+                    <div style={{textAlign: 'center', marginBottom: '20px'}}>
+                      <div className="loading"></div>
+                      <p style={{color: '#666', marginTop: '10px'}}>Processing Excel file...</p>
+                    </div>
+                  )}
+
+                  {importResults && !importResults.loading && (
+                    <div style={{
+                      marginBottom: '20px', 
+                      padding: '15px', 
+                      borderRadius: '6px',
+                      background: importResults.success ? '#d4edda' : '#f8d7da',
+                      border: importResults.success ? '1px solid #c3e6cb' : '1px solid #f5c6cb'
+                    }}>
+                      <h4 style={{
+                        color: importResults.success ? '#155724' : '#721c24',
+                        marginBottom: '10px'
+                      }}>
+                        {importResults.success ? '✅ Import Results' : '❌ Import Failed'}
+                      </h4>
+                      {importResults.success ? (
+                        <div style={{color: '#155724'}}>
+                          <p><strong>Total processed:</strong> {importResults.total}</p>
+                          <p><strong>Successfully imported:</strong> {importResults.imported}</p>
+                          <p><strong>Errors:</strong> {importResults.errors?.length || 0}</p>
+                          <p><strong>Duplicates skipped:</strong> {importResults.duplicates?.length || 0}</p>
+                        </div>
+                      ) : (
+                        <p style={{color: '#721c24'}}>{importResults.message}</p>
+                      )}
+                    </div>
+                  )}
+
+                  <div style={{display: 'flex', gap: '10px', justifyContent: 'space-between'}}>
+                    <div style={{display: 'flex', gap: '10px'}}>
+                      <button
+                        type="button"
+                        className="btn"
+                        style={{background: '#28a745'}}
+                        onClick={downloadExcelTemplate}
+                      >
+                        📥 Download Template
+                      </button>
+                    </div>
+                    <div style={{display: 'flex', gap: '10px'}}>
+                      <button
+                        type="button"
+                        className="btn"
+                        style={{background: '#6c757d'}}
+                        onClick={() => {
+                          setShowExcelImportModal(false);
+                          setExcelFile(null);
+                          setImportResults(null);
+                        }}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        className="btn"
+                        style={{background: '#fd7e14'}}
+                        onClick={() => importProductsFromExcel(excelFile)}
+                        disabled={!excelFile || (importResults && importResults.loading)}
+                      >
+                        📤 Import Products
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
