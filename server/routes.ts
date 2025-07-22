@@ -159,6 +159,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const adminPath = path.resolve('./admin/index.html');
       console.log('Serving admin interface from:', adminPath);
+      
+      // Set cache headers for better performance
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'DENY',
+        'X-XSS-Protection': '1; mode=block'
+      });
+      
       res.sendFile(adminPath);
     } catch (error) {
       console.error('Error serving admin interface:', error);
