@@ -36,6 +36,7 @@ const invoiceSchema = z.object({
   companyAddress: z.string().optional(),
   companyCity: z.string().optional(),
   companyState: z.string().optional(),
+  companyCounty: z.string().min(1, "County (Județ) is required"), // Mandatory for Romanian invoices
   companyZip: z.string().optional(),
   companyCountry: z.string().optional(),
   billingEmail: z.string().email("Invalid email address").optional().or(z.literal("")),
@@ -43,6 +44,7 @@ const invoiceSchema = z.object({
   deliveryAddress: z.string().optional(),
   deliveryCity: z.string().optional(),
   deliveryState: z.string().optional(),
+  deliveryCounty: z.string().min(1, "County (Județ) is required"), // Mandatory for Romanian invoices
   deliveryZip: z.string().optional(),
   deliveryCountry: z.string().optional(),
   deliveryInstructions: z.string().optional(),
@@ -114,6 +116,7 @@ export default function Account() {
       companyAddress: "",
       companyCity: "",
       companyState: "",
+      companyCounty: "",
       companyZip: "",
       companyCountry: "",
       billingEmail: "",
@@ -121,6 +124,7 @@ export default function Account() {
       deliveryAddress: "",
       deliveryCity: "",
       deliveryState: "",
+      deliveryCounty: "",
       deliveryZip: "",
       deliveryCountry: "",
       deliveryInstructions: "",
@@ -164,6 +168,7 @@ export default function Account() {
         companyAddress: user.companyAddress || "",
         companyCity: user.companyCity || "",
         companyState: user.companyState || "",
+        companyCounty: user.companyCounty || "",
         companyZip: user.companyZip || "",
         companyCountry: user.companyCountry || "",
         billingEmail: user.billingEmail || "",
@@ -171,6 +176,7 @@ export default function Account() {
         deliveryAddress: user.deliveryAddress || "",
         deliveryCity: user.deliveryCity || "",
         deliveryState: user.deliveryState || "",
+        deliveryCounty: user.deliveryCounty || "",
         deliveryZip: user.deliveryZip || "",
         deliveryCountry: user.deliveryCountry || "",
         deliveryInstructions: user.deliveryInstructions || "",
@@ -1090,7 +1096,7 @@ export default function Account() {
                               </FormItem>
                             )}
                           />
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField
                               control={invoiceForm.control}
                               name="companyCity"
@@ -1098,7 +1104,7 @@ export default function Account() {
                                 <FormItem>
                                   <FormLabel>{t('account.city')}</FormLabel>
                                   <FormControl>
-                                    <Input placeholder="London" {...field} />
+                                    <Input placeholder="Bucharest" {...field} />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -1111,7 +1117,22 @@ export default function Account() {
                                 <FormItem>
                                   <FormLabel>{t('account.stateProvince')}</FormLabel>
                                   <FormControl>
-                                    <Input placeholder="England" {...field} />
+                                    <Input placeholder="Bucharest" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={invoiceForm.control}
+                              name="companyCounty"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>County (Județ) *</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="e.g. Bucharest, Cluj, Ilfov" {...field} />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -1124,7 +1145,7 @@ export default function Account() {
                                 <FormItem>
                                   <FormLabel>{t('account.zipCode')}</FormLabel>
                                   <FormControl>
-                                    <Input placeholder="SW1A 1AA" {...field} />
+                                    <Input placeholder="012345" {...field} />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -1197,7 +1218,7 @@ export default function Account() {
                               </FormItem>
                             )}
                           />
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField
                               control={invoiceForm.control}
                               name="deliveryCity"
@@ -1205,7 +1226,7 @@ export default function Account() {
                                 <FormItem>
                                   <FormLabel>{t('account.city')}</FormLabel>
                                   <FormControl>
-                                    <Input placeholder="London" {...field} />
+                                    <Input placeholder="Bucharest" {...field} />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -1218,7 +1239,22 @@ export default function Account() {
                                 <FormItem>
                                   <FormLabel>{t('account.stateProvince')}</FormLabel>
                                   <FormControl>
-                                    <Input placeholder="England" {...field} />
+                                    <Input placeholder="Bucharest" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={invoiceForm.control}
+                              name="deliveryCounty"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>County (Județ) *</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="e.g. Bucharest, Cluj, Ilfov" {...field} />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -1231,7 +1267,7 @@ export default function Account() {
                                 <FormItem>
                                   <FormLabel>{t('account.zipCode')}</FormLabel>
                                   <FormControl>
-                                    <Input placeholder="SW1A 1AA" {...field} />
+                                    <Input placeholder="012345" {...field} />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -1245,7 +1281,7 @@ export default function Account() {
                               <FormItem>
                                 <FormLabel>{t('account.country')}</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="United Kingdom" {...field} />
+                                  <Input placeholder="Romania" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>

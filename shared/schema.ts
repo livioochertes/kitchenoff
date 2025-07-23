@@ -22,7 +22,8 @@ export const users = pgTable("users", {
   taxId: varchar("tax_id", { length: 50 }),
   companyAddress: text("company_address"),
   companyCity: varchar("company_city", { length: 100 }),
-  companyState: varchar("company_state", { length: 100 }),
+  companyState: varchar("company_state", { length: 100 }), // Județ for Romania
+  companyCounty: varchar("company_county", { length: 100 }), // Added for Romanian Județ
   companyZip: varchar("company_zip", { length: 20 }),
   companyCountry: varchar("company_country", { length: 100 }),
   billingEmail: varchar("billing_email", { length: 255 }),
@@ -30,7 +31,8 @@ export const users = pgTable("users", {
   // Delivery address (if different from company address)
   deliveryAddress: text("delivery_address"),
   deliveryCity: varchar("delivery_city", { length: 100 }),
-  deliveryState: varchar("delivery_state", { length: 100 }),
+  deliveryState: varchar("delivery_state", { length: 100 }), // Județ for Romania
+  deliveryCounty: varchar("delivery_county", { length: 100 }), // Added for Romanian Județ
   deliveryZip: varchar("delivery_zip", { length: 20 }),
   deliveryCountry: varchar("delivery_country", { length: 100 }),
   deliveryInstructions: text("delivery_instructions"),
@@ -177,6 +179,7 @@ export const suppliers = pgTable("suppliers", {
   address: text("address"),
   city: varchar("city", { length: 100 }),
   state: varchar("state", { length: 100 }),
+  county: varchar("county", { length: 100 }), // Added for Romanian Județ
   zipCode: varchar("zip_code", { length: 20 }),
   country: varchar("country", { length: 100 }),
   contactPerson: varchar("contact_person", { length: 255 }),
@@ -199,6 +202,7 @@ export const companySettings = pgTable("company_settings", {
   address: text("address"),
   city: varchar("city", { length: 100 }),
   state: varchar("state", { length: 100 }),
+  county: varchar("county", { length: 100 }), // Added for Romanian Județ
   zipCode: varchar("zip_code", { length: 20 }),
   country: varchar("country", { length: 100 }),
   contactPerson: varchar("contact_person", { length: 255 }),

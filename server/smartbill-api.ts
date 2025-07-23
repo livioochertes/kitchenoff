@@ -620,7 +620,7 @@ export function orderToSmartbillInvoice(
     itemCount: order.items?.length || 0
   });
 
-  // Format client data with proper address mapping
+  // Format client data with proper address mapping including mandatory Județ for Romania
   // ⚠️ CRITICAL: Omit vatCode and regCom fields completely if empty (Smartbill API fix)
   const client: SmartbillClient = {
     name: user.companyName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email.split('@')[0],
@@ -628,6 +628,7 @@ export function orderToSmartbillInvoice(
     isTaxPayer: false,
     saveToDb: true, // Allow Smartbill to save client information
     city: order.billingAddress?.city || order.shippingAddress?.city || 'Bucharest',
+    county: order.billingAddress?.county || order.shippingAddress?.county || user.companyCounty || 'Bucuresti', // Mandatory Județ for Romania
     country: order.billingAddress?.country || order.shippingAddress?.country || 'Romania',
     email: user.email
   };

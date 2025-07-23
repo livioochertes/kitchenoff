@@ -30,6 +30,7 @@ const addressSchema = z.object({
   address: z.string().min(1, "Address is required"),
   city: z.string().min(1, "City is required"),
   state: z.string().min(1, "State is required"),
+  county: z.string().min(1, "County (Județ) is required"), // Mandatory for Romanian invoices
   zipCode: z.string().min(1, "ZIP code is required"),
   country: z.string().min(1, "Country is required"),
   phone: z.string().min(1, "Phone number is required"),
@@ -64,8 +65,9 @@ export default function Checkout() {
         address: "",
         city: "",
         state: "",
+        county: "",
         zipCode: "",
-        country: "US",
+        country: "RO",
         phone: "",
       },
       billingAddress: {
@@ -75,8 +77,9 @@ export default function Checkout() {
         address: "",
         city: "",
         state: "",
+        county: "",
         zipCode: "",
-        country: "US",
+        country: "RO",
         phone: "",
       },
       paymentMethod: "stripe",
@@ -103,8 +106,6 @@ export default function Checkout() {
         paymentMethod: data.paymentMethod,
         items: orderItems,
         notes: data.notes,
-      }, {
-        Authorization: `Bearer ${token}`,
       });
     },
     onSuccess: (data) => {
@@ -333,7 +334,7 @@ export default function Checkout() {
                             </FormItem>
                           )}
                         />
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <FormField
                             control={form.control}
                             name="shippingAddress.city"
@@ -355,6 +356,21 @@ export default function Checkout() {
                                 <FormLabel>State</FormLabel>
                                 <FormControl>
                                   <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="shippingAddress.county"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>County (Județ) *</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="e.g. Bucharest, Cluj, Ilfov" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -458,7 +474,7 @@ export default function Checkout() {
                                 </FormItem>
                               )}
                             />
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <FormField
                                 control={form.control}
                                 name="billingAddress.city"
@@ -480,6 +496,21 @@ export default function Checkout() {
                                     <FormLabel>State</FormLabel>
                                     <FormControl>
                                       <Input {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <FormField
+                                control={form.control}
+                                name="billingAddress.county"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>County (Județ) *</FormLabel>
+                                    <FormControl>
+                                      <Input placeholder="e.g. Bucharest, Cluj, Ilfov" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                   </FormItem>
