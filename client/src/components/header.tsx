@@ -18,7 +18,7 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [, navigate] = useLocation();
   const { cart } = useCart();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const { t } = useTranslation();
 
   const { data: categories } = useQuery({
@@ -115,13 +115,18 @@ export default function Header() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            ) : (
+            ) : !isLoading ? (
               <Link href="/login">
                 <Button variant="ghost" size="sm" className="hidden md:flex">
                   <User className="h-4 w-4 mr-2" />
                   {t('nav.login')}
                 </Button>
               </Link>
+            ) : (
+              <Button variant="ghost" size="sm" className="hidden md:flex" disabled>
+                <User className="h-4 w-4 mr-2" />
+                {user?.firstName || t('nav.login')}
+              </Button>
             )}
             <Link href="/cart">
               <Button variant="ghost" size="sm" className="relative">
@@ -207,12 +212,28 @@ export default function Header() {
                       {t('nav.aiAssistant')}
                     </Button>
                   </Link>
-                  <Link href="/login">
-                    <Button variant="ghost" className="w-full justify-start">
+                  {isAuthenticated ? (
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start"
+                      onClick={() => navigate("/account")}
+                    >
                       <User className="h-4 w-4 mr-2" />
-                      {t('nav.account')}
+                      {user?.firstName || t('nav.account')}
                     </Button>
-                  </Link>
+                  ) : !isLoading ? (
+                    <Link href="/login">
+                      <Button variant="ghost" className="w-full justify-start">
+                        <User className="h-4 w-4 mr-2" />
+                        {t('nav.login')}
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Button variant="ghost" className="w-full justify-start" disabled>
+                      <User className="h-4 w-4 mr-2" />
+                      {user?.firstName || t('nav.login')}
+                    </Button>
+                  )}
                 </div>
               </SheetContent>
             </Sheet>
