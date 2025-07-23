@@ -159,13 +159,6 @@ export default function Account() {
   // Update forms when user data changes
   useEffect(() => {
     if (user) {
-      console.log('🔍 Account page: User data received:', {
-        companyName: user.companyName,
-        companyCounty: user.companyCounty,
-        deliveryCounty: user.deliveryCounty,
-        companyAddress: user.companyAddress
-      });
-      
       profileForm.reset({
         firstName: user.firstName || "",
         lastName: user.lastName || "",
@@ -205,10 +198,6 @@ export default function Account() {
         priceDrops: user.priceDrops ?? false,
         promotions: user.promotions ?? true,
       });
-      
-      console.log('✅ Account page: Forms reset with user data');
-    } else {
-      console.log('⚠️ Account page: No user data available');
     }
   }, [user, profileForm, invoiceForm, notificationForm]);
 

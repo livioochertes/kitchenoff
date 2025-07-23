@@ -98,12 +98,6 @@ export function useAuth() {
       try {
         const response = await apiRequest('GET', '/api/auth/me');
         const user = await response.json();
-        console.log('🔍 useAuth: Fetched complete user data:', {
-          companyName: user.companyName,
-          companyCounty: user.companyCounty,
-          deliveryCounty: user.deliveryCounty,
-          companyAddress: user.companyAddress
-        });
         const newState = { user, isLoading: false, isAuthenticated: true };
         updateGlobalAuthState(newState);
       } catch (error) {
@@ -117,10 +111,22 @@ export function useAuth() {
     initAuth();
   }, []);
 
-  const login = (token: string, user: User) => {
+  const login = async (token: string, user: User) => {
     localStorage.setItem('token', token);
-    const newState = { user, isLoading: false, isAuthenticated: true };
+    // Initial login with basic user data
+    let newState = { user, isLoading: false, isAuthenticated: true };
     updateGlobalAuthState(newState);
+    
+    // Immediately fetch complete user data to get company details
+    try {
+      const response = await apiRequest('GET', '/api/auth/me');
+      const completeUser = await response.json();
+      newState = { user: completeUser, isLoading: false, isAuthenticated: true };
+      updateGlobalAuthState(newState);
+    } catch (error) {
+      console.error('Failed to fetch complete user data after login:', error);
+      // Keep the basic user data if fetching complete data fails
+    }
   };
 
   const logout = () => {

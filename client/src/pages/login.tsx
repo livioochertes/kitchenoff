@@ -65,8 +65,8 @@ export default function Login() {
       const response = await apiRequest("POST", "/api/auth/login", data);
       return response.json();
     },
-    onSuccess: (data) => {
-      login(data.token, data.user);
+    onSuccess: async (data) => {
+      await login(data.token, data.user);
       toast({
         title: "Welcome back!",
         description: "You have been successfully logged in.",
@@ -87,8 +87,8 @@ export default function Login() {
       const response = await apiRequest("POST", "/api/auth/register", data);
       return response.json();
     },
-    onSuccess: (data) => {
-      login(data.token, data.user);
+    onSuccess: async (data) => {
+      await login(data.token, data.user);
       toast({
         title: "Account created!",
         description: "Your account has been created successfully.",
