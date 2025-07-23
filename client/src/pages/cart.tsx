@@ -35,9 +35,18 @@ export default function Cart() {
   
   const freeShippingThreshold = shippingSettings ? parseFloat(shippingSettings.freeShippingThreshold) : 500;
   const standardShippingCost = shippingSettings ? parseFloat(shippingSettings.standardShippingCost) : 25;
+  const currency = shippingSettings?.currency || 'EUR';
   
   const shipping = subtotal > freeShippingThreshold ? 0 : standardShippingCost;
   const total = subtotal + shipping;
+
+  // Currency symbol helper
+  const getCurrencySymbol = (curr: string) => {
+    const symbols = { 'EUR': '€', 'RON': 'lei', 'USD': '$', 'GBP': '£' };
+    return symbols[curr] || curr;
+  };
+  
+  const currencySymbol = getCurrencySymbol(currency);
 
   const handleUpdateQuantity = (itemId: number, newQuantity: number) => {
     if (newQuantity < 1) {
@@ -177,7 +186,7 @@ export default function Cart() {
                 <CardContent className="space-y-4">
                   <div className="flex justify-between">
                     <span>Subtotal ({cart.length} items):</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>{subtotal.toFixed(2)} {currencySymbol}</span>
                   </div>
                   
                   <div className="flex justify-between">
@@ -186,14 +195,14 @@ export default function Cart() {
                       {shipping === 0 ? (
                         <Badge variant="secondary">Free</Badge>
                       ) : (
-                        `$${shipping.toFixed(2)}`
+                        `${shipping.toFixed(2)} ${currencySymbol}`
                       )}
                     </span>
                   </div>
                   
                   {subtotal < freeShippingThreshold && (
                     <div className="text-sm text-muted-foreground">
-                      Add ${(freeShippingThreshold - subtotal).toFixed(2)} more for free shipping
+                      Add {(freeShippingThreshold - subtotal).toFixed(2)} {currencySymbol} more for free shipping
                     </div>
                   )}
                   
@@ -201,7 +210,7 @@ export default function Cart() {
                   
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total:</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>{total.toFixed(2)} {currencySymbol}</span>
                   </div>
                   
                   <Link href="/checkout">

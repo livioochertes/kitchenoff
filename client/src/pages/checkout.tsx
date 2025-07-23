@@ -162,13 +162,24 @@ export default function Checkout() {
     if (!item.product || !item.product.price) return sum;
     return sum + (parseFloat(item.product.price) * item.quantity);
   }, 0);
-  
+
   const freeShippingThreshold = shippingSettings ? parseFloat(shippingSettings.freeShippingThreshold) : 500;
   const standardShippingCost = shippingSettings ? parseFloat(shippingSettings.standardShippingCost) : 25;
+  const currency = shippingSettings?.currency || 'EUR';
   
   const shipping = subtotal > freeShippingThreshold ? 0 : standardShippingCost;
+  const total = subtotal + shipping;
+
+  // Currency symbol helper
+  const getCurrencySymbol = (curr: string) => {
+    const symbols = { 'EUR': '€', 'RON': 'lei', 'USD': '$', 'GBP': '£' };
+    return symbols[curr] || curr;
+  };
+  
+  const currencySymbol = getCurrencySymbol(currency);
+  
   const tax = subtotal * 0.08; // 8% tax
-  const total = subtotal + shipping + tax;
+  const finalTotal = subtotal + shipping + tax;
 
   const handleNext = async () => {
     let fieldsToValidate: any[] = [];
@@ -812,7 +823,7 @@ export default function Checkout() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Subtotal:</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>{subtotal.toFixed(2)} {currencySymbol}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Shipping:</span>
@@ -820,13 +831,13 @@ export default function Checkout() {
                       {shipping === 0 ? (
                         <Badge variant="secondary">Free</Badge>
                       ) : (
-                        `$${shipping.toFixed(2)}`
+                        `${shipping.toFixed(2)} ${currencySymbol}`
                       )}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Tax:</span>
-                    <span>${tax.toFixed(2)}</span>
+                    <span>{tax.toFixed(2)} {currencySymbol}</span>
                   </div>
                 </div>
 
@@ -834,7 +845,7 @@ export default function Checkout() {
 
                 <div className="flex justify-between font-semibold text-lg">
                   <span>Total:</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>{finalTotal.toFixed(2)} {currencySymbol}</span>
                 </div>
               </CardContent>
             </Card>

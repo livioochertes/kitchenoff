@@ -1512,6 +1512,7 @@ Always be helpful, professional, and focus on practical solutions. When recommen
       res.json({
         freeShippingThreshold: settings?.freeShippingThreshold || "500.00",
         standardShippingCost: settings?.standardShippingCost || "25.00",
+        currency: settings?.defaultCurrency || "EUR",
       });
     } catch (error) {
       console.error("Error fetching shipping settings:", error);
