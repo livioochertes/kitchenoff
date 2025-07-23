@@ -4,14 +4,18 @@ import bcrypt from "bcrypt";
 
 export async function seedDatabase() {
   try {
-    // Clear existing data in correct order to handle foreign key constraints
-    await db.delete(invoiceItems);
-    await db.delete(invoices);
-    await db.delete(orderItems);
-    await db.delete(orders);
-    await db.delete(products);
-    await db.delete(categories);
-    await db.delete(users);
+    // Check if data already exists to prevent overwriting user data
+    const existingUsers = await db.select().from(users);
+    const existingCategories = await db.select().from(categories);
+    const existingProducts = await db.select().from(products);
+    
+    // Only seed if no data exists (first run)
+    if (existingUsers.length > 0 || existingCategories.length > 0 || existingProducts.length > 0) {
+      console.log("🔄 Database already contains data, skipping seeding to preserve user data");
+      return;
+    }
+
+    console.log("🌱 First run detected, seeding database with sample data...");
 
 
 
