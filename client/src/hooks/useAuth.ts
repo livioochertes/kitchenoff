@@ -40,8 +40,17 @@ interface AuthState {
   isAuthenticated: boolean;
 }
 
+import { createContext, useContext } from 'react';
+
+// Create a context for authentication state
+const AuthContext = createContext<{
+  authState: AuthState;
+  setAuthState: (state: AuthState) => void;
+} | null>(null);
+
 // Global authentication state to persist across component re-renders
 let globalAuthState: AuthState | null = null;
+let globalSetters: Set<(state: AuthState) => void> = new Set();
 
 export function useAuth() {
   const [authState, setAuthState] = useState<AuthState>(() => {
@@ -56,6 +65,20 @@ export function useAuth() {
     };
   });
 
+  // Register this setter with global setters
+  useEffect(() => {
+    globalSetters.add(setAuthState);
+    return () => {
+      globalSetters.delete(setAuthState);
+    };
+  }, []);
+
+  // Custom setState that updates all components
+  const updateGlobalAuthState = (newState: AuthState) => {
+    globalAuthState = newState;
+    globalSetters.forEach(setter => setter(newState));
+  };
+
   useEffect(() => {
     // If we already have authentication state, don't re-initialize
     if (globalAuthState && !globalAuthState.isLoading) {
@@ -66,8 +89,7 @@ export function useAuth() {
       const token = localStorage.getItem('token');
       if (!token) {
         const newState = { user: null, isLoading: false, isAuthenticated: false };
-        setAuthState(newState);
-        globalAuthState = newState;
+        updateGlobalAuthState(newState);
         return;
       }
 
@@ -75,14 +97,12 @@ export function useAuth() {
         const response = await apiRequest('GET', '/api/auth/me');
         const user = await response.json();
         const newState = { user, isLoading: false, isAuthenticated: true };
-        setAuthState(newState);
-        globalAuthState = newState;
+        updateGlobalAuthState(newState);
       } catch (error) {
         // Auth check failed, remove token and set unauthenticated
         localStorage.removeItem('token');
         const newState = { user: null, isLoading: false, isAuthenticated: false };
-        setAuthState(newState);
-        globalAuthState = newState;
+        updateGlobalAuthState(newState);
       }
     };
 
@@ -92,21 +112,18 @@ export function useAuth() {
   const login = (token: string, user: User) => {
     localStorage.setItem('token', token);
     const newState = { user, isLoading: false, isAuthenticated: true };
-    setAuthState(newState);
-    globalAuthState = newState;
+    updateGlobalAuthState(newState);
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     const newState = { user: null, isLoading: false, isAuthenticated: false };
-    setAuthState(newState);
-    globalAuthState = newState;
+    updateGlobalAuthState(newState);
   };
 
   const updateUser = (updatedUser: User) => {
     const newState = { ...authState, user: updatedUser };
-    setAuthState(newState);
-    globalAuthState = newState;
+    updateGlobalAuthState(newState);
   };
 
   return {
