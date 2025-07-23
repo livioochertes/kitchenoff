@@ -22,6 +22,7 @@ interface ShippingSettingsProps {
 }
 
 export default function ShippingSettings({ token }: ShippingSettingsProps) {
+  console.log('🚚 ShippingSettings component rendered with token:', token ? 'present' : 'missing');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -29,6 +30,7 @@ export default function ShippingSettings({ token }: ShippingSettingsProps) {
   const { data: settings, isLoading } = useQuery({
     queryKey: ['/admin/api/settings'],
     queryFn: async () => {
+      console.log('🚚 ShippingSettings: Fetching settings...');
       const response = await fetch('/admin/api/settings', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -36,10 +38,17 @@ export default function ShippingSettings({ token }: ShippingSettingsProps) {
       });
 
       if (!response.ok) {
+        console.error('🚚 ShippingSettings: Failed to fetch settings:', response.status);
         throw new Error('Failed to fetch settings');
       }
 
-      return response.json();
+      const data = await response.json();
+      console.log('🚚 ShippingSettings: Received data:', data);
+      console.log('🚚 ShippingSettings: Shipping fields:', {
+        freeShippingThreshold: data.freeShippingThreshold,
+        standardShippingCost: data.standardShippingCost
+      });
+      return data;
     },
   });
 
