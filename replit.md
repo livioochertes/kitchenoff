@@ -10,23 +10,25 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### July 23, 2025 - 🚚 CONFIGURABLE SHIPPING SETTINGS SYSTEM ✅
-- ✅ IMPLEMENTED: Dynamic shipping configuration system replacing hardcoded $500 free shipping threshold
+### July 23, 2025 - 🚚 CONFIGURABLE SHIPPING SETTINGS SYSTEM WITH CURRENCY AWARENESS ✅
+- ✅ IMPLEMENTED: Dynamic shipping configuration system replacing hardcoded $500 free shipping threshold  
 - ✅ DATABASE SCHEMA: Added freeShippingThreshold and standardShippingCost fields to company_settings table
 - ✅ ADMIN INTERFACE: Created ShippingSettings component in admin dashboard settings tab
 - ✅ API ENDPOINTS: Added admin settings endpoints (GET/PUT /admin/api/settings) for configuration management
-- ✅ PUBLIC API: Added /api/shipping-settings endpoint for cart and checkout to fetch current settings
-- ✅ CART INTEGRATION: Updated cart page to dynamically fetch and apply shipping thresholds and costs
-- ✅ CHECKOUT INTEGRATION: Updated checkout page to use dynamic shipping settings instead of hardcoded values
+- ✅ PUBLIC API: Enhanced /api/shipping-settings endpoint to include currency information from company settings
+- ✅ CART INTEGRATION: Updated cart page with dynamic currency symbols (€, lei, $, £) based on company default currency
+- ✅ CHECKOUT INTEGRATION: Updated checkout page with currency-aware pricing display across all order summary sections
+- ✅ CURRENCY CONVERSION: Automatic currency symbol mapping (EUR=€, RON=lei, USD=$, GBP=£) with fallback support
 - ✅ STORAGE LAYER: Enhanced storage interface with getCompanySettings() and updateCompanySettings() methods
-- ✅ FORM VALIDATION: Professional form with numeric inputs for threshold ($) and shipping cost ($) values
+- ✅ FORM VALIDATION: Professional form with numeric inputs for threshold and shipping cost values
 - ✅ REAL-TIME UPDATES: Settings changes immediately reflect in cart and checkout without page refresh
-- ✅ FALLBACK VALUES: Default settings (500.00 threshold, 25.00 shipping) maintained for system reliability
-- ✅ USER EXPERIENCE: Free shipping threshold messages dynamically update based on admin configuration
+- ✅ FALLBACK VALUES: Default settings (500.00 threshold, 25.00 shipping, EUR currency) maintained for system reliability
+- ✅ USER EXPERIENCE: Free shipping threshold messages dynamically update based on admin configuration with proper currency
 - ✅ PROFESSIONAL UI: Settings panel with truck icon, clear labels, and save confirmation toasts
-- 🔧 TECHNICAL IMPLEMENTATION: Complete end-to-end system from database to frontend with proper caching
-- 📊 BUSINESS VALUE: Administrators can now adjust shipping policies without code changes
-- ✅ FULLY OPERATIONAL: Shipping configuration system ready for production use
+- ✅ CURRENCY INTEGRATION: Complete integration with company default currency settings from admin interface
+- 🔧 TECHNICAL IMPLEMENTATION: Complete end-to-end system from database to frontend with proper caching and currency awareness
+- 📊 BUSINESS VALUE: Administrators can now adjust shipping policies and see currency-appropriate displays without code changes
+- ✅ FULLY OPERATIONAL: Currency-aware shipping configuration system ready for production use
 
 ### July 23, 2025 - 🔧 ACCOUNT DATA PERSISTENCE & HEADER FIX ✅
 - ✅ FIXED: Account data persistence issue - removed duplicate `/api/auth/invoice` endpoints that were causing conflicts
