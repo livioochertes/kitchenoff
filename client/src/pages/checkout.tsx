@@ -22,6 +22,7 @@ import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import RevolutPayment from "@/components/revolut-payment";
 import StripePayment from "@/components/stripe-payment";
+import { getCountyOptions, getCitiesForCounty, getCountryOptions, romanianCounties } from "@/utils/location-data";
 
 const shippingAddressSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -89,7 +90,7 @@ export default function Checkout() {
         state: "",
         county: "",
         zipCode: "",
-        country: "RO",
+        country: "Romania",
         phone: "",
       },
       billingAddress: {
@@ -101,7 +102,7 @@ export default function Checkout() {
         state: "",
         county: "",
         zipCode: "",
-        country: "RO",
+        country: "Romania",
         phone: "",
       },
       paymentMethod: "stripe",
@@ -416,6 +417,30 @@ export default function Checkout() {
                         </div>
                         <FormField
                           control={form.control}
+                          name="shippingAddress.country"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Country *</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select country" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {getCountryOptions().map((country) => (
+                                    <SelectItem key={country.code} value={country.value}>
+                                      {country.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
                           name="shippingAddress.phone"
                           render={({ field }) => (
                             <FormItem>
@@ -554,6 +579,30 @@ export default function Checkout() {
                                 )}
                               />
                             </div>
+                            <FormField
+                              control={form.control}
+                              name="billingAddress.country"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Country *</FormLabel>
+                                  <Select onValueChange={field.onChange} value={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select country" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {getCountryOptions().map((country) => (
+                                        <SelectItem key={country.code} value={country.value}>
+                                          {country.label}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
                           </div>
                         )}
                       </CardContent>

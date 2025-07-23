@@ -22,7 +22,7 @@ import Header from "@/components/header";
 import { useLocation } from "wouter";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getCountyOptions, getCitiesForCounty, romanianCounties } from "@/utils/location-data";
+import { getCountyOptions, getCitiesForCounty, getCountryOptions, romanianCounties } from "@/utils/location-data";
 
 const profileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -1201,9 +1201,20 @@ export default function Account() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>{t('account.country')} *</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="United Kingdom" {...field} />
-                                </FormControl>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select country" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {getCountryOptions().map((country) => (
+                                      <SelectItem key={country.code} value={country.value}>
+                                        {country.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -1406,13 +1417,20 @@ export default function Account() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>{t('account.country')}{!copyCompanyAddress && ' *'}</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    placeholder="Romania" 
-                                    disabled={copyCompanyAddress}
-                                    {...field} 
-                                  />
-                                </FormControl>
+                                <Select onValueChange={field.onChange} value={field.value} disabled={copyCompanyAddress}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select country" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {getCountryOptions().map((country) => (
+                                      <SelectItem key={country.code} value={country.value}>
+                                        {country.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                                 <FormMessage />
                               </FormItem>
                             )}
