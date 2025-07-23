@@ -2356,7 +2356,8 @@ export async function registerAdminRoutes(app: Express) {
           country, contact_person as "contactPerson", website, 
           vat_number as "vatNumber", registration_number as "registrationNumber", 
           bank_name as "bankName", iban, description,
-          default_currency as "defaultCurrency", default_vat_percentage as "defaultVatPercentage", reverse_charge_vat as "reverseChargeVat"
+          default_currency as "defaultCurrency", default_vat_percentage as "defaultVatPercentage", reverse_charge_vat as "reverseChargeVat",
+          free_shipping_threshold as "freeShippingThreshold", standard_shipping_cost as "standardShippingCost"
         FROM company_settings 
         ORDER BY created_at DESC 
         LIMIT 1
@@ -2401,7 +2402,7 @@ export async function registerAdminRoutes(app: Express) {
       const { 
         name, email, logisticsEmail, phone, address, city, state, zipCode, country, 
         contactPerson, website, vatNumber, registrationNumber, bankName, iban, description,
-        defaultCurrency, defaultVatPercentage, reverseChargeVat 
+        defaultCurrency, defaultVatPercentage, reverseChargeVat, freeShippingThreshold, standardShippingCost
       } = req.body;
       
       console.log('Updating company settings with currency:', defaultCurrency, 'VAT:', defaultVatPercentage);
@@ -2422,12 +2423,13 @@ export async function registerAdminRoutes(app: Express) {
               website = $11, vat_number = $12, registration_number = $13, 
               bank_name = $14, iban = $15, description = $16,
               default_currency = $17, default_vat_percentage = $18, reverse_charge_vat = $19,
+              free_shipping_threshold = $20, standard_shipping_cost = $21,
               updated_at = CURRENT_TIMESTAMP
-          WHERE id = $20
+          WHERE id = $22
         `, [
           name, email, logisticsEmail, phone, address, city, state, zipCode, country,
           contactPerson, website, vatNumber, registrationNumber, bankName, iban, description,
-          defaultCurrency, defaultVatPercentage, reverseChargeVat,
+          defaultCurrency, defaultVatPercentage, reverseChargeVat, freeShippingThreshold, standardShippingCost,
           existingResult.rows[0].id
         ]);
       } else {
@@ -2436,12 +2438,12 @@ export async function registerAdminRoutes(app: Express) {
           INSERT INTO company_settings (
             name, email, logistics_email, phone, address, city, state, zip_code, country, 
             contact_person, website, vat_number, registration_number, bank_name, iban, description,
-            default_currency, default_vat_percentage, reverse_charge_vat
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+            default_currency, default_vat_percentage, reverse_charge_vat, free_shipping_threshold, standard_shipping_cost
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
         `, [
           name, email, logisticsEmail, phone, address, city, state, zipCode, country,
           contactPerson, website, vatNumber, registrationNumber, bankName, iban, description,
-          defaultCurrency, defaultVatPercentage, reverseChargeVat
+          defaultCurrency, defaultVatPercentage, reverseChargeVat, freeShippingThreshold, standardShippingCost
         ]);
       }
 
