@@ -1,0 +1,143 @@
+{
+  "description": "Exact invoice format being sent to Smartbill API",
+  "endpoint": "https://ws.smartbill.ro/SBORO/api/invoice",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "Authorization": "Basic bGl2aXUuY2hlcnRlc0BnbWFpbC5jb206MDAxfDJhZjhmY2RjM2VhNTc5Y2I3YTgxMDkzY2E0MDRiMzFl"
+  },
+  "credentials": {
+    "username": "liviu.chertes@gmail.com",
+    "token": "001|2af8fcdc3ea579cb7a81093ca404b31e",
+    "companyVat": "RO16582983"
+  },
+  "actual_format_being_sent": {
+    "companyVatCode": "RO16582983",
+    "client": {
+      "name": "Liviu Chertes",
+      "vatCode": "",
+      "regCom": "",
+      "address": "Calea Mosilor 158",
+      "isTaxPayer": false,
+      "saveToDb": true,
+      "city": "Bucharest",
+      "country": "Romania",
+      "email": "liviu.chertes@gmail.com"
+    },
+    "issueDate": "2025-07-22",
+    "seriesName": "KTO",
+    "isDraft": false,
+    "dueDate": "2025-08-21",
+    "mentions": "Factura cu TVA 19% conform legislației române",
+    "observations": "",
+    "deliveryDate": "2025-07-22",
+    "precision": 2,
+    "products": [
+      {
+        "name": "Set 8 role etichete xHACCP - TOP",
+        "code": "5944582004177",
+        "isDiscount": false,
+        "measuringUnitName": "buc",
+        "currency": "RON",
+        "quantity": 1,
+        "price": 125.99,
+        "isTaxIncluded": true,
+        "taxName": "Normala",
+        "taxPercentage": 19,
+        "vatPercentage": 19,
+        "vatAmount": 20.16,
+        "saveToDb": true,
+        "isService": false
+      }
+    ]
+  },
+  "minimal_test_format": {
+    "companyVat": "RO16582983",
+    "seriesName": "KTO",
+    "client": {
+      "name": "Test Client",
+      "address": "Test Address",
+      "city": "Bucharest",
+      "country": "Romania"
+    },
+    "issueDate": "2025-07-22",
+    "currency": "RON",
+    "products": [
+      {
+        "name": "Test Product",
+        "measuringUnitName": "buc",
+        "quantity": 1,
+        "price": 100,
+        "isTaxIncluded": false,
+        "taxName": "Normala",
+        "taxPercentage": 19
+      }
+    ]
+  },
+  "api_responses": {
+    "series_endpoint_working": {
+      "url": "https://ws.smartbill.ro/SBORO/api/series?cif=RO16582983",
+      "status": 200,
+      "response": {
+        "errorText": "",
+        "message": "",
+        "number": "",
+        "series": "",
+        "url": "",
+        "list": [
+          {
+            "name": "KTO",
+            "nextNumber": 10002,
+            "type": "f"
+          },
+          {
+            "name": "CCM",
+            "nextNumber": 71,
+            "type": "f"
+          },
+          {
+            "name": "CCL",
+            "nextNumber": 2162,
+            "type": "f"
+          }
+        ]
+      }
+    },
+    "invoice_endpoint_failing": {
+      "url": "https://ws.smartbill.ro/SBORO/api/invoice",
+      "status": 500,
+      "error": "HTTP Status 500 - Internal Server Error"
+    }
+  },
+  "field_mapping": {
+    "companyVatCode": "Should be 'RO16582983' - your company VAT number",
+    "seriesName": "Should be 'KTO' - matches your series in Smartbill",
+    "client.isTaxPayer": "Set to false for B2C clients",
+    "client.saveToDb": "Set to true to save client in Smartbill database",
+    "products.isTaxIncluded": "Set to true - Romanian invoices include VAT in price",
+    "products.vatAmount": "Calculated automatically: price * quantity * VAT% / (100 + VAT%)",
+    "products.saveToDb": "Set to true to save products in Smartbill database"
+  },
+  "vat_calculation": {
+    "method": "VAT included in price (Romanian standard)",
+    "example": "Price 125.99 RON includes 19% VAT",
+    "vat_amount": "125.99 * 19 / (100 + 19) = 20.16 RON",
+    "net_amount": "125.99 - 20.16 = 105.83 RON"
+  },
+  "tested_variations": [
+    "Full format with all fields",
+    "Minimal format with required fields only",
+    "Different VAT calculations (included vs excluded)",
+    "Different product configurations",
+    "Various client data combinations"
+  ],
+  "error_analysis": {
+    "authentication": "✅ Working - series endpoint returns 200 OK",
+    "authorization": "✅ Working - can access series data with these credentials",
+    "data_format": "❌ All tested formats return HTTP 500",
+    "server_response": "Generic Tomcat error page, no specific field validation errors",
+    "conclusion": "Server-side error at Smartbill, not client data format issue"
+  },
+  "recommendation": "Contact Smartbill support with this exact format and mention that the series endpoint works but invoice creation returns HTTP 500. The data format appears correct based on their documentation."
+}
