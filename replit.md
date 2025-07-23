@@ -10,6 +10,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### July 23, 2025 - 🔧 ACCOUNT DATA PERSISTENCE & HEADER FIX ✅
+- ✅ FIXED: Account data persistence issue - removed duplicate `/api/auth/invoice` endpoints that were causing conflicts
+- ✅ VERIFIED: User data saves correctly to database and persists across login sessions
+- ✅ FIXED: Missing fields in `/api/auth/me` endpoint - added companyCounty, deliveryCounty, and notification preferences
+- ✅ TESTED: Account settings including company details, county information, and delivery addresses save and load properly
+- ✅ CONFIRMED: Data verification shows all fields saving correctly: company_name, company_county, delivery_county, addresses
+- ✅ RESOLVED: Account information now persists permanently after logout/login cycles
+
 ### July 23, 2025 - 🔧 HEADER AUTHENTICATION FLICKERING FIX ✅
 - ✅ FIXED: Header authentication button flickering during navigation resolved
 - ✅ MOVED HEADER TO APP LEVEL: Header component now rendered at application level to prevent remounting during route changes
