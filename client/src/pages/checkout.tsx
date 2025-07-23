@@ -17,7 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import Header from "@/components/header";
+
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import RevolutPayment from "@/components/revolut-payment";
@@ -226,7 +226,6 @@ export default function Checkout() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Header />
 
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center space-x-2 mb-8">

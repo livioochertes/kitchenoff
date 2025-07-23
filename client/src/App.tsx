@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "@/components/cart-provider";
 import { LanguageProvider } from "@/contexts/language-context";
+import Header from "@/components/header";
 import Home from "@/pages/home";
 import Products from "@/pages/products";
 import ProductDetails from "@/pages/product-details";
@@ -23,23 +24,26 @@ import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/products" component={Products} />
-      <Route path="/products/:slug" component={ProductDetails} />
-      <Route path="/cart" component={Cart} />
-      <Route path="/checkout" component={Checkout} />
-      <Route path="/admin" component={Admin} />
-      <Route path="/login" component={Login} />
-      <Route path="/account" component={Account} />
-      <Route path="/ai-assistant" component={AIAssistant} />
-      <Route path="/about" component={About} />
-      <Route path="/b2b" component={B2B} />
-      <Route path="/terms" component={Terms} />
-      <Route path="/privacy" component={Privacy} />
-      <Route path="/invoice/:invoiceId" component={Invoice} />
-      <Route component={NotFound} />
-    </Switch>
+    <>
+      <Header />
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/products" component={Products} />
+        <Route path="/products/:slug" component={ProductDetails} />
+        <Route path="/cart" component={Cart} />
+        <Route path="/checkout" component={Checkout} />
+        <Route path="/admin" component={Admin} />
+        <Route path="/login" component={Login} />
+        <Route path="/account" component={Account} />
+        <Route path="/ai-assistant" component={AIAssistant} />
+        <Route path="/about" component={About} />
+        <Route path="/b2b" component={B2B} />
+        <Route path="/terms" component={Terms} />
+        <Route path="/privacy" component={Privacy} />
+        <Route path="/invoice/:invoiceId" component={Invoice} />
+        <Route component={NotFound} />
+      </Switch>
+    </>
   );
 }
 

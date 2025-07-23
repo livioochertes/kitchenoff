@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import Header from "@/components/header";
+
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 
@@ -48,7 +48,6 @@ export default function Cart() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50">
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
             <div className="loading-spinner mx-auto mb-4"></div>

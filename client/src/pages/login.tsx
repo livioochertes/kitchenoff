@@ -12,7 +12,7 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import Header from "@/components/header";
+
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -114,7 +114,6 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
       
       <div className="container max-w-md mx-auto px-4 py-8">
         <Card>

@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "@/hooks/useTranslation";
-import Header from "@/components/header";
+
 import ProductCard from "@/components/product-card";
 import ContactModal from "@/components/contact-modal";
 import type { Category, ProductWithCategory } from "@shared/schema";
@@ -65,7 +65,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Header />
 
       {/* Hero Section */}
       <section className="hero-gradient text-white py-16">

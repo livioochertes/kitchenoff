@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "@/hooks/useTranslation";
-import Header from "@/components/header";
+
 import ProductCard from "@/components/product-card";
 import type { Category, ProductWithCategory } from "@shared/schema";
 
@@ -162,7 +162,6 @@ export default function Products() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Header />
 
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">

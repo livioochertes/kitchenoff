@@ -40,29 +40,49 @@ interface AuthState {
   isAuthenticated: boolean;
 }
 
+// Global authentication state to persist across component re-renders
+let globalAuthState: AuthState | null = null;
+
 export function useAuth() {
-  const [authState, setAuthState] = useState<AuthState>({
-    user: null,
-    isLoading: true,
-    isAuthenticated: false,
+  const [authState, setAuthState] = useState<AuthState>(() => {
+    // If we already have a global state, use it instead of starting with loading
+    if (globalAuthState) {
+      return globalAuthState;
+    }
+    return {
+      user: null,
+      isLoading: true,
+      isAuthenticated: false,
+    };
   });
 
   useEffect(() => {
+    // If we already have authentication state, don't re-initialize
+    if (globalAuthState && !globalAuthState.isLoading) {
+      return;
+    }
+
     const initAuth = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
-        setAuthState({ user: null, isLoading: false, isAuthenticated: false });
+        const newState = { user: null, isLoading: false, isAuthenticated: false };
+        setAuthState(newState);
+        globalAuthState = newState;
         return;
       }
 
       try {
         const response = await apiRequest('GET', '/api/auth/me');
         const user = await response.json();
-        setAuthState({ user, isLoading: false, isAuthenticated: true });
+        const newState = { user, isLoading: false, isAuthenticated: true };
+        setAuthState(newState);
+        globalAuthState = newState;
       } catch (error) {
         // Auth check failed, remove token and set unauthenticated
         localStorage.removeItem('token');
-        setAuthState({ user: null, isLoading: false, isAuthenticated: false });
+        const newState = { user: null, isLoading: false, isAuthenticated: false };
+        setAuthState(newState);
+        globalAuthState = newState;
       }
     };
 
@@ -71,16 +91,22 @@ export function useAuth() {
 
   const login = (token: string, user: User) => {
     localStorage.setItem('token', token);
-    setAuthState({ user, isLoading: false, isAuthenticated: true });
+    const newState = { user, isLoading: false, isAuthenticated: true };
+    setAuthState(newState);
+    globalAuthState = newState;
   };
 
   const logout = () => {
     localStorage.removeItem('token');
-    setAuthState({ user: null, isLoading: false, isAuthenticated: false });
+    const newState = { user: null, isLoading: false, isAuthenticated: false };
+    setAuthState(newState);
+    globalAuthState = newState;
   };
 
   const updateUser = (updatedUser: User) => {
-    setAuthState(prev => ({ ...prev, user: updatedUser }));
+    const newState = { ...authState, user: updatedUser };
+    setAuthState(newState);
+    globalAuthState = newState;
   };
 
   return {
