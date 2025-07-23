@@ -75,6 +75,7 @@ export class SmartbillAPI {
       'Content-Type': contentType,
       'Accept': 'application/json',
       'Authorization': this.getAuthHeader(),
+      'X-SB-Access-Token': this.config.token, // Add the missing X-SB-Access-Token header
     };
   }
 
@@ -615,10 +616,9 @@ export function orderToSmartbillInvoice(
   });
 
   // Format client data with proper address mapping
+  // ⚠️ CRITICAL: Omit vatCode and regCom fields completely if empty (Smartbill API fix)
   const client: SmartbillClient = {
     name: user.companyName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email.split('@')[0],
-    vatCode: user.vatNumber || '',
-    regCom: user.registrationNumber || '',
     address: order.billingAddress?.address || order.shippingAddress?.address || 'Strada Exemple 123',
     isTaxPayer: false,
     saveToDb: true, // Allow Smartbill to save client information
@@ -626,6 +626,14 @@ export function orderToSmartbillInvoice(
     country: order.billingAddress?.country || order.shippingAddress?.country || 'Romania',
     email: user.email
   };
+  
+  // Only add vatCode and regCom if they have actual values (not empty strings)
+  if (user.vatNumber && user.vatNumber.trim()) {
+    client.vatCode = user.vatNumber.trim();
+  }
+  if (user.registrationNumber && user.registrationNumber.trim()) {
+    client.regCom = user.registrationNumber.trim();
+  }
 
   // Format products using Romanian tax settings
   const products: SmartbillProduct[] = order.items.map((item: any) => {
