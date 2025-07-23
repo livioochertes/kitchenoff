@@ -1276,6 +1276,16 @@ export default function Account() {
                                   invoiceForm.setValue('deliveryCountry', companyValues.companyCountry || '');
                                   // Also update the selected county state for delivery
                                   setSelectedDeliveryCounty(companyValues.companyCounty || '');
+                                  
+                                  // Use the actual selectedCompanyCounty state instead of form values for better consistency
+                                  const actualCompanyCounty = selectedCompanyCounty || companyValues.companyCounty || '';
+                                  setSelectedDeliveryCounty(actualCompanyCounty);
+                                  
+                                  // Force form update to ensure city field refreshes with correct value
+                                  setTimeout(() => {
+                                    invoiceForm.setValue('deliveryCity', companyValues.companyCity || '');
+                                    invoiceForm.setValue('deliveryCounty', actualCompanyCounty);
+                                  }, 100);
                                 } else {
                                   // Clear delivery address fields when unchecked
                                   invoiceForm.setValue('deliveryAddress', '');
