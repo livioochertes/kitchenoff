@@ -98,6 +98,12 @@ export function useAuth() {
       try {
         const response = await apiRequest('GET', '/api/auth/me');
         const user = await response.json();
+        console.log('🔍 useAuth: Fetched complete user data:', {
+          companyName: user.companyName,
+          companyCounty: user.companyCounty,
+          deliveryCounty: user.deliveryCounty,
+          companyAddress: user.companyAddress
+        });
         const newState = { user, isLoading: false, isAuthenticated: true };
         updateGlobalAuthState(newState);
       } catch (error) {
