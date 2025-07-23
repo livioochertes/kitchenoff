@@ -1025,6 +1025,172 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AWB Generation routes
+  app.post("/api/orders/:id/generate-awb", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const order = await storage.getOrder(orderId);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      const { createSamedayAPI } = await import('./sameday-api');
+      const samedayAPI = createSamedayAPI();
+      
+      if (!samedayAPI) {
+        return res.status(500).json({ message: "Sameday API not configured. Please add SAMEDAY_USERNAME and SAMEDAY_PASSWORD environment variables." });
+      }
+
+      // Get pickup points and services
+      const [pickupPoints, services] = await Promise.all([
+        samedayAPI.getPickupPoints(),
+        samedayAPI.getServices()
+      ]);
+
+      if (pickupPoints.length === 0) {
+        return res.status(500).json({ message: "No pickup points configured for Sameday" });
+      }
+
+      if (services.length === 0) {
+        return res.status(500).json({ message: "No services configured for Sameday" });
+      }
+
+      const shippingAddr = order.shippingAddress as any;
+      const defaultPickupPoint = pickupPoints[0];
+      const defaultService = services[0];
+
+      // Calculate total parcel weight (estimate 1kg per item if not specified)
+      const totalWeight = (order.items?.length || 1) * 1; // 1kg per item estimate
+
+      const awbData = {
+        pickupPointId: defaultPickupPoint.id,
+        contactPersonId: defaultPickupPoint.contactPersons?.[0]?.id,
+        serviceId: defaultService.id,
+        awbPayment: 1, // Sender pays
+        awbRecipient: {
+          name: `${shippingAddr.firstName} ${shippingAddr.lastName}`,
+          phone: shippingAddr.phone || '0700000000',
+          email: shippingAddr.email,
+          companyName: shippingAddr.companyName,
+          address: shippingAddr.address,
+          city: shippingAddr.city,
+          county: shippingAddr.county || shippingAddr.state,
+          postalCode: shippingAddr.postalCode,
+        },
+        parcels: [{
+          weight: totalWeight,
+          awbNumber: order.id.toString(),
+        }],
+        cashOnDelivery: 0, // No COD for now
+        insuredValue: parseFloat(order.totalAmount.toString()),
+        observations: `Order #${order.id} - KitchenOff E-commerce`,
+        clientInternalReference: `ORDER_${order.id}`,
+      };
+
+      // Create AWB with Sameday
+      const awbResponse = await samedayAPI.createAWB(awbData);
+
+      // Update order with AWB information
+      const updatedOrder = await storage.updateOrder(orderId, {
+        status: 'shipped',
+        awbNumber: awbResponse.awbNumber,
+        awbCourier: 'sameday',
+        awbCost: awbResponse.cost.toString(),
+        awbCurrency: awbResponse.currency,
+        awbCreatedAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      console.log('✅ AWB generated successfully:', awbResponse.awbNumber);
+
+      res.json({
+        success: true,
+        awbNumber: awbResponse.awbNumber,
+        awbCost: awbResponse.cost,
+        currency: awbResponse.currency,
+        order: updatedOrder,
+        trackingUrl: `https://sameday.ro/track/${awbResponse.awbNumber}`,
+      });
+
+    } catch (error) {
+      console.error("Generate AWB error:", error);
+      res.status(500).json({ 
+        message: "Failed to generate AWB", 
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Get AWB PDF
+  app.get("/api/orders/:id/awb-pdf", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const order = await storage.getOrder(orderId);
+      
+      if (!order || !order.awbNumber) {
+        return res.status(404).json({ message: "Order or AWB not found" });
+      }
+
+      const { createSamedayAPI } = await import('./sameday-api');
+      const samedayAPI = createSamedayAPI();
+      
+      if (!samedayAPI) {
+        return res.status(500).json({ message: "Sameday API not configured" });
+      }
+
+      const pdfBuffer = await samedayAPI.getAWBPDF(order.awbNumber);
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="AWB_${order.awbNumber}.pdf"`);
+      res.send(pdfBuffer);
+
+    } catch (error) {
+      console.error("Get AWB PDF error:", error);
+      res.status(500).json({ message: "Failed to get AWB PDF" });
+    }
+  });
+
+  // Track AWB
+  app.get("/api/orders/:id/track-awb", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const order = await storage.getOrder(orderId);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      // Check if user owns this order or is admin
+      if (order.userId !== req.userId && !req.isAdmin) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      if (!order.awbNumber) {
+        return res.status(404).json({ message: "AWB not found for this order" });
+      }
+
+      const { createSamedayAPI } = await import('./sameday-api');
+      const samedayAPI = createSamedayAPI();
+      
+      if (!samedayAPI) {
+        return res.status(500).json({ message: "Sameday API not configured" });
+      }
+
+      const trackingInfo = await samedayAPI.trackAWB(order.awbNumber);
+
+      res.json({
+        awbNumber: order.awbNumber,
+        trackingUrl: `https://sameday.ro/track/${order.awbNumber}`,
+        trackingInfo,
+      });
+
+    } catch (error) {
+      console.error("Track AWB error:", error);
+      res.status(500).json({ message: "Failed to track AWB" });
+    }
+  });
+
   // Review routes
   app.get("/api/products/:id/reviews", async (req, res) => {
     try {

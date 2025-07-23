@@ -99,6 +99,15 @@ export const orders = pgTable("orders", {
   paymentMethod: varchar("payment_method", { length: 50 }).notNull(),
   paymentStatus: varchar("payment_status", { length: 50 }).notNull().default("pending"),
   notes: text("notes"),
+  // AWB (Air Waybill) fields for shipping
+  awbNumber: varchar("awb_number", { length: 100 }),
+  awbCourier: varchar("awb_courier", { length: 50 }).default("sameday"),
+  awbCost: decimal("awb_cost", { precision: 10, scale: 2 }),
+  awbCurrency: varchar("awb_currency", { length: 3 }).default("RON"),
+  awbPdfUrl: text("awb_pdf_url"),
+  awbTrackingUrl: text("awb_tracking_url"),
+  awbCreatedAt: timestamp("awb_created_at"),
+  estimatedDelivery: timestamp("estimated_delivery"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

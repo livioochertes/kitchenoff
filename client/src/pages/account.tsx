@@ -905,6 +905,16 @@ export default function Account() {
                                 </>
                               )}
                             </Button>
+                            {order.awbNumber && (
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => window.open(`https://sameday.ro/track/${order.awbNumber}`, '_blank')}
+                              >
+                                <ExternalLink className="h-4 w-4 mr-2" />
+                                Track Package
+                              </Button>
+                            )}
                             {order.status.toLowerCase() === "delivered" && (
                               <Button variant="outline" size="sm">
                                 {t('account.reorder')}

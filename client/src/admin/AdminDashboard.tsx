@@ -23,7 +23,10 @@ import {
   Calendar,
   DollarSign,
   Search,
-  Filter
+  Filter,
+  Truck,
+  Download,
+  ExternalLink
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AdminTwoFactor from "./AdminTwoFactor";
@@ -543,11 +546,17 @@ export default function AdminDashboard({ token, admin, onLogout }: AdminDashboar
                           <TableCell>{formatCurrency(order.totalAmount)}</TableCell>
                           <TableCell>{order.items?.length || 0}</TableCell>
                           <TableCell>
-                            <OrderStatusUpdate 
-                              orderId={order.id} 
-                              currentStatus={order.status}
-                              onStatusUpdate={() => queryClient.invalidateQueries({ queryKey: ['/api/orders'] })}
-                            />
+                            <div className="flex gap-2">
+                              <OrderStatusUpdate 
+                                orderId={order.id} 
+                                currentStatus={order.status}
+                                onStatusUpdate={() => queryClient.invalidateQueries({ queryKey: ['/api/orders'] })}
+                              />
+                              <AWBActions
+                                order={order}
+                                onAWBGenerated={() => queryClient.invalidateQueries({ queryKey: ['/api/orders'] })}
+                              />
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -894,4 +903,119 @@ function OrderStatusUpdate({ orderId, currentStatus, onStatusUpdate }: OrderStat
       </SelectContent>
     </Select>
   );
+}
+
+// AWB Actions Component
+interface AWBActionsProps {
+  order: any;
+  onAWBGenerated: () => void;
+}
+
+function AWBActions({ order, onAWBGenerated }: AWBActionsProps) {
+  const { toast } = useToast();
+
+  const generateAWBMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest(`/api/orders/${order.id}/generate-awb`, {
+        method: 'POST'
+      });
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: "AWB Generated Successfully",
+        description: `AWB Number: ${data.awbNumber} - Order status updated to Shipped`,
+      });
+      onAWBGenerated();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "AWB Generation Failed",
+        description: error.message || "Failed to generate AWB with Sameday",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const downloadAWBPDF = async () => {
+    try {
+      const response = await fetch(`/api/orders/${order.id}/awb-pdf`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download AWB PDF');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `AWB_${order.awbNumber}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "PDF Downloaded",
+        description: "AWB PDF has been downloaded successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "Failed to download AWB PDF",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Show different actions based on order status and AWB status
+  if (order.awbNumber) {
+    // AWB already exists
+    return (
+      <div className="flex gap-1">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={downloadAWBPDF}
+          title="Download AWB PDF"
+        >
+          <Download className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => window.open(`https://sameday.ro/track/${order.awbNumber}`, '_blank')}
+          title="Track Package"
+        >
+          <ExternalLink className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  }
+
+  // Show AWB generation button for processing orders
+  if (order.status === 'processing') {
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => generateAWBMutation.mutate()}
+        disabled={generateAWBMutation.isPending}
+        title="Generate AWB & Ship"
+        className="text-purple-600 border-purple-200 hover:bg-purple-50"
+      >
+        {generateAWBMutation.isPending ? (
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-purple-300 border-t-purple-600" />
+        ) : (
+          <Truck className="h-4 w-4" />
+        )}
+      </Button>
+    );
+  }
+
+  // No actions for pending or other statuses
+  return null;
 }
