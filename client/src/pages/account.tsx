@@ -375,16 +375,29 @@ export default function Account() {
 
   const getOrderStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case "delivered":
-        return "bg-green-100 text-green-800";
-      case "shipped":
-        return "bg-blue-100 text-blue-800";
-      case "processing":
-        return "bg-yellow-100 text-yellow-800";
-      case "cancelled":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+      case 'pending': 
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'processing': 
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'shipped': 
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      case 'delivered': 
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'cancelled': 
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      default: 
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+    }
+  }
+
+  const getOrderStatusLabel = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'pending': return 'Pending Review';
+      case 'processing': return 'Processing';
+      case 'shipped': return 'Shipped';
+      case 'delivered': return 'Delivered';
+      case 'cancelled': return 'Cancelled';
+      default: return status;
     }
   };
 
@@ -854,7 +867,7 @@ export default function Account() {
                                 </p>
                               </div>
                               <Badge className={getOrderStatusColor(order.status)}>
-                                {order.status}
+                                {getOrderStatusLabel(order.status)}
                               </Badge>
                             </div>
                             <div className="text-right">

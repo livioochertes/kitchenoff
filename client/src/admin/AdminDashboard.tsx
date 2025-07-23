@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -44,6 +45,7 @@ interface AdminStats {
 export default function AdminDashboard({ token, admin, onLogout }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   // Search states
   const [searchQuery, setSearchQuery] = useState("");
@@ -524,6 +526,7 @@ export default function AdminDashboard({ token, admin, onLogout }: AdminDashboar
                         <TableHead>Status</TableHead>
                         <TableHead>Total</TableHead>
                         <TableHead>Items</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -539,6 +542,13 @@ export default function AdminDashboard({ token, admin, onLogout }: AdminDashboar
                           </TableCell>
                           <TableCell>{formatCurrency(order.totalAmount)}</TableCell>
                           <TableCell>{order.items?.length || 0}</TableCell>
+                          <TableCell>
+                            <OrderStatusUpdate 
+                              orderId={order.id} 
+                              currentStatus={order.status}
+                              onStatusUpdate={() => queryClient.invalidateQueries({ queryKey: ['/api/orders'] })}
+                            />
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -798,5 +808,90 @@ export default function AdminDashboard({ token, admin, onLogout }: AdminDashboar
         </Tabs>
       </main>
     </div>
+  );
+}
+
+// Order Status Update Component
+interface OrderStatusUpdateProps {
+  orderId: number;
+  currentStatus: string;
+  onStatusUpdate: () => void;
+}
+
+function OrderStatusUpdate({ orderId, currentStatus, onStatusUpdate }: OrderStatusUpdateProps) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  const statusOptions = [
+    { value: 'pending', label: 'Pending', description: 'Order awaiting review' },
+    { value: 'processing', label: 'Processing', description: 'Order accepted and being prepared' },
+    { value: 'shipped', label: 'Shipped', description: 'AWB generated, package shipped' },
+    { value: 'delivered', label: 'Delivered', description: 'Package delivered to customer' },
+    { value: 'cancelled', label: 'Cancelled', description: 'Order cancelled' }
+  ];
+
+  const updateStatusMutation = useMutation({
+    mutationFn: async (newStatus: string) => {
+      return apiRequest(`/api/orders/${orderId}/status`, {
+        method: 'PUT',
+        body: { status: newStatus }
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Status Updated",
+        description: "Order status has been successfully updated.",
+      });
+      onStatusUpdate();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update order status",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleStatusChange = (newStatus: string) => {
+    if (newStatus === currentStatus) return;
+    updateStatusMutation.mutate(newStatus);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'processing': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'shipped': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      case 'delivered': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'cancelled': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+    }
+  };
+
+  return (
+    <Select
+      value={currentStatus}
+      onValueChange={handleStatusChange}
+      disabled={updateStatusMutation.isPending}
+    >
+      <SelectTrigger className="w-40">
+        <SelectValue>
+          <Badge className={getStatusColor(currentStatus)}>
+            {statusOptions.find(s => s.value === currentStatus)?.label || currentStatus}
+          </Badge>
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {statusOptions.map((status) => (
+          <SelectItem key={status.value} value={status.value}>
+            <div className="flex flex-col">
+              <span className="font-medium">{status.label}</span>
+              <span className="text-xs text-muted-foreground">{status.description}</span>
+            </div>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
