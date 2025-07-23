@@ -10,22 +10,28 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### July 23, 2025 - 🎉 SMARTBILL API INTEGRATION COMPLETE SUCCESS! ✅
+### July 23, 2025 - 🎉 SMARTBILL API INTEGRATION & ROMANIAN TAX COMPLIANCE COMPLETE! ✅
 - 🎉 BREAKTHROUGH: Smartbill invoice creation now working perfectly with HTTP 200 OK responses!
 - ✅ CRITICAL API FIXES: Added missing X-SB-Access-Token header for proper authentication
 - ✅ DATA FORMAT FIXES: Removed empty vatCode/regCom fields completely instead of sending empty strings
 - ✅ PRODUCT FORMAT FIXES: Eliminated redundant VAT fields (vatPercentage, vatAmount) - kept only taxPercentage
 - ✅ CURRENCY STRUCTURE FIXES: Moved currency to invoice level, removed from product level
-- ✅ LIVE INVOICE CREATED: Successfully created invoice "KTO 10002" through Smartbill API
+- ✅ LIVE INVOICE CREATED: Successfully created invoice "KTO 10003" through Smartbill API
 - ✅ SEQUENTIAL NUMBERING: Perfect KTO format with space: "KTO 10002", "KTO 10003", etc.
 - ✅ ROMANIAN TAX COMPLIANCE: Full RON currency and 19% VAT integration working
 - ✅ AUTHENTICATION CONFIRMED: liviu.chertes@gmail.com credentials working with complete API access
 - ✅ PRODUCTION READY: System now creates invoices directly in Smartbill with proper sequential numbering
 - ✅ FALLBACK MAINTAINED: Local invoice system still available as backup with identical KTO format
-- ✅ API RESPONSE: Clean JSON response with series="KTO", number="10002", errorText=""
+- ✅ API RESPONSE: Clean JSON response with series="KTO", number="10003", errorText=""
+- ✅ COUNTY FIELD INTEGRATION: Mandatory "Județ" (County) field added for Romanian invoice compliance
+- ✅ SMART VALIDATION: County mandatory for shipping addresses, optional for billing when same as shipping
+- ✅ CHECKOUT FORMS: County field with Romanian placeholders (e.g. Bucharest, Cluj, Ilfov)
+- ✅ ACCOUNT SETTINGS: County fields in company address and delivery address sections
+- ✅ BACKEND API: Updated user profile and invoice API routes to handle county fields
+- ✅ CONDITIONAL LOGIC: Delivery address county not mandatory when same as company address
 - 🔧 TECHNICAL RESOLUTION: API issues were client-side data format problems, not server-side errors
 - 📋 PERFECT INTEGRATION: E-commerce platform now seamlessly creates invoices in Smartbill system
-- 🚀 STATUS: Complete Smartbill integration operational and tested - invoices created successfully
+- 🚀 STATUS: Complete Smartbill integration with Romanian tax compliance operational and tested
 
 ### July 22, 2025 - Complete Company-Level Default VAT & Currency System
 - COMPLETED: Enhanced Company Settings with comprehensive default VAT and currency management system

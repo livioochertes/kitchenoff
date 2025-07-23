@@ -23,14 +23,27 @@ import { useToast } from "@/hooks/use-toast";
 import RevolutPayment from "@/components/revolut-payment";
 import StripePayment from "@/components/stripe-payment";
 
-const addressSchema = z.object({
+const shippingAddressSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   company: z.string().optional(),
   address: z.string().min(1, "Address is required"),
   city: z.string().min(1, "City is required"),
   state: z.string().min(1, "State is required"),
-  county: z.string().min(1, "County (Județ) is required"), // Mandatory for Romanian invoices
+  county: z.string().min(1, "County (Județ) is required"), // Always mandatory for shipping
+  zipCode: z.string().min(1, "ZIP code is required"),
+  country: z.string().min(1, "Country is required"),
+  phone: z.string().min(1, "Phone number is required"),
+});
+
+const billingAddressSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  company: z.string().optional(),
+  address: z.string().min(1, "Address is required"),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
+  county: z.string().optional(), // Optional for billing - will be copied from shipping when same
   zipCode: z.string().min(1, "ZIP code is required"),
   country: z.string().min(1, "Country is required"),
   phone: z.string().min(1, "Phone number is required"),
@@ -38,11 +51,20 @@ const addressSchema = z.object({
 
 const checkoutSchema = z.object({
   email: z.string().email("Invalid email address"),
-  shippingAddress: addressSchema,
-  billingAddress: addressSchema,
+  shippingAddress: shippingAddressSchema,
+  billingAddress: billingAddressSchema,
   paymentMethod: z.enum(["revolut", "stripe", "paypal"]),
   sameAsBilling: z.boolean().default(false),
   notes: z.string().optional(),
+}).refine((data) => {
+  // When billing address is different from shipping, county becomes required
+  if (!data.sameAsBilling && !data.billingAddress.county) {
+    return false;
+  }
+  return true;
+}, {
+  message: "County (Județ) is required for Romanian invoices when using different billing address",
+  path: ["billingAddress", "county"]
 });
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
@@ -145,6 +167,7 @@ export default function Checkout() {
         "shippingAddress.address",
         "shippingAddress.city",
         "shippingAddress.state",
+        "shippingAddress.county", // Always required for shipping
         "shippingAddress.zipCode",
         "shippingAddress.country",
         "shippingAddress.phone"
@@ -158,6 +181,7 @@ export default function Checkout() {
           "billingAddress.address", 
           "billingAddress.city",
           "billingAddress.state",
+          "billingAddress.county", // Required when billing is different
           "billingAddress.zipCode",
           "billingAddress.country",
           "billingAddress.phone"
