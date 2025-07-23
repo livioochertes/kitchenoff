@@ -407,6 +407,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update invoice details endpoint
+  app.put("/api/auth/invoice", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const {
+        companyName,
+        vatNumber,
+        registrationNumber,
+        taxId,
+        companyAddress,
+        companyCity,
+        companyState,
+        companyCounty,
+        companyZip,
+        companyCountry,
+        billingEmail,
+        billingPhone,
+        deliveryAddress,
+        deliveryCity,
+        deliveryState,
+        deliveryCounty,
+        deliveryZip,
+        deliveryCountry,
+        deliveryInstructions,
+      } = req.body;
+
+      const updatedUser = await storage.updateUser(req.userId!, {
+        companyName,
+        vatNumber,
+        registrationNumber,
+        taxId,
+        companyAddress,
+        companyCity,
+        companyState,
+        companyCounty,
+        companyZip,
+        companyCountry,
+        billingEmail,
+        billingPhone,
+        deliveryAddress,
+        deliveryCity,
+        deliveryState,
+        deliveryCounty,
+        deliveryZip,
+        deliveryCountry,
+        deliveryInstructions,
+      });
+
+      res.json({ 
+        id: updatedUser.id, 
+        email: updatedUser.email, 
+        firstName: updatedUser.firstName, 
+        lastName: updatedUser.lastName, 
+        isAdmin: updatedUser.isAdmin,
+        // Include all invoice/company fields
+        companyName: updatedUser.companyName,
+        vatNumber: updatedUser.vatNumber,
+        registrationNumber: updatedUser.registrationNumber,
+        taxId: updatedUser.taxId,
+        companyAddress: updatedUser.companyAddress,
+        companyCity: updatedUser.companyCity,
+        companyState: updatedUser.companyState,
+        companyCounty: updatedUser.companyCounty,
+        companyZip: updatedUser.companyZip,
+        companyCountry: updatedUser.companyCountry,
+        billingEmail: updatedUser.billingEmail,
+        billingPhone: updatedUser.billingPhone,
+        deliveryAddress: updatedUser.deliveryAddress,
+        deliveryCity: updatedUser.deliveryCity,
+        deliveryState: updatedUser.deliveryState,
+        deliveryCounty: updatedUser.deliveryCounty,
+        deliveryZip: updatedUser.deliveryZip,
+        deliveryCountry: updatedUser.deliveryCountry,
+        deliveryInstructions: updatedUser.deliveryInstructions,
+        // Include notification preferences too
+        emailNotifications: updatedUser.emailNotifications,
+        orderUpdates: updatedUser.orderUpdates,
+        productRestocks: updatedUser.productRestocks,
+        priceDrops: updatedUser.priceDrops,
+        promotions: updatedUser.promotions,
+      });
+    } catch (error) {
+      console.error("Error updating invoice details:", error);
+      res.status(500).json({ message: "Failed to update invoice details" });
+    }
+  });
+
   // Change password endpoint
   app.put("/api/auth/change-password", authenticateToken, async (req: AuthRequest, res) => {
     try {
