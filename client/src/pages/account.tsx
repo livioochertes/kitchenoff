@@ -18,7 +18,7 @@ import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { User, Package, CreditCard, Bell, Settings, Download, Eye, Receipt, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
-import Header from "@/components/header";
+
 import { useLocation } from "wouter";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -478,7 +478,6 @@ export default function Account() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
@@ -493,8 +492,6 @@ export default function Account() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
-      
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">

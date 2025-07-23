@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Download, ExternalLink, QrCode } from "lucide-react";
-import Header from "@/components/header";
+
 import QRCode from "qrcode";
 
 export default function Invoice() {

@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useLanguage } from "@/contexts/language-context";
-import Header from "@/components/header";
+
 import { Link } from "wouter";
 
 interface Message {

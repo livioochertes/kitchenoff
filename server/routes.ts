@@ -285,6 +285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         companyAddress: user.companyAddress,
         companyCity: user.companyCity,
         companyState: user.companyState,
+        companyCounty: user.companyCounty, // Add missing county field
         companyZip: user.companyZip,
         companyCountry: user.companyCountry,
         billingEmail: user.billingEmail,
@@ -293,9 +294,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         deliveryAddress: user.deliveryAddress,
         deliveryCity: user.deliveryCity,
         deliveryState: user.deliveryState,
+        deliveryCounty: user.deliveryCounty, // Add missing delivery county field
         deliveryZip: user.deliveryZip,
         deliveryCountry: user.deliveryCountry,
         deliveryInstructions: user.deliveryInstructions,
+        // Notification preferences
+        emailNotifications: user.emailNotifications,
+        orderUpdates: user.orderUpdates,
+        productRestocks: user.productRestocks,
+        priceDrops: user.priceDrops,
+        promotions: user.promotions,
       });
     } catch (error) {
       console.error("Get user error:", error);
