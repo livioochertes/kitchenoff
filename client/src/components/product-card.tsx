@@ -7,6 +7,7 @@ import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/useTranslation";
 import type { ProductWithCategory } from "@shared/schema";
+import EcoBadge from "@/components/eco-badge";
 import { memo } from "react";
 
 interface ProductCardProps {
@@ -56,11 +57,14 @@ const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
             <div>
               <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-base">{product.name}</h3>
               
-              {product.category && (
-                <Badge variant="secondary" className="mb-3 text-xs">
-                  {product.category.name}
-                </Badge>
-              )}
+              <div className="flex items-center gap-2 mb-3 flex-wrap">
+                {product.category && (
+                  <Badge variant="secondary" className="text-xs">
+                    {product.category.name}
+                  </Badge>
+                )}
+                <EcoBadge product={product as any} variant="simple" />
+              </div>
               
               <div className="flex items-center mb-4">
                 <div className="flex items-center text-yellow-400 mr-2">
