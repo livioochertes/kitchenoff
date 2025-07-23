@@ -50,7 +50,6 @@ export default function ProductDetails() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50">
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
             <div className="loading-spinner mx-auto mb-4"></div>
@@ -64,7 +63,6 @@ export default function ProductDetails() {
   if (!product) {
     return (
       <div className="min-h-screen bg-slate-50">
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
             <p className="text-muted-foreground mb-4">Product not found</p>
@@ -82,8 +80,6 @@ export default function ProductDetails() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Header />
-
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-8">

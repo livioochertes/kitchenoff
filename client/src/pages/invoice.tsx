@@ -63,7 +63,6 @@ export default function Invoice() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <p className="text-gray-600">Loading invoice...</p>
@@ -76,7 +75,6 @@ export default function Invoice() {
   if (error || !invoice) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Invoice Not Found</h1>
