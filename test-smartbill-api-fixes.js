@@ -45,19 +45,19 @@ const testInvoiceData = {
   observations: "",
   deliveryDate: "2025-07-23",
   precision: 2,
+  currency: "RON", // ✅ FIXED: Currency at invoice level
   products: [{
     name: "Test Product - API Fix",
     code: "TEST-001",
     isDiscount: false,
     measuringUnitName: "buc",
-    currency: "RON",
+    // ✅ FIXED: Removed currency from product level
     quantity: 1,
     price: 100.00,
     isTaxIncluded: true,
     taxName: "Normala",
     taxPercentage: 19,
-    vatPercentage: 19,
-    vatAmount: 15.97, // 100 * 19 / (100 + 19)
+    // ✅ FIXED: Removed vatPercentage and vatAmount (Smartbill calculates automatically)
     saveToDb: true,
     isService: false
   }]
