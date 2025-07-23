@@ -50,9 +50,9 @@ const authenticateToken = async (req: AuthRequest, res: Response, next: NextFunc
     console.log('✅ User found:', { id: user.id, email: user.email, isAdmin: user.isAdmin });
     req.userId = decoded.id;
     req.isAdmin = user.isAdmin || false;
-    req.user = { id: user.id, email: user.email, isAdmin: user.isAdmin };
+    req.user = { id: user.id, email: user.email, isAdmin: user.isAdmin || false };
     next();
-  } catch (error) {
+  } catch (error: any) {
     console.log('❌ Token verification failed:', error.message);
     return res.status(403).json({ message: "Invalid token" });
   }
@@ -525,7 +525,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       try {
-        await sendNotificationPreferencesEmail(updatedUser, preferences);
+        await sendNotificationPreferencesEmail(updatedUser, {
+          emailNotifications: updatedUser.emailNotifications || false,
+          orderUpdates: updatedUser.orderUpdates || false,
+          productRestocks: updatedUser.productRestocks || false,
+          priceDrops: updatedUser.priceDrops || false,
+          promotions: updatedUser.promotions || false
+        });
         console.log('✅ Notification preferences email sent successfully to:', updatedUser.email);
       } catch (emailError) {
         console.error('❌ Failed to send notification preferences email:', emailError);
@@ -637,7 +643,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const invoiceData = {
         invoiceNumber,
         orderId,
-        userId: order.userId || req.userId,
+        userId: order.userId!,
         issueDate: new Date(),
         supplyDate: new Date(),
         subtotal: subtotalWithoutVat.toFixed(2),
@@ -660,7 +666,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lineTotal: item.totalPrice,
       }));
 
-      const invoice = await storage.createInvoice(invoiceData, invoiceItems);
+      const invoice = await storage.createInvoice(invoiceData as any, invoiceItems);
       
       // Get the full invoice with items for response
       const fullInvoice = await storage.getInvoice(invoice.id);
@@ -1190,7 +1196,7 @@ When user asks about orders, invoices, or order status, provide specific informa
         'ar': 'Arabic'
       };
       
-      const userLanguage = languageMap[language] || 'English';
+      const userLanguage = (languageMap as any)[language] || 'English';
       const languageInstruction = language && language !== 'en' 
         ? `\n\nIMPORTANT: Respond in ${userLanguage} language. The user interface is in ${userLanguage}, so provide your response in the same language to ensure consistency.`
         : '';
@@ -1247,7 +1253,7 @@ Always be helpful, professional, and focus on practical solutions. When recommen
         )
       ]);
 
-      const response = completion.choices[0].message.content || "I'm here to help with your kitchen equipment needs! How can I assist you today?";
+      const response = (completion as any).choices[0].message.content || "I'm here to help with your kitchen equipment needs! How can I assist you today?";
 
       res.json({
         response,
@@ -1260,7 +1266,7 @@ Always be helpful, professional, and focus on practical solutions. When recommen
           "Schedule consultation"
         ]
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("AI chat error:", error);
       
       // Provide specific error messages based on error type
@@ -1292,7 +1298,7 @@ Always be helpful, professional, and focus on practical solutions. When recommen
 
       // Create payment intent with Stripe
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-        apiVersion: '2023-10-16',
+        apiVersion: '2020-08-27' as any,
       });
       
       const paymentIntent = await stripe.paymentIntents.create({

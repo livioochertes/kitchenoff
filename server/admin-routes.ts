@@ -219,7 +219,7 @@ async function forwardOrderToSupplier(supplier: any, orderData: any) {
               status: 'forwarded',
               message: 'Order successfully forwarded to supplier API',
               items: orderData.items.length,
-              totalAmount: orderData.items.reduce((sum, item) => sum + parseFloat(item.totalPrice), 0)
+              totalAmount: orderData.items.reduce((sum: number, item: any) => sum + parseFloat(item.totalPrice), 0)
             }
           };
         }
@@ -250,7 +250,7 @@ async function forwardOrderToSupplier(supplier: any, orderData: any) {
                 <th>Price</th>
                 <th>Total</th>
               </tr>
-              ${orderData.items.map(item => `
+              ${orderData.items.map((item: any) => `
                 <tr>
                   <td>${item.productName}</td>
                   <td>${item.productCode || 'N/A'}</td>
@@ -805,7 +805,7 @@ export async function registerAdminRoutes(app: Express) {
       // Filter by supplier if specified
       if (supplierId) {
         filteredOrders = filteredOrders.filter(order => 
-          order.orderItems && order.orderItems.some(item => item.supplierId === parseInt(supplierId as string))
+          (order as any).orderItems && (order as any).orderItems.some((item: any) => item.supplierId === parseInt(supplierId as string))
         );
       }
       
@@ -1469,7 +1469,7 @@ export async function registerAdminRoutes(app: Express) {
           if (product) {
             let newPrice = product.price;
             if (multiplier) {
-              newPrice = product.price * multiplier;
+              newPrice = parseFloat(product.price) * multiplier;
             } else if (fixedPrice) {
               newPrice = fixedPrice;
             }
