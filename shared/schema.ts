@@ -84,18 +84,6 @@ export const products = pgTable("products", {
   ncCode: varchar("nc_code", { length: 50 }),
   cpvCode: varchar("cpv_code", { length: 50 }),
   status: varchar("status", { length: 20 }).default("active"),
-  // Sustainability fields
-  isEcoFriendly: boolean("is_eco_friendly").default(false),
-  sustainabilityScore: integer("sustainability_score").default(0), // 1-100 scale
-  recycledMaterial: boolean("recycled_material").default(false),
-  biodegradable: boolean("biodegradable").default(false),
-  energyEfficient: boolean("energy_efficient").default(false),
-  lowCarbonFootprint: boolean("low_carbon_footprint").default(false),
-  sustainableSourcing: boolean("sustainable_sourcing").default(false),
-  certifications: jsonb("certifications").default([]), // Array of eco certifications
-  co2ReductionPercent: integer("co2_reduction_percent").default(0), // % CO2 reduction
-  energySavingPercent: integer("energy_saving_percent").default(0), // % energy saving
-  recyclingInfo: text("recycling_info"), // Instructions for proper disposal
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
