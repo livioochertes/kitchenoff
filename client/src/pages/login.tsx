@@ -66,15 +66,12 @@ export default function Login() {
       return response.json();
     },
     onSuccess: (data) => {
-      console.log("Login successful, data:", data);
       login(data.token, data.user);
-      console.log("About to navigate to home");
       toast({
         title: "Welcome back!",
         description: "You have been successfully logged in.",
       });
       navigate("/");
-      console.log("Navigation triggered");
     },
     onError: (error) => {
       toast({
