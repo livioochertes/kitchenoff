@@ -21,6 +21,8 @@ import { format } from "date-fns";
 import Header from "@/components/header";
 import { useLocation } from "wouter";
 import { useTranslation } from "@/hooks/useTranslation";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getCountyOptions, getCitiesForCounty, romanianCounties } from "@/utils/location-data";
 
 const profileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -35,9 +37,9 @@ const invoiceSchema = z.object({
   taxId: z.string().optional(),
   companyAddress: z.string().min(1, "Company address is required"),
   companyCity: z.string().min(1, "Company city is required"),
-  companyState: z.string().min(1, "Company state is required"),
+  companyState: z.string().optional(), // Optional - not mandatory
   companyCounty: z.string().min(1, "Company county (Județ) is required"), // Mandatory for Romanian invoices
-  companyZip: z.string().min(1, "Company ZIP code is required"),
+  companyZip: z.string().optional(), // Optional - not mandatory
   companyCountry: z.string().min(1, "Company country is required"),
   billingEmail: z.string().email("Invalid email address").optional().or(z.literal("")),
   billingPhone: z.string().optional(),
@@ -80,6 +82,8 @@ export default function Account() {
   const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
   const [downloadingInvoice, setDownloadingInvoice] = useState<number | null>(null);
   const [copyCompanyAddress, setCopyCompanyAddress] = useState(false);
+  const [selectedCompanyCounty, setSelectedCompanyCounty] = useState("");
+  const [selectedDeliveryCounty, setSelectedDeliveryCounty] = useState("");
   const { user, isAuthenticated, isLoading, updateUser } = useAuth();
   const [, navigate] = useLocation();
   const { toast } = useToast();
@@ -182,6 +186,10 @@ export default function Account() {
         deliveryCountry: user.deliveryCountry || "",
         deliveryInstructions: user.deliveryInstructions || "",
       });
+      
+      // Initialize selected county states with existing data
+      setSelectedCompanyCounty(user.companyCounty || '');
+      setSelectedDeliveryCounty(user.deliveryCounty || '');
 
       notificationForm.reset({
         emailNotifications: user.emailNotifications ?? true,
@@ -1104,9 +1112,26 @@ export default function Account() {
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>{t('account.city')} *</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="Bucharest" {...field} />
-                                  </FormControl>
+                                  <Select 
+                                    onValueChange={field.onChange} 
+                                    value={field.value}
+                                    disabled={!selectedCompanyCounty}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder={selectedCompanyCounty ? "Select city..." : "Select county first"} />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {selectedCompanyCounty && romanianCounties
+                                        .find(county => county.name === selectedCompanyCounty)
+                                        ?.cities.map((city) => (
+                                          <SelectItem key={city} value={city}>
+                                            {city}
+                                          </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                  </Select>
                                   <FormMessage />
                                 </FormItem>
                               )}
@@ -1116,7 +1141,7 @@ export default function Account() {
                               name="companyState"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>{t('account.stateProvince')} *</FormLabel>
+                                  <FormLabel>{t('account.stateProvince')}</FormLabel>
                                   <FormControl>
                                     <Input placeholder="Bucharest" {...field} />
                                   </FormControl>
@@ -1132,9 +1157,26 @@ export default function Account() {
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>County (Județ) *</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="e.g. Bucharest, Cluj, Ilfov" {...field} />
-                                  </FormControl>
+                                  <Select 
+                                    onValueChange={(value) => {
+                                      field.onChange(value);
+                                      setSelectedCompanyCounty(value);
+                                    }} 
+                                    value={field.value}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select county..." />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {getCountyOptions().map((county) => (
+                                        <SelectItem key={county.code} value={county.value}>
+                                          {county.label}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
                                   <FormMessage />
                                 </FormItem>
                               )}
@@ -1144,7 +1186,7 @@ export default function Account() {
                               name="companyZip"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>{t('account.zipCode')} *</FormLabel>
+                                  <FormLabel>{t('account.zipCode')}</FormLabel>
                                   <FormControl>
                                     <Input placeholder="012345" {...field} />
                                   </FormControl>
@@ -1221,6 +1263,8 @@ export default function Account() {
                                   invoiceForm.setValue('deliveryCounty', companyValues.companyCounty || '');
                                   invoiceForm.setValue('deliveryZip', companyValues.companyZip || '');
                                   invoiceForm.setValue('deliveryCountry', companyValues.companyCountry || '');
+                                  // Also update the selected county state for delivery
+                                  setSelectedDeliveryCounty(companyValues.companyCounty || '');
                                 } else {
                                   // Clear delivery address fields when unchecked
                                   invoiceForm.setValue('deliveryAddress', '');
@@ -1229,6 +1273,8 @@ export default function Account() {
                                   invoiceForm.setValue('deliveryCounty', '');
                                   invoiceForm.setValue('deliveryZip', '');
                                   invoiceForm.setValue('deliveryCountry', '');
+                                  // Also clear the selected county state for delivery
+                                  setSelectedDeliveryCounty('');
                                 }
                               }}
                             />
@@ -1262,13 +1308,26 @@ export default function Account() {
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>{t('account.city')}{!copyCompanyAddress && ' *'}</FormLabel>
-                                  <FormControl>
-                                    <Input 
-                                      placeholder="Bucharest" 
-                                      disabled={copyCompanyAddress}
-                                      {...field} 
-                                    />
-                                  </FormControl>
+                                  <Select 
+                                    onValueChange={field.onChange} 
+                                    value={field.value}
+                                    disabled={copyCompanyAddress || !selectedDeliveryCounty}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder={!copyCompanyAddress && selectedDeliveryCounty ? "Select city..." : "Select county first"} />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {selectedDeliveryCounty && romanianCounties
+                                        .find(county => county.name === selectedDeliveryCounty)
+                                        ?.cities.map((city) => (
+                                          <SelectItem key={city} value={city}>
+                                            {city}
+                                          </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                  </Select>
                                   <FormMessage />
                                 </FormItem>
                               )}
@@ -1278,7 +1337,7 @@ export default function Account() {
                               name="deliveryState"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>{t('account.stateProvince')}{!copyCompanyAddress && ' *'}</FormLabel>
+                                  <FormLabel>{t('account.stateProvince')}</FormLabel>
                                   <FormControl>
                                     <Input 
                                       placeholder="Bucharest" 
@@ -1298,13 +1357,27 @@ export default function Account() {
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>County (Județ){!copyCompanyAddress && ' *'}</FormLabel>
-                                  <FormControl>
-                                    <Input 
-                                      placeholder="e.g. Bucharest, Cluj, Ilfov" 
-                                      disabled={copyCompanyAddress}
-                                      {...field} 
-                                    />
-                                  </FormControl>
+                                  <Select 
+                                    onValueChange={(value) => {
+                                      field.onChange(value);
+                                      setSelectedDeliveryCounty(value);
+                                    }} 
+                                    value={field.value}
+                                    disabled={copyCompanyAddress}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select county..." />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {getCountyOptions().map((county) => (
+                                        <SelectItem key={county.code} value={county.value}>
+                                          {county.label}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
                                   <FormMessage />
                                 </FormItem>
                               )}
@@ -1314,7 +1387,7 @@ export default function Account() {
                               name="deliveryZip"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>{t('account.zipCode')}{!copyCompanyAddress && ' *'}</FormLabel>
+                                  <FormLabel>{t('account.zipCode')}</FormLabel>
                                   <FormControl>
                                     <Input 
                                       placeholder="012345" 
