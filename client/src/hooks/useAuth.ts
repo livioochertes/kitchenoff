@@ -15,6 +15,7 @@ interface User {
   companyAddress?: string;
   companyCity?: string;
   companyState?: string;
+  companyCounty?: string; // Added missing county field
   companyZip?: string;
   companyCountry?: string;
   billingEmail?: string;
@@ -23,6 +24,7 @@ interface User {
   deliveryAddress?: string;
   deliveryCity?: string;
   deliveryState?: string;
+  deliveryCounty?: string; // Added missing delivery county field
   deliveryZip?: string;
   deliveryCountry?: string;
   deliveryInstructions?: string;
