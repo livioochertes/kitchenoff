@@ -33,18 +33,18 @@ const invoiceSchema = z.object({
   vatNumber: z.string().optional(),
   registrationNumber: z.string().optional(),
   taxId: z.string().optional(),
-  companyAddress: z.string().optional(),
-  companyCity: z.string().optional(),
-  companyState: z.string().optional(),
-  companyCounty: z.string().min(1, "County (Județ) is required"), // Mandatory for Romanian invoices
-  companyZip: z.string().optional(),
-  companyCountry: z.string().optional(),
+  companyAddress: z.string().min(1, "Company address is required"),
+  companyCity: z.string().min(1, "Company city is required"),
+  companyState: z.string().min(1, "Company state is required"),
+  companyCounty: z.string().min(1, "Company county (Județ) is required"), // Mandatory for Romanian invoices
+  companyZip: z.string().min(1, "Company ZIP code is required"),
+  companyCountry: z.string().min(1, "Company country is required"),
   billingEmail: z.string().email("Invalid email address").optional().or(z.literal("")),
   billingPhone: z.string().optional(),
   deliveryAddress: z.string().optional(),
   deliveryCity: z.string().optional(),
   deliveryState: z.string().optional(),
-  deliveryCounty: z.string().min(1, "County (Județ) is required"), // Mandatory for Romanian invoices
+  deliveryCounty: z.string().optional(), // Optional - will be auto-filled from company address when checkbox is checked
   deliveryZip: z.string().optional(),
   deliveryCountry: z.string().optional(),
   deliveryInstructions: z.string().optional(),
@@ -79,6 +79,7 @@ export default function Account() {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
   const [downloadingInvoice, setDownloadingInvoice] = useState<number | null>(null);
+  const [copyCompanyAddress, setCopyCompanyAddress] = useState(false);
   const { user, isAuthenticated, isLoading, updateUser } = useAuth();
   const [, navigate] = useLocation();
   const { toast } = useToast();
@@ -1088,7 +1089,7 @@ export default function Account() {
                             name="companyAddress"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>{t('account.streetAddress')}</FormLabel>
+                                <FormLabel>{t('account.streetAddress')} *</FormLabel>
                                 <FormControl>
                                   <Input placeholder="123 Business Street" {...field} />
                                 </FormControl>
@@ -1102,7 +1103,7 @@ export default function Account() {
                               name="companyCity"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>{t('account.city')}</FormLabel>
+                                  <FormLabel>{t('account.city')} *</FormLabel>
                                   <FormControl>
                                     <Input placeholder="Bucharest" {...field} />
                                   </FormControl>
@@ -1115,7 +1116,7 @@ export default function Account() {
                               name="companyState"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>{t('account.stateProvince')}</FormLabel>
+                                  <FormLabel>{t('account.stateProvince')} *</FormLabel>
                                   <FormControl>
                                     <Input placeholder="Bucharest" {...field} />
                                   </FormControl>
@@ -1143,7 +1144,7 @@ export default function Account() {
                               name="companyZip"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>{t('account.zipCode')}</FormLabel>
+                                  <FormLabel>{t('account.zipCode')} *</FormLabel>
                                   <FormControl>
                                     <Input placeholder="012345" {...field} />
                                   </FormControl>
@@ -1157,7 +1158,7 @@ export default function Account() {
                             name="companyCountry"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>{t('account.country')}</FormLabel>
+                                <FormLabel>{t('account.country')} *</FormLabel>
                                 <FormControl>
                                   <Input placeholder="United Kingdom" {...field} />
                                 </FormControl>
@@ -1203,16 +1204,52 @@ export default function Account() {
 
                       {/* Delivery Address Section */}
                       <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-900">{t('account.deliveryAddress')}</h3>
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-semibold text-gray-900">{t('account.deliveryAddress')}</h3>
+                          <div className="flex items-center space-x-2">
+                            <Switch
+                              id="copy-company-address"
+                              checked={copyCompanyAddress}
+                              onCheckedChange={(checked) => {
+                                setCopyCompanyAddress(checked);
+                                if (checked) {
+                                  // Auto-fill delivery address with company address values
+                                  const companyValues = invoiceForm.getValues();
+                                  invoiceForm.setValue('deliveryAddress', companyValues.companyAddress || '');
+                                  invoiceForm.setValue('deliveryCity', companyValues.companyCity || '');
+                                  invoiceForm.setValue('deliveryState', companyValues.companyState || '');
+                                  invoiceForm.setValue('deliveryCounty', companyValues.companyCounty || '');
+                                  invoiceForm.setValue('deliveryZip', companyValues.companyZip || '');
+                                  invoiceForm.setValue('deliveryCountry', companyValues.companyCountry || '');
+                                } else {
+                                  // Clear delivery address fields when unchecked
+                                  invoiceForm.setValue('deliveryAddress', '');
+                                  invoiceForm.setValue('deliveryCity', '');
+                                  invoiceForm.setValue('deliveryState', '');
+                                  invoiceForm.setValue('deliveryCounty', '');
+                                  invoiceForm.setValue('deliveryZip', '');
+                                  invoiceForm.setValue('deliveryCountry', '');
+                                }
+                              }}
+                            />
+                            <Label htmlFor="copy-company-address" className="text-sm font-medium">
+                              Same as Company Address
+                            </Label>
+                          </div>
+                        </div>
                         <div className="grid grid-cols-1 gap-4">
                           <FormField
                             control={invoiceForm.control}
                             name="deliveryAddress"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>{t('account.deliveryStreetAddress')}</FormLabel>
+                                <FormLabel>{t('account.deliveryStreetAddress')}{!copyCompanyAddress && ' *'}</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="456 Delivery Street" {...field} />
+                                  <Input 
+                                    placeholder="456 Delivery Street" 
+                                    disabled={copyCompanyAddress}
+                                    {...field} 
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -1224,9 +1261,13 @@ export default function Account() {
                               name="deliveryCity"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>{t('account.city')}</FormLabel>
+                                  <FormLabel>{t('account.city')}{!copyCompanyAddress && ' *'}</FormLabel>
                                   <FormControl>
-                                    <Input placeholder="Bucharest" {...field} />
+                                    <Input 
+                                      placeholder="Bucharest" 
+                                      disabled={copyCompanyAddress}
+                                      {...field} 
+                                    />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -1237,9 +1278,13 @@ export default function Account() {
                               name="deliveryState"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>{t('account.stateProvince')}</FormLabel>
+                                  <FormLabel>{t('account.stateProvince')}{!copyCompanyAddress && ' *'}</FormLabel>
                                   <FormControl>
-                                    <Input placeholder="Bucharest" {...field} />
+                                    <Input 
+                                      placeholder="Bucharest" 
+                                      disabled={copyCompanyAddress}
+                                      {...field} 
+                                    />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -1252,9 +1297,13 @@ export default function Account() {
                               name="deliveryCounty"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>County (Județ) *</FormLabel>
+                                  <FormLabel>County (Județ){!copyCompanyAddress && ' *'}</FormLabel>
                                   <FormControl>
-                                    <Input placeholder="e.g. Bucharest, Cluj, Ilfov" {...field} />
+                                    <Input 
+                                      placeholder="e.g. Bucharest, Cluj, Ilfov" 
+                                      disabled={copyCompanyAddress}
+                                      {...field} 
+                                    />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -1265,9 +1314,13 @@ export default function Account() {
                               name="deliveryZip"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>{t('account.zipCode')}</FormLabel>
+                                  <FormLabel>{t('account.zipCode')}{!copyCompanyAddress && ' *'}</FormLabel>
                                   <FormControl>
-                                    <Input placeholder="012345" {...field} />
+                                    <Input 
+                                      placeholder="012345" 
+                                      disabled={copyCompanyAddress}
+                                      {...field} 
+                                    />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -1279,9 +1332,13 @@ export default function Account() {
                             name="deliveryCountry"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>{t('account.country')}</FormLabel>
+                                <FormLabel>{t('account.country')}{!copyCompanyAddress && ' *'}</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="Romania" {...field} />
+                                  <Input 
+                                    placeholder="Romania" 
+                                    disabled={copyCompanyAddress}
+                                    {...field} 
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -1295,8 +1352,9 @@ export default function Account() {
                                 <FormLabel>{t('account.deliveryInstructions')}</FormLabel>
                                 <FormControl>
                                   <textarea 
-                                    className="flex min-h-[60px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className={`flex min-h-[60px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${copyCompanyAddress ? 'opacity-50' : ''}`}
                                     placeholder="Please ring the bell at the main entrance. Loading dock is at the back of the building."
+                                    disabled={copyCompanyAddress}
                                     {...field}
                                   />
                                 </FormControl>
