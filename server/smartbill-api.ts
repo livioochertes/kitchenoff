@@ -28,10 +28,12 @@ export interface SmartbillClient {
   country?: string;
   county?: string;
   city?: string;
+  isTaxPayer?: boolean;
+  saveToDb?: boolean;
 }
 
 export interface SmartbillInvoiceData {
-  companyVat: string;
+  companyVatCode: string;
   seriesName: string;
   client: SmartbillClient;
   issueDate: string;
@@ -41,6 +43,9 @@ export interface SmartbillInvoiceData {
   currency?: string;
   precision?: number;
   mentions?: string;
+  observations?: string;
+  deliveryDate?: string;
+  isDraft?: boolean;
   paymentUrl?: string;
   sendEmail?: boolean;
 }
