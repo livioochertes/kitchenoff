@@ -3039,4 +3039,26 @@ export async function registerAdminRoutes(app: Express) {
       });
     }
   });
+
+  // Company/Shipping Settings Routes
+  app.get("/admin/api/settings", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const settings = await storage.getCompanySettings();
+      res.json(settings || {});
+    } catch (error) {
+      console.error("Error fetching company settings:", error);
+      res.status(500).json({ message: "Failed to fetch company settings" });
+    }
+  });
+
+  app.put("/admin/api/settings", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const settings = req.body;
+      const updatedSettings = await storage.updateCompanySettings(settings);
+      res.json(updatedSettings);
+    } catch (error) {
+      console.error("Error updating company settings:", error);
+      res.status(500).json({ message: "Failed to update company settings" });
+    }
+  });
 }

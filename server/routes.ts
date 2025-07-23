@@ -1505,6 +1505,20 @@ Always be helpful, professional, and focus on practical solutions. When recommen
     }
   });
 
+  // Public shipping settings endpoint (no auth required)
+  app.get("/api/shipping-settings", async (req, res) => {
+    try {
+      const settings = await storage.getCompanySettings();
+      res.json({
+        freeShippingThreshold: settings?.freeShippingThreshold || "500.00",
+        standardShippingCost: settings?.standardShippingCost || "25.00",
+      });
+    } catch (error) {
+      console.error("Error fetching shipping settings:", error);
+      res.status(500).json({ message: "Failed to fetch shipping settings" });
+    }
+  });
+
   // Smartbill API Test endpoints
   app.get("/api/smartbill/test", authenticateToken, async (req: AuthRequest, res) => {
     try {

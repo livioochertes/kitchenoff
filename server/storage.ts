@@ -9,6 +9,7 @@ import {
   suppliers,
   invoices,
   invoiceItems,
+  companySettings,
   type User,
   type InsertUser,
   type Category,
@@ -33,6 +34,8 @@ import {
   type InvoiceItem,
   type InsertInvoiceItem,
   type InvoiceWithItems,
+  type CompanySettings,
+  type InsertCompanySettings,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, and, sql } from "drizzle-orm";
@@ -102,6 +105,10 @@ export interface IStorage {
   getTotalOrders(): Promise<number>;
   getTotalProducts(): Promise<number>;
   getRecentOrders(limit: number): Promise<OrderWithItems[]>;
+
+  // Company settings operations
+  getCompanySettings(): Promise<CompanySettings | undefined>;
+  updateCompanySettings(settings: Partial<InsertCompanySettings>): Promise<CompanySettings>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -823,6 +830,31 @@ export class DatabaseStorage implements IStorage {
     }
 
     return result;
+  }
+
+  // Company settings operations
+  async getCompanySettings(): Promise<CompanySettings | undefined> {
+    const [settings] = await db.select().from(companySettings).limit(1);
+    return settings;
+  }
+
+  async updateCompanySettings(settings: Partial<InsertCompanySettings>): Promise<CompanySettings> {
+    // Check if settings exist
+    const existing = await this.getCompanySettings();
+    
+    if (existing) {
+      // Update existing settings
+      const [updatedSettings] = await db
+        .update(companySettings)
+        .set({ ...settings, updatedAt: new Date() })
+        .where(eq(companySettings.id, existing.id))
+        .returning();
+      return updatedSettings;
+    } else {
+      // Create new settings if none exist
+      const [newSettings] = await db.insert(companySettings).values(settings).returning();
+      return newSettings;
+    }
   }
 }
 

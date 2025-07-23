@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AdminTwoFactor from "./AdminTwoFactor";
+import ShippingSettings from "./ShippingSettings";
 
 interface AdminDashboardProps {
   token: string;
@@ -788,6 +789,10 @@ export default function AdminDashboard({ token, admin, onLogout }: AdminDashboar
                   window.location.reload();
                 }}
               />
+            </div>
+            
+            <div className="grid grid-cols-1 gap-6">
+              <ShippingSettings token={token} />
             </div>
           </TabsContent>
         </Tabs>

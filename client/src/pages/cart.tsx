@@ -4,13 +4,27 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
 
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/hooks/useTranslation";
+import Header from "@/components/header";
 
 export default function Cart() {
   const { cart, updateQuantity, removeFromCart, clearCart, isLoading } = useCart();
   const { toast } = useToast();
+  const { t } = useTranslation();
+
+  // Fetch shipping settings
+  const { data: shippingSettings } = useQuery({
+    queryKey: ['/api/shipping-settings'],
+    queryFn: async () => {
+      const response = await fetch('/api/shipping-settings');
+      if (!response.ok) throw new Error('Failed to fetch shipping settings');
+      return response.json();
+    },
+  });
 
   // Filter out items without product data
   const validCart = cart.filter(item => item.product && item.product.price);
@@ -18,7 +32,11 @@ export default function Cart() {
   const subtotal = validCart.reduce((sum, item) => {
     return sum + (parseFloat(item.product.price) * item.quantity);
   }, 0);
-  const shipping = subtotal > 500 ? 0 : 25;
+  
+  const freeShippingThreshold = shippingSettings ? parseFloat(shippingSettings.freeShippingThreshold) : 500;
+  const standardShippingCost = shippingSettings ? parseFloat(shippingSettings.standardShippingCost) : 25;
+  
+  const shipping = subtotal > freeShippingThreshold ? 0 : standardShippingCost;
   const total = subtotal + shipping;
 
   const handleUpdateQuantity = (itemId: number, newQuantity: number) => {
@@ -173,9 +191,9 @@ export default function Cart() {
                     </span>
                   </div>
                   
-                  {subtotal < 500 && (
+                  {subtotal < freeShippingThreshold && (
                     <div className="text-sm text-muted-foreground">
-                      Add ${(500 - subtotal).toFixed(2)} more for free shipping
+                      Add ${(freeShippingThreshold - subtotal).toFixed(2)} more for free shipping
                     </div>
                   )}
                   

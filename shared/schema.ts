@@ -216,6 +216,9 @@ export const companySettings = pgTable("company_settings", {
   defaultCurrency: varchar("default_currency", { length: 3 }).default("EUR"),
   defaultVatPercentage: decimal("default_vat_percentage", { precision: 5, scale: 2 }).default("19.00"),
   reverseChargeVat: decimal("reverse_charge_vat", { precision: 5, scale: 2 }).default("0.00"), // For international invoices
+  // Shipping settings
+  freeShippingThreshold: decimal("free_shipping_threshold", { precision: 10, scale: 2 }).default("500.00"),
+  standardShippingCost: decimal("standard_shipping_cost", { precision: 10, scale: 2 }).default("25.00"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

@@ -15,7 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
 import { useCart } from "@/hooks/use-cart";
@@ -76,6 +76,16 @@ export default function Checkout() {
   const { cart, clearCart } = useCart();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Fetch shipping settings
+  const { data: shippingSettings } = useQuery({
+    queryKey: ['/api/shipping-settings'],
+    queryFn: async () => {
+      const response = await fetch('/api/shipping-settings');
+      if (!response.ok) throw new Error('Failed to fetch shipping settings');
+      return response.json();
+    },
+  });
 
   const form = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
@@ -152,7 +162,11 @@ export default function Checkout() {
     if (!item.product || !item.product.price) return sum;
     return sum + (parseFloat(item.product.price) * item.quantity);
   }, 0);
-  const shipping = subtotal > 500 ? 0 : 25;
+  
+  const freeShippingThreshold = shippingSettings ? parseFloat(shippingSettings.freeShippingThreshold) : 500;
+  const standardShippingCost = shippingSettings ? parseFloat(shippingSettings.standardShippingCost) : 25;
+  
+  const shipping = subtotal > freeShippingThreshold ? 0 : standardShippingCost;
   const tax = subtotal * 0.08; // 8% tax
   const total = subtotal + shipping + tax;
 
