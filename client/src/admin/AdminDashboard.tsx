@@ -121,11 +121,21 @@ export default function AdminDashboard({ token, admin, onLogout }: AdminDashboar
       });
 
       if (!response.ok) {
+        // If token is expired, log error and show auth issue
+        if (response.status === 401) {
+          console.error('Admin token expired, please re-login');
+          toast({
+            title: "Session Expired",
+            description: "Please refresh the page and login again",
+            variant: "destructive",
+          });
+        }
         throw new Error('Failed to fetch orders');
       }
 
       const ordersData = await response.json();
-      console.log('Orders loaded:', ordersData.slice(0, 3)); // Log first 3 orders
+      console.log('📋 Orders loaded successfully:', ordersData.length, 'orders');
+      console.log('📋 First few orders:', ordersData.slice(0, 3));
       return ordersData;
     },
   });
