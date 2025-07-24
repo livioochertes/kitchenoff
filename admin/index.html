@@ -1470,10 +1470,17 @@
               total: result.total || 0
             });
             
-            // Refresh products list
-            fetchProducts();
+            // Refresh products list with delay to ensure data is updated
+            console.log('Excel import completed, refreshing product list...');
+            await fetchProducts();
             
-            alert(`✅ Import completed!\\n\\nImported: ${result.imported}\\nErrors: ${result.errors?.length || 0}\\nDuplicates: ${result.duplicates?.length || 0}`);
+            // Also refresh after a short delay to ensure cache is cleared
+            setTimeout(async () => {
+              console.log('Performing delayed product list refresh...');
+              await fetchProducts();
+            }, 1000);
+            
+            alert(`✅ Import completed!\\n\\nImported: ${result.imported}\\nErrors: ${result.errors?.length || 0}\\nDuplicates: ${result.duplicates?.length || 0}\\n\\nProduct list has been refreshed. The new products should now be visible.`);
           } else {
             setImportResults({
               success: false,
