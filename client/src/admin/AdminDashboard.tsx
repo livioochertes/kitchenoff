@@ -275,9 +275,9 @@ export default function AdminDashboard({ token, admin, onLogout }: AdminDashboar
   };
 
   const formatCurrency = (amount: string) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('ro-RO', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'RON',
     }).format(parseFloat(amount));
   };
 

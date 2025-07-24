@@ -77,17 +77,17 @@ const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
               <div className="flex flex-col space-y-2">
                 <div className="flex items-center space-x-2">
                   <span className="text-2xl font-bold text-emerald-600">
-                    ${parseFloat(product.price).toFixed(2)}
+                    {parseFloat(product.price).toFixed(2)} lei
                   </span>
                   {product.compareAtPrice && (
                     <span className="text-sm text-gray-500 line-through">
-                      ${parseFloat(product.compareAtPrice).toFixed(2)}
+                      {parseFloat(product.compareAtPrice).toFixed(2)} lei
                     </span>
                   )}
                 </div>
                 {product.compareAtPrice && (
                   <Badge variant="destructive" className="text-xs w-fit">
-{t('products.save')} ${(parseFloat(product.compareAtPrice) - parseFloat(product.price)).toFixed(2)}
+{t('products.save')} {(parseFloat(product.compareAtPrice) - parseFloat(product.price)).toFixed(2)} lei
                   </Badge>
                 )}
               </div>
