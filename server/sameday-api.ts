@@ -54,31 +54,35 @@ export interface AWBParcel {
   width?: number;
   length?: number;
   height?: number;
-  awbNumber?: string;
+  awbParcelNumber?: string;
 }
 
 export interface AWBRecipient {
   name: string;
-  phone: string;
+  phoneNumber: string;
+  personType: number; // 1 = natural person, 2 = legal entity
   email?: string;
   companyName?: string;
   address: string;
-  city: string;
-  county: string;
+  countyString?: string;
+  cityString?: string;
+  county?: number;
+  city?: number;
   postalCode?: string;
 }
 
 export interface CreateAWBRequest {
-  pickupPointId: number;
-  contactPersonId?: number;
-  serviceId: number;
+  pickupPoint: number;
+  contactPerson?: number;
+  service: number;
+  packageType: number;
   awbPayment: number; // 1 = sender pays, 2 = recipient pays, 3 = third party pays
+  thirdPartyPickup: boolean;
   awbRecipient: AWBRecipient;
   parcels: AWBParcel[];
   cashOnDelivery?: number;
   insuredValue?: number;
-  thirdPartyPickup?: boolean;
-  observations?: string;
+  observation?: string;
   clientInternalReference?: string;
 }
 
@@ -209,7 +213,7 @@ export class SamedayAPI {
 export function createSamedayAPI(): SamedayAPI | null {
   const username = process.env.SAMEDAY_USERNAME;
   const password = process.env.SAMEDAY_PASSWORD;
-  const baseUrl = process.env.SAMEDAY_BASE_URL || 'https://sameday-api.demo.zitec.com';
+  const baseUrl = process.env.SAMEDAY_BASE_URL || 'https://api.sameday.ro';
 
   if (!username || !password) {
     console.warn('⚠️ Sameday credentials not configured');

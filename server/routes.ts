@@ -1079,27 +1079,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const totalWeight = (order.items?.length || 1) * 1; // 1kg per item estimate
 
       const awbData = {
-        pickupPointId: defaultPickupPoint.id,
-        contactPersonId: defaultPickupPoint.contactPersons?.[0]?.id,
-        serviceId: defaultService.id,
+        pickupPoint: defaultPickupPoint.id,
+        contactPerson: defaultPickupPoint.contactPersons?.[0]?.id,
+        service: defaultService.id,
+        packageType: 1, // Parcel type
         awbPayment: 1, // Sender pays
+        thirdPartyPickup: false,
         awbRecipient: {
           name: `${shippingAddr.firstName} ${shippingAddr.lastName}`,
-          phone: shippingAddr.phone || '0700000000',
+          phoneNumber: shippingAddr.phone || '0700000000',
+          personType: 1, // Natural person
           email: shippingAddr.email,
           companyName: shippingAddr.companyName,
           address: shippingAddr.address,
-          city: shippingAddr.city,
-          county: shippingAddr.county || shippingAddr.state,
+          countyString: shippingAddr.county || shippingAddr.state,
+          cityString: shippingAddr.city,
           postalCode: shippingAddr.postalCode,
         },
         parcels: [{
           weight: totalWeight,
-          awbNumber: order.id.toString(),
+          awbParcelNumber: order.id.toString(),
         }],
         cashOnDelivery: 0, // No COD for now
         insuredValue: parseFloat(order.totalAmount.toString()),
-        observations: `Order #${order.id} - KitchenOff E-commerce`,
+        observation: `Order #${order.id} - KitchenOff E-commerce`,
         clientInternalReference: `ORDER_${order.id}`,
       };
 
