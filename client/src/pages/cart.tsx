@@ -123,7 +123,7 @@ export default function Cart() {
               {validCart.map((item) => (
                 <Card key={item.id}>
                   <CardContent className="p-6">
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-start space-x-4">
                       <img
                         src={item.product?.imageUrl || "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"}
                         alt={item.product?.name || "Product"}
@@ -134,11 +134,6 @@ export default function Cart() {
                         <h3 className="font-semibold text-primary mb-1">
                           {item.product?.name || "Unknown Product"}
                         </h3>
-                        {item.product?.description && (
-                          <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                            {item.product.description}
-                          </p>
-                        )}
                         <p className="text-sm text-muted-foreground mb-2">
                           {item.product?.price ? parseFloat(item.product.price).toFixed(2) : "0.00"} {item.product?.currency === 'RON' ? 'lei' : item.product?.currency || 'RON'} each
                         </p>
@@ -178,6 +173,15 @@ export default function Cart() {
                           </div>
                         </div>
                       </div>
+
+                      {/* Product Description on the Right */}
+                      {item.product?.description && (
+                        <div className="w-1/3 pl-4 border-l border-gray-200 dark:border-gray-700">
+                          <p className="text-sm text-muted-foreground line-clamp-3">
+                            {item.product.description}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
