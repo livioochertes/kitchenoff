@@ -2602,10 +2602,16 @@ export async function registerAdminRoutes(app: Express) {
             }
           }
 
+          // Get company defaults for currency and VAT
+          const companySettings = await storage.getCompanySettings();
+          const defaultCurrency = companySettings?.defaultCurrency || 'RON';
+          const defaultVatPercentage = companySettings?.defaultVatPercentage || 19;
+
           // Extract optional fields with defaults
           const description = row['Description']?.toString()?.trim() || '';
           const status = row['Status']?.toString()?.toLowerCase()?.trim() || 'active';
-          const vatValue = parseFloat(row['VAT %']?.toString()?.replace('%', '').replace(',', '.') || '19');
+          const vatValue = parseFloat(row['VAT %']?.toString()?.replace('%', '').replace(',', '.') || defaultVatPercentage.toString());
+          const currency = row['Currency']?.toString()?.trim()?.toUpperCase() || defaultCurrency;
           const productCode = row['Product Code']?.toString()?.trim() || '';
           const ncCode = row['NC Code']?.toString()?.trim() || '';
           const cpvCode = row['CPV Code']?.toString()?.trim() || '';
@@ -2666,7 +2672,7 @@ export async function registerAdminRoutes(app: Express) {
             images: [],
             vatValue: vatValue.toString(),
             vatPercentage: vatValue.toString(), // Use same value for backwards compatibility
-            currency: 'EUR', // Default currency for Excel imports
+            currency: currency, // Use company default currency (RON for Romanian market)
             productCode: productCode,
             ncCode: ncCode,
             cpvCode: cpvCode,
