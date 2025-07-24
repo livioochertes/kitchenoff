@@ -238,7 +238,10 @@ export default function Checkout() {
   const vat = subtotal * 0.19; // 19% VAT for Romanian market
   const finalTotal = subtotal + shipping + vat;
 
-  const handleNext = async () => {
+  const handleNext = async (e?: React.MouseEvent) => {
+    e?.preventDefault(); // Prevent any default form behavior
+    console.log("handleNext called, current step:", step);
+    
     let fieldsToValidate: any[] = [];
     
     if (step === 1 && !isAuthenticated) {
@@ -275,6 +278,7 @@ export default function Checkout() {
     }
     
     const isValid = await form.trigger(fieldsToValidate);
+    console.log("Validation result:", isValid, "will go to step:", step + 1);
     
     if (isValid) {
       setStep(step + 1);
@@ -400,7 +404,18 @@ export default function Checkout() {
           {/* Main Content */}
           <div className="lg:col-span-2">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+              <form 
+                onSubmit={(e) => {
+                  console.log("Form submit event triggered, current step:", step);
+                  if (step !== 3) {
+                    console.log("Preventing form submission - not on payment step");
+                    e.preventDefault();
+                    return false;
+                  }
+                  form.handleSubmit(handleSubmit)(e);
+                }} 
+                className="space-y-6"
+              >
                 {/* Contact Information Step - Only for guest users */}
                 {step === 1 && !isAuthenticated && (
                   <Card>
@@ -931,7 +946,15 @@ export default function Checkout() {
                   <div className="ml-auto">
                     {/* Show Next button until payment step - authenticated users: 2->3, guests: 1->2->3 */}
                     {(isAuthenticated && step < 3) || (!isAuthenticated && step < 3) ? (
-                      <Button type="button" onClick={handleNext} className="kitchen-pro-secondary">
+                      <Button 
+                        type="button" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleNext(e);
+                        }} 
+                        className="kitchen-pro-secondary"
+                      >
                         Next
                       </Button>
                     ) : (
