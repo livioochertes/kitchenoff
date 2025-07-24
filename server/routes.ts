@@ -1078,9 +1078,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('🚚 Available services:', services.length);
       console.log('🚚 First 3 services:', services.slice(0, 3).map(s => ({ id: s.id, name: s.name, type: s.type })));
       
-      // Use the first available pickup point and service
-      const selectedPickupPoint = pickupPoints[0];
+      // Use specified pickup point code 447249
+      const selectedPickupPoint = pickupPoints.find(p => p.id === 447249) || pickupPoints[0];
       const selectedService = services.find(s => s.name.toLowerCase().includes('standard')) || services[0];
+      
+      console.log('📦 Selected pickup point:', { id: selectedPickupPoint.id, name: selectedPickupPoint.name });
+      console.log('🚚 Selected service:', { id: selectedService.id, name: selectedService.name });
 
       // Calculate total parcel weight (estimate 1kg per item if not specified)
       const totalWeight = (order.items?.length || 1) * 1; // 1kg per item estimate
@@ -1111,9 +1114,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('🎯 Found county:', county ? { id: county.id, name: county.name } : 'None');
       console.log('🎯 Found city:', city ? { id: city.id, name: city.name } : 'None');
 
+      // Use your exact working AWB format with pickup point 447249
       const awbData = {
-        pickupPointId: selectedPickupPoint.id,
-        serviceId: selectedService.id,
+        pickupPointId: 447249,
+        serviceId: 7, // Use service ID 7 from your working example  
         packageType: "PARCEL",
         awbPayment: "SENDER",
         recipient: {
@@ -1122,8 +1126,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           personType: "individual",
           companyName: shippingAddr.companyName || `${shippingAddr.firstName} ${shippingAddr.lastName}`,
           address: shippingAddr.address,
-          countyId: county?.id || 123, // Use found county ID or fallback
-          cityId: city?.id || 456, // Use found city ID or fallback
+          countyId: county?.id || 14, // Use found county ID or Cluj fallback
+          cityId: city?.id || 7, // Use found city ID or fallback
         },
         parcels: [{
           weight: totalWeight,
