@@ -133,16 +133,16 @@ export default function ProductDetails() {
               {/* Price */}
               <div className="flex items-center space-x-4 mb-6">
                 <span className="text-3xl font-bold text-primary">
-                  {parseFloat(product.price).toFixed(2)} lei
+                  {parseFloat(product.price).toFixed(2)} {product.currency === 'RON' ? 'lei' : product.currency}
                 </span>
                 {product.compareAtPrice && (
                   <span className="text-xl text-muted-foreground line-through">
-                    {parseFloat(product.compareAtPrice).toFixed(2)} lei
+                    {parseFloat(product.compareAtPrice).toFixed(2)} {product.currency === 'RON' ? 'lei' : product.currency}
                   </span>
                 )}
                 {product.compareAtPrice && (
                   <Badge variant="destructive">
-                    Save {(parseFloat(product.compareAtPrice) - parseFloat(product.price)).toFixed(2)} lei
+                    Save {(parseFloat(product.compareAtPrice) - parseFloat(product.price)).toFixed(2)} {product.currency === 'RON' ? 'lei' : product.currency}
                   </Badge>
                 )}
               </div>

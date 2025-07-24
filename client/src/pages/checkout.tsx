@@ -177,7 +177,9 @@ export default function Checkout() {
     return symbols[curr] || curr;
   };
   
-  const currencySymbol = getCurrencySymbol(currency);
+  // Determine currency from cart items (use first product's currency or fallback to company default)
+  const cartCurrency = cart.length > 0 && cart[0].product?.currency ? cart[0].product.currency : currency;
+  const currencySymbol = cartCurrency === 'RON' ? 'lei' : getCurrencySymbol(cartCurrency);
   
   const vat = subtotal * 0.19; // 19% VAT for Romanian market
   const finalTotal = subtotal + shipping + vat;

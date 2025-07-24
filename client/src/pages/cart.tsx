@@ -46,7 +46,9 @@ export default function Cart() {
     return symbols[curr] || curr;
   };
   
-  const currencySymbol = getCurrencySymbol(currency);
+  // Determine currency from cart items (use first product's currency or fallback to company default)
+  const cartCurrency = validCart.length > 0 && validCart[0].product?.currency ? validCart[0].product.currency : currency;
+  const currencySymbol = cartCurrency === 'RON' ? 'lei' : getCurrencySymbol(cartCurrency);
 
   const handleUpdateQuantity = (itemId: number, newQuantity: number) => {
     if (newQuantity < 1) {
@@ -133,7 +135,7 @@ export default function Cart() {
                           {item.product?.name || "Unknown Product"}
                         </h3>
                         <p className="text-sm text-muted-foreground mb-2">
-                          {item.product?.price ? parseFloat(item.product.price).toFixed(2) : "0.00"} {currencySymbol} each
+                          {item.product?.price ? parseFloat(item.product.price).toFixed(2) : "0.00"} {item.product?.currency === 'RON' ? 'lei' : item.product?.currency || 'RON'} each
                         </p>
                         
                         <div className="flex items-center space-x-4">
@@ -158,7 +160,7 @@ export default function Cart() {
                           
                           <div className="flex items-center space-x-2">
                             <span className="font-semibold">
-                              {item.product?.price ? (parseFloat(item.product.price) * item.quantity).toFixed(2) : "0.00"} {currencySymbol}
+                              {item.product?.price ? (parseFloat(item.product.price) * item.quantity).toFixed(2) : "0.00"} {item.product?.currency === 'RON' ? 'lei' : item.product?.currency || 'RON'}
                             </span>
                             <Button
                               variant="ghost"
