@@ -42,7 +42,7 @@ export default function Cart() {
 
   // Currency symbol helper
   const getCurrencySymbol = (curr: string) => {
-    const symbols = { 'EUR': '€', 'RON': 'lei', 'USD': '$', 'GBP': '£' };
+    const symbols: { [key: string]: string } = { 'EUR': '€', 'RON': 'lei', 'USD': '$', 'GBP': '£' };
     return symbols[curr] || curr;
   };
   
@@ -134,6 +134,11 @@ export default function Cart() {
                         <h3 className="font-semibold text-primary mb-1">
                           {item.product?.name || "Unknown Product"}
                         </h3>
+                        {item.product?.description && (
+                          <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                            {item.product.description}
+                          </p>
+                        )}
                         <p className="text-sm text-muted-foreground mb-2">
                           {item.product?.price ? parseFloat(item.product.price).toFixed(2) : "0.00"} {item.product?.currency === 'RON' ? 'lei' : item.product?.currency || 'RON'} each
                         </p>
