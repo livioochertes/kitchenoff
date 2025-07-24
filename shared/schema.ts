@@ -89,6 +89,7 @@ export const products = pgTable("products", {
   length: decimal("length", { precision: 8, scale: 2 }), // Length in cm
   width: decimal("width", { precision: 8, scale: 2 }), // Width in cm
   height: decimal("height", { precision: 8, scale: 2 }), // Height in cm
+  piecesPerPackage: integer("pieces_per_package").default(1), // Maximum pieces per package for shipping
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

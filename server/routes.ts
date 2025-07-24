@@ -1105,8 +1105,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('📦 Selected pickup point:', { id: selectedPickupPoint.id, name: selectedPickupPoint.name });
       console.log('🚚 Selected service:', { id: selectedService.id, name: selectedService.name });
 
-      // Calculate total parcel weight (estimate 1kg per item if not specified)
-      const totalWeight = (order.items?.length || 1) * 1; // 1kg per item estimate
+      // Calculate parcels based on product logistics data and pieces per package
+      const parcels = [];
+      let parcelCounter = 1;
+
+      // Group order items by product and calculate required packages
+      if (order.items && order.items.length > 0) {
+        console.log('📦 Processing order items for intelligent package calculation:');
+        
+        for (const item of order.items) {
+          const product = await storage.getProduct(item.productId);
+          if (!product) {
+            console.log(`⚠️ Product not found for item ${item.productId}, using defaults`);
+            continue;
+          }
+
+          const quantity = item.quantity;
+          const piecesPerPackage = product.piecesPerPackage || 1;
+          const weight = product.weight || 1;
+          const length = product.length || 10;
+          const width = product.width || 10;
+          const height = product.height || 10;
+
+          // Calculate number of packages needed for this product
+          const packagesNeeded = Math.ceil(quantity / piecesPerPackage);
+          
+          console.log(`📦 Product: ${product.name}`);
+          console.log(`   - Quantity ordered: ${quantity}`);
+          console.log(`   - Pieces per package: ${piecesPerPackage}`);
+          console.log(`   - Packages needed: ${packagesNeeded}`);
+          console.log(`   - Weight per package: ${weight}kg`);
+          console.log(`   - Dimensions: ${length}x${width}x${height}cm`);
+
+          // Create parcels for this product
+          for (let packageNum = 1; packageNum <= packagesNeeded; packageNum++) {
+            const remainingQuantity = quantity - ((packageNum - 1) * piecesPerPackage);
+            const itemsInThisPackage = Math.min(remainingQuantity, piecesPerPackage);
+            const packageWeight = Math.max(1, Math.round(weight * (itemsInThisPackage / piecesPerPackage)));
+
+            parcels.push({
+              weight: packageWeight,
+              length: length,
+              width: width,
+              height: height,
+              awbParcelNumber: `KTO${order.id.toString().padStart(5, '0')}-P${parcelCounter}`,
+            });
+
+            console.log(`   📦 Package ${parcelCounter}: ${itemsInThisPackage} items, ${packageWeight}kg`);
+            parcelCounter++;
+          }
+        }
+      }
+
+      // Fallback: if no parcels created, create one default parcel
+      if (parcels.length === 0) {
+        console.log('⚠️ No parcels calculated, using fallback single parcel');
+        parcels.push({
+          weight: 1,
+          awbParcelNumber: `KTO${order.id.toString().padStart(5, '0')}-P1`,
+        });
+      }
+
+      console.log(`📦 Total parcels to ship: ${parcels.length}`);
+      console.log('📦 Parcel summary:', parcels.map(p => ({ number: p.awbParcelNumber, weight: `${p.weight}kg` })));
 
       // Get real counties and cities from Sameday API for proper ID mapping
       const [counties, cities] = await Promise.all([
@@ -1149,10 +1210,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           countyId: county?.id || 14, // Use found county ID or Cluj fallback
           cityId: city?.id || 7, // Use found city ID or fallback
         },
-        parcels: [{
-          weight: totalWeight,
-          awbParcelNumber: `KTO${order.id.toString().padStart(5, '0')}`,
-        }],
+        parcels: parcels,
         codAmount: 0,
         insuredValue: parseFloat(order.totalAmount.toString()),
         observation: `Order #${order.id} - KitchenOff E-commerce`,

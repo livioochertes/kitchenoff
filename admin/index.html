@@ -4408,7 +4408,8 @@
               weight: editingProduct.weight?.toString() || '',
               length: editingProduct.length?.toString() || '',
               width: editingProduct.width?.toString() || '',
-              height: editingProduct.height?.toString() || ''
+              height: editingProduct.height?.toString() || '',
+              piecesPerPackage: editingProduct.piecesPerPackage?.toString() || ''
             });
             setUploadedImages(editingProduct.images || []);
             setShowAddProductModal(true);
@@ -4987,9 +4988,24 @@
                             placeholder="e.g. 15.00"
                           />
                         </div>
+                        <div className="form-group" style={{display: 'flex', flexDirection: 'column'}}>
+                          <label className="form-label" style={{height: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start'}}>
+                            Pieces per Package
+                            <span style={{fontSize: '11px', color: '#666', fontWeight: 'normal'}}>Max items per package</span>
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            step="1"
+                            className="form-input"
+                            value={productFormData.piecesPerPackage || ''}
+                            onChange={(e) => setProductFormData({...productFormData, piecesPerPackage: e.target.value})}
+                            placeholder="e.g. 6"
+                          />
+                        </div>
                       </div>
                       <div style={{marginTop: '10px', fontSize: '12px', color: '#666'}}>
-                        These dimensions are used for AWB generation and shipping calculations
+                        These dimensions and pieces per package are used for AWB generation and shipping calculations
                       </div>
                     </div>
                     
@@ -5022,7 +5038,8 @@
                             weight: '',
                             length: '',
                             width: '',
-                            height: ''
+                            height: '',
+                            piecesPerPackage: ''
                           });
                           setUploadedImages([]);
                         }}
