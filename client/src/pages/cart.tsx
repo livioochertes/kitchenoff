@@ -133,7 +133,7 @@ export default function Cart() {
                           {item.product?.name || "Unknown Product"}
                         </h3>
                         <p className="text-sm text-muted-foreground mb-2">
-                          ${item.product?.price ? parseFloat(item.product.price).toFixed(2) : "0.00"} each
+                          {item.product?.price ? parseFloat(item.product.price).toFixed(2) : "0.00"} {currencySymbol} each
                         </p>
                         
                         <div className="flex items-center space-x-4">
@@ -158,7 +158,7 @@ export default function Cart() {
                           
                           <div className="flex items-center space-x-2">
                             <span className="font-semibold">
-                              ${item.product?.price ? (parseFloat(item.product.price) * item.quantity).toFixed(2) : "0.00"}
+                              {item.product?.price ? (parseFloat(item.product.price) * item.quantity).toFixed(2) : "0.00"} {currencySymbol}
                             </span>
                             <Button
                               variant="ghost"
