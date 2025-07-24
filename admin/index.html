@@ -4492,10 +4492,7 @@
                         Admin User
                       </label>
                     </div>
-                    <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
-                      <button type="submit" className="btn" style={{background: '#28a745'}}>
-                        {editingUser ? 'Update User' : 'Create User'}
-                      </button>
+                    <div style={{display: 'flex', gap: '10px', marginTop: '20px', justifyContent: 'flex-end'}}>
                       <button
                         type="button"
                         className="btn"
@@ -4513,6 +4510,9 @@
                         }}
                       >
                         Cancel
+                      </button>
+                      <button type="submit" className="btn" style={{background: '#28a745'}}>
+                        {editingUser ? 'Update User' : 'Create User'}
                       </button>
                     </div>
                   </form>
@@ -4993,10 +4993,7 @@
                       </div>
                     </div>
                     
-                    <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
-                      <button type="submit" className="btn" style={{background: '#28a745'}}>
-                        {editingProduct ? 'Update Product' : 'Create Product'}
-                      </button>
+                    <div style={{display: 'flex', gap: '10px', marginTop: '20px', justifyContent: 'flex-end'}}>
                       <button
                         type="button"
                         className="btn"
@@ -5031,6 +5028,9 @@
                         }}
                       >
                         Cancel
+                      </button>
+                      <button type="submit" className="btn" style={{background: '#28a745'}}>
+                        {editingProduct ? 'Update Product' : 'Create Product'}
                       </button>
                     </div>
                   </form>
@@ -6696,10 +6696,7 @@ TOTAL: $${selectedOrder.totalAmount}
                         </p>
                       </div>
                     </div>
-                    <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
-                      <button type="submit" className="btn" style={{background: '#28a745'}}>
-                        {editingCategory ? 'Update Category' : 'Create Category'}
-                      </button>
+                    <div style={{display: 'flex', gap: '10px', marginTop: '20px', justifyContent: 'flex-end'}}>
                       <button
                         type="button"
                         className="btn"
@@ -6710,6 +6707,9 @@ TOTAL: $${selectedOrder.totalAmount}
                         }}
                       >
                         Cancel
+                      </button>
+                      <button type="submit" className="btn" style={{background: '#28a745'}}>
+                        {editingCategory ? 'Update Category' : 'Create Category'}
                       </button>
                     </div>
                   </form>
