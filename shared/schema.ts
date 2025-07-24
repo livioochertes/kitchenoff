@@ -84,6 +84,11 @@ export const products = pgTable("products", {
   ncCode: varchar("nc_code", { length: 50 }),
   cpvCode: varchar("cpv_code", { length: 50 }),
   status: varchar("status", { length: 20 }).default("active"),
+  // Logistics details for shipping
+  weight: decimal("weight", { precision: 8, scale: 3 }), // Weight in kg
+  length: decimal("length", { precision: 8, scale: 2 }), // Length in cm
+  width: decimal("width", { precision: 8, scale: 2 }), // Width in cm
+  height: decimal("height", { precision: 8, scale: 2 }), // Height in cm
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -228,6 +233,22 @@ export const companySettings = pgTable("company_settings", {
   // Shipping settings
   freeShippingThreshold: decimal("free_shipping_threshold", { precision: 10, scale: 2 }).default("500.00"),
   standardShippingCost: decimal("standard_shipping_cost", { precision: 10, scale: 2 }).default("25.00"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Shipping settings table for parcel company configuration
+export const shippingSettings = pgTable("shipping_settings", {
+  id: serial("id").primaryKey(),
+  companyName: varchar("company_name", { length: 100 }).notNull().default("Sameday Courier"),
+  pickupPointCode: varchar("pickup_point_code", { length: 50 }).notNull().default("447249"),
+  username: varchar("username", { length: 100 }).notNull(),
+  password: varchar("password", { length: 255 }).notNull(),
+  apiBaseUrl: varchar("api_base_url", { length: 255 }).default("https://api.sameday.ro"),
+  isActive: boolean("is_active").default(true),
+  serviceId: integer("service_id").default(7), // Default service for shipping
+  defaultPackageType: varchar("default_package_type", { length: 50 }).default("PARCEL"),
+  defaultPaymentMethod: varchar("default_payment_method", { length: 50 }).default("SENDER"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -385,6 +406,12 @@ export const insertCompanySettingsSchema = createInsertSchema(companySettings).o
   updatedAt: true,
 });
 
+export const insertShippingSettingsSchema = createInsertSchema(shippingSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -408,6 +435,8 @@ export type InvoiceItem = typeof invoiceItems.$inferSelect;
 export type InsertInvoiceItem = z.infer<typeof insertInvoiceItemSchema>;
 export type CompanySettings = typeof companySettings.$inferSelect;
 export type InsertCompanySettings = z.infer<typeof insertCompanySettingsSchema>;
+export type ShippingSettings = typeof shippingSettings.$inferSelect;
+export type InsertShippingSettings = z.infer<typeof insertShippingSettingsSchema>;
 
 // Additional types for API responses
 export type ProductWithCategory = Product & { category: Category | null; supplier: Supplier | null };

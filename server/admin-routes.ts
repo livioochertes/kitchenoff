@@ -3069,4 +3069,36 @@ export async function registerAdminRoutes(app: Express) {
       res.status(500).json({ message: "Failed to update company settings" });
     }
   });
+
+  // Shipping/Parcel Company Settings Routes
+  app.get("/admin/api/shipping-settings", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const settings = await storage.getShippingSettings();
+      res.json(settings || {
+        companyName: 'Sameday Courier',
+        pickupPointCode: '447249',
+        username: '',
+        password: '',
+        apiBaseUrl: 'https://api.sameday.ro',
+        isActive: true,
+        serviceId: 7,
+        defaultPackageType: 'PARCEL',
+        defaultPaymentMethod: 'SENDER'
+      });
+    } catch (error) {
+      console.error("Error fetching shipping settings:", error);
+      res.status(500).json({ message: "Failed to fetch shipping settings" });
+    }
+  });
+
+  app.put("/admin/api/shipping-settings", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const settings = req.body;
+      const updatedSettings = await storage.updateShippingSettings(settings);
+      res.json(updatedSettings);
+    } catch (error) {
+      console.error("Error updating shipping settings:", error);
+      res.status(500).json({ message: "Failed to update shipping settings" });
+    }
+  });
 }

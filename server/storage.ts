@@ -10,6 +10,7 @@ import {
   invoices,
   invoiceItems,
   companySettings,
+  shippingSettings,
   type User,
   type InsertUser,
   type Category,
@@ -36,6 +37,8 @@ import {
   type InvoiceWithItems,
   type CompanySettings,
   type InsertCompanySettings,
+  type ShippingSettings,
+  type InsertShippingSettings,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, and, sql } from "drizzle-orm";
@@ -109,6 +112,11 @@ export interface IStorage {
   // Company settings operations
   getCompanySettings(): Promise<CompanySettings | undefined>;
   updateCompanySettings(settings: Partial<InsertCompanySettings>): Promise<CompanySettings>;
+
+  // Shipping settings operations
+  getShippingSettings(): Promise<ShippingSettings | undefined>;
+  updateShippingSettings(settings: Partial<InsertShippingSettings>): Promise<ShippingSettings>;
+  createShippingSettings(settings: InsertShippingSettings): Promise<ShippingSettings>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -884,6 +892,36 @@ export class DatabaseStorage implements IStorage {
       const [newSettings] = await db.insert(companySettings).values([settings]).returning();
       return newSettings;
     }
+  }
+
+  // Shipping settings operations
+  async getShippingSettings(): Promise<ShippingSettings | undefined> {
+    const [settings] = await db.select().from(shippingSettings).limit(1);
+    return settings;
+  }
+
+  async updateShippingSettings(settings: Partial<InsertShippingSettings>): Promise<ShippingSettings> {
+    // Check if settings exist
+    const existing = await this.getShippingSettings();
+    
+    if (existing) {
+      // Update existing settings
+      const [updatedSettings] = await db
+        .update(shippingSettings)
+        .set({ ...settings, updatedAt: new Date() })
+        .where(eq(shippingSettings.id, existing.id))
+        .returning();
+      return updatedSettings;
+    } else {
+      // Create new settings if none exist
+      const [newSettings] = await db.insert(shippingSettings).values([settings]).returning();  
+      return newSettings;
+    }
+  }
+
+  async createShippingSettings(settings: InsertShippingSettings): Promise<ShippingSettings> {
+    const [newSettings] = await db.insert(shippingSettings).values([settings]).returning();
+    return newSettings;
   }
 }
 
