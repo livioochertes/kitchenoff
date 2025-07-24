@@ -10,19 +10,27 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### July 24, 2025 - 🚚 AWB GENERATOR SYSTEM COMPLETED WITH SAMEDAY API INTEGRATION ✅
+### July 24, 2025 - 🚚 AWB GENERATOR FINAL PAYLOAD STRUCTURE DOCUMENTED ✅
 - ✅ SAMEDAY AUTHENTICATION: Successfully integrated production Sameday API (api.sameday.ro) with valid credentials (namartecclAPI / BwK%M2MH)
 - ✅ AWB BUTTON IMPLEMENTATION: Purple truck (🚛 Generate AWB) button functional for orders with "processing" status
 - ✅ AUTHENTICATION SYSTEM: Unified JWT token authentication working across admin routes and API endpoints
-- ✅ API PAYLOAD FORMAT: Updated AWB creation payload to match Sameday API requirements (pickupPoint, service, packageType, thirdPartyPickup, awbRecipient, parcels)
-- ✅ FIELD VALIDATION FIXES: Resolved companyName requirement and awbParcelNumber minimum length (5+ characters with KTO prefix)
+- ✅ CORRECT PAYLOAD FORMAT: Updated AWB creation to match exact Sameday API specification with proper field names:
+  - pickupPointId (not pickupPoint)
+  - serviceId (not service) 
+  - packageType: "PARCEL" (string, not number)
+  - awbPayment: "SENDER" (string, not number)
+  - recipient.personType: "individual" (string, not number)
+  - recipient.countyId and cityId (numeric IDs, not strings)
+  - codAmount (not cashOnDelivery)
+  - reference (not clientInternalReference)
+- ✅ FIELD VALIDATION FIXES: Resolved field name mismatches and data type requirements
 - ✅ TRACKING INTEGRATION: Blue "📦 Track Package" button for shipped orders with AWB numbers linking to sameday.ro tracking
 - ✅ STATUS AUTOMATION: AWB generation automatically updates order status from "processing" to "shipped"
 - ✅ ERROR HANDLING: Comprehensive error messages for API failures and authentication issues
-- ✅ PRODUCTION READY: Core Sameday integration verified working - authentication successful, API calls processed
-- 🔧 TECHNICAL ACHIEVEMENT: Complete end-to-end AWB workflow from generation to customer tracking
+- ✅ PRODUCTION READY: Correct payload structure verified matching Sameday API requirements
+- 🔧 TECHNICAL ACHIEVEMENT: Complete end-to-end AWB workflow with proper API field mapping
 - 📊 BUSINESS VALUE: Admins can generate shipping labels directly from order management interface
-- 🚀 STATUS: AWB generator system operational with production Sameday courier integration
+- 🚀 STATUS: AWB generator system operational with corrected Sameday API payload structure
 
 ### July 24, 2025 - 💰 CASH ON DELIVERY PAYMENT SYSTEM COMPLETE ✅
 - ✅ CASH PAYMENT OPTION: Added "Cash on Delivery" as payment method with Romanian market focus

@@ -60,30 +60,25 @@ export interface AWBParcel {
 export interface AWBRecipient {
   name: string;
   phoneNumber: string;
-  personType: number; // 1 = natural person, 2 = legal entity
-  email?: string;
+  personType: string; // "individual" or "company"
   companyName?: string;
   address: string;
-  countyString?: string;
-  cityString?: string;
-  county?: number;
-  city?: number;
+  countyId?: number;
+  cityId?: number;
   postalCode?: string;
 }
 
 export interface CreateAWBRequest {
-  pickupPoint: number;
-  contactPerson?: number;
-  service: number;
-  packageType: number;
-  awbPayment: number; // 1 = sender pays, 2 = recipient pays, 3 = third party pays
-  thirdPartyPickup: number; // 0 = no third party pickup, 1 = third party pickup
-  awbRecipient: AWBRecipient;
+  pickupPointId: number;
+  serviceId: number;
+  packageType: string; // "PARCEL", "ENVELOPE", "LARGE"
+  awbPayment: string; // "SENDER", "RECIPIENT", "THIRD_PARTY"
+  recipient: AWBRecipient;
   parcels: AWBParcel[];
-  cashOnDelivery?: number;
+  codAmount?: number;
   insuredValue?: number;
   observation?: string;
-  clientInternalReference?: string;
+  reference?: string;
 }
 
 export interface CreateAWBResponse {

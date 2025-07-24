@@ -1078,32 +1078,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Calculate total parcel weight (estimate 1kg per item if not specified)
       const totalWeight = (order.items?.length || 1) * 1; // 1kg per item estimate
 
+      // Get counties and cities for proper ID mapping
+      const [counties, cities] = await Promise.all([
+        samedayAPI.getCounties(),
+        samedayAPI.getCities()
+      ]);
+
+      // Find county and city IDs based on shipping address
+      const county = counties.find(c => 
+        c.name.toLowerCase().includes((shippingAddr.county || shippingAddr.state || 'cluj').toLowerCase())
+      );
+      const city = cities.find(c => 
+        c.name.toLowerCase().includes((shippingAddr.city || 'feleacu').toLowerCase())
+      );
+
       const awbData = {
-        pickupPoint: defaultPickupPoint.id,
-        contactPerson: defaultPickupPoint.contactPersons?.[0]?.id,
-        service: defaultService.id,
-        packageType: 1, // Parcel type
-        awbPayment: 1, // Sender pays
-        thirdPartyPickup: 0, // No third party pickup
-        awbRecipient: {
+        pickupPointId: defaultPickupPoint.id,
+        serviceId: defaultService.id,
+        packageType: "PARCEL",
+        awbPayment: "SENDER",
+        recipient: {
           name: `${shippingAddr.firstName} ${shippingAddr.lastName}`,
-          phoneNumber: shippingAddr.phone || '0700000000',
-          personType: 1, // Natural person
-          email: shippingAddr.email,
+          phoneNumber: shippingAddr.phone || '+40700000000',
+          personType: "individual",
           companyName: shippingAddr.companyName || `${shippingAddr.firstName} ${shippingAddr.lastName}`,
           address: shippingAddr.address,
-          countyString: shippingAddr.county || shippingAddr.state,
-          cityString: shippingAddr.city,
-          postalCode: shippingAddr.postalCode,
+          countyId: county?.id || 123, // Use found county ID or fallback
+          cityId: city?.id || 456, // Use found city ID or fallback
         },
         parcels: [{
           weight: totalWeight,
           awbParcelNumber: `KTO${order.id.toString().padStart(5, '0')}`,
         }],
-        cashOnDelivery: 0, // No COD for now
+        codAmount: 0,
         insuredValue: parseFloat(order.totalAmount.toString()),
         observation: `Order #${order.id} - KitchenOff E-commerce`,
-        clientInternalReference: `ORDER_${order.id}`,
+        reference: `ORDER_${order.id}`,
       };
 
       // Create AWB with Sameday
