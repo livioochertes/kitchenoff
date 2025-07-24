@@ -1500,6 +1500,31 @@
         }
       };
 
+      // AWB Generation Function
+      const generateAWB = async (orderId) => {
+        try {
+          const response = await fetch(`/api/orders/${orderId}/generate-awb`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            fetchOrders(); // Refresh order list to show new AWB
+            alert(`✅ AWB Generated Successfully!\\n\\nAWB Number: ${data.awbNumber}\\nCourier: ${data.courier}\\nCost: ${data.cost} ${data.currency}\\n\\nOrder status updated to "shipped"`);
+          } else {
+            alert(`❌ AWB Generation Failed\\n\\nError: ${data.message || 'Unknown error occurred'}`);
+          }
+        } catch (err) {
+          console.error('AWB generation error:', err);
+          alert('❌ Network error during AWB generation');
+        }
+      };
+
       const acceptOrder = async (orderId) => {
         try {
           const response = await fetch(`/admin/api/orders/${orderId}/accept`, {
@@ -2167,6 +2192,38 @@
                                     }}
                                   >
                                     ✅ Accept
+                                  </button>
+                                )}
+                                {order.status === 'processing' && !order.awbNumber && (
+                                  <button 
+                                    style={{
+                                      padding: '4px 8px', 
+                                      border: 'none', 
+                                      borderRadius: '3px', 
+                                      backgroundColor: '#8e44ad', 
+                                      color: 'white', 
+                                      cursor: 'pointer',
+                                      fontSize: '12px'
+                                    }}
+                                    onClick={() => generateAWB(order.id)}
+                                  >
+                                    🚛 Generate AWB
+                                  </button>
+                                )}
+                                {order.awbNumber && (
+                                  <button 
+                                    style={{
+                                      padding: '4px 8px', 
+                                      border: 'none', 
+                                      borderRadius: '3px', 
+                                      backgroundColor: '#17a2b8', 
+                                      color: 'white', 
+                                      cursor: 'pointer',
+                                      fontSize: '12px'
+                                    }}
+                                    onClick={() => window.open(`https://sameday.ro/track/${order.awbNumber}`, '_blank')}
+                                  >
+                                    📦 Track Package
                                   </button>
                                 )}
                                 <button 
