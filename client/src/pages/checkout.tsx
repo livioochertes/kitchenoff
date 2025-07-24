@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { ArrowLeft, CreditCard, Truck, MapPin, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import { apiRequest } from "@/lib/queryClient";
 
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/header";
 import RevolutPayment from "@/components/revolut-payment";
 import StripePayment from "@/components/stripe-payment";
@@ -72,7 +73,8 @@ const checkoutSchema = z.object({
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
 export default function Checkout() {
-  const [step, setStep] = useState(1);
+  const { user, isAuthenticated } = useAuth();
+  const [step, setStep] = useState(isAuthenticated ? 2 : 1); // Skip contact info for logged-in users
   const [, navigate] = useLocation();
   const { cart, clearCart } = useCart();
   const { toast } = useToast();
@@ -88,9 +90,44 @@ export default function Checkout() {
     },
   });
 
-  const form = useForm<CheckoutFormData>({
-    resolver: zodResolver(checkoutSchema),
-    defaultValues: {
+  // Helper function to get default form values
+  const getDefaultFormValues = (): CheckoutFormData => {
+    if (isAuthenticated && user) {
+      // Pre-populate with user data for authenticated users
+      return {
+        email: user.email || "",
+        shippingAddress: {
+          firstName: user.firstName || "",
+          lastName: user.lastName || "",
+          company: user.companyName || "",
+          address: user.deliveryAddress || user.companyAddress || "",
+          city: user.deliveryCity || user.companyCity || "",
+          state: user.deliveryState || user.companyState || "",
+          county: user.deliveryCounty || user.companyCounty || "",
+          zipCode: user.deliveryZip || user.companyZip || "",
+          country: user.deliveryCountry || user.companyCountry || "Romania",
+          phone: user.billingPhone || "",
+        },
+        billingAddress: {
+          firstName: user.firstName || "",
+          lastName: user.lastName || "",
+          company: user.companyName || "",
+          address: user.companyAddress || "",
+          city: user.companyCity || "",
+          state: user.companyState || "",
+          county: user.companyCounty || "",
+          zipCode: user.companyZip || "",
+          country: user.companyCountry || "Romania",
+          phone: user.billingPhone || "",
+        },
+        paymentMethod: "stripe",
+        sameAsBilling: !user.deliveryAddress, // Default to same if no separate delivery address
+        notes: "",
+      };
+    }
+    
+    // Default empty values for guest users
+    return {
       email: "",
       shippingAddress: {
         firstName: "",
@@ -119,8 +156,25 @@ export default function Checkout() {
       paymentMethod: "stripe",
       sameAsBilling: false,
       notes: "",
-    },
+    };
+  };
+
+  const form = useForm<CheckoutFormData>({
+    resolver: zodResolver(checkoutSchema),
+    defaultValues: getDefaultFormValues(),
   });
+
+  // Update form values when user data becomes available
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const defaultValues = getDefaultFormValues();
+      form.reset(defaultValues);
+      // Skip to address step for authenticated users
+      if (step === 1) {
+        setStep(2);
+      }
+    }
+  }, [isAuthenticated, user, form]);
 
   const sameAsBilling = form.watch("sameAsBilling");
 
@@ -173,7 +227,7 @@ export default function Checkout() {
 
   // Currency symbol helper
   const getCurrencySymbol = (curr: string) => {
-    const symbols = { 'EUR': '€', 'RON': 'lei', 'USD': '$', 'GBP': '£' };
+    const symbols: { [key: string]: string } = { 'EUR': '€', 'RON': 'lei', 'USD': '$', 'GBP': '£' };
     return symbols[curr] || curr;
   };
   
@@ -187,9 +241,11 @@ export default function Checkout() {
   const handleNext = async () => {
     let fieldsToValidate: any[] = [];
     
-    if (step === 1) {
+    if (step === 1 && !isAuthenticated) {
+      // Guest users need to validate email on step 1
       fieldsToValidate = ["email"];
-    } else if (step === 2) {
+    } else if ((step === 1 && isAuthenticated) || (step === 2)) {
+      // Address validation for authenticated users on step 1 or guest users on step 2
       fieldsToValidate = [
         "shippingAddress.firstName",
         "shippingAddress.lastName", 
@@ -268,26 +324,69 @@ export default function Checkout() {
         {/* Progress Steps */}
         <div className="flex items-center justify-center mb-8">
           <div className="flex items-center space-x-4">
-            {[1, 2, 3].map((stepNum) => (
-              <div key={stepNum} className="flex items-center">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                    stepNum <= step
-                      ? "kitchen-pro-secondary text-white"
-                      : "bg-slate-200 text-slate-500"
-                  }`}
-                >
-                  {stepNum}
-                </div>
-                {stepNum < 3 && (
+            {isAuthenticated ? (
+              // For authenticated users: only Address and Payment steps
+              <>
+                <div className="flex items-center">
                   <div
-                    className={`w-16 h-0.5 mx-2 ${
-                      stepNum < step ? "bg-blue-500" : "bg-slate-200"
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                      step >= 2
+                        ? "kitchen-pro-secondary text-white"
+                        : "bg-slate-200 text-slate-500"
                     }`}
-                  />
-                )}
-              </div>
-            ))}
+                  >
+                    1
+                  </div>
+                  <div className="ml-2 text-sm">Address</div>
+                </div>
+                <div
+                  className={`w-16 h-0.5 ${
+                    step >= 3 ? "bg-blue-500" : "bg-slate-200"
+                  }`}
+                />
+                <div className="flex items-center">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                      step >= 3
+                        ? "kitchen-pro-secondary text-white"
+                        : "bg-slate-200 text-slate-500"
+                    }`}
+                  >
+                    2
+                  </div>
+                  <div className="ml-2 text-sm">Payment</div>
+                </div>
+              </>
+            ) : (
+              // For guest users: Contact, Address, and Payment steps
+              <>
+                {[
+                  { num: 1, label: "Contact" },
+                  { num: 2, label: "Address" },
+                  { num: 3, label: "Payment" }
+                ].map((stepInfo, index) => (
+                  <div key={stepInfo.num} className="flex items-center">
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                        stepInfo.num <= step
+                          ? "kitchen-pro-secondary text-white"
+                          : "bg-slate-200 text-slate-500"
+                      }`}
+                    >
+                      {stepInfo.num}
+                    </div>
+                    <div className="ml-2 text-sm">{stepInfo.label}</div>
+                    {index < 2 && (
+                      <div
+                        className={`w-16 h-0.5 mx-2 ${
+                          stepInfo.num < step ? "bg-blue-500" : "bg-slate-200"
+                        }`}
+                      />
+                    )}
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         </div>
 
@@ -296,7 +395,8 @@ export default function Checkout() {
           <div className="lg:col-span-2">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-                {step === 1 && (
+                {/* Contact Information Step - Only for guest users */}
+                {step === 1 && !isAuthenticated && (
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center">
@@ -318,6 +418,25 @@ export default function Checkout() {
                           </FormItem>
                         )}
                       />
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* For authenticated users, show user info summary */}
+                {isAuthenticated && user && step === 2 && (
+                  <Card className="mb-6">
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <User className="h-5 w-5 mr-2" />
+                        Account Information
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-sm text-muted-foreground">
+                        <p><strong>Email:</strong> {user.email}</p>
+                        {user.companyName && <p><strong>Company:</strong> {user.companyName}</p>}
+                        <p className="mt-2 text-xs">Your saved address information will be pre-filled below. You can modify it if needed.</p>
+                      </div>
                     </CardContent>
                   </Card>
                 )}
@@ -758,7 +877,8 @@ export default function Checkout() {
                 )}
 
                 <div className="flex justify-between">
-                  {step > 1 && (
+                  {/* Previous button - only show if not on first step for guest users, or not on step 2 for authenticated users */}
+                  {((step > 1 && !isAuthenticated) || (step > 2 && isAuthenticated)) && (
                     <Button
                       type="button"
                       variant="outline"
@@ -768,11 +888,13 @@ export default function Checkout() {
                     </Button>
                   )}
                   <div className="ml-auto">
+                    {/* Show Next button until payment step (step 3) */}
                     {step < 3 ? (
                       <Button type="button" onClick={handleNext} className="kitchen-pro-secondary">
                         Next
                       </Button>
                     ) : (
+                      /* Payment step - show different UI based on payment method */
                       form.watch("paymentMethod") === "stripe" ? (
                         <div className="text-sm text-gray-600">
                           Use the payment form above to complete your order
