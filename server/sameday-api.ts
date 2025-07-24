@@ -119,7 +119,7 @@ export class SamedayAPI {
       throw new Error(`Sameday authentication failed: ${response.statusText}`);
     }
 
-    const authData: SamedayAuthResponse = await response.json();
+    const authData = await response.json() as SamedayAuthResponse;
     this.token = authData.token;
     this.tokenExpiry = new Date(authData.expire_at);
     
@@ -144,7 +144,7 @@ export class SamedayAPI {
       throw new Error(`Sameday API error: ${response.statusText} - ${errorText}`);
     }
 
-    return response.json();
+    return response.json() as Promise<T>;
   }
 
   async getPickupPoints(): Promise<SamedayPickupPoint[]> {
