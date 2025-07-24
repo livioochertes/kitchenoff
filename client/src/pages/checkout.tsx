@@ -20,6 +20,7 @@ import { apiRequest } from "@/lib/queryClient";
 
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
+import Header from "@/components/header";
 import RevolutPayment from "@/components/revolut-payment";
 import StripePayment from "@/components/stripe-payment";
 import { getCountyOptions, getCitiesForCounty, getCountryOptions, romanianCounties } from "@/utils/location-data";
@@ -178,8 +179,8 @@ export default function Checkout() {
   
   const currencySymbol = getCurrencySymbol(currency);
   
-  const tax = subtotal * 0.08; // 8% tax
-  const finalTotal = subtotal + shipping + tax;
+  const vat = subtotal * 0.19; // 19% VAT for Romanian market
+  const finalTotal = subtotal + shipping + vat;
 
   const handleNext = async () => {
     let fieldsToValidate: any[] = [];
@@ -812,7 +813,7 @@ export default function Checkout() {
                         </p>
                       </div>
                       <p className="text-sm font-medium">
-                        ${(parseFloat(item.product.price) * item.quantity).toFixed(2)}
+                        {(parseFloat(item.product.price) * item.quantity).toFixed(2)} {currencySymbol}
                       </p>
                     </div>
                   ))}
@@ -836,8 +837,8 @@ export default function Checkout() {
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span>Tax:</span>
-                    <span>{tax.toFixed(2)} {currencySymbol}</span>
+                    <span>VAT (19%):</span>
+                    <span>{vat.toFixed(2)} {currencySymbol}</span>
                   </div>
                 </div>
 
