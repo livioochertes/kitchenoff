@@ -4405,10 +4405,10 @@
               cpvCode: editingProduct.cpvCode || '',
               status: editingProduct.status || 'active',
               images: editingProduct.images || [],
-              weight: editingProduct.weight || '',
-              length: editingProduct.length || '',
-              width: editingProduct.width || '',
-              height: editingProduct.height || ''
+              weight: editingProduct.weight?.toString() || '',
+              length: editingProduct.length?.toString() || '',
+              width: editingProduct.width?.toString() || '',
+              height: editingProduct.height?.toString() || ''
             });
             setUploadedImages(editingProduct.images || []);
             setShowAddProductModal(true);

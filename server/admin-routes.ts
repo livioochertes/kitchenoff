@@ -1293,7 +1293,12 @@ export async function registerAdminRoutes(app: Express) {
         slug,
         price: parseFloat(productData.price),
         compareAtPrice: productData.compareAtPrice ? parseFloat(productData.compareAtPrice) : undefined,
-        stockQuantity: parseInt(productData.stockQuantity || 0)
+        stockQuantity: parseInt(productData.stockQuantity || 0),
+        // Convert logistics fields properly - empty strings to null, valid numbers to float
+        weight: productData.weight && productData.weight.trim() !== '' ? parseFloat(productData.weight) : null,
+        length: productData.length && productData.length.trim() !== '' ? parseFloat(productData.length) : null,
+        width: productData.width && productData.width.trim() !== '' ? parseFloat(productData.width) : null,
+        height: productData.height && productData.height.trim() !== '' ? parseFloat(productData.height) : null
       });
 
       res.json({ message: "Product created successfully", product: newProduct });
@@ -1317,7 +1322,12 @@ export async function registerAdminRoutes(app: Express) {
         price: productData.price ? parseFloat(productData.price) : undefined,
         compareAtPrice: productData.compareAtPrice ? parseFloat(productData.compareAtPrice) : undefined,
         stockQuantity: productData.stockQuantity ? parseInt(productData.stockQuantity) : undefined,
-        images: productData.images || []  // Ensure images are properly saved
+        images: productData.images || [],  // Ensure images are properly saved
+        // Convert logistics fields properly - empty strings to null, valid numbers to float
+        weight: productData.weight && productData.weight.trim() !== '' ? parseFloat(productData.weight) : null,
+        length: productData.length && productData.length.trim() !== '' ? parseFloat(productData.length) : null,
+        width: productData.width && productData.width.trim() !== '' ? parseFloat(productData.width) : null,
+        height: productData.height && productData.height.trim() !== '' ? parseFloat(productData.height) : null
       });
       
       console.log('Updated product result:', updatedProduct);
