@@ -1076,7 +1076,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('📦 Available pickup points:', pickupPoints.length);
       console.log('📦 First 3 pickup points:', pickupPoints.slice(0, 3).map(p => ({ id: p.id, name: p.name, county: p.county })));
       console.log('🚚 Available services:', services.length);
-      console.log('🚚 First 3 services:', services.slice(0, 3).map(s => ({ id: s.id, name: s.name, type: s.type })));
+      console.log('🚚 First 3 services:', services.slice(0, 3).map(s => ({ id: s.id, name: s.name })));
       
       // Use specified pickup point code 447249
       const selectedPickupPoint = pickupPoints.find(p => p.id === 447249) || pickupPoints[0];
@@ -1762,7 +1762,7 @@ Always be helpful, professional, and focus on practical solutions. When recommen
       });
     } catch (error) {
       console.error("Error testing Smartbill connection:", error);
-      res.status(500).json({ message: "Failed to test connection", error: error.message });
+      res.status(500).json({ message: "Failed to test connection", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -1790,7 +1790,7 @@ Always be helpful, professional, and focus on practical solutions. When recommen
       res.json(invoice);
     } catch (error) {
       console.error("Error generating test invoice:", error);
-      res.status(500).json({ message: "Failed to generate invoice", error: error.message });
+      res.status(500).json({ message: "Failed to generate invoice", error: error instanceof Error ? error.message : String(error) });
     }
   });
 

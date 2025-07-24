@@ -186,6 +186,7 @@ export class DatabaseStorage implements IStorage {
         id: products.id,
         name: products.name,
         slug: products.slug,
+        description: products.description,
         price: products.price,
         compareAtPrice: products.compareAtPrice,
         categoryId: products.categoryId,
@@ -210,6 +211,12 @@ export class DatabaseStorage implements IStorage {
           id: categories.id,
           name: categories.name,
           slug: categories.slug,
+          description: categories.description,
+          imageUrl: categories.imageUrl,
+          showOnMainTop: categories.showOnMainTop,
+          showOnMainShop: categories.showOnMainShop,
+          sortOrder: categories.sortOrder,
+          createdAt: categories.createdAt,
         },
         supplier: {
           id: suppliers.id,
@@ -287,6 +294,9 @@ export class DatabaseStorage implements IStorage {
           slug: categories.slug,
           description: categories.description,
           imageUrl: categories.imageUrl,
+          showOnMainTop: categories.showOnMainTop,
+          showOnMainShop: categories.showOnMainShop,
+          sortOrder: categories.sortOrder,
           createdAt: categories.createdAt,
         },
         supplier: {
@@ -350,6 +360,9 @@ export class DatabaseStorage implements IStorage {
           slug: categories.slug,
           description: categories.description,
           imageUrl: categories.imageUrl,
+          showOnMainTop: categories.showOnMainTop,
+          showOnMainShop: categories.showOnMainShop,
+          sortOrder: categories.sortOrder,
           createdAt: categories.createdAt,
         },
         supplier: {
@@ -868,7 +881,7 @@ export class DatabaseStorage implements IStorage {
       return updatedSettings;
     } else {
       // Create new settings if none exist
-      const [newSettings] = await db.insert(companySettings).values(settings).returning();
+      const [newSettings] = await db.insert(companySettings).values([settings]).returning();
       return newSettings;
     }
   }
