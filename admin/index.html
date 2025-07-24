@@ -2785,7 +2785,7 @@
                         </tr>
                       </thead>
                       <tbody>
-                        {(showProductSearchFilter ? filteredProducts : products).slice(0, 10).map((product, index) => (
+                        {(showProductSearchFilter ? filteredProducts : products).sort((a, b) => a.name.localeCompare(b.name)).slice(0, 10).map((product, index) => (
                           <tr key={index} style={{borderBottom: '1px solid #eee'}}>
                             <td style={{padding: '12px', textAlign: 'center'}}>
                               <input 
