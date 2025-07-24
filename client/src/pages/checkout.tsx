@@ -282,6 +282,12 @@ export default function Checkout() {
   };
 
   const handleSubmit = (data: CheckoutFormData) => {
+    // Only submit if we're on the final payment step
+    if (step !== 3) {
+      console.log("Form submitted but not on payment step, ignoring");
+      return;
+    }
+    console.log("Submitting order from payment step");
     createOrderMutation.mutate(data);
   };
 
@@ -923,8 +929,8 @@ export default function Checkout() {
                     </Button>
                   )}
                   <div className="ml-auto">
-                    {/* Show Next button until payment step (step 3) */}
-                    {step < 3 ? (
+                    {/* Show Next button until payment step - authenticated users: 2->3, guests: 1->2->3 */}
+                    {(isAuthenticated && step < 3) || (!isAuthenticated && step < 3) ? (
                       <Button type="button" onClick={handleNext} className="kitchen-pro-secondary">
                         Next
                       </Button>
