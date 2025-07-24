@@ -124,7 +124,9 @@ export default function AdminDashboard({ token, admin, onLogout }: AdminDashboar
         throw new Error('Failed to fetch orders');
       }
 
-      return response.json();
+      const ordersData = await response.json();
+      console.log('Orders loaded:', ordersData.slice(0, 3)); // Log first 3 orders
+      return ordersData;
     },
   });
 
@@ -231,6 +233,7 @@ export default function AdminDashboard({ token, admin, onLogout }: AdminDashboar
   // Filtered orders
   const filteredOrders = useMemo(() => {
     console.log("🔍 Filtering orders with:", { orderSearchQuery, orderStatusFilter, ordersCount: orders.length });
+    console.log("🔍 Raw orders data:", orders.slice(0, 2)); // Log first 2 orders for debugging
     let filtered = orders.filter((order: any) => {
       // Search filter
       if (orderSearchQuery) {
