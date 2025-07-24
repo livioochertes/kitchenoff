@@ -389,6 +389,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         deliveryInstructions,
       } = req.body;
 
+      console.log('🔄 Updating user profile data for user:', req.userId);
+      console.log('📊 Profile data received:', {
+        companyName, companyAddress, companyCity, companyCounty, 
+        billingEmail, billingPhone
+      });
+
       const updatedUser = await storage.updateUser(req.userId!, {
         companyName,
         vatNumber,
@@ -409,6 +415,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         deliveryZip,
         deliveryCountry,
         deliveryInstructions,
+      });
+
+      console.log('✅ User profile updated successfully:', {
+        id: updatedUser.id,
+        companyName: updatedUser.companyName,
+        companyAddress: updatedUser.companyAddress,
+        companyCity: updatedUser.companyCity
       });
 
       res.json({ 
@@ -445,7 +458,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         promotions: updatedUser.promotions,
       });
     } catch (error) {
-      console.error("Error updating invoice details:", error);
+      console.error("❌ Error updating invoice details:", error);
+      console.error("❌ Error stack:", (error as Error).stack);
       res.status(500).json({ message: "Failed to update invoice details" });
     }
   });
@@ -657,6 +671,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create invoice items
       const invoiceItems = order.items.map(item => ({
+        invoiceId: 0, // Will be set after invoice creation
         productId: item.productId,
         productName: item.product.name,
         productCode: item.product.productCode || null,
@@ -1099,7 +1114,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         awbCost: awbResponse.cost.toString(),
         awbCurrency: awbResponse.currency,
         awbCreatedAt: new Date(),
-        updatedAt: new Date(),
       });
 
       console.log('✅ AWB generated successfully:', awbResponse.awbNumber);
