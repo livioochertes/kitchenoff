@@ -2626,6 +2626,13 @@ export async function registerAdminRoutes(app: Express) {
           const ncCode = row['NC Code']?.toString()?.trim() || '';
           const cpvCode = row['CPV Code']?.toString()?.trim() || '';
           const supplierName = row['Supplier Name']?.toString()?.trim() || 'KitchenOff Direct';
+          
+          // Extract logistics fields with defaults and validation
+          const weight = Math.max(1, Math.round(parseFloat(row['Weight (kg)']?.toString()?.replace(',', '.') || '1')));
+          const length = parseFloat(row['Length (cm)']?.toString()?.replace(',', '.') || '10');
+          const width = parseFloat(row['Width (cm)']?.toString()?.replace(',', '.') || '10'); 
+          const height = parseFloat(row['Height (cm)']?.toString()?.replace(',', '.') || '10');
+          const piecesPerPackage = Math.max(1, parseInt(row['Pieces Per Package']?.toString() || '1'));
 
           // Validate status
           const validStatuses = ['active', 'inactive', 'draft', 'discontinued'];
@@ -2686,7 +2693,12 @@ export async function registerAdminRoutes(app: Express) {
             productCode: productCode,
             ncCode: ncCode,
             cpvCode: cpvCode,
-            status: status
+            status: status,
+            weight: weight,
+            length: length,
+            width: width,
+            height: height,
+            piecesPerPackage: piecesPerPackage
           };
 
           console.log(`🔄 Creating product with data:`, JSON.stringify(productData, null, 2));

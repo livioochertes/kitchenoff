@@ -1376,7 +1376,12 @@
             'Product Code': 'KO001',
             'NC Code': '3924100000',
             'CPV Code': '39830000-9',
-            'Supplier Name': 'KitchenOff Direct'
+            'Supplier Name': 'KitchenOff Direct',
+            'Weight (kg)': '2.5',
+            'Length (cm)': '25.0',
+            'Width (cm)': '15.0',
+            'Height (cm)': '10.0',
+            'Pieces Per Package': '6'
           },
           {
             'Product Name': 'Another Product',
@@ -1390,7 +1395,12 @@
             'Product Code': 'KO002',
             'NC Code': '4821100000',
             'CPV Code': '30199700-3',
-            'Supplier Name': 'KitchenOff Direct'
+            'Supplier Name': 'KitchenOff Direct',
+            'Weight (kg)': '1.0',
+            'Length (cm)': '20.0',
+            'Width (cm)': '15.0',
+            'Height (cm)': '5.0',
+            'Pieces Per Package': '12'
           }
         ];
 
@@ -1412,7 +1422,12 @@
           { Field: 'Product Code', Required: 'No', Description: 'Alphanumeric product code' },
           { Field: 'NC Code', Required: 'No', Description: 'Nomenclature code' },
           { Field: 'CPV Code', Required: 'No', Description: 'Common Procurement Vocabulary code' },
-          { Field: 'Supplier Name', Required: 'No', Description: 'Supplier name (default: KitchenOff Direct)' }
+          { Field: 'Supplier Name', Required: 'No', Description: 'Supplier name (default: KitchenOff Direct)' },
+          { Field: 'Weight (kg)', Required: 'No', Description: 'Product weight in kilograms (minimum 1kg for parcel compliance)' },
+          { Field: 'Length (cm)', Required: 'No', Description: 'Product length in centimeters for shipping calculations' },
+          { Field: 'Width (cm)', Required: 'No', Description: 'Product width in centimeters for shipping calculations' },
+          { Field: 'Height (cm)', Required: 'No', Description: 'Product height in centimeters for shipping calculations' },
+          { Field: 'Pieces Per Package', Required: 'No', Description: 'Maximum pieces per shipping package for AWB generation (default: 1)' }
         ];
 
         const instructionsWs = XLSX.utils.json_to_sheet(instructionsData);
