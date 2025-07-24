@@ -1084,13 +1084,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         service: defaultService.id,
         packageType: 1, // Parcel type
         awbPayment: 1, // Sender pays
-        thirdPartyPickup: false,
+        thirdPartyPickup: 0, // No third party pickup
         awbRecipient: {
           name: `${shippingAddr.firstName} ${shippingAddr.lastName}`,
           phoneNumber: shippingAddr.phone || '0700000000',
           personType: 1, // Natural person
           email: shippingAddr.email,
-          companyName: shippingAddr.companyName,
+          companyName: shippingAddr.companyName || `${shippingAddr.firstName} ${shippingAddr.lastName}`,
           address: shippingAddr.address,
           countyString: shippingAddr.county || shippingAddr.state,
           cityString: shippingAddr.city,
@@ -1098,7 +1098,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         parcels: [{
           weight: totalWeight,
-          awbParcelNumber: order.id.toString(),
+          awbParcelNumber: `KTO${order.id.toString().padStart(5, '0')}`,
         }],
         cashOnDelivery: 0, // No COD for now
         insuredValue: parseFloat(order.totalAmount.toString()),

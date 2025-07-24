@@ -77,7 +77,7 @@ export interface CreateAWBRequest {
   service: number;
   packageType: number;
   awbPayment: number; // 1 = sender pays, 2 = recipient pays, 3 = third party pays
-  thirdPartyPickup: boolean;
+  thirdPartyPickup: number; // 0 = no third party pickup, 1 = third party pickup
   awbRecipient: AWBRecipient;
   parcels: AWBParcel[];
   cashOnDelivery?: number;
