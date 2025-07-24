@@ -1072,23 +1072,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const shippingAddr = order.shippingAddress as any;
-      const defaultPickupPoint = pickupPoints[0];
-      const defaultService = services[0];
+      
+      console.log('📦 Available pickup points:', pickupPoints.length);
+      console.log('📦 First 3 pickup points:', pickupPoints.slice(0, 3).map(p => ({ id: p.id, name: p.name, county: p.county })));
+      console.log('🚚 Available services:', services.length);
+      console.log('🚚 First 3 services:', services.slice(0, 3).map(s => ({ id: s.id, name: s.name, type: s.type })));
+      
+      // Use the first available pickup point and service
+      const selectedPickupPoint = pickupPoints[0];
+      const selectedService = services.find(s => s.name.toLowerCase().includes('standard')) || services[0];
 
       // Calculate total parcel weight (estimate 1kg per item if not specified)
       const totalWeight = (order.items?.length || 1) * 1; // 1kg per item estimate
 
-      // Use hardcoded county and city IDs from your example for now
-      console.log('📍 Using example county/city IDs from your correct format');
-      const county = { id: 123, name: 'Cluj' }; // From your example
-      const city = { id: 456, name: 'Feleacu' }; // From your example
+      // Get real counties and cities from Sameday API for proper ID mapping
+      const [counties, cities] = await Promise.all([
+        samedayAPI.getCounties(),
+        samedayAPI.getCities()
+      ]);
+
+      console.log('📍 Total counties available:', counties.length);
+      console.log('📍 First 3 counties:', counties.slice(0, 3).map(c => ({ id: c.id, name: c.name })));
+      console.log('📍 Total cities available:', cities.length);
+      console.log('📍 First 3 cities:', cities.slice(0, 3).map(c => ({ id: c.id, name: c.name })));
+
+      // Find county and city IDs based on shipping address
+      const targetCounty = (shippingAddr.county || shippingAddr.state || 'Cluj').toLowerCase();
+      const targetCity = (shippingAddr.city || 'Feleacu').toLowerCase();
       
-      console.log('🎯 Using county:', county);
-      console.log('🎯 Using city:', city);
+      const county = counties.find(c => 
+        c.name.toLowerCase().includes(targetCounty) || targetCounty.includes(c.name.toLowerCase())
+      ) || counties[0]; // Use first available county as fallback
+      
+      const city = cities.find(c => 
+        c.name.toLowerCase().includes(targetCity) || targetCity.includes(c.name.toLowerCase())
+      ) || cities[0]; // Use first available city as fallback
+      
+      console.log('🎯 Found county:', county ? { id: county.id, name: county.name } : 'None');
+      console.log('🎯 Found city:', city ? { id: city.id, name: city.name } : 'None');
 
       const awbData = {
-        pickupPointId: defaultPickupPoint.id,
-        serviceId: defaultService.id,
+        pickupPointId: selectedPickupPoint.id,
+        serviceId: selectedService.id,
         packageType: "PARCEL",
         awbPayment: "SENDER",
         recipient: {
