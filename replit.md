@@ -10,7 +10,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### July 24, 2025 - 📦 LOGISTICS FIELDS DATABASE INTEGRATION COMPLETE ✅
+### July 24, 2025 - 📦 COMPLETE LOGISTICS FIELDS SYSTEM WITH PARCEL COMPANY COMPLIANCE ✅
 - ✅ CRITICAL FIX: Resolved missing logistics fields in product database queries - weight, length, width, height now load properly
 - ✅ STORAGE LAYER UPDATE: Added logistics fields to all product select queries (getProducts, getProduct, getProductBySlug, orderItems)
 - ✅ ADMIN FORM STATE: Fixed productFormData initialization and reset functions to include all logistics fields
@@ -20,10 +20,16 @@ Preferred communication style: Simple, everyday language.
 - ✅ FORM VALIDATION: All logistics fields now properly integrated with React state management and form submission
 - ✅ DEBUG LOGGING: Added comprehensive debugging to track product data loading and field population
 - ✅ TYPESCRIPT FIXES: Resolved compilation errors related to missing logistics fields in product queries
+- ✅ PARCEL COMPANY COMPLIANCE: Implemented weight validation (minimum 1kg, whole number increments only)
+- ✅ BACKEND VALIDATION: Added Math.max(1, Math.round()) to ensure weight meets parcel company requirements
+- ✅ FRONTEND VALIDATION: Added min="1" step="1" attributes to weight input for proper user guidance
+- ✅ LAYOUT OPTIMIZATION: Fixed input box alignment issues with consistent 40px label heights and flexbox structure
+- ✅ VISUAL CONSISTENCY: Standardized dimension fields with step="0.01" precision and proper placeholders
+- ✅ PERFECT ALIGNMENT: Weight and Length inputs now align perfectly horizontally using invisible placeholder spans
 - ✅ COMPLETE INTEGRATION: Logistics fields now work end-to-end from database storage to admin interface display
-- 🔧 TECHNICAL ACHIEVEMENT: Complete logistics data persistence system with proper admin interface integration
-- 📊 BUSINESS VALUE: Admins can now set and edit product dimensions for AWB generation and shipping calculations
-- 🚀 STATUS: Logistics fields system fully operational - all product dimensions save and load correctly in admin interface
+- 🔧 TECHNICAL ACHIEVEMENT: Complete logistics data persistence system with parcel company weight compliance and perfect UI alignment
+- 📊 BUSINESS VALUE: Admins can now set and edit product dimensions for AWB generation with proper weight validation
+- 🚀 STATUS: Logistics fields system fully operational with parcel company compliance - ready for shipping integration
 
 ### July 24, 2025 - 🔧 APPLICATION STARTUP DEBUG AND FIX COMPLETE ✅
 - ✅ CRITICAL STARTUP ISSUE RESOLVED: Fixed server startup failure that was preventing application from running
