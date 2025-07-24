@@ -4380,12 +4380,20 @@
         
         React.useEffect(() => {
           if (editingProduct) {
+            console.log('Loading product for editing:', editingProduct);
+            console.log('Logistics data:', {
+              weight: editingProduct.weight,
+              length: editingProduct.length,
+              width: editingProduct.width,
+              height: editingProduct.height
+            });
             setProductFormData({
               name: editingProduct.name || '',
               description: editingProduct.description || '',
               price: editingProduct.price || '',
               compareAtPrice: editingProduct.compareAtPrice || '',
               categoryId: editingProduct.categoryId || '',
+              supplierId: editingProduct.supplierId || '',
               imageUrl: editingProduct.imageUrl || '',
               stockQuantity: editingProduct.stockQuantity || '',
               featured: editingProduct.featured || false,
