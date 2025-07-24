@@ -56,7 +56,7 @@ const checkoutSchema = z.object({
   email: z.string().email("Invalid email address"),
   shippingAddress: shippingAddressSchema,
   billingAddress: billingAddressSchema,
-  paymentMethod: z.enum(["revolut", "stripe", "paypal"]),
+  paymentMethod: z.enum(["revolut", "stripe", "paypal", "cash"]),
   sameAsBilling: z.boolean().default(false),
   notes: z.string().optional(),
 }).refine((data) => {
@@ -120,7 +120,7 @@ export default function Checkout() {
           country: user.companyCountry || "Romania",
           phone: user.billingPhone || "",
         },
-        paymentMethod: "stripe",
+        paymentMethod: "cash",
         sameAsBilling: !user.deliveryAddress, // Default to same if no separate delivery address
         notes: "",
       };
@@ -153,7 +153,7 @@ export default function Checkout() {
         country: "Romania",
         phone: "",
       },
-      paymentMethod: "stripe",
+      paymentMethod: "cash",
       sameAsBilling: false,
       notes: "",
     };
@@ -796,6 +796,13 @@ export default function Checkout() {
                                       PayPal
                                     </Label>
                                   </div>
+                                  <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                                    <RadioGroupItem value="cash" id="cash" />
+                                    <Label htmlFor="cash" className="flex items-center space-x-2 cursor-pointer">
+                                      <span>Cash on Delivery</span>
+                                      <Badge variant="outline">Pay when delivered</Badge>
+                                    </Label>
+                                  </div>
                                 </RadioGroup>
                               </FormControl>
                               <FormMessage />
@@ -851,6 +858,34 @@ export default function Checkout() {
                       />
                     )}
 
+                    {/* Cash on Delivery Information */}
+                    {form.watch("paymentMethod") === "cash" && (
+                      <Card className="border-green-200 bg-green-50">
+                        <CardHeader>
+                          <CardTitle className="flex items-center text-green-800">
+                            <div className="h-5 w-5 mr-2">💰</div>
+                            Cash on Delivery
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="text-green-700">
+                          <div className="space-y-2">
+                            <p className="text-sm">
+                              • You will pay in cash when your order is delivered to your address
+                            </p>
+                            <p className="text-sm">
+                              • Please have the exact amount ready: <strong>{getCurrencySymbol(currency)} {finalTotal.toFixed(2)}</strong>
+                            </p>
+                            <p className="text-sm">
+                              • Our delivery agent will provide a receipt upon payment
+                            </p>
+                            <p className="text-sm">
+                              • Delivery time: 1-3 business days in Bucharest, 2-5 days nationwide
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
                     <Card>
                       <CardHeader>
                         <CardTitle>Order Notes</CardTitle>
@@ -899,6 +934,14 @@ export default function Checkout() {
                         <div className="text-sm text-gray-600">
                           Use the payment form above to complete your order
                         </div>
+                      ) : form.watch("paymentMethod") === "cash" ? (
+                        <Button
+                          type="submit"
+                          disabled={createOrderMutation.isPending}
+                          className="kitchen-pro-secondary"
+                        >
+                          {createOrderMutation.isPending ? "Processing..." : "Confirm Cash on Delivery Order"}
+                        </Button>
                       ) : (
                         <Button
                           type="submit"
