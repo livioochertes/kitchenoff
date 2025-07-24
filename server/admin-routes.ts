@@ -1294,8 +1294,8 @@ export async function registerAdminRoutes(app: Express) {
         price: parseFloat(productData.price),
         compareAtPrice: productData.compareAtPrice ? parseFloat(productData.compareAtPrice) : undefined,
         stockQuantity: parseInt(productData.stockQuantity || 0),
-        // Convert logistics fields properly - empty strings to null, valid numbers to float
-        weight: productData.weight && productData.weight.trim() !== '' ? parseFloat(productData.weight) : null,
+        // Convert logistics fields properly - weight must be minimum 1kg with 1kg increments
+        weight: productData.weight && productData.weight.trim() !== '' ? Math.max(1, Math.round(parseFloat(productData.weight))) : null,
         length: productData.length && productData.length.trim() !== '' ? parseFloat(productData.length) : null,
         width: productData.width && productData.width.trim() !== '' ? parseFloat(productData.width) : null,
         height: productData.height && productData.height.trim() !== '' ? parseFloat(productData.height) : null
@@ -1323,8 +1323,8 @@ export async function registerAdminRoutes(app: Express) {
         compareAtPrice: productData.compareAtPrice ? parseFloat(productData.compareAtPrice) : undefined,
         stockQuantity: productData.stockQuantity ? parseInt(productData.stockQuantity) : undefined,
         images: productData.images || [],  // Ensure images are properly saved
-        // Convert logistics fields properly - empty strings to null, valid numbers to float
-        weight: productData.weight && productData.weight.trim() !== '' ? parseFloat(productData.weight) : null,
+        // Convert logistics fields properly - weight must be minimum 1kg with 1kg increments
+        weight: productData.weight && productData.weight.trim() !== '' ? Math.max(1, Math.round(parseFloat(productData.weight))) : null,
         length: productData.length && productData.length.trim() !== '' ? parseFloat(productData.length) : null,
         width: productData.width && productData.width.trim() !== '' ? parseFloat(productData.width) : null,
         height: productData.height && productData.height.trim() !== '' ? parseFloat(productData.height) : null
