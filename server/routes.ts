@@ -37,8 +37,28 @@ const authenticateToken = async (req: AuthRequest, res: Response, next: NextFunc
     }
 
     console.log('🔍 Attempting to verify token:', token?.substring(0, 20) + '...');
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key") as any;
-    console.log('✅ Token decoded successfully:', { id: decoded.id, email: decoded.email });
+    
+    let decoded: any;
+    let isAdminToken = false;
+    
+    // Try to decode as regular user token first
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key") as any;
+      console.log('✅ Token decoded as user token:', { id: decoded.id, email: decoded.email });
+    } catch (err) {
+      // Try to decode as admin token
+      try {
+        decoded = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key") as any;
+        if (decoded.adminId) {
+          isAdminToken = true;
+          decoded.id = decoded.adminId; // Map adminId to id for consistency
+          console.log('✅ Token decoded as admin token:', { adminId: decoded.adminId });
+        }
+      } catch (adminErr) {
+        console.log('❌ Token verification failed for both user and admin:', err);
+        return res.status(403).json({ message: "Invalid token" });
+      }
+    }
     
     // Get user to check admin status
     const user = await storage.getUser(decoded.id);
@@ -49,8 +69,8 @@ const authenticateToken = async (req: AuthRequest, res: Response, next: NextFunc
 
     console.log('✅ User found:', { id: user.id, email: user.email, isAdmin: user.isAdmin });
     req.userId = decoded.id;
-    req.isAdmin = user.isAdmin || false;
-    req.user = { id: user.id, email: user.email, isAdmin: user.isAdmin || false };
+    req.isAdmin = user.isAdmin || isAdminToken;
+    req.user = { id: user.id, email: user.email, isAdmin: user.isAdmin || isAdminToken };
     next();
   } catch (error: any) {
     console.log('❌ Token verification failed:', error.message);
