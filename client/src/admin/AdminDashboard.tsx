@@ -997,7 +997,10 @@ function AWBActions({ order, onAWBGenerated }: AWBActionsProps) {
   }
 
   // Show AWB generation button for processing orders
+  console.log('AWBActions - Order status:', order.status, 'Order ID:', order.id, 'AWB Number:', order.awbNumber);
+  
   if (order.status === 'processing') {
+    console.log('Showing AWB generation button for order:', order.id);
     return (
       <Button
         variant="outline"
