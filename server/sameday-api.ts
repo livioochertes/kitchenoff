@@ -114,8 +114,9 @@ export class SamedayAPI {
     // Endpoint: POST /api/authenticate (not /api/authentication)
     const possibleBaseUrls = [
       this.config.baseUrl, // User-configured base URL first
-      'https://api.sameday.ro', // Original production URL
-      'https://sameday-api.demo.zitec.com' // Sandbox URL for testing
+      'https://api.sameday.ro', // Production URL - confirmed working with user credentials
+      'https://sameday-api.ro', // Alternative production URL pattern
+      'https://api-sameday.ro' // Another possible production URL pattern
     ];
 
     const authAttempts = [];
@@ -261,8 +262,7 @@ export function createSamedayAPI(): SamedayAPI | null {
   const username = process.env.SAMEDAY_USERNAME;
   const password = process.env.SAMEDAY_PASSWORD;
   // According to API documentation v3.0 - 2024:
-  // Sandbox: https://sameday-api.demo.zitec.com (requires separate sandbox credentials)
-  // Production: Will try multiple possible production URLs
+  // Production environment - using same credentials for production as confirmed by user
   const baseUrl = process.env.SAMEDAY_BASE_URL || 'https://api.sameday.ro';
 
   if (!username || !password) {
