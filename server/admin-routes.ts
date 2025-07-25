@@ -916,9 +916,9 @@ export async function registerAdminRoutes(app: Express) {
         return res.status(404).json({ success: false, message: 'Order not found' });
       }
 
-      // Check if order is already accepted
-      if (order.status === 'accepted') {
-        return res.status(400).json({ success: false, message: 'Order is already accepted' });
+      // Check if order is already processed
+      if (order.status === 'processing' || order.status === 'shipped' || order.status === 'delivered') {
+        return res.status(400).json({ success: false, message: 'Order has already been processed' });
       }
 
       // Accept the order

@@ -2197,7 +2197,7 @@
                                       fontSize: '12px'
                                     }}
                                     onClick={async () => {
-                                      if (confirm(`Accept order #${order.id}?\n\nThis will:\n• Update order status to 'accepted'\n• Send confirmation email to customer\n• Send notification to logistics team`)) {
+                                      if (confirm(`Accept order #${order.id}?\n\nThis will:\n• Update order status to 'processing'\n• Send confirmation email to customer\n• Send notification to logistics team\n• Enable AWB generation button`)) {
                                         const result = await acceptOrder(order.id);
                                         if (result.success) {
                                           let message = 'Order accepted successfully!';
