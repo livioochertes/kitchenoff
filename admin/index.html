@@ -1525,7 +1525,7 @@
       // AWB Generation Function
       const generateAWB = async (orderId) => {
         try {
-          const response = await fetch(`/api/orders/${orderId}/generate-awb`, {
+          const response = await fetch(`/admin/api/orders/${orderId}/generate-awb`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
