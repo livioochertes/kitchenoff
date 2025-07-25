@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 
 export interface SamedayConfig {
-  baseUrl: string;
+  baseUrl: string; // https://sameday-api.demo.zitec.com for sandbox, production URL to be confirmed
   username: string;
   password: string;
 }
@@ -110,50 +110,47 @@ export class SamedayAPI {
 
     console.log('🔄 Authenticating with Sameday API...');
     
-    // Try multiple authentication endpoints and methods
-    const authAttempts = [
-      // Primary endpoint with JSON body
-      {
-        url: `${this.config.baseUrl}/api/authentication`,
-        method: 'POST',
-        headers: {
-          'X-AUTH-USERNAME': this.config.username,
-          'X-AUTH-PASSWORD': this.config.password,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ remember_me: 1 })
-      },
-      // Query parameter approach
-      {
-        url: `${this.config.baseUrl}/api/authentication?remember_me=1`,
-        method: 'POST',
-        headers: {
-          'X-AUTH-USERNAME': this.config.username,
-          'X-AUTH-PASSWORD': this.config.password,
-          'Content-Type': 'application/json',
-        }
-      },
-      // Alternative endpoints
-      {
-        url: `${this.config.baseUrl}/authenticate`,
-        method: 'POST',
-        headers: {
-          'X-AUTH-USERNAME': this.config.username,
-          'X-AUTH-PASSWORD': this.config.password,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ remember_me: 1 })
-      }
+    // According to the latest API documentation v3.0 - 2024
+    // Endpoint: POST /api/authenticate (not /api/authentication)
+    const possibleBaseUrls = [
+      this.config.baseUrl, // User-configured base URL first
+      'https://api.sameday.ro', // Original production URL
+      'https://sameday-api.demo.zitec.com' // Sandbox URL for testing
     ];
+
+    const authAttempts = [];
+    
+    // Try each base URL with different authentication approaches
+    for (const baseUrl of possibleBaseUrls) {
+      authAttempts.push(
+        {
+          name: `${baseUrl} - remember_me=1`,
+          url: `${baseUrl}/api/authenticate?remember_me=1`,
+          method: 'POST',
+          headers: {
+            'X-AUTH-USERNAME': this.config.username,
+            'X-AUTH-PASSWORD': this.config.password,
+          }
+        },
+        {
+          name: `${baseUrl} - basic auth`,
+          url: `${baseUrl}/api/authenticate`,
+          method: 'POST',
+          headers: {
+            'X-AUTH-USERNAME': this.config.username,
+            'X-AUTH-PASSWORD': this.config.password,
+          }
+        }
+      );
+    }
 
     for (const attempt of authAttempts) {
       try {
-        console.log(`🔍 Trying: ${attempt.url}`);
+        console.log(`🔍 Trying ${attempt.name}: ${attempt.url}`);
         
         const response = await fetch(attempt.url, {
-          method: attempt.method,
-          headers: attempt.headers,
-          body: attempt.body
+          method: attempt.method as string,
+          headers: attempt.headers
         });
 
         console.log(`📡 Response: ${response.status}, Content-Type: ${response.headers.get('content-type')}`);
@@ -172,10 +169,10 @@ export class SamedayAPI {
         }
         
         const errorText = await response.text();
-        console.warn(`❌ Attempt failed: ${response.status} - ${errorText.substring(0, 200)}`);
+        console.warn(`❌ ${attempt.name} failed: ${response.status} - ${errorText.substring(0, 200)}`);
         
       } catch (error: any) {
-        console.warn(`❌ Network error:`, error.message);
+        console.warn(`❌ ${attempt.name} network error:`, error.message);
       }
     }
 
@@ -190,7 +187,7 @@ export class SamedayAPI {
       headers: {
         'X-AUTH-TOKEN': token,
         'Content-Type': 'application/json',
-        ...options.headers,
+        ...(options.headers as Record<string, string>),
       },
     });
 
@@ -263,6 +260,9 @@ export class SamedayAPI {
 export function createSamedayAPI(): SamedayAPI | null {
   const username = process.env.SAMEDAY_USERNAME;
   const password = process.env.SAMEDAY_PASSWORD;
+  // According to API documentation v3.0 - 2024:
+  // Sandbox: https://sameday-api.demo.zitec.com (requires separate sandbox credentials)
+  // Production: Will try multiple possible production URLs
   const baseUrl = process.env.SAMEDAY_BASE_URL || 'https://api.sameday.ro';
 
   if (!username || !password) {
