@@ -102,30 +102,84 @@ export class SamedayAPI {
   }
 
   private async authenticate(): Promise<string> {
+    // Return cached token if still valid
     if (this.token && this.tokenExpiry && new Date() < this.tokenExpiry) {
+      console.log('🔑 Using cached Sameday token (expires:', this.tokenExpiry.toISOString(), ')');
       return this.token;
     }
 
-    const response = await fetch(`${this.config.baseUrl}/api/authentication?remember_me=1`, {
-      method: 'POST',
-      headers: {
-        'X-AUTH-USERNAME': this.config.username,
-        'X-AUTH-PASSWORD': this.config.password,
+    console.log('🔄 Authenticating with Sameday API...');
+    
+    // Try multiple authentication endpoints and methods
+    const authAttempts = [
+      // Primary endpoint with JSON body
+      {
+        url: `${this.config.baseUrl}/api/authentication`,
+        method: 'POST',
+        headers: {
+          'X-AUTH-USERNAME': this.config.username,
+          'X-AUTH-PASSWORD': this.config.password,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ remember_me: 1 })
+      },
+      // Query parameter approach
+      {
+        url: `${this.config.baseUrl}/api/authentication?remember_me=1`,
+        method: 'POST',
+        headers: {
+          'X-AUTH-USERNAME': this.config.username,
+          'X-AUTH-PASSWORD': this.config.password,
+          'Content-Type': 'application/json',
+        }
+      },
+      // Alternative endpoints
+      {
+        url: `${this.config.baseUrl}/authenticate`,
+        method: 'POST',
+        headers: {
+          'X-AUTH-USERNAME': this.config.username,
+          'X-AUTH-PASSWORD': this.config.password,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ remember_me: 1 })
       }
-    });
+    ];
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Sameday authentication failed: ${response.status} ${response.statusText} - ${errorText}`);
+    for (const attempt of authAttempts) {
+      try {
+        console.log(`🔍 Trying: ${attempt.url}`);
+        
+        const response = await fetch(attempt.url, {
+          method: attempt.method,
+          headers: attempt.headers,
+          body: attempt.body
+        });
+
+        console.log(`📡 Response: ${response.status}, Content-Type: ${response.headers.get('content-type')}`);
+
+        if (response.ok) {
+          const contentType = response.headers.get('content-type');
+          if (contentType?.includes('application/json')) {
+            const authData = await response.json() as SamedayAuthResponse;
+            this.token = authData.token;
+            // Parse the date format from Sameday: "2018-05-25 23:07"
+            this.tokenExpiry = new Date(authData.expire_at.replace(' ', 'T') + ':00');
+            
+            console.log('✅ Sameday authentication successful, token expires:', authData.expire_at);
+            return this.token;
+          }
+        }
+        
+        const errorText = await response.text();
+        console.warn(`❌ Attempt failed: ${response.status} - ${errorText.substring(0, 200)}`);
+        
+      } catch (error: any) {
+        console.warn(`❌ Network error:`, error.message);
+      }
     }
 
-    const authData = await response.json() as SamedayAuthResponse;
-    this.token = authData.token;
-    // Parse the date format from Sameday: "2018-05-25 23:07"
-    this.tokenExpiry = new Date(authData.expire_at.replace(' ', 'T') + ':00');
-    
-    console.log('✅ Sameday authentication successful, token expires:', authData.expire_at);
-    return this.token;
+    throw new Error('All Sameday API authentication attempts failed. Please verify credentials and API endpoints.');
   }
 
   private async apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
