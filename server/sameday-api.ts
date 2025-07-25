@@ -8,7 +8,7 @@ export interface SamedayConfig {
 
 export interface SamedayAuthResponse {
   token: string;
-  expire_at: string;
+  expire_at: string; // Format: "2018-05-25 23:07"
 }
 
 export interface SamedayPickupPoint {
@@ -106,22 +106,23 @@ export class SamedayAPI {
       return this.token;
     }
 
-    const response = await fetch(`${this.config.baseUrl}/api/authenticate`, {
+    const response = await fetch(`${this.config.baseUrl}/api/authentication?remember_me=1`, {
       method: 'POST',
       headers: {
         'X-AUTH-USERNAME': this.config.username,
         'X-AUTH-PASSWORD': this.config.password,
-        'Content-Type': 'application/json',
-      },
+      }
     });
 
     if (!response.ok) {
-      throw new Error(`Sameday authentication failed: ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`Sameday authentication failed: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
     const authData = await response.json() as SamedayAuthResponse;
     this.token = authData.token;
-    this.tokenExpiry = new Date(authData.expire_at);
+    // Parse the date format from Sameday: "2018-05-25 23:07"
+    this.tokenExpiry = new Date(authData.expire_at.replace(' ', 'T') + ':00');
     
     console.log('✅ Sameday authentication successful, token expires:', authData.expire_at);
     return this.token;
