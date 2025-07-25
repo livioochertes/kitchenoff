@@ -2224,9 +2224,8 @@ export async function registerAdminRoutes(app: Express) {
       const pickupPoint = pickupPoints[0];
       const service = services[0];
 
-      // Get order items to calculate parcels
-      const orderItems = await storage.getOrderItems(orderId);
-      if (!orderItems || orderItems.length === 0) {
+      // Check if order has items
+      if (!order.items || order.items.length === 0) {
         return res.status(400).json({ message: "Order has no items" });
       }
 
@@ -2234,7 +2233,7 @@ export async function registerAdminRoutes(app: Express) {
       const parcels = [];
       let parcelIndex = 1;
 
-      for (const item of orderItems) {
+      for (const item of order.items) {
         const product = await storage.getProduct(item.productId);
         if (!product) continue;
 

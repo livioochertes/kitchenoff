@@ -37,6 +37,8 @@ Preferred communication style: Simple, everyday language.
 - ✅ AUTHENTICATION RESOLUTION: Fixed admin token authentication issue by using admin-specific routes with authenticateAdmin middleware
 - ✅ TOKEN STRUCTURE FIX: Admin tokens with `adminId` field now properly handled by admin authentication middleware
 - ✅ ENDPOINT MIGRATION: Updated admin interface to use admin-specific AWB endpoint instead of regular user endpoint
+- ✅ ORDER ITEMS ACCESS FIX: Corrected AWB generation to use `order.items` from OrderWithItems instead of non-existent `getOrderItems()` method
+- ✅ STORAGE INTERFACE COMPATIBILITY: Fixed method calls to align with existing storage interface structure for order item access
 
 ### July 24, 2025 - 🎉 EXCEL LOGISTICS IMPORT SYSTEM FULLY OPERATIONAL AND TESTED ✅
 - ✅ COMPLETE SUCCESS: Excel import system working perfectly with all logistics fields processing correctly
