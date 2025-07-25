@@ -1038,6 +1038,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const order = await storage.createOrder(orderData, items);
       
+      // Get full order with items for email notification
+      const fullOrder = await storage.getOrder(order.id);
+      
+      // Get user details for email notification
+      const user = await storage.getUser(req.userId!);
+      
+      if (fullOrder && user) {
+        // Import and send new order notification email immediately
+        const { sendNewOrderNotificationEmail } = await import('./email-service.js');
+        sendNewOrderNotificationEmail(fullOrder, user).catch(error => {
+          console.error('Failed to send new order notification email:', error);
+        });
+      }
+      
       // Clear cart after successful order
       await storage.clearCart(req.userId!);
       

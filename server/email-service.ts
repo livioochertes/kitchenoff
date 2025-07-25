@@ -217,6 +217,191 @@ export async function sendOrderConfirmationEmail(
   });
 }
 
+export async function sendNewOrderNotificationEmail(
+  order: OrderWithItems,
+  user: User,
+  logisticsEmail?: string
+): Promise<boolean> {
+  // Get logistics email from company settings if not provided
+  if (!logisticsEmail) {
+    logisticsEmail = await getLogisticsEmailFromSettings() || 'liviu.chertes@gmail.com';
+  }
+  const shippingAddress = order.shippingAddress as any;
+  const billingAddress = order.billingAddress as any;
+  
+  // Create admin URL for order management
+  const adminOrderUrl = `https://kitchen-off.com/admin#orders-${order.id}`;
+  
+  const orderItemsText = order.items
+    .map(item => `- ${item.product.name} (Qty: ${item.quantity}) - ${item.totalPrice} lei`)
+    .join('\n');
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>New Order Created - KitchenOff</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #2c3e50; margin-bottom: 10px;">KitchenOff</h1>
+        <h2 style="color: #f39c12; margin-top: 0;">🔔 New Order Created</h2>
+      </div>
+      
+      <div style="background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
+        <h3 style="margin-top: 0; color: #856404;">Order Awaiting Review</h3>
+        <p><strong>Order ID:</strong> #${order.id}</p>
+        <p><strong>Order Date:</strong> ${new Date(order.createdAt!).toLocaleDateString()}</p>
+        <p><strong>Customer:</strong> ${user.firstName} ${user.lastName}</p>
+        <p><strong>Customer Email:</strong> ${user.email}</p>
+        <p><strong>Customer Phone:</strong> ${shippingAddress.phone}</p>
+        <p><strong>Total Amount:</strong> ${order.totalAmount} lei</p>
+        <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
+        <p><strong>Status:</strong> <span style="color: #f39c12; font-weight: bold;">PENDING REVIEW</span></p>
+      </div>
+
+      <div style="text-align: center; margin-bottom: 30px;">
+        <a href="${adminOrderUrl}" 
+           style="display: inline-block; background-color: #27ae60; color: white; padding: 15px 30px; 
+                  text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+          🎯 VIEW & ACCEPT ORDER
+        </a>
+        <p style="margin: 10px 0 0 0; color: #666; font-size: 14px;">
+          Click the button above to review and accept this order
+        </p>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <h3 style="color: #2c3e50;">Order Items:</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+          <thead>
+            <tr style="background-color: #f8f9fa;">
+              <th style="padding: 12px 8px; text-align: left; border-bottom: 2px solid #dee2e6;">Product</th>
+              <th style="padding: 12px 8px; text-align: center; border-bottom: 2px solid #dee2e6;">Quantity</th>
+              <th style="padding: 12px 8px; text-align: right; border-bottom: 2px solid #dee2e6;">Unit Price</th>
+              <th style="padding: 12px 8px; text-align: right; border-bottom: 2px solid #dee2e6;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${order.items.map(item => `
+              <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.product.name}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${item.price} lei</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${item.totalPrice} lei</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+        <div style="flex: 1; background-color: #f8f9fa; padding: 15px; border-radius: 8px;">
+          <h4 style="margin-top: 0; color: #2c3e50;">Delivery Address</h4>
+          <p style="margin: 0; line-height: 1.5;">
+            ${shippingAddress.firstName} ${shippingAddress.lastName}<br>
+            ${shippingAddress.address}<br>
+            ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.zipCode}<br>
+            ${shippingAddress.country}<br>
+            <strong>Phone:</strong> ${shippingAddress.phone}
+          </p>
+        </div>
+        
+        <div style="flex: 1; background-color: #f8f9fa; padding: 15px; border-radius: 8px;">
+          <h4 style="margin-top: 0; color: #2c3e50;">Billing Address</h4>
+          <p style="margin: 0; line-height: 1.5;">
+            ${billingAddress.firstName} ${billingAddress.lastName}<br>
+            ${billingAddress.address}<br>
+            ${billingAddress.city}, ${billingAddress.state} ${billingAddress.zipCode}<br>
+            ${billingAddress.country}<br>
+            <strong>Phone:</strong> ${billingAddress.phone || shippingAddress.phone}
+          </p>
+        </div>
+      </div>
+
+      ${order.notes ? `
+        <div style="background-color: #e8f4fd; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <h3 style="margin-top: 0; color: #0c5460;">Customer Notes</h3>
+          <p style="margin: 0;">${order.notes}</p>
+        </div>
+      ` : ''}
+
+      <div style="background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <h3 style="margin-top: 0; color: #856404;">🚨 Action Required</h3>
+        <ol style="margin: 0; padding-left: 20px;">
+          <li><strong>Review order details above</strong></li>
+          <li><strong>Click "VIEW & ACCEPT ORDER" button</strong></li>
+          <li><strong>Verify product availability</strong></li>
+          <li><strong>Accept the order to begin processing</strong></li>
+        </ol>
+      </div>
+
+      <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+        <p style="margin: 0; color: #666;">
+          Direct admin link: 
+          <a href="${adminOrderUrl}" style="color: #27ae60;">kitchen-off.com/admin#orders-${order.id}</a>
+        </p>
+        <p style="margin: 10px 0 0 0; color: #666; font-size: 14px;">
+          KitchenOff - Order Management System
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const textContent = `
+    KitchenOff - New Order Created
+    
+    🔔 NEW ORDER AWAITING REVIEW
+    
+    Order Details:
+    - Order ID: #${order.id}
+    - Order Date: ${new Date(order.createdAt!).toLocaleDateString()}
+    - Customer: ${user.firstName} ${user.lastName}
+    - Customer Email: ${user.email}
+    - Customer Phone: ${shippingAddress.phone}
+    - Total Amount: ${order.totalAmount} lei
+    - Payment Method: ${order.paymentMethod}
+    - Status: PENDING REVIEW
+    
+    Items Ordered:
+    ${orderItemsText}
+    
+    Delivery Address:
+    ${shippingAddress.firstName} ${shippingAddress.lastName}
+    ${shippingAddress.address}
+    ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.zipCode}
+    ${shippingAddress.country}
+    Phone: ${shippingAddress.phone}
+    
+    Billing Address:
+    ${billingAddress.firstName} ${billingAddress.lastName}
+    ${billingAddress.address}
+    ${billingAddress.city}, ${billingAddress.state} ${billingAddress.zipCode}
+    ${billingAddress.country}
+    Phone: ${billingAddress.phone || shippingAddress.phone}
+    
+    ${order.notes ? `Customer Notes: ${order.notes}` : ''}
+    
+    🚨 ACTION REQUIRED:
+    1. Review order details above
+    2. Access admin panel: ${adminOrderUrl}
+    3. Verify product availability
+    4. Accept the order to begin processing
+    
+    Direct link: kitchen-off.com/admin#orders-${order.id}
+  `;
+
+  return await sendEmail({
+    to: logisticsEmail,
+    from: VERIFIED_SENDER,
+    subject: `🔔 New Order #${order.id} - Awaiting Review & Acceptance`,
+    text: textContent,
+    html: html,
+  });
+}
+
 export async function sendLogisticsNotificationEmail(
   order: OrderWithItems,
   user: User,
