@@ -2209,11 +2209,19 @@ export async function registerAdminRoutes(app: Express) {
       // Handle rate limiting by providing immediate feedback to user
       console.log('🚚 Starting AWB generation for order:', orderId);
 
-      // Get pickup points and services
-      const [pickupPoints, services] = await Promise.all([
-        samedayAPI.getPickupPoints(),
-        samedayAPI.getServices()
-      ]);
+      // Try to get pickup points and services, but use manual fallback if it fails
+      let pickupPoints, services;
+      try {
+        console.log('🏢 Fetching pickup points and services from Sameday API...');
+        [pickupPoints, services] = await Promise.all([
+          samedayAPI.getPickupPoints(),
+          samedayAPI.getServices()
+        ]);
+        console.log(`🏢 Retrieved ${pickupPoints.length} pickup points and ${services.length} services`);
+      } catch (apiError) {
+        console.log('⚠️ Failed to fetch pickup points/services, using manual AWB fallback');
+        throw new Error('All Sameday API authentication attempts failed'); // Trigger manual AWB
+      }
 
       if (pickupPoints.length === 0) {
         return res.status(500).json({ message: "No pickup points configured in Sameday account" });
@@ -2285,10 +2293,12 @@ export async function registerAdminRoutes(app: Express) {
       }
       
       // Get real counties and cities from Sameday API for proper ID mapping
+      console.log('📍 Fetching counties and cities from Sameday API...');
       const [counties, cities] = await Promise.all([
         samedayAPI.getCounties(),
         samedayAPI.getCities()
       ]);
+      console.log(`📍 Retrieved ${counties.length} counties and ${cities.length} cities`);
 
       // Find county and city IDs based on shipping address
       const targetCounty = (shippingAddr.county || shippingAddr.state || 'Cluj').toLowerCase();
@@ -2353,6 +2363,8 @@ export async function registerAdminRoutes(app: Express) {
 
     } catch (error) {
       console.error("Admin AWB generation error:", error);
+      console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
+      console.error("Error message:", error instanceof Error ? error.message : 'Unknown error');
       
       // Handle specific rate limiting error or IP blocking
       if (error instanceof Error && error.message.includes('All Sameday API authentication attempts failed')) {
