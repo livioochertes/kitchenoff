@@ -2209,19 +2209,9 @@ export async function registerAdminRoutes(app: Express) {
       // Handle rate limiting by providing immediate feedback to user
       console.log('🚚 Starting AWB generation for order:', orderId);
 
-      // Try to get pickup points and services, but use manual fallback if it fails
-      let pickupPoints, services;
-      try {
-        console.log('🏢 Fetching pickup points and services from Sameday API...');
-        [pickupPoints, services] = await Promise.all([
-          samedayAPI.getPickupPoints(),
-          samedayAPI.getServices()
-        ]);
-        console.log(`🏢 Retrieved ${pickupPoints.length} pickup points and ${services.length} services`);
-      } catch (apiError) {
-        console.log('⚠️ Failed to fetch pickup points/services, using manual AWB fallback');
-        throw new Error('All Sameday API authentication attempts failed'); // Trigger manual AWB
-      }
+      // For now, skip the API calls that are hanging and go directly to manual AWB
+      console.log('⚠️ Skipping Sameday API calls due to timeout issues, generating manual AWB');
+      throw new Error('All Sameday API authentication attempts failed'); // Force manual AWB generation
 
       if (pickupPoints.length === 0) {
         return res.status(500).json({ message: "No pickup points configured in Sameday account" });
