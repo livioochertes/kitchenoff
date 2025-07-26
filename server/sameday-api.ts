@@ -97,7 +97,7 @@ export class SamedayAPI {
   private token: string | null = null;
   private tokenExpiry: Date | null = null;
   private lastAuthAttempt: Date | null = null;
-  private authCooldownMs = 30000; // 30 seconds between auth attempts
+  private authCooldownMs = 300000; // 5 minutes between auth attempts to avoid IP blocking
 
   constructor(config: SamedayConfig) {
     this.config = config;
