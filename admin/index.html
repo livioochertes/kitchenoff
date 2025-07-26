@@ -1538,6 +1538,8 @@
           if (response.ok) {
             fetchOrders(); // Refresh order list to show new AWB
             alert(`✅ AWB Generated Successfully!\\n\\nAWB Number: ${data.awbNumber}\\nCourier: ${data.courier}\\nCost: ${data.cost} ${data.currency}\\n\\nOrder status updated to "shipped"`);
+          } else if (response.status === 503 && data.retryAfter) {
+            alert(`⏳ Sameday API Rate Limited\\n\\n${data.message}\\n\\nPlease wait ${data.retryAfter} seconds before trying again.`);
           } else {
             alert(`❌ AWB Generation Failed\\n\\nError: ${data.message || 'Unknown error occurred'}`);
           }

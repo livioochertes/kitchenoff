@@ -2206,6 +2206,9 @@ export async function registerAdminRoutes(app: Express) {
         return res.status(500).json({ message: "Sameday API not configured. Please add SAMEDAY_USERNAME and SAMEDAY_PASSWORD environment variables." });
       }
 
+      // Handle rate limiting by providing immediate feedback to user
+      console.log('🚚 Starting AWB generation for order:', orderId);
+
       // Get pickup points and services
       const [pickupPoints, services] = await Promise.all([
         samedayAPI.getPickupPoints(),
@@ -2340,6 +2343,16 @@ export async function registerAdminRoutes(app: Express) {
 
     } catch (error) {
       console.error("Admin AWB generation error:", error);
+      
+      // Handle specific rate limiting error
+      if (error instanceof Error && error.message.includes('All Sameday API authentication attempts failed')) {
+        return res.status(503).json({ 
+          message: "Sameday API is temporarily rate limited. Please wait 30 seconds and try again.", 
+          error: "Rate limiting detected",
+          retryAfter: 30
+        });
+      }
+      
       res.status(500).json({ 
         message: "Failed to generate AWB", 
         error: error instanceof Error ? error.message : 'Unknown error'
