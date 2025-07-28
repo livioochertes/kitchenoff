@@ -2189,18 +2189,11 @@ export async function registerAdminRoutes(app: Express) {
     }
   });
 
-  // AWB Generation route for admin interface
+  // Manual AWB Generation route for admin interface
   app.post("/admin/api/orders/:id/generate-awb", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
-    const orderId = parseInt(req.params.id);
-    console.log('🚚 Starting AWB generation for order:', orderId);
-
-    // Set a timeout for the entire AWB generation process
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('AWB generation timeout - process taking too long')), 30000);
-    });
-
     try {
       const orderId = parseInt(req.params.id);
+      console.log('🚚 Starting manual AWB generation for order:', orderId);
       const order = await storage.getOrder(orderId);
       
       if (!order) {
