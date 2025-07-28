@@ -270,7 +270,11 @@ export class SamedayAPI {
 
   async createAWB(awbData: CreateAWBRequest): Promise<CreateAWBResponse> {
     console.log('🚚 Creating AWB with Sameday:', JSON.stringify(awbData, null, 2));
-
+    
+    // Force fresh authentication before AWB creation to prevent token expiry
+    console.log('🔄 Ensuring fresh token for AWB creation...');
+    this.token = null; // Clear cached token
+    
     const response = await this.apiRequest<CreateAWBResponse>('/api/awb', {
       method: 'POST',
       body: JSON.stringify(awbData),
