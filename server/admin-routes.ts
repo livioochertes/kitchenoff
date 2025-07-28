@@ -2209,32 +2209,94 @@ export async function registerAdminRoutes(app: Express) {
       // Handle rate limiting by providing immediate feedback to user
       console.log('🚚 Starting AWB generation for order:', orderId);
 
-      // Generate manual AWB number immediately (bypassing API issues)
-      console.log('🚚 Generating manual AWB for immediate functionality...');
-      
-      const manualAwbNumber = `KTO${String(orderId).padStart(5, '0')}-${Date.now().toString().slice(-6)}`;
-      console.log('✅ Generated manual AWB number:', manualAwbNumber);
+      // Get real pickup points and services from Sameday API
+      console.log('📍 Fetching pickup points and services from Sameday API...');
+      const [pickupPoints, services] = await Promise.all([
+        samedayAPI.getPickupPoints(),
+        samedayAPI.getServices()
+      ]);
 
-      // Update order with manual AWB number (for immediate functionality)
+      if (pickupPoints.length === 0) {
+        throw new Error("No pickup points configured in Sameday account");
+      }
+
+      if (services.length === 0) {
+        throw new Error("No services configured in Sameday account");
+      }
+
+      // Use first available pickup point and service
+      const pickupPoint = pickupPoints[0];
+      const service = services[0];
+
+      console.log('✅ Using pickup point:', pickupPoint.id, pickupPoint.alias);
+      console.log('✅ Using service:', service.id, service.name);
+
+      // Parse shipping address
+      let shippingAddress = {};
+      try {
+        if (order.shippingAddress) {
+          shippingAddress = typeof order.shippingAddress === 'string' 
+            ? JSON.parse(order.shippingAddress)
+            : order.shippingAddress;
+        }
+      } catch (err) {
+        console.error('Failed to parse shipping address:', err);
+        shippingAddress = {};
+      }
+
+      // Create AWB request with correct format based on API documentation
+      const awbRequest = {
+        pickupPoint: pickupPoint.id,
+        contactPerson: pickupPoint.contactPersons?.[0]?.id || null,
+        service: service.id,
+        packageType: 0, // 0 = parcel (1.01-38kg), 1 = small parcel (0.01-1kg), 2 = overweight (38kg+)
+        packageWeight: 1,
+        awbPayment: 1, // 1 = sender pays
+        cashOnDelivery: 0,
+        insuredValue: 0,
+        thirdPartyPickup: 0,
+        awbRecipient: {
+          name: shippingAddress.name || `${order.firstName} ${order.lastName}`,
+          phoneNumber: shippingAddress.phone || order.phone || "+40700000000",
+          personType: 1, // 1 = individual
+          address: shippingAddress.address || shippingAddress.street || "Address not provided",
+          countyString: shippingAddress.county || shippingAddress.state || "Cluj",
+          cityString: shippingAddress.city || "Cluj-Napoca",
+        },
+        parcels: [{
+          weight: 1,
+          width: 15,
+          length: 20,
+          height: 5,
+          awbParcelNumber: `KTO${String(orderId).padStart(5, '0')}-P1`
+        }],
+        clientInternalReference: `KTO${String(orderId).padStart(5, '0')}`
+      };
+
+      console.log('📦 Creating AWB with Sameday API:', JSON.stringify(awbRequest, null, 2));
+      const awbResponse = await samedayAPI.createAWB(awbRequest);
+      console.log('✅ AWB created successfully:', awbResponse);
+
+      // Update order with real AWB data from Sameday
       const orderUpdate = await storage.updateOrder(orderId, {
-        awbNumber: manualAwbNumber,
-        awbCourier: 'Sameday (Manual)',
-        awbCost: 25,
-        awbCurrency: 'RON',
-        awbPdfUrl: null,
+        awbNumber: awbResponse.awbNumber,
+        awbCourier: 'Sameday',
+        awbCost: awbResponse.cost || 0,
+        awbCurrency: awbResponse.currency || 'RON',
+        awbPdfUrl: awbResponse.pdfUrl || null,
         status: 'shipped',
         awbCreatedAt: new Date(),
       });
 
       return res.json({
         success: true,
-        awbNumber: manualAwbNumber,
-        awbCost: 25,
-        currency: 'RON',
-        courier: 'Sameday (Manual)',
+        awbNumber: awbResponse.awbNumber,
+        awbCost: awbResponse.cost || 0,
+        currency: awbResponse.currency || 'RON',
+        courier: 'Sameday',
         order: orderUpdate,
-        trackingUrl: `https://sameday.ro/track/${manualAwbNumber}`,
-        message: `Manual AWB generated: ${manualAwbNumber}. Use this reference number when creating AWB in Sameday portal.`
+        trackingUrl: `https://sameday.ro/track/${awbResponse.awbNumber}`,
+        message: `Real AWB created via Sameday API: ${awbResponse.awbNumber}`
       });
 
     } catch (error) {
