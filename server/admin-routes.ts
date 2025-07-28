@@ -298,7 +298,7 @@ async function forwardOrderToSupplier(supplier: any, orderData: any) {
   } catch (error) {
     return {
       success: false,
-      message: `Failed to forward order: ${error.message}`
+      message: `Failed to forward order: ${error instanceof Error ? error.message : 'Unknown error'}`
     };
   }
 }
@@ -349,7 +349,7 @@ async function performSupplierSync(supplier: any, order: any, action: string) {
   } catch (error) {
     return {
       success: false,
-      message: `Sync failed: ${error.message}`
+      message: `Sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`
     };
   }
 }
@@ -845,7 +845,7 @@ export async function registerAdminRoutes(app: Express) {
           const order = await storage.updateOrderStatus(parsedOrderId, status);
           results.push({ orderId, success: true, order });
         } catch (error) {
-          results.push({ orderId, success: false, error: error.message });
+          results.push({ orderId, success: false, error: error instanceof Error ? error.message : 'Unknown error' });
         }
       }
       
@@ -983,7 +983,7 @@ export async function registerAdminRoutes(app: Express) {
             results.push({ orderId, success: false, error: "Order not found" });
           }
         } catch (error) {
-          results.push({ orderId, success: false, error: error.message });
+          results.push({ orderId, success: false, error: error instanceof Error ? error.message : 'Unknown error' });
         }
       }
       
@@ -1032,7 +1032,7 @@ export async function registerAdminRoutes(app: Express) {
             results.push({ orderId, success: false, error: "Order not found" });
           }
         } catch (error) {
-          results.push({ orderId, success: false, error: error.message });
+          results.push({ orderId, success: false, error: error instanceof Error ? error.message : 'Unknown error' });
         }
       }
       
@@ -1078,7 +1078,7 @@ export async function registerAdminRoutes(app: Express) {
             results.push({ orderId, success: false, error: "Order not found" });
           }
         } catch (error) {
-          results.push({ orderId, success: false, error: error.message });
+          results.push({ orderId, success: false, error: error instanceof Error ? error.message : 'Unknown error' });
         }
       }
       
@@ -1151,7 +1151,7 @@ export async function registerAdminRoutes(app: Express) {
       res.status(500).json({ 
         success: false,
         message: "Connection error",
-        error: error.message 
+        error: error instanceof Error ? error.message : 'Unknown error' 
       });
     }
   });
@@ -1484,13 +1484,13 @@ export async function registerAdminRoutes(app: Express) {
               newPrice = fixedPrice;
             }
             
-            await storage.updateProduct(parseInt(productId), { price: newPrice });
+            await storage.updateProduct(parseInt(productId), { price: newPrice.toString() });
             results.push({ id: productId, success: true, newPrice });
           } else {
             results.push({ id: productId, success: false, message: "Product not found" });
           }
         } catch (error) {
-          results.push({ id: productId, success: false, message: error.message });
+          results.push({ id: productId, success: false, message: error instanceof Error ? error.message : 'Unknown error' });
         }
       }
       
@@ -2911,9 +2911,9 @@ export async function registerAdminRoutes(app: Express) {
             cpvCode: cpvCode,
             status: status,
             weight: weight,
-            length: length,
-            width: width,
-            height: height,
+            length: length.toString(),
+            width: width.toString(),
+            height: height.toString(),
             piecesPerPackage: piecesPerPackage
           };
 
