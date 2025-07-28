@@ -2244,6 +2244,37 @@ export async function registerAdminRoutes(app: Express) {
         shippingAddress = {};
       }
 
+      // Look up county and city IDs for production reliability
+      let countyId = null;
+      let cityId = null;
+      
+      try {
+        const counties = await sameday.getCounties();
+        const countyName = shippingAddress.county || shippingAddress.state || "Cluj";
+        const foundCounty = counties.find(c => 
+          c.name.toLowerCase().includes(countyName.toLowerCase()) ||
+          countyName.toLowerCase().includes(c.name.toLowerCase())
+        );
+        
+        if (foundCounty) {
+          countyId = foundCounty.id;
+          
+          // Get cities for this county
+          const cities = await sameday.getCities(foundCounty.name);
+          const cityName = shippingAddress.city || "Cluj-Napoca";
+          const foundCity = cities.find(c => 
+            c.name.toLowerCase().includes(cityName.toLowerCase()) ||
+            cityName.toLowerCase().includes(c.name.toLowerCase())
+          );
+          
+          if (foundCity) {
+            cityId = foundCity.id;
+          }
+        }
+      } catch (error) {
+        console.warn('Could not fetch county/city IDs, using string names as fallback:', error.message);
+      }
+
       // Create AWB request with EXACT Sameday API v3.0 format
       const awbRequest = {
         pickupPoint: pickupPoint.id,                    // Correct field name
@@ -2260,8 +2291,9 @@ export async function registerAdminRoutes(app: Express) {
           phoneNumber: shippingAddress.phone || "+40700000000",
           personType: 1,                                // Numeric: 1=individual, 2=company
           address: shippingAddress.address || shippingAddress.street || "Address not provided",
-          county: shippingAddress.county || shippingAddress.state || "Cluj",     // Will try string first
-          city: shippingAddress.city || "Cluj-Napoca",                          // Will try string first
+          // Use numeric IDs if available, fallback to strings
+          ...(countyId ? { countyId } : { county: shippingAddress.county || shippingAddress.state || "Cluj" }),
+          ...(cityId ? { cityId } : { city: shippingAddress.city || "Cluj-Napoca" }),
         },
         parcels: [{
           weight: 1,

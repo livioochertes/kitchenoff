@@ -279,8 +279,10 @@ export function createSamedayAPI(): SamedayAPI | null {
   const username = process.env.SAMEDAY_USERNAME;
   const password = process.env.SAMEDAY_PASSWORD;
   // According to API documentation v3.0 - 2024:
-  // Production environment - using same credentials for production as confirmed by user
-  const baseUrl = process.env.SAMEDAY_BASE_URL || 'https://api.sameday.ro';
+  // Sandbox: https://sameday-api.demo.zitec.com (for testing)
+  // Production: https://api.sameday.ro (live environment)
+  const baseUrl = process.env.SAMEDAY_BASE_URL || 
+    (process.env.NODE_ENV === 'development' ? 'https://sameday-api.demo.zitec.com' : 'https://api.sameday.ro');
 
   if (!username || !password) {
     console.warn('⚠️ Sameday credentials not configured');
