@@ -200,17 +200,30 @@ export class SamedayAPI {
   private async apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const token = await this.authenticate();
     
+    console.log(`🔗 Making Sameday API request: ${endpoint}`);
+    console.log(`🔑 Using token: ${token.substring(0, 20)}...`);
+    
     const response = await fetch(`${this.config.baseUrl}${endpoint}`, {
       ...options,
       headers: {
         'X-AUTH-TOKEN': token,
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
         ...(options.headers as Record<string, string>),
       },
     });
 
+    console.log(`📡 API response status: ${response.status} for ${endpoint}`);
+
     if (!response.ok) {
       const errorText = await response.text();
+      console.error(`❌ Sameday API error details:`, {
+        endpoint,
+        status: response.status,
+        statusText: response.statusText,
+        errorText: errorText.substring(0, 500),
+        token: token.substring(0, 20) + '...'
+      });
       throw new Error(`Sameday API error: ${response.statusText} - ${errorText}`);
     }
 
@@ -279,10 +292,10 @@ export function createSamedayAPI(): SamedayAPI | null {
   const username = process.env.SAMEDAY_USERNAME;
   const password = process.env.SAMEDAY_PASSWORD;
   // According to API documentation v3.0 - 2024:
-  // Sandbox: https://sameday-api.demo.zitec.com (for testing)
-  // Production: https://api.sameday.ro (live environment)
-  const baseUrl = process.env.SAMEDAY_BASE_URL || 
-    (process.env.NODE_ENV === 'development' ? 'https://sameday-api.demo.zitec.com' : 'https://api.sameday.ro');
+  // Sandbox: https://sameday-api.demo.zitec.com (for testing - requires different credentials)
+  // Production: https://api.sameday.ro (live environment - using user's production credentials)
+  // Force production for now since sandbox requires different credentials
+  const baseUrl = process.env.SAMEDAY_BASE_URL || 'https://api.sameday.ro';
 
   if (!username || !password) {
     console.warn('⚠️ Sameday credentials not configured');

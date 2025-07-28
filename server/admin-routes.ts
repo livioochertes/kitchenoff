@@ -2336,8 +2336,16 @@ export async function registerAdminRoutes(app: Express) {
       console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
       console.error("Error message:", error instanceof Error ? error.message : 'Unknown error');
       
-      // Handle specific rate limiting error or IP blocking
-      if (error instanceof Error && error.message.includes('All Sameday API authentication attempts failed')) {
+      // Handle any Sameday API error with manual AWB fallback
+      if (error instanceof Error && 
+          (error.message.includes('Sameday API') || 
+           error.message.includes('Invalid credentials') || 
+           error.message.includes('Unauthorized') ||
+           error.message.includes('All Sameday API authentication attempts failed'))) {
+        
+        console.log('🔄 Sameday API issue detected, generating manual AWB fallback...');
+        console.log('📋 API Error:', error.message);
+        
         // Generate a manual AWB number as fallback
         const manualAwbNumber = `KTO${String(req.params.id).padStart(5, '0')}-MANUAL-${Date.now().toString().slice(-6)}`;
         
@@ -2352,6 +2360,14 @@ export async function registerAdminRoutes(app: Express) {
           awbCreatedAt: new Date(),
         });
 
+        // Determine error type for better user messaging
+        let errorType = 'API issue';
+        if (error.message.includes('Invalid credentials') || error.message.includes('Unauthorized')) {
+          errorType = 'authentication issue';
+        } else if (error.message.includes('429') || error.message.includes('rate limit')) {
+          errorType = 'rate limiting';
+        }
+
         return res.json({
           success: true,
           awbNumber: manualAwbNumber,
@@ -2361,7 +2377,8 @@ export async function registerAdminRoutes(app: Express) {
           order: updatedOrder,
           trackingUrl: `https://sameday.ro/track/${manualAwbNumber}`,
           manual: true,
-          message: "Sameday API is temporarily blocked. Manual AWB generated. Please create the actual AWB in Sameday portal using this reference number."
+          message: `Sameday API ${errorType} detected. Manual AWB generated. Please create the actual AWB in Sameday portal using reference: ${manualAwbNumber}`,
+          apiError: error.message.substring(0, 200)
         });
       }
       
