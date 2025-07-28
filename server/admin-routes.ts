@@ -2191,6 +2191,11 @@ export async function registerAdminRoutes(app: Express) {
 
   // AWB Generation route for admin interface
   app.post("/admin/api/orders/:id/generate-awb", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    // Set a timeout for the entire AWB generation process
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('AWB generation timeout - process taking too long')), 30000);
+    });
+
     try {
       const orderId = parseInt(req.params.id);
       const order = await storage.getOrder(orderId);
@@ -2209,127 +2214,134 @@ export async function registerAdminRoutes(app: Express) {
       // Handle rate limiting by providing immediate feedback to user
       console.log('🚚 Starting AWB generation for order:', orderId);
 
-      // Get real pickup points and services from Sameday API
-      console.log('📍 Fetching pickup points and services from Sameday API...');
-      const [pickupPoints, services] = await Promise.all([
-        samedayAPI.getPickupPoints(),
-        samedayAPI.getServices()
-      ]);
+      // Race the AWB generation process against timeout
+      const awbGenerationPromise = async () => {
+        // Get real pickup points and services from Sameday API
+        console.log('📍 Fetching pickup points and services from Sameday API...');
+        const [pickupPoints, services] = await Promise.all([
+          samedayAPI.getPickupPoints(),
+          samedayAPI.getServices()
+        ]);
 
-      if (pickupPoints.length === 0) {
-        throw new Error("No pickup points configured in Sameday account");
-      }
-
-      if (services.length === 0) {
-        throw new Error("No services configured in Sameday account");
-      }
-
-      // Use first available pickup point and service
-      const pickupPoint = pickupPoints[0];
-      const service = services[0];
-
-      console.log('✅ Using pickup point:', pickupPoint.id, pickupPoint.alias);
-      console.log('✅ Using service:', service.id, service.name);
-
-      // Parse shipping address
-      let shippingAddress = {};
-      try {
-        if (order.shippingAddress) {
-          shippingAddress = typeof order.shippingAddress === 'string' 
-            ? JSON.parse(order.shippingAddress)
-            : order.shippingAddress;
+        if (pickupPoints.length === 0) {
+          throw new Error("No pickup points configured in Sameday account");
         }
-      } catch (err) {
-        console.error('Failed to parse shipping address:', err);
-        shippingAddress = {};
-      }
 
-      // Look up county and city IDs for production reliability
-      let countyId = null;
-      let cityId = null;
-      
-      try {
-        const counties = await sameday.getCounties();
-        const countyName = shippingAddress.county || shippingAddress.state || "Cluj";
-        const foundCounty = counties.find(c => 
-          c.name.toLowerCase().includes(countyName.toLowerCase()) ||
-          countyName.toLowerCase().includes(c.name.toLowerCase())
-        );
+        if (services.length === 0) {
+          throw new Error("No services configured in Sameday account");
+        }
+
+        // Use first available pickup point and service
+        const pickupPoint = pickupPoints[0];
+        const service = services[0];
+
+        console.log('✅ Using pickup point:', pickupPoint.id, pickupPoint.alias);
+        console.log('✅ Using service:', service.id, service.name);
+
+        // Parse shipping address
+        let shippingAddress = {};
+        try {
+          if (order.shippingAddress) {
+            shippingAddress = typeof order.shippingAddress === 'string' 
+              ? JSON.parse(order.shippingAddress)
+              : order.shippingAddress;
+          }
+        } catch (err) {
+          console.error('Failed to parse shipping address:', err);
+          shippingAddress = {};
+        }
+
+        // Look up county and city IDs for production reliability
+        let countyId = null;
+        let cityId = null;
         
-        if (foundCounty) {
-          countyId = foundCounty.id;
-          
-          // Get cities for this county
-          const cities = await sameday.getCities(foundCounty.name);
-          const cityName = shippingAddress.city || "Cluj-Napoca";
-          const foundCity = cities.find(c => 
-            c.name.toLowerCase().includes(cityName.toLowerCase()) ||
-            cityName.toLowerCase().includes(c.name.toLowerCase())
+        try {
+          console.log('🗺️ Fetching counties and cities for location lookup...');
+          const counties = await samedayAPI.getCounties();
+          const countyName = shippingAddress.county || shippingAddress.state || "Cluj";
+          const foundCounty = counties.find(c => 
+            c.name.toLowerCase().includes(countyName.toLowerCase()) ||
+            countyName.toLowerCase().includes(c.name.toLowerCase())
           );
           
-          if (foundCity) {
-            cityId = foundCity.id;
+          if (foundCounty) {
+            countyId = foundCounty.id;
+            
+            // Get cities for this county
+            const cities = await samedayAPI.getCities(foundCounty.name);
+            const cityName = shippingAddress.city || "Cluj-Napoca";
+            const foundCity = cities.find(c => 
+              c.name.toLowerCase().includes(cityName.toLowerCase()) ||
+              cityName.toLowerCase().includes(c.name.toLowerCase())
+            );
+            
+            if (foundCity) {
+              cityId = foundCity.id;
+            }
           }
+        } catch (error) {
+          console.warn('Could not fetch county/city IDs, using string names as fallback:', error.message);
         }
-      } catch (error) {
-        console.warn('Could not fetch county/city IDs, using string names as fallback:', error.message);
-      }
 
-      // Create AWB request with EXACT Sameday API v3.0 format
-      const awbRequest = {
-        pickupPoint: pickupPoint.id,                    // Correct field name
-        contactPerson: pickupPoint.contactPersons?.[0]?.id || null,
-        service: service.id,                            // Correct field name
-        packageType: 0,                                 // Numeric: 0=PARCEL, 1=ENVELOPE, 2=LARGE
-        packageWeight: 1,
-        awbPayment: 1,                                  // Numeric: 1=SENDER, 2=RECIPIENT, 3=THIRD_PARTY
-        cashOnDelivery: 0,
-        insuredValue: 0,
-        thirdPartyPickup: 0,
-        awbRecipient: {                                 // Correct field name
-          name: shippingAddress.name || `${order.customerName || 'Customer'}`,
-          phoneNumber: shippingAddress.phone || "+40700000000",
-          personType: 1,                                // Numeric: 1=individual, 2=company
-          address: shippingAddress.address || shippingAddress.street || "Address not provided",
-          // Use numeric IDs if available, fallback to strings
-          ...(countyId ? { countyId } : { county: shippingAddress.county || shippingAddress.state || "Cluj" }),
-          ...(cityId ? { cityId } : { city: shippingAddress.city || "Cluj-Napoca" }),
-        },
-        parcels: [{
-          weight: 1,
-          width: 15,
-          length: 20,
-          height: 5
-          // Removed awbParcelNumber - auto-generated by Sameday
-        }],
-        clientInternalReference: `KTO${String(orderId).padStart(5, '0')}`
+        // Create AWB request with EXACT Sameday API v3.0 format
+        const awbRequest = {
+          pickupPoint: pickupPoint.id,                    // Correct field name
+          contactPerson: pickupPoint.contactPersons?.[0]?.id || null,
+          service: service.id,                            // Correct field name
+          packageType: 0,                                 // Numeric: 0=PARCEL, 1=ENVELOPE, 2=LARGE
+          packageWeight: 1,
+          awbPayment: 1,                                  // Numeric: 1=SENDER, 2=RECIPIENT, 3=THIRD_PARTY
+          cashOnDelivery: 0,
+          insuredValue: 0,
+          thirdPartyPickup: 0,
+          awbRecipient: {                                 // Correct field name
+            name: shippingAddress.name || `${order.customerName || 'Customer'}`,
+            phoneNumber: shippingAddress.phone || "+40700000000",
+            personType: 1,                                // Numeric: 1=individual, 2=company
+            address: shippingAddress.address || shippingAddress.street || "Address not provided",
+            // Use numeric IDs if available, fallback to strings
+            ...(countyId ? { countyId } : { county: shippingAddress.county || shippingAddress.state || "Cluj" }),
+            ...(cityId ? { cityId } : { city: shippingAddress.city || "Cluj-Napoca" }),
+          },
+          parcels: [{
+            weight: 1,
+            width: 15,
+            length: 20,
+            height: 5
+            // Removed awbParcelNumber - auto-generated by Sameday
+          }],
+          clientInternalReference: `KTO${String(orderId).padStart(5, '0')}`
+        };
+
+        console.log('📦 Creating AWB with Sameday API:', JSON.stringify(awbRequest, null, 2));
+        const awbResponse = await samedayAPI.createAWB(awbRequest);
+        console.log('✅ AWB created successfully:', awbResponse);
+
+        // Update order with real AWB data from Sameday
+        const orderUpdate = await storage.updateOrder(parseInt(orderId), {
+          awbNumber: awbResponse.awbNumber || `KTO${String(orderId).padStart(5, '0')}-API`,
+          awbCourier: 'Sameday',
+          awbCost: awbResponse.cost || 0,
+          awbCurrency: awbResponse.currency || 'RON',
+          awbPdfUrl: awbResponse.pdfUrl || null,
+          status: 'shipped',
+          awbCreatedAt: new Date(),
+        });
+
+        return res.json({
+          success: true,
+          awbNumber: awbResponse.awbNumber || `KTO${String(orderId).padStart(5, '0')}-API`,
+          awbCost: awbResponse.cost || 0,
+          currency: awbResponse.currency || 'RON',
+          courier: 'Sameday',
+          order: orderUpdate,
+          trackingUrl: `https://sameday.ro/track/${awbResponse.awbNumber || `KTO${String(orderId).padStart(5, '0')}-API`}`,
+          message: `Real AWB created via Sameday API: ${awbResponse.awbNumber || `KTO${String(orderId).padStart(5, '0')}-API`}`
+        });
       };
 
-      console.log('📦 Creating AWB with Sameday API:', JSON.stringify(awbRequest, null, 2));
-      const awbResponse = await samedayAPI.createAWB(awbRequest);
-      console.log('✅ AWB created successfully:', awbResponse);
-
-      // Update order with real AWB data from Sameday
-      const orderUpdate = await storage.updateOrder(parseInt(orderId), {
-        awbNumber: awbResponse.awbNumber || `KTO${String(orderId).padStart(5, '0')}-API`,
-        awbCourier: 'Sameday',
-        awbCost: awbResponse.cost || 0,
-        awbCurrency: awbResponse.currency || 'RON',
-        awbPdfUrl: awbResponse.pdfUrl || null,
-        status: 'shipped',
-        awbCreatedAt: new Date(),
-      });
-
-      return res.json({
-        success: true,
-        awbNumber: awbResponse.awbNumber || `KTO${String(orderId).padStart(5, '0')}-API`,
-        awbCost: awbResponse.cost || 0,
-        currency: awbResponse.currency || 'RON',
-        courier: 'Sameday',
-        order: orderUpdate,
-        trackingUrl: `https://sameday.ro/track/${awbResponse.awbNumber || `KTO${String(orderId).padStart(5, '0')}-API`}`,
-        message: `Real AWB created via Sameday API: ${awbResponse.awbNumber || `KTO${String(orderId).padStart(5, '0')}-API`}`
-      });
+      // Race the AWB generation against timeout
+      await Promise.race([awbGenerationPromise(), timeoutPromise]);
 
     } catch (error) {
       console.error("Admin AWB generation error:", error);
@@ -2341,6 +2353,8 @@ export async function registerAdminRoutes(app: Express) {
           (error.message.includes('Sameday API') || 
            error.message.includes('Invalid credentials') || 
            error.message.includes('Unauthorized') ||
+           error.message.includes('timeout') ||
+           error.message.includes('not responding') ||
            error.message.includes('All Sameday API authentication attempts failed'))) {
         
         console.log('🔄 Sameday API issue detected, generating manual AWB fallback...');

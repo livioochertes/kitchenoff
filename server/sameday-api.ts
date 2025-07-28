@@ -203,31 +203,45 @@ export class SamedayAPI {
     console.log(`🔗 Making Sameday API request: ${endpoint}`);
     console.log(`🔑 Using token: ${token.substring(0, 20)}...`);
     
-    const response = await fetch(`${this.config.baseUrl}${endpoint}`, {
-      ...options,
-      headers: {
-        'X-AUTH-TOKEN': token,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        ...(options.headers as Record<string, string>),
-      },
-    });
-
-    console.log(`📡 API response status: ${response.status} for ${endpoint}`);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`❌ Sameday API error details:`, {
-        endpoint,
-        status: response.status,
-        statusText: response.statusText,
-        errorText: errorText.substring(0, 500),
-        token: token.substring(0, 20) + '...'
+    // Add timeout to prevent hanging requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+    
+    try {
+      const response = await fetch(`${this.config.baseUrl}${endpoint}`, {
+        ...options,
+        signal: controller.signal,
+        headers: {
+          'X-AUTH-TOKEN': token,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...(options.headers as Record<string, string>),
+        },
       });
-      throw new Error(`Sameday API error: ${response.statusText} - ${errorText}`);
-    }
 
-    return response.json() as Promise<T>;
+      clearTimeout(timeoutId);
+      console.log(`📡 API response status: ${response.status} for ${endpoint}`);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`❌ Sameday API error details:`, {
+          endpoint,
+          status: response.status,
+          statusText: response.statusText,
+          errorText: errorText.substring(0, 500),
+          token: token.substring(0, 20) + '...'
+        });
+        throw new Error(`Sameday API error: ${response.statusText} - ${errorText}`);
+      }
+
+      return response.json() as Promise<T>;
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        throw new Error('Sameday API request timeout - server not responding');
+      }
+      throw error;
+    }
   }
 
   async getPickupPoints(): Promise<SamedayPickupPoint[]> {
