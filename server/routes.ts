@@ -666,9 +666,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         paymentLink = `https://www.kitchenoff.app/pay/invoice/${invoiceNumber}`;
       }
 
-      // Calculate totals with 19% VAT for RON
+      // Calculate totals with 21% VAT for RON
       const subtotal = parseFloat(order.totalAmount);
-      const vatRate = 19; // 19% VAT for Romanian invoices
+      const vatRate = 21; // 21% VAT for Romanian invoices
       const vatAmount = (subtotal * vatRate) / (100 + vatRate); // Extract VAT from total
       const subtotalWithoutVat = subtotal - vatAmount;
       const totalAmount = subtotal; // Total already includes VAT
@@ -686,7 +686,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currency: 'RON',
         paymentMethod,
         paymentLink: paymentLink || null,
-        notes: 'Factura cu TVA 19% conform legislației române',
+        notes: 'Factura cu TVA 21% conform legislației române',
       };
 
       // Create invoice items
@@ -697,7 +697,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         productCode: item.product.productCode || null,
         quantity: item.quantity,
         unitPrice: item.price,
-        vatRate: '19.00',
+        vatRate: '21.00',
         lineTotal: item.totalPrice,
       }));
 
