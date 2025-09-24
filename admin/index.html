@@ -1372,7 +1372,7 @@
             'Category ID': '1',
             'Category Name': 'Cleaning & Sanitizing',
             'Status': 'active',
-            'VAT %': '19',
+            'VAT %': '21',
             'Product Code': 'KO001',
             'NC Code': '3924100000',
             'CPV Code': '39830000-9',
@@ -1391,7 +1391,7 @@
             'Category ID': '2',
             'Category Name': 'Food Labels',
             'Status': 'active',
-            'VAT %': '19',
+            'VAT %': '21',
             'Product Code': 'KO002',
             'NC Code': '4821100000',
             'CPV Code': '30199700-3',
@@ -1840,7 +1840,7 @@
           if (response.ok && data) {
             return {
               currency: data.defaultCurrency || 'EUR',
-              vatPercentage: data.defaultVatPercentage || '19.00'
+              vatPercentage: data.defaultVatPercentage || '21.00'
             };
           }
         } catch (err) {
@@ -1850,7 +1850,7 @@
         // Return defaults if fetch fails
         return {
           currency: 'EUR',
-          vatPercentage: '19.00'
+          vatPercentage: '21.00'
         };
       };
 
@@ -3565,7 +3565,7 @@
                     </div>
                     <div style={{marginBottom: '10px'}}>
                       <strong style={{color: '#495057'}}>Default VAT Percentage:</strong>
-                      <p style={{margin: '5px 0', color: '#007bff', fontWeight: '500'}}>{companySettings.defaultVatPercentage || '19.00'}%</p>
+                      <p style={{margin: '5px 0', color: '#007bff', fontWeight: '500'}}>{companySettings.defaultVatPercentage || '21.00'}%</p>
                     </div>
                     <div style={{marginBottom: '10px'}}>
                       <strong style={{color: '#495057'}}>Reverse Charge VAT:</strong>
@@ -4136,7 +4136,7 @@
           stockQuantity: '',
           featured: false,
           vatValue: '',
-          vatPercentage: '19.00',
+          vatPercentage: '21.00',
           currency: 'RON',
           productCode: '',
           ncCode: '',
@@ -4378,7 +4378,7 @@
               stockQuantity: '',
               featured: false,
               vatValue: '',
-              vatPercentage: '19.00',
+              vatPercentage: '21.00',
               currency: 'EUR',
               productCode: '',
               ncCode: '',
@@ -4865,13 +4865,13 @@
                         <label className="form-label">VAT Percentage (%)</label>
                         <select
                           className="form-input"
-                          value={productFormData.vatPercentage || '19.00'}
+                          value={productFormData.vatPercentage || '21.00'}
                           onChange={(e) => setProductFormData({...productFormData, vatPercentage: e.target.value})}
                         >
                           <option value="0.00">0% (Reverse Charge)</option>
                           <option value="5.00">5% (Reduced VAT)</option>
                           <option value="9.00">9% (Reduced VAT)</option>
-                          <option value="19.00">19% (Standard VAT)</option>
+                          <option value="21.00">21% (Standard VAT)</option>
                           <option value="21.00">21% (Standard VAT - from 01.08.2025)</option>
                           <option value="24.00">24% (Luxury VAT)</option>
                         </select>
@@ -5067,7 +5067,7 @@
                             stockQuantity: '',
                             featured: false,
                             vatValue: '',
-                            vatPercentage: '19.00',
+                            vatPercentage: '21.00',
                             currency: 'RON',
                             productCode: '',
                             ncCode: '',
@@ -7420,7 +7420,7 @@ TOTAL: $${selectedOrder.totalAmount}
                             <option value="0.00">0% (Reverse Charge)</option>
                             <option value="5.00">5% (Reduced VAT)</option>
                             <option value="9.00">9% (Reduced VAT)</option>
-                            <option value="19.00">19% (Standard VAT)</option>
+                            <option value="21.00">21% (Standard VAT)</option>
                             <option value="21.00">21% (Standard VAT - from 01.08.2025)</option>
                             <option value="24.00">24% (Luxury VAT)</option>
                           </select>
