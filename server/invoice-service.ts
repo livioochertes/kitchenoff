@@ -190,7 +190,7 @@ export class InvoiceService {
         currency: 'RON',
         paymentMethod: paymentData.paymentMethod || 'card',
         paymentLink: null,
-        notes: 'Generated via Smartbill API - TVA 19% conform legislației române',
+        notes: 'Generated via Smartbill API - TVA 21% conform legislației române',
         smartbillSeries: smartbillResult.series,
         smartbillNumber: smartbillResult.number.toString(),
         smartbillId: smartbillResult.id,
@@ -204,7 +204,7 @@ export class InvoiceService {
         productCode: item.product.productCode || null,
         quantity: item.quantity,
         unitPrice: item.price,
-        vatRate: '19.00',
+        vatRate: '21.00',
         lineTotal: item.totalPrice,
       }));
 
@@ -263,9 +263,9 @@ export class InvoiceService {
       
       console.log(`📋 Generating local invoice with Smartbill format: ${invoiceNumber}`);
       
-      // Calculate totals with 19% VAT for RON
+      // Calculate totals with 21% VAT for RON
       const subtotal = parseFloat(order.totalAmount);
-      const vatRate = 19; // 19% VAT for Romanian invoices
+      const vatRate = 21; // 21% VAT for Romanian invoices
       const vatAmount = (subtotal * vatRate) / (100 + vatRate); // Extract VAT from total (price includes VAT)
       const subtotalWithoutVat = subtotal - vatAmount;
       const totalAmount = subtotal; // Total already includes VAT
@@ -283,21 +283,21 @@ export class InvoiceService {
         currency: 'RON',
         paymentMethod: paymentData.paymentMethod || 'card',
         paymentLink: null,
-        notes: 'Factura cu TVA 19% conform legislației române',
+        notes: 'Factura cu TVA 21% conform legislației române',
         status: 'issued',
         // Use proper Smartbill series format
         smartbillSeries: 'KTO',
         smartbillNumber: smartbillNumber
       };
 
-      // Create invoice items with 19% VAT
+      // Create invoice items with 21% VAT
       const invoiceItems = order.items.map((item: any) => ({
         productId: item.productId,
         productName: item.product.name,
         productCode: item.product.productCode || null,
         quantity: item.quantity,
         unitPrice: item.price,
-        vatRate: '19.00',
+        vatRate: '21.00',
         lineTotal: item.totalPrice,
       }));
 
