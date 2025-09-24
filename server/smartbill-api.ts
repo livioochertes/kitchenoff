@@ -643,7 +643,7 @@ export function orderToSmartbillInvoice(
 
   // Format products using Romanian tax settings
   const products: SmartbillProduct[] = order.items.map((item: any) => {
-    const productVatPercentage = parseFloat(item.product.vatPercentage || '19');
+    const productVatPercentage = parseFloat(item.product.vatPercentage || '21');
     const isReverseCharge = false; // Use standard VAT for Romanian invoices
     
     console.log(`📦 Product ${item.product.name}: VAT=${productVatPercentage}%, ReverseCharge=${isReverseCharge}`);
@@ -681,7 +681,7 @@ export function orderToSmartbillInvoice(
     isDraft: false,
     dueDate,
     currency: 'RON', // ✅ FIXED: Currency at invoice level only
-    mentions: 'Factura cu TVA 19% conform legislației române',
+    mentions: 'Factura cu TVA 21% conform legislației române',
     observations: '',
     deliveryDate: issueDate,
     precision: 2,
