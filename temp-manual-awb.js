@@ -2,6 +2,9 @@
 app.post("/admin/api/orders/:id/generate-awb", authenticateAdmin, async (req, res) => {
   try {
     const orderId = parseInt(req.params.id);
+    if (isNaN(orderId) || orderId <= 0) {
+      return res.status(400).json({ message: 'Invalid order ID' });
+    }
     console.log('🚚 Starting manual AWB generation for order:', orderId);
     
     // Get order details
