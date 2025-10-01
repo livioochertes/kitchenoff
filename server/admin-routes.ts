@@ -1708,8 +1708,9 @@ export async function registerAdminRoutes(app: Express) {
       // Refresh memory cache after bulk operations
       await loadAllDataIntoMemory();
       
+      const totalCount = productIds.length;
       res.json({ 
-        message: `Delete operation completed for ${productIds.length} products`,
+        message: `Delete operation completed for ${totalCount} products`,
         results
       });
     } catch (error) {
