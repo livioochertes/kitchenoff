@@ -1,6 +1,8 @@
 import type { Express } from "express";
 import { storage } from "./storage";
 import { db, pool } from "./db";
+import { companySettings, suppliers } from "@shared/schema";
+import { desc, eq, and } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import speakeasy from "speakeasy";
@@ -2576,23 +2578,38 @@ export async function registerAdminRoutes(app: Express) {
   app.get("/admin/api/company-settings", async (req: Request, res: Response) => {
     console.log('Company settings API endpoint called');
     try {
-      const result = await pool.query(`
-        SELECT 
-          name, email, logistics_email as "logisticsEmail", phone, address, city, state, zip_code as "zipCode", 
-          country, contact_person as "contactPerson", website, 
-          vat_number as "vatNumber", registration_number as "registrationNumber", 
-          bank_name as "bankName", iban, description,
-          default_currency as "defaultCurrency", default_vat_percentage as "defaultVatPercentage", reverse_charge_vat as "reverseChargeVat",
-          free_shipping_threshold as "freeShippingThreshold", standard_shipping_cost as "standardShippingCost"
-        FROM company_settings 
-        ORDER BY created_at DESC 
-        LIMIT 1
-      `);
+      const [settings] = await db
+        .select({
+          name: companySettings.name,
+          email: companySettings.email,
+          logisticsEmail: companySettings.logisticsEmail,
+          phone: companySettings.phone,
+          address: companySettings.address,
+          city: companySettings.city,
+          state: companySettings.state,
+          zipCode: companySettings.zipCode,
+          country: companySettings.country,
+          contactPerson: companySettings.contactPerson,
+          website: companySettings.website,
+          vatNumber: companySettings.vatNumber,
+          registrationNumber: companySettings.registrationNumber,
+          bankName: companySettings.bankName,
+          iban: companySettings.iban,
+          description: companySettings.description,
+          defaultCurrency: companySettings.defaultCurrency,
+          defaultVatPercentage: companySettings.defaultVatPercentage,
+          reverseChargeVat: companySettings.reverseChargeVat,
+          freeShippingThreshold: companySettings.freeShippingThreshold,
+          standardShippingCost: companySettings.standardShippingCost,
+        })
+        .from(companySettings)
+        .orderBy(desc(companySettings.createdAt))
+        .limit(1);
       
-      console.log('Company settings query result:', result.rows[0]);
+      console.log('Company settings query result:', settings);
       
-      if (result.rows.length > 0) {
-        res.json(result.rows[0]);
+      if (settings) {
+        res.json(settings);
       } else {
         // Return default company settings if none exist
         res.json({
