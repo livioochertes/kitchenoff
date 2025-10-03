@@ -84,6 +84,16 @@ app.use((req, res, next) => {
   // Serve uploaded files
   app.use('/uploads', express.static('uploads'));
   
+  // In production, serve static assets (/assets/*) BEFORE routes to avoid blocking delays
+  if (app.get("env") !== "development") {
+    const path = await import("path");
+    const distPath = path.resolve(import.meta.dirname, "public");
+    app.use('/assets', express.static(path.join(distPath, 'assets'), {
+      maxAge: '1y',
+      immutable: true
+    }));
+  }
+  
   // Register admin routes FIRST before any other middleware
   await registerAdminRoutes(app);
   
