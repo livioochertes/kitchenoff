@@ -1290,12 +1290,18 @@ export async function registerAdminRoutes(app: Express) {
       // Generate slug from name
       const slug = productData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
       
+      // Sync imageUrl with first image from images array
+      const imagesArray = productData.images || [];
+      const mainImageUrl = imagesArray.length > 0 ? imagesArray[0] : (productData.imageUrl || null);
+      
       const newProduct = await storage.createProduct({
         ...productData,
         slug,
         price: parseFloat(productData.price),
         compareAtPrice: productData.compareAtPrice ? parseFloat(productData.compareAtPrice) : undefined,
         stockQuantity: parseInt(productData.stockQuantity || 0),
+        images: imagesArray,
+        imageUrl: mainImageUrl,
         // Convert logistics fields properly - weight must be minimum 1kg with 1kg increments
         weight: productData.weight && productData.weight.trim() !== '' ? Math.max(1, Math.round(parseFloat(productData.weight))) : null,
         length: productData.length && productData.length.trim() !== '' ? parseFloat(productData.length) : null,
