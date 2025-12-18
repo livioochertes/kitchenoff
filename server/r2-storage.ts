@@ -11,7 +11,16 @@ const R2_CDN_URL = process.env.R2_CDN_URL; // Your public CDN URL (e.g., https:/
 
 // Check if R2 is configured
 export function isR2Configured(): boolean {
-  return !!(R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY && R2_BUCKET_NAME && R2_CDN_URL);
+  const configured = !!(R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY && R2_BUCKET_NAME && R2_CDN_URL);
+  return configured;
+}
+
+// Log R2 status on module load
+console.log("☁️ R2 Storage Status:", isR2Configured() ? "CONFIGURED" : "NOT CONFIGURED");
+if (isR2Configured()) {
+  console.log("  - Account ID:", R2_ACCOUNT_ID?.slice(0, 8) + "...");
+  console.log("  - Bucket:", R2_BUCKET_NAME);
+  console.log("  - CDN URL:", R2_CDN_URL);
 }
 
 // Create S3 client for R2
