@@ -3,7 +3,7 @@ import sharp from 'sharp';
 import path from 'path';
 import { Request, Response, NextFunction } from 'express';
 import { promises as fs } from 'fs';
-import { isR2Configured, uploadImageToR2 } from './r2-storage';
+import { isR2Configured, uploadImageToR2, deleteImageFromR2 } from './r2-storage';
 
 // Extend Express Request interface to include processed files
 declare global {
@@ -117,17 +117,17 @@ export const processImages = async (req: Request, res: Response, next: NextFunct
       for (const file of files) {
         const timestamp = Date.now();
         const randomNum = Math.floor(Math.random() * 1000);
-        const ext = path.extname(file.originalname);
         const fileType = uploadType === 'categories' ? 'category' : 'product';
         const baseFilename = `${fileType}-${timestamp}-${randomNum}`;
         
         const uploadDir = path.join(process.cwd(), 'uploads', uploadType);
         await fs.mkdir(uploadDir, { recursive: true });
         
-        const outputPath = path.join(uploadDir, `processed-${baseFilename}${ext}`);
+        // Always use .jpeg extension to match the JPEG output format
+        const outputPath = path.join(uploadDir, `processed-${baseFilename}.jpeg`);
         const thumbnailPath = path.join(uploadDir, `thumb-${baseFilename}.webp`);
         
-        // Process main image
+        // Process main image - output as JPEG
         await sharp(file.buffer)
           .resize(800, 600, { 
             fit: 'inside',
@@ -146,11 +146,11 @@ export const processImages = async (req: Request, res: Response, next: NextFunct
           .toFile(thumbnailPath);
 
         processedFiles.push({
-          filename: `processed-${baseFilename}${ext}`,
+          filename: `processed-${baseFilename}.jpeg`,
           thumbnail: `thumb-${baseFilename}.webp`,
           originalName: file.originalname,
           size: file.size,
-          url: `/uploads/${uploadType}/processed-${baseFilename}${ext}`,
+          url: `/uploads/${uploadType}/processed-${baseFilename}.jpeg`,
           thumbnailUrl: `/uploads/${uploadType}/thumb-${baseFilename}.webp`
         });
       }
@@ -178,10 +178,28 @@ export const serveUploads = (req: Request, res: Response) => {
 };
 
 // Delete uploaded file (works for both local and R2)
-export const deleteUploadedFile = async (filename: string): Promise<boolean> => {
+export const deleteUploadedFile = async (imageUrl: string): Promise<boolean> => {
   try {
-    const filePath = path.join(process.cwd(), 'uploads', 'products', filename);
+    // Check if this is an R2 URL (contains CDN domain)
+    if (isR2Configured() && imageUrl.startsWith('http')) {
+      return await deleteImageFromR2(imageUrl);
+    }
+    
+    // Local file - extract filename from URL path
+    const filename = path.basename(imageUrl);
+    const uploadType = imageUrl.includes('/categories/') ? 'categories' : 'products';
+    const filePath = path.join(process.cwd(), 'uploads', uploadType, filename);
     await fs.unlink(filePath);
+    
+    // Also try to delete thumbnail
+    const thumbFilename = filename.replace('processed-', 'thumb-').replace('.jpeg', '.webp');
+    const thumbPath = path.join(process.cwd(), 'uploads', uploadType, thumbFilename);
+    try {
+      await fs.unlink(thumbPath);
+    } catch (e) {
+      // Thumbnail might not exist
+    }
+    
     return true;
   } catch (error) {
     console.error('Error deleting file:', error);
