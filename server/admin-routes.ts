@@ -1377,8 +1377,16 @@ export async function registerAdminRoutes(app: Express) {
       }
       
       res.json({ message: "Product deleted successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting product:", error);
+      
+      // Check if it's a foreign key constraint error (product is in orders)
+      if (error.code === '23503' || (error.message && error.message.includes('foreign key'))) {
+        return res.status(400).json({ 
+          message: "Acest produs nu poate fi șters deoarece există comenzi care îl conțin. Puteți marca produsul ca inactiv în loc să îl ștergeți." 
+        });
+      }
+      
       res.status(500).json({ message: "Failed to delete product" });
     }
   });
