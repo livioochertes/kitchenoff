@@ -1303,6 +1303,9 @@ export async function registerAdminRoutes(app: Express) {
         height: productData.height && productData.height.trim() !== '' ? parseFloat(productData.height) : null
       });
 
+      // Refresh memory cache so site shows new product immediately
+      await loadAllDataIntoMemory();
+
       res.json({ message: "Product created successfully", product: newProduct });
     } catch (error) {
       console.error("Error creating product:", error);
@@ -1334,6 +1337,9 @@ export async function registerAdminRoutes(app: Express) {
       
       console.log('Updated product result:', updatedProduct);
 
+      // Refresh memory cache so site shows updated data immediately
+      await loadAllDataIntoMemory();
+
       res.json({ 
         message: "Product updated successfully", 
         product: updatedProduct,
@@ -1351,6 +1357,10 @@ export async function registerAdminRoutes(app: Express) {
       const productId = parseInt(req.params.id);
       
       await storage.deleteProduct(productId);
+      
+      // Refresh memory cache so site reflects deletion immediately
+      await loadAllDataIntoMemory();
+      
       res.json({ message: "Product deleted successfully" });
     } catch (error) {
       console.error("Error deleting product:", error);
