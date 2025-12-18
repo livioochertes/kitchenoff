@@ -1327,12 +1327,17 @@ export async function registerAdminRoutes(app: Express) {
       console.log('Currency field:', productData.currency);
       console.log('VAT percentage field:', productData.vatPercentage);
       
+      // Sync imageUrl with first image from images array
+      const imagesArray = productData.images || [];
+      const mainImageUrl = imagesArray.length > 0 ? imagesArray[0] : productData.imageUrl;
+      
       const updatedProduct = await storage.updateProduct(productId, {
         ...productData,
         price: productData.price ? parseFloat(productData.price) : undefined,
         compareAtPrice: productData.compareAtPrice ? parseFloat(productData.compareAtPrice) : undefined,
         stockQuantity: productData.stockQuantity ? parseInt(productData.stockQuantity) : undefined,
-        images: productData.images || [],  // Ensure images are properly saved
+        images: imagesArray,  // Ensure images are properly saved
+        imageUrl: mainImageUrl,  // Sync main image with first image in array
         // Convert logistics fields properly - weight must be minimum 1kg with 1kg increments
         weight: productData.weight && productData.weight.trim() !== '' ? Math.max(1, Math.round(parseFloat(productData.weight))) : null,
         length: productData.length && productData.length.trim() !== '' ? parseFloat(productData.length) : null,
