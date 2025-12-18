@@ -15,6 +15,41 @@ import { loadAllDataIntoMemory } from "./routes";
 import multer from "multer";
 import * as XLSX from "xlsx";
 
+// Helper function to extract URL from image object or string
+function extractImageUrl(image: any): string | null {
+  if (!image) return null;
+  
+  // If it's already a string URL, return it
+  if (typeof image === 'string') {
+    // Check if it's a JSON string that was accidentally stringified
+    if (image.startsWith('{') && image.includes('"url"')) {
+      try {
+        const parsed = JSON.parse(image);
+        return parsed.url || parsed.thumbnailUrl || null;
+      } catch {
+        return image; // Return as-is if parsing fails
+      }
+    }
+    return image;
+  }
+  
+  // If it's an object with url property, extract it
+  if (typeof image === 'object' && image !== null) {
+    return image.url || image.thumbnailUrl || null;
+  }
+  
+  return null;
+}
+
+// Process images array to extract URLs
+function processImagesArray(images: any[]): string[] {
+  if (!Array.isArray(images)) return [];
+  
+  return images
+    .map(img => extractImageUrl(img))
+    .filter((url): url is string => url !== null && url.length > 0);
+}
+
 // Rate limiting for admin login attempts
 const adminLoginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -1290,9 +1325,12 @@ export async function registerAdminRoutes(app: Express) {
       // Generate slug from name
       const slug = productData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
       
-      // Sync imageUrl with first image from images array
-      const imagesArray = productData.images || [];
-      const mainImageUrl = imagesArray.length > 0 ? imagesArray[0] : (productData.imageUrl || null);
+      // Process images array to extract clean URLs (handles both objects and strings)
+      const cleanImages = processImagesArray(productData.images || []);
+      const mainImageUrl = cleanImages.length > 0 ? cleanImages[0] : extractImageUrl(productData.imageUrl);
+      
+      console.log('Creating product with images:', cleanImages);
+      console.log('Main image URL:', mainImageUrl);
       
       const newProduct = await storage.createProduct({
         ...productData,
@@ -1300,7 +1338,7 @@ export async function registerAdminRoutes(app: Express) {
         price: parseFloat(productData.price),
         compareAtPrice: productData.compareAtPrice ? parseFloat(productData.compareAtPrice) : undefined,
         stockQuantity: parseInt(productData.stockQuantity || 0),
-        images: imagesArray,
+        images: cleanImages,
         imageUrl: mainImageUrl,
         // Convert logistics fields properly - weight must be minimum 1kg with 1kg increments
         weight: productData.weight && productData.weight.trim() !== '' ? Math.max(1, Math.round(parseFloat(productData.weight))) : null,
@@ -1333,17 +1371,20 @@ export async function registerAdminRoutes(app: Express) {
       console.log('Currency field:', productData.currency);
       console.log('VAT percentage field:', productData.vatPercentage);
       
-      // Sync imageUrl with first image from images array
-      const imagesArray = productData.images || [];
-      const mainImageUrl = imagesArray.length > 0 ? imagesArray[0] : productData.imageUrl;
+      // Process images array to extract clean URLs (handles both objects and strings)
+      const cleanImages = processImagesArray(productData.images || []);
+      const mainImageUrl = cleanImages.length > 0 ? cleanImages[0] : extractImageUrl(productData.imageUrl);
+      
+      console.log('Updating product with clean images:', cleanImages);
+      console.log('Main image URL:', mainImageUrl);
       
       const updatedProduct = await storage.updateProduct(productId, {
         ...productData,
         price: productData.price ? parseFloat(productData.price) : undefined,
         compareAtPrice: productData.compareAtPrice ? parseFloat(productData.compareAtPrice) : undefined,
         stockQuantity: productData.stockQuantity ? parseInt(productData.stockQuantity) : undefined,
-        images: imagesArray,  // Ensure images are properly saved
-        imageUrl: mainImageUrl,  // Sync main image with first image in array
+        images: cleanImages,
+        imageUrl: mainImageUrl,
         // Convert logistics fields properly - weight must be minimum 1kg with 1kg increments
         weight: productData.weight && productData.weight.trim() !== '' ? Math.max(1, Math.round(parseFloat(productData.weight))) : null,
         length: productData.length && productData.length.trim() !== '' ? parseFloat(productData.length) : null,
@@ -1399,6 +1440,64 @@ export async function registerAdminRoutes(app: Express) {
       }
       
       res.status(500).json({ message: "Failed to delete product" });
+    }
+  });
+
+  // Endpoint to fix corrupted product images (JSON objects stored as strings)
+  app.post("/admin/api/products/fix-images", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const products = await storage.getProducts({});
+      let fixedCount = 0;
+      const fixedProducts: string[] = [];
+      
+      for (const product of products) {
+        let needsFix = false;
+        let cleanImages: string[] = [];
+        let cleanImageUrl: string | null = null;
+        
+        // Check and fix images array
+        if (product.images && Array.isArray(product.images)) {
+          cleanImages = processImagesArray(product.images);
+          if (JSON.stringify(cleanImages) !== JSON.stringify(product.images)) {
+            needsFix = true;
+          }
+        }
+        
+        // Check and fix imageUrl
+        if (product.imageUrl) {
+          cleanImageUrl = extractImageUrl(product.imageUrl);
+          if (cleanImageUrl !== product.imageUrl) {
+            needsFix = true;
+          }
+        }
+        
+        // If no clean imageUrl but we have clean images, use first image
+        if (!cleanImageUrl && cleanImages.length > 0) {
+          cleanImageUrl = cleanImages[0];
+          needsFix = true;
+        }
+        
+        if (needsFix) {
+          await storage.updateProduct(product.id, {
+            images: cleanImages,
+            imageUrl: cleanImageUrl
+          });
+          fixedCount++;
+          fixedProducts.push(`${product.id}: ${product.name}`);
+          console.log(`Fixed product ${product.id} (${product.name}): images=${JSON.stringify(cleanImages)}, imageUrl=${cleanImageUrl}`);
+        }
+      }
+      
+      // Refresh memory cache
+      await loadAllDataIntoMemory();
+      
+      res.json({ 
+        message: `Fixed ${fixedCount} products with corrupted images`,
+        fixedProducts
+      });
+    } catch (error) {
+      console.error("Error fixing product images:", error);
+      res.status(500).json({ message: "Failed to fix product images" });
     }
   });
 
