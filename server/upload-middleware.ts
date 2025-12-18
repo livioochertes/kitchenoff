@@ -3,6 +3,7 @@ import sharp from 'sharp';
 import path from 'path';
 import { Request, Response, NextFunction } from 'express';
 import { promises as fs } from 'fs';
+import { isR2Configured, uploadImageToR2 } from './r2-storage';
 
 // Extend Express Request interface to include processed files
 declare global {
@@ -20,17 +21,17 @@ declare global {
   }
 }
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
+// Use memory storage when R2 is available, disk storage as fallback
+const memoryStorage = multer.memoryStorage();
+
+const diskStorage = multer.diskStorage({
   destination: async (req, file, cb) => {
-    // Determine upload directory based on request path
     const uploadType = req.path.includes('categories') ? 'categories' : 'products';
     const uploadDir = path.join(process.cwd(), 'uploads', uploadType);
     await fs.mkdir(uploadDir, { recursive: true });
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    // Generate unique filename with timestamp and original extension
     const timestamp = Date.now();
     const randomNum = Math.floor(Math.random() * 1000);
     const ext = path.extname(file.originalname);
@@ -49,9 +50,19 @@ const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilt
   }
 };
 
-// Configure multer with size limits
+// Use memory storage for R2, disk storage for local
+const getStorage = () => {
+  if (isR2Configured()) {
+    console.log("📦 Using R2 cloud storage for uploads");
+    return memoryStorage;
+  }
+  console.log("📁 Using local disk storage for uploads");
+  return diskStorage;
+};
+
+// Configure multer with dynamic storage
 export const upload = multer({
-  storage,
+  storage: memoryStorage, // Always use memory, we'll decide where to save in processImages
   fileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB limit
@@ -62,8 +73,6 @@ export const upload = multer({
 // Middleware to process uploaded images
 export const processImages = async (req: Request, res: Response, next: NextFunction) => {
   console.log("processImages middleware called");
-  console.log("req.files:", req.files);
-  console.log("req.file:", req.file);
   
   // Handle both single file and multiple files
   let files: Express.Multer.File[] = [];
@@ -79,56 +88,76 @@ export const processImages = async (req: Request, res: Response, next: NextFunct
     return next();
   }
 
+  const uploadType = req.path.includes('categories') ? 'categories' : 'products';
+
   try {
     const processedFiles = [];
-    
-    for (const file of files) {
-      const inputPath = file.path;
-      const outputPath = path.join(
-        path.dirname(inputPath),
-        `processed-${file.filename}`
-      );
 
-      // Process image: resize, optimize, and convert to WebP
-      await sharp(inputPath)
-        .resize(800, 600, { 
-          fit: 'inside',
-          withoutEnlargement: true 
-        })
-        .webp({ quality: 85 })
-        .toFile(outputPath);
-
-      // Create thumbnail
-      const thumbnailPath = path.join(
-        path.dirname(inputPath),
-        `thumb-${file.filename.replace(/\.[^/.]+$/, '')}.webp`
-      );
+    // Check if R2 is configured
+    if (isR2Configured()) {
+      console.log("☁️ Uploading to Cloudflare R2...");
       
-      await sharp(inputPath)
-        .resize(200, 150, { 
-          fit: 'cover',
-          position: 'center' 
-        })
-        .webp({ quality: 70 })
-        .toFile(thumbnailPath);
-
-      // Remove original file
-      await fs.unlink(inputPath);
-
-      // Determine upload type based on request path
-      const uploadType = req.path.includes('categories') ? 'categories' : 'products';
+      for (const file of files) {
+        const result = await uploadImageToR2(file.buffer, file.originalname, uploadType);
+        if (result) {
+          processedFiles.push({
+            filename: result.filename,
+            thumbnail: path.basename(result.thumbnailUrl),
+            originalName: result.originalName,
+            size: result.size,
+            url: result.url,
+            thumbnailUrl: result.thumbnailUrl
+          });
+        }
+      }
+    } else {
+      console.log("📁 Saving to local filesystem...");
       
-      processedFiles.push({
-        filename: `processed-${file.filename}`,
-        thumbnail: `thumb-${file.filename.replace(/\.[^/.]+$/, '')}.webp`,
-        originalName: file.originalname,
-        size: file.size,
-        url: `/uploads/${uploadType}/processed-${file.filename}`,
-        thumbnailUrl: `/uploads/${uploadType}/thumb-${file.filename.replace(/\.[^/.]+$/, '')}.webp`
-      });
+      // Fall back to local storage
+      for (const file of files) {
+        const timestamp = Date.now();
+        const randomNum = Math.floor(Math.random() * 1000);
+        const ext = path.extname(file.originalname);
+        const fileType = uploadType === 'categories' ? 'category' : 'product';
+        const baseFilename = `${fileType}-${timestamp}-${randomNum}`;
+        
+        const uploadDir = path.join(process.cwd(), 'uploads', uploadType);
+        await fs.mkdir(uploadDir, { recursive: true });
+        
+        const outputPath = path.join(uploadDir, `processed-${baseFilename}${ext}`);
+        const thumbnailPath = path.join(uploadDir, `thumb-${baseFilename}.webp`);
+        
+        // Process main image
+        await sharp(file.buffer)
+          .resize(800, 600, { 
+            fit: 'inside',
+            withoutEnlargement: true 
+          })
+          .jpeg({ quality: 85 })
+          .toFile(outputPath);
+
+        // Create thumbnail
+        await sharp(file.buffer)
+          .resize(200, 150, { 
+            fit: 'cover',
+            position: 'center' 
+          })
+          .webp({ quality: 70 })
+          .toFile(thumbnailPath);
+
+        processedFiles.push({
+          filename: `processed-${baseFilename}${ext}`,
+          thumbnail: `thumb-${baseFilename}.webp`,
+          originalName: file.originalname,
+          size: file.size,
+          url: `/uploads/${uploadType}/processed-${baseFilename}${ext}`,
+          thumbnailUrl: `/uploads/${uploadType}/thumb-${baseFilename}.webp`
+        });
+      }
     }
 
     req.processedFiles = processedFiles;
+    console.log("✅ Processed", processedFiles.length, "files");
     next();
   } catch (error) {
     console.error('Error processing images:', error);
@@ -136,7 +165,7 @@ export const processImages = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-// Serve uploaded files
+// Serve uploaded files (for local storage only)
 export const serveUploads = (req: Request, res: Response) => {
   const filename = req.params.filename;
   const filePath = path.join(process.cwd(), 'uploads', 'products', filename);
@@ -148,7 +177,7 @@ export const serveUploads = (req: Request, res: Response) => {
   });
 };
 
-// Delete uploaded file
+// Delete uploaded file (works for both local and R2)
 export const deleteUploadedFile = async (filename: string): Promise<boolean> => {
   try {
     const filePath = path.join(process.cwd(), 'uploads', 'products', filename);
