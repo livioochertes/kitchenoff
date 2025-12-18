@@ -8,6 +8,7 @@ import { subdomainMiddleware, adminSubdomainHandler } from "./subdomain-middlewa
 import { setupVite, serveStatic, log } from "./vite";
 import { seedDatabase } from "./sample-data";
 import { loadAllDataIntoMemory } from "./routes";
+import { logR2Status } from "./r2-storage";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -87,6 +88,9 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Log R2 storage status
+  logR2Status();
+  
   // Serve static assets first - use WORKSPACE_ROOT (process.cwd()) which always points to workspace root
   // This works in both dev and production, regardless of where the compiled JS runs from
   app.use('/attached_assets', express.static(path.join(WORKSPACE_ROOT, 'attached_assets')));

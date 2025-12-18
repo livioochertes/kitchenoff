@@ -2,29 +2,38 @@ import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client
 import sharp from "sharp";
 import path from "path";
 
-// R2 Configuration - uses environment variables
-const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID;
-const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID;
-const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY;
-const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME;
-const R2_CDN_URL = process.env.R2_CDN_URL; // Your public CDN URL (e.g., https://cdn.kitchen-off.com)
+// R2 Configuration - read at runtime to pick up env changes
+function getR2Config() {
+  return {
+    accountId: process.env.R2_ACCOUNT_ID,
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+    bucketName: process.env.R2_BUCKET_NAME,
+    cdnUrl: process.env.R2_CDN_URL
+  };
+}
 
 // Check if R2 is configured
 export function isR2Configured(): boolean {
-  const configured = !!(R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY && R2_BUCKET_NAME && R2_CDN_URL);
-  return configured;
+  const config = getR2Config();
+  return !!(config.accountId && config.accessKeyId && config.secretAccessKey && config.bucketName && config.cdnUrl);
 }
 
-// Log R2 status on module load
-console.log("☁️ R2 Storage Status:", isR2Configured() ? "CONFIGURED" : "NOT CONFIGURED");
-if (isR2Configured()) {
-  console.log("  - Account ID:", R2_ACCOUNT_ID?.slice(0, 8) + "...");
-  console.log("  - Bucket:", R2_BUCKET_NAME);
-  console.log("  - CDN URL:", R2_CDN_URL);
+// Log R2 status (called once at startup)
+export function logR2Status() {
+  const config = getR2Config();
+  const configured = isR2Configured();
+  console.log("☁️ R2 Storage Status:", configured ? "CONFIGURED" : "NOT CONFIGURED");
+  if (configured) {
+    console.log("  - Account ID:", config.accountId?.slice(0, 8) + "...");
+    console.log("  - Bucket:", config.bucketName);
+    console.log("  - CDN URL:", config.cdnUrl);
+  }
 }
 
 // Create S3 client for R2
 function getR2Client(): S3Client | null {
+  const config = getR2Config();
   if (!isR2Configured()) {
     console.warn("⚠️ R2 storage not configured - falling back to local storage");
     return null;
@@ -32,10 +41,10 @@ function getR2Client(): S3Client | null {
 
   return new S3Client({
     region: "auto",
-    endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    endpoint: `https://${config.accountId}.r2.cloudflarestorage.com`,
     credentials: {
-      accessKeyId: R2_ACCESS_KEY_ID!,
-      secretAccessKey: R2_SECRET_ACCESS_KEY!,
+      accessKeyId: config.accessKeyId!,
+      secretAccessKey: config.secretAccessKey!,
     },
   });
 }
@@ -85,10 +94,12 @@ export async function uploadImageToR2(
   const mainKey = `${uploadType}/processed-${baseFilename}.jpeg`;
   const thumbKey = `${uploadType}/thumb-${baseFilename}.webp`;
 
+  const config = getR2Config();
+  
   try {
     // Upload main image
     await client.send(new PutObjectCommand({
-      Bucket: R2_BUCKET_NAME!,
+      Bucket: config.bucketName!,
       Key: mainKey,
       Body: processedBuffer,
       ContentType: 'image/jpeg',
@@ -96,13 +107,13 @@ export async function uploadImageToR2(
 
     // Upload thumbnail
     await client.send(new PutObjectCommand({
-      Bucket: R2_BUCKET_NAME!,
+      Bucket: config.bucketName!,
       Key: thumbKey,
       Body: thumbnailBuffer,
       ContentType: 'image/webp',
     }));
 
-    const cdnBase = R2_CDN_URL!.replace(/\/$/, ''); // Remove trailing slash if present
+    const cdnBase = config.cdnUrl!.replace(/\/$/, ''); // Remove trailing slash if present
 
     console.log(`✅ Uploaded to R2: ${mainKey}`);
 
@@ -120,19 +131,20 @@ export async function uploadImageToR2(
 }
 
 export async function deleteImageFromR2(imageUrl: string): Promise<boolean> {
+  const config = getR2Config();
   const client = getR2Client();
   
-  if (!client || !R2_CDN_URL) {
+  if (!client || !config.cdnUrl) {
     return false;
   }
 
   try {
     // Extract key from URL
-    const cdnBase = R2_CDN_URL.replace(/\/$/, '');
+    const cdnBase = config.cdnUrl.replace(/\/$/, '');
     const key = imageUrl.replace(`${cdnBase}/`, '');
 
     await client.send(new DeleteObjectCommand({
-      Bucket: R2_BUCKET_NAME!,
+      Bucket: config.bucketName!,
       Key: key,
     }));
 
@@ -140,7 +152,7 @@ export async function deleteImageFromR2(imageUrl: string): Promise<boolean> {
     const thumbKey = key.replace('processed-', 'thumb-').replace('.jpeg', '.webp');
     try {
       await client.send(new DeleteObjectCommand({
-        Bucket: R2_BUCKET_NAME!,
+        Bucket: config.bucketName!,
         Key: thumbKey,
       }));
     } catch (e) {
