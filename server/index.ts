@@ -1,11 +1,17 @@
 import express, { type Request, Response, NextFunction } from "express";
 import compression from "compression";
+import path from "path";
+import { fileURLToPath } from "url";
 import { registerRoutes } from "./routes";
 import { registerAdminRoutes } from "./admin-routes";
 import { subdomainMiddleware, adminSubdomainHandler } from "./subdomain-middleware";
 import { setupVite, serveStatic, log } from "./vite";
 import { seedDatabase } from "./sample-data";
 import { loadAllDataIntoMemory } from "./routes";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const ROOT_DIR = path.resolve(__dirname, '..');
 
 const app = express();
 
@@ -78,20 +84,23 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Serve static assets first
-  app.use('/attached_assets', express.static('attached_assets'));
+  // Serve static assets first - use absolute paths that work in both dev and production
+  app.use('/attached_assets', express.static(path.join(ROOT_DIR, 'attached_assets')));
   
-  // Serve uploaded files
-  app.use('/uploads', express.static('uploads'));
+  // Serve uploaded files - use absolute path to root uploads folder
+  app.use('/uploads', express.static(path.join(ROOT_DIR, 'uploads')));
+  
+  console.log(`📁 Serving uploads from: ${path.join(ROOT_DIR, 'uploads')}`);
+  console.log(`📁 Serving attached_assets from: ${path.join(ROOT_DIR, 'attached_assets')}`);
   
   // In production, serve static assets (/assets/*) BEFORE routes to avoid blocking delays
   if (app.get("env") !== "development") {
-    const path = await import("path");
-    const distPath = path.resolve(import.meta.dirname, "public");
+    const distPath = path.join(ROOT_DIR, 'dist', 'public');
     app.use('/assets', express.static(path.join(distPath, 'assets'), {
       maxAge: '1y',
       immutable: true
     }));
+    console.log(`📁 Serving dist assets from: ${path.join(distPath, 'assets')}`);
   }
   
   // Register admin routes FIRST before any other middleware
