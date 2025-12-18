@@ -1304,7 +1304,12 @@ export async function registerAdminRoutes(app: Express) {
       });
 
       // Refresh memory cache so site shows new product immediately
-      await loadAllDataIntoMemory();
+      // Wrapped in try-catch to not fail the main operation if cache refresh fails
+      try {
+        await loadAllDataIntoMemory();
+      } catch (cacheError) {
+        console.error("Cache refresh failed after product creation:", cacheError);
+      }
 
       res.json({ message: "Product created successfully", product: newProduct });
     } catch (error) {
@@ -1338,7 +1343,12 @@ export async function registerAdminRoutes(app: Express) {
       console.log('Updated product result:', updatedProduct);
 
       // Refresh memory cache so site shows updated data immediately
-      await loadAllDataIntoMemory();
+      // Wrapped in try-catch to not fail the main operation if cache refresh fails
+      try {
+        await loadAllDataIntoMemory();
+      } catch (cacheError) {
+        console.error("Cache refresh failed after product update:", cacheError);
+      }
 
       res.json({ 
         message: "Product updated successfully", 
@@ -1359,7 +1369,12 @@ export async function registerAdminRoutes(app: Express) {
       await storage.deleteProduct(productId);
       
       // Refresh memory cache so site reflects deletion immediately
-      await loadAllDataIntoMemory();
+      // Wrapped in try-catch to not fail the main operation if cache refresh fails
+      try {
+        await loadAllDataIntoMemory();
+      } catch (cacheError) {
+        console.error("Cache refresh failed after product deletion:", cacheError);
+      }
       
       res.json({ message: "Product deleted successfully" });
     } catch (error) {
