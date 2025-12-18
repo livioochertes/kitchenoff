@@ -11,7 +11,10 @@ import { loadAllDataIntoMemory } from "./routes";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+// In production, __dirname is dist/server, but uploads/attached_assets are at workspace root
+// Use process.cwd() for static assets which always points to workspace root
 const ROOT_DIR = path.resolve(__dirname, '..');
+const WORKSPACE_ROOT = process.cwd();
 
 const app = express();
 
@@ -84,14 +87,15 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Serve static assets first - use absolute paths that work in both dev and production
-  app.use('/attached_assets', express.static(path.join(ROOT_DIR, 'attached_assets')));
+  // Serve static assets first - use WORKSPACE_ROOT (process.cwd()) which always points to workspace root
+  // This works in both dev and production, regardless of where the compiled JS runs from
+  app.use('/attached_assets', express.static(path.join(WORKSPACE_ROOT, 'attached_assets')));
   
-  // Serve uploaded files - use absolute path to root uploads folder
-  app.use('/uploads', express.static(path.join(ROOT_DIR, 'uploads')));
+  // Serve uploaded files - use WORKSPACE_ROOT to find uploads folder at workspace root
+  app.use('/uploads', express.static(path.join(WORKSPACE_ROOT, 'uploads')));
   
-  console.log(`📁 Serving uploads from: ${path.join(ROOT_DIR, 'uploads')}`);
-  console.log(`📁 Serving attached_assets from: ${path.join(ROOT_DIR, 'attached_assets')}`);
+  console.log(`📁 Serving uploads from: ${path.join(WORKSPACE_ROOT, 'uploads')}`);
+  console.log(`📁 Serving attached_assets from: ${path.join(WORKSPACE_ROOT, 'attached_assets')}`);
   
   // In production, serve static assets (/assets/*) BEFORE routes to avoid blocking delays
   if (app.get("env") !== "development") {
