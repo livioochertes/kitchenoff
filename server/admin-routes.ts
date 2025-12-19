@@ -1523,11 +1523,14 @@ export async function registerAdminRoutes(app: Express) {
       // Generate slug from name
       const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
       
+      // Extract clean URL from imageUrl (handles objects and strings)
+      const cleanImageUrl = extractImageUrl(imageUrl);
+      
       const newCategory = await storage.createCategory({
         name,
         slug,
         description,
-        imageUrl
+        imageUrl: cleanImageUrl
       });
 
       res.json({ message: "Category created successfully", category: newCategory });
@@ -1542,10 +1545,13 @@ export async function registerAdminRoutes(app: Express) {
       const categoryId = parseInt(req.params.id);
       const { name, description, imageUrl } = req.body;
       
+      // Extract clean URL from imageUrl (handles objects and strings)
+      const cleanImageUrl = imageUrl !== undefined ? extractImageUrl(imageUrl) : undefined;
+      
       const updatedCategory = await storage.updateCategory(categoryId, {
         name,
         description,
-        imageUrl
+        imageUrl: cleanImageUrl
       });
 
       res.json({ message: "Category updated successfully", category: updatedCategory });
