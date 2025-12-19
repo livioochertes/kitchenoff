@@ -49,14 +49,14 @@ export default function Header() {
       </div>
 
       {/* Main Header */}
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
+      <div className="container mx-auto px-4 py-2">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 flex-shrink-0">
             <img 
               src={kitchenOffLogo} 
               alt="KitchenOff Logo" 
-              className="w-[100px] h-[100px] object-contain"
+              className="w-[100px] h-[100px] object-contain -my-4"
             />
             <span className="text-xl font-bold text-primary">KitchenOff</span>
           </Link>
