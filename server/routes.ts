@@ -106,11 +106,15 @@ let allProductsData: any[] = [];
 let productsBySlug = new Map<string, any>();
 let stringifiedProductsData: string = '';
 let stringifiedCategoriesData: string = '';
+let dataVersion: number = Date.now();
 
 // Load ALL data into memory at startup - never hit database again
 export async function loadAllDataIntoMemory() {
   try {
     console.log('Loading all data into permanent memory...');
+    
+    // Update version to invalidate caches
+    dataVersion = Date.now();
     
     // Load categories
     categoriesData = await storage.getCategories();
@@ -787,10 +791,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Category routes - instant response from memory
   app.get("/api/categories", (req, res) => {
-    // Ultra-fast synchronous response - no JSON.stringify overhead
+    // No browser caching to ensure admin changes are visible immediately
     res.set({
-      'Cache-Control': 'public, max-age=300, s-maxage=300',
-      'ETag': 'categories-memory',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+      'ETag': `categories-${dataVersion}`,
       'Content-Type': 'application/json'
     });
     res.send(stringifiedCategoriesData);
