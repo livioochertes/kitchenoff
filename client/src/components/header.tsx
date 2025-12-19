@@ -52,11 +52,11 @@ export default function Header() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3">
+          <Link href="/" className="flex items-center space-x-3 flex-shrink-0">
             <img 
               src={kitchenOffLogo} 
               alt="KitchenOff Logo" 
-              className="w-16 h-16 object-contain"
+              className="w-[100px] h-[100px] object-contain"
             />
             <span className="text-xl font-bold text-primary">KitchenOff</span>
           </Link>
