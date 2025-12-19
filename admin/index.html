@@ -4140,6 +4140,7 @@
         const [productTranslations, setProductTranslations] = useState([]);
         const [showTranslationsTab, setShowTranslationsTab] = useState(false);
         const [newTranslation, setNewTranslation] = useState({ language: '', name: '', description: '', sourceUrl: '' });
+        const [editingTranslation, setEditingTranslation] = useState(null);
 
         // Import from URL handler
         const handleImportFromUrl = async () => {
@@ -4576,6 +4577,43 @@
             }
           } catch (error) {
             console.error('Error deleting translation:', error);
+          }
+        };
+        
+        // Update translation
+        const handleUpdateTranslation = async () => {
+          if (!editingTranslation || !editingTranslation.name) {
+            alert('Name is required');
+            return;
+          }
+          
+          try {
+            const response = await fetch(`/admin/api/products/translations/${editingTranslation.id}`, {
+              method: 'PUT',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` 
+              },
+              body: JSON.stringify({
+                language: editingTranslation.language,
+                name: editingTranslation.name,
+                description: editingTranslation.description,
+                sourceUrl: editingTranslation.sourceUrl
+              })
+            });
+            
+            if (response.ok) {
+              const updated = await response.json();
+              setProductTranslations(productTranslations.map(t => t.id === updated.id ? updated : t));
+              setEditingTranslation(null);
+              alert('✅ Translation updated!');
+            } else {
+              const error = await response.json();
+              alert('Error: ' + error.message);
+            }
+          } catch (error) {
+            console.error('Error updating translation:', error);
+            alert('Failed to update translation');
           }
         };
         
@@ -5303,6 +5341,180 @@
                       </div>
                     </div>
                     
+                    {/* Translations Section - Only show when editing */}
+                    {editingProduct && (
+                      <div style={{
+                        backgroundColor: '#f0f7ff',
+                        padding: '15px',
+                        borderRadius: '8px',
+                        marginTop: '20px',
+                        border: '1px solid #b3d4fc'
+                      }}>
+                        <h4 style={{marginBottom: '15px', color: '#1976d2', fontSize: '14px'}}>
+                          🌍 Traduceri Produs ({productTranslations.length})
+                        </h4>
+                        
+                        {/* Existing translations */}
+                        {productTranslations.length > 0 && (
+                          <div style={{marginBottom: '15px'}}>
+                            {productTranslations.map(translation => (
+                              <div key={translation.id} style={{
+                                backgroundColor: '#fff',
+                                padding: '10px 12px',
+                                borderRadius: '4px',
+                                marginBottom: '8px',
+                                border: editingTranslation?.id === translation.id ? '2px solid #1976d2' : '1px solid #e0e0e0'
+                              }}>
+                                {editingTranslation?.id === translation.id ? (
+                                  <div>
+                                    <div style={{display: 'flex', gap: '8px', marginBottom: '8px'}}>
+                                      <span style={{
+                                        backgroundColor: '#1976d2',
+                                        color: '#fff',
+                                        padding: '4px 10px',
+                                        borderRadius: '4px',
+                                        fontSize: '12px',
+                                        textTransform: 'uppercase'
+                                      }}>
+                                        {editingTranslation.language}
+                                      </span>
+                                      <input
+                                        type="text"
+                                        className="form-input"
+                                        value={editingTranslation.name}
+                                        onChange={(e) => setEditingTranslation({...editingTranslation, name: e.target.value})}
+                                        style={{flex: 1, fontSize: '13px'}}
+                                        placeholder="Name"
+                                      />
+                                    </div>
+                                    <textarea
+                                      className="form-input"
+                                      value={editingTranslation.description || ''}
+                                      onChange={(e) => setEditingTranslation({...editingTranslation, description: e.target.value})}
+                                      rows="2"
+                                      style={{marginBottom: '8px', fontSize: '13px'}}
+                                      placeholder="Description"
+                                    />
+                                    <div style={{display: 'flex', gap: '8px'}}>
+                                      <button type="button" className="btn" onClick={handleUpdateTranslation} style={{backgroundColor: '#28a745', fontSize: '12px'}}>
+                                        ✓ Save
+                                      </button>
+                                      <button type="button" className="btn" onClick={() => setEditingTranslation(null)} style={{backgroundColor: '#6c757d', fontSize: '12px'}}>
+                                        ✕ Cancel
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                                    <div>
+                                      <span style={{
+                                        backgroundColor: '#1976d2',
+                                        color: '#fff',
+                                        padding: '2px 8px',
+                                        borderRadius: '4px',
+                                        fontSize: '11px',
+                                        marginRight: '10px',
+                                        textTransform: 'uppercase'
+                                      }}>
+                                        {translation.language}
+                                      </span>
+                                      <strong>{translation.name}</strong>
+                                      {translation.sourceUrl && (
+                                        <a href={translation.sourceUrl} target="_blank" style={{marginLeft: '8px', fontSize: '11px'}}>🔗</a>
+                                      )}
+                                    </div>
+                                    <div style={{display: 'flex', gap: '5px'}}>
+                                      <button
+                                        type="button"
+                                        onClick={() => setEditingTranslation({...translation})}
+                                        style={{background: 'none', border: 'none', color: '#1976d2', cursor: 'pointer', fontSize: '14px'}}
+                                      >
+                                        ✏️
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDeleteTranslation(translation.id)}
+                                        style={{background: 'none', border: 'none', color: '#dc3545', cursor: 'pointer', fontSize: '14px'}}
+                                      >
+                                        🗑️
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {/* Add new translation */}
+                        <div style={{
+                          backgroundColor: '#fff',
+                          padding: '12px',
+                          borderRadius: '6px',
+                          border: '1px dashed #1976d2'
+                        }}>
+                          <div style={{fontSize: '13px', fontWeight: 'bold', marginBottom: '10px', color: '#1976d2'}}>
+                            ➕ Adaugă traducere
+                          </div>
+                          <div style={{display: 'grid', gridTemplateColumns: '100px 1fr', gap: '10px', marginBottom: '10px'}}>
+                            <select
+                              className="form-input"
+                              value={newTranslation.language}
+                              onChange={(e) => setNewTranslation({...newTranslation, language: e.target.value})}
+                              style={{fontSize: '13px'}}
+                            >
+                              <option value="">Limbă</option>
+                              <option value="ro">🇷🇴 Română</option>
+                              <option value="en">🇬🇧 English</option>
+                              <option value="de">🇩🇪 Deutsch</option>
+                              <option value="fr">🇫🇷 Français</option>
+                              <option value="it">🇮🇹 Italiano</option>
+                              <option value="es">🇪🇸 Español</option>
+                            </select>
+                            <input
+                              type="text"
+                              className="form-input"
+                              placeholder="Nume produs tradus"
+                              value={newTranslation.name}
+                              onChange={(e) => setNewTranslation({...newTranslation, name: e.target.value})}
+                              style={{fontSize: '13px'}}
+                            />
+                          </div>
+                          <textarea
+                            className="form-input"
+                            placeholder="Descriere tradusă (opțional)"
+                            value={newTranslation.description}
+                            onChange={(e) => setNewTranslation({...newTranslation, description: e.target.value})}
+                            rows="2"
+                            style={{marginBottom: '10px', fontSize: '13px'}}
+                          />
+                          <div style={{display: 'flex', gap: '10px'}}>
+                            <input
+                              type="url"
+                              className="form-input"
+                              placeholder="URL sursă (opțional)"
+                              value={newTranslation.sourceUrl}
+                              onChange={(e) => setNewTranslation({...newTranslation, sourceUrl: e.target.value})}
+                              style={{flex: 1, fontSize: '13px'}}
+                            />
+                            <button
+                              type="button"
+                              className="btn"
+                              onClick={() => handleAddTranslation(editingProduct.id)}
+                              disabled={!newTranslation.language || !newTranslation.name}
+                              style={{
+                                backgroundColor: newTranslation.language && newTranslation.name ? '#28a745' : '#ccc',
+                                whiteSpace: 'nowrap',
+                                fontSize: '13px'
+                              }}
+                            >
+                              ➕ Adaugă
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
                     <div style={{display: 'flex', gap: '10px', marginTop: '20px', justifyContent: 'flex-end'}}>
                       <button
                         type="button"
@@ -5340,6 +5552,10 @@
                           setImportUrl('');
                           setImportedData(null);
                           setUsageRightsConfirmed(false);
+                          // Reset translations state
+                          setProductTranslations([]);
+                          setNewTranslation({ language: '', name: '', description: '', sourceUrl: '' });
+                          setEditingTranslation(null);
                         }}
                       >
                         Cancel
