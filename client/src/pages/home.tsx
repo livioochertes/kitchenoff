@@ -128,7 +128,7 @@ export default function Home() {
                       <h3 className="text-xl font-semibold text-primary mb-2">{getCategoryName(category)}</h3>
                       <p className="text-slate-600 mb-4">{getCategoryDescription(category)}</p>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-slate-500">50+ {t('home.categories.products')}</span>
+                        <span className="text-sm text-slate-500">{(category as any).productCount || 0} {t('home.categories.products')}</span>
                         <Button variant="ghost" className="text-secondary hover:text-blue-600 p-0">
                           {t('home.categories.viewAll')} <ArrowRight className="ml-1 h-4 w-4" />
                         </Button>

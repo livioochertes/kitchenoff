@@ -117,19 +117,23 @@ export async function loadAllDataIntoMemory() {
     dataVersion = Date.now();
     
     // Load categories
-    categoriesData = await storage.getCategories();
-    setCachedData('categories-all', categoriesData);
+    const rawCategories = await storage.getCategories();
+    setCachedData('categories-all', rawCategories);
     
-    // Refresh stringified categories data
-    stringifiedCategoriesData = JSON.stringify(categoriesData);
-    
-    // Load products for each category (all products, no limit)
-    for (const category of categoriesData) {
+    // Load products for each category and add product count
+    for (const category of rawCategories) {
       const products = await storage.getProducts({
         categoryId: category.id
       });
       productsByCategory.set(category.slug, products);
+      // Add product count to category
+      (category as any).productCount = products.length;
     }
+    
+    categoriesData = rawCategories;
+    
+    // Refresh stringified categories data (now includes productCount)
+    stringifiedCategoriesData = JSON.stringify(categoriesData);
     
     // Load all products (no filter, no limit)
     allProductsData = await storage.getProducts({});
