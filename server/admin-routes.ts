@@ -1342,10 +1342,11 @@ export async function registerAdminRoutes(app: Express) {
         images: cleanImages,
         imageUrl: mainImageUrl,
         // Convert logistics fields properly - weight must be minimum 1kg with 1kg increments
-        weight: productData.weight && productData.weight.trim() !== '' ? Math.max(1, Math.round(parseFloat(productData.weight))) : null,
-        length: productData.length && productData.length.trim() !== '' ? parseFloat(productData.length) : null,
-        width: productData.width && productData.width.trim() !== '' ? parseFloat(productData.width) : null,
-        height: productData.height && productData.height.trim() !== '' ? parseFloat(productData.height) : null
+        // Handle both string and number types safely
+        weight: productData.weight && String(productData.weight).trim() !== '' ? Math.max(1, Math.round(parseFloat(String(productData.weight)))) : null,
+        length: productData.length && String(productData.length).trim() !== '' ? parseFloat(String(productData.length)) : null,
+        width: productData.width && String(productData.width).trim() !== '' ? parseFloat(String(productData.width)) : null,
+        height: productData.height && String(productData.height).trim() !== '' ? parseFloat(String(productData.height)) : null
       });
 
       // Refresh memory cache so site shows new product immediately
@@ -1388,10 +1389,11 @@ export async function registerAdminRoutes(app: Express) {
         images: cleanImages,
         imageUrl: mainImageUrl,
         // Convert logistics fields properly - weight must be minimum 1kg with 1kg increments
-        weight: productData.weight && productData.weight.trim() !== '' ? Math.max(1, Math.round(parseFloat(productData.weight))) : null,
-        length: productData.length && productData.length.trim() !== '' ? parseFloat(productData.length) : null,
-        width: productData.width && productData.width.trim() !== '' ? parseFloat(productData.width) : null,
-        height: productData.height && productData.height.trim() !== '' ? parseFloat(productData.height) : null
+        // Handle both string and number types safely
+        weight: productData.weight && String(productData.weight).trim() !== '' ? Math.max(1, Math.round(parseFloat(String(productData.weight)))) : null,
+        length: productData.length && String(productData.length).trim() !== '' ? parseFloat(String(productData.length)) : null,
+        width: productData.width && String(productData.width).trim() !== '' ? parseFloat(String(productData.width)) : null,
+        height: productData.height && String(productData.height).trim() !== '' ? parseFloat(String(productData.height)) : null
       });
       
       console.log('Updated product result:', updatedProduct);
