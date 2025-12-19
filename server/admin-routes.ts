@@ -14,6 +14,7 @@ import { upload, processImages, serveUploads, deleteUploadedFile } from "./uploa
 import { loadAllDataIntoMemory } from "./routes";
 import multer from "multer";
 import * as XLSX from "xlsx";
+import * as cheerio from "cheerio";
 
 // Helper function to extract URL from image object or string
 function extractImageUrl(image: any): string | null {
@@ -1441,6 +1442,161 @@ export async function registerAdminRoutes(app: Express) {
       }
       
       res.status(500).json({ message: "Failed to delete product" });
+    }
+  });
+
+  // Product Translations API endpoints
+  app.get("/admin/api/products/:id/translations", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const productId = parseInt(req.params.id);
+      const translations = await storage.getProductTranslations(productId);
+      res.json(translations);
+    } catch (error) {
+      console.error("Error fetching product translations:", error);
+      res.status(500).json({ message: "Failed to fetch translations" });
+    }
+  });
+
+  app.post("/admin/api/products/:id/translations", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const productId = parseInt(req.params.id);
+      const { language, name, description, slug, sourceUrl } = req.body;
+      
+      if (!language || !name) {
+        return res.status(400).json({ message: "Language and name are required" });
+      }
+      
+      // Check if translation for this language already exists
+      const existingTranslation = await storage.getProductTranslation(productId, language);
+      if (existingTranslation) {
+        return res.status(400).json({ message: `Translation for language '${language}' already exists` });
+      }
+      
+      const translation = await storage.createProductTranslation({
+        productId,
+        language,
+        name,
+        description: description || null,
+        slug: slug || null,
+        sourceUrl: sourceUrl || null
+      });
+      
+      res.status(201).json(translation);
+    } catch (error) {
+      console.error("Error creating product translation:", error);
+      res.status(500).json({ message: "Failed to create translation" });
+    }
+  });
+
+  app.put("/admin/api/products/translations/:id", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const translationId = parseInt(req.params.id);
+      const { language, name, description, slug, sourceUrl } = req.body;
+      
+      const translation = await storage.updateProductTranslation(translationId, {
+        language,
+        name,
+        description,
+        slug,
+        sourceUrl
+      });
+      
+      res.json(translation);
+    } catch (error) {
+      console.error("Error updating product translation:", error);
+      res.status(500).json({ message: "Failed to update translation" });
+    }
+  });
+
+  app.delete("/admin/api/products/translations/:id", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const translationId = parseInt(req.params.id);
+      await storage.deleteProductTranslation(translationId);
+      res.json({ message: "Translation deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting product translation:", error);
+      res.status(500).json({ message: "Failed to delete translation" });
+    }
+  });
+
+  // Import product data from URL using web scraping
+  app.post("/admin/api/products/import-from-url", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { url } = req.body;
+      
+      if (!url) {
+        return res.status(400).json({ message: "URL is required" });
+      }
+      
+      // Validate URL format
+      let parsedUrl: URL;
+      try {
+        parsedUrl = new URL(url);
+      } catch {
+        return res.status(400).json({ message: "Invalid URL format" });
+      }
+      
+      // Fetch the webpage
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.5'
+        }
+      });
+      
+      if (!response.ok) {
+        return res.status(400).json({ message: `Failed to fetch URL: ${response.statusText}` });
+      }
+      
+      const html = await response.text();
+      const $ = cheerio.load(html);
+      
+      // Extract Open Graph meta tags
+      const ogTitle = $('meta[property="og:title"]').attr('content') || 
+                      $('meta[name="og:title"]').attr('content') ||
+                      $('title').text() || '';
+      
+      const ogDescription = $('meta[property="og:description"]').attr('content') || 
+                            $('meta[name="og:description"]').attr('content') ||
+                            $('meta[name="description"]').attr('content') || '';
+      
+      let ogImage = $('meta[property="og:image"]').attr('content') || 
+                    $('meta[name="og:image"]').attr('content') || '';
+      
+      // Make relative image URLs absolute
+      if (ogImage && !ogImage.startsWith('http')) {
+        ogImage = new URL(ogImage, parsedUrl.origin).href;
+      }
+      
+      // Additional fallback: try to find first product image
+      if (!ogImage) {
+        const firstImage = $('img[src*="product"]').first().attr('src') ||
+                          $('img.product-image').first().attr('src') ||
+                          $('img').first().attr('src');
+        if (firstImage) {
+          ogImage = firstImage.startsWith('http') ? firstImage : new URL(firstImage, parsedUrl.origin).href;
+        }
+      }
+      
+      // Try to extract price if available
+      const priceMatch = html.match(/["']price["']\s*:\s*["']?(\d+(?:[.,]\d{2})?)/i) ||
+                        html.match(/(\d+(?:[.,]\d{2})?)\s*(?:lei|ron|eur|€|RON|LEI)/i);
+      const price = priceMatch ? priceMatch[1].replace(',', '.') : null;
+      
+      res.json({
+        success: true,
+        data: {
+          title: ogTitle.trim(),
+          description: ogDescription.trim(),
+          imageUrl: ogImage,
+          price: price,
+          sourceUrl: url
+        }
+      });
+    } catch (error) {
+      console.error("Error importing from URL:", error);
+      res.status(500).json({ message: "Failed to import data from URL" });
     }
   });
 
