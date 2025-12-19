@@ -4797,14 +4797,14 @@
                       <h4 style={{marginBottom: '10px', color: '#495057', fontSize: '14px'}}>
                         🔗 Import din URL (Opțional)
                       </h4>
-                      <div style={{display: 'flex', gap: '10px', marginBottom: '10px'}}>
+                      <div style={{display: 'flex', gap: '10px', marginBottom: '10px', flexWrap: 'wrap'}}>
                         <input
                           type="url"
                           className="form-input"
                           placeholder="https://example.com/product-page"
                           value={importUrl}
                           onChange={(e) => setImportUrl(e.target.value)}
-                          style={{flex: 1}}
+                          style={{flex: '1 1 300px', minWidth: '250px', padding: '10px', fontSize: '14px'}}
                         />
                         <select
                           className="form-input"
