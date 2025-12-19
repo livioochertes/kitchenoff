@@ -832,7 +832,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Product routes - ultra-fast response from memory
   app.get("/api/products", (req, res) => {
-    const { categorySlug, search, limit = "20" } = req.query;
+    const { categorySlug, search, limit = "20", featured } = req.query;
     
     let products: any[] = [];
     
@@ -841,6 +841,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       products = productsByCategory.get(categorySlug as string) || [];
     } else {
       products = allProductsData;
+    }
+    
+    // Apply featured filter if requested
+    if (featured === 'true') {
+      products = products.filter(product => product.featured === true);
     }
     
     // Apply search filter if needed (optimized string operations)
@@ -860,12 +865,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Set aggressive caching headers for performance
     res.set({
       'Cache-Control': 'public, max-age=300, s-maxage=300',
-      'ETag': `products-${categorySlug || 'all'}-${limitNum}`,
+      'ETag': `products-${categorySlug || 'all'}-${featured || 'all'}-${limitNum}`,
       'Content-Type': 'application/json'
     });
     
     // For full product list, use pre-stringified data when possible
-    if (!categorySlug && !search && limitNum >= allProductsData.length) {
+    if (!categorySlug && !search && !featured && limitNum >= allProductsData.length) {
       res.send(stringifiedProductsData);
     } else {
       res.json(products);
