@@ -22,16 +22,14 @@ export default function Home() {
     queryKey: ["/api/products", { featured: true, limit: 4 }],
   });
 
-  // Function to get translated category name
+  // Function to get category name - use database name directly for admin-editable names
   const getCategoryName = (category: Category) => {
-    const key = `categories.${category.slug}` as keyof typeof t;
-    return t(key) || category.name;
+    return category.name;
   };
 
-  // Function to get translated category description
+  // Function to get category description - use database description directly
   const getCategoryDescription = (category: Category) => {
-    const key = `categories.${category.slug}.description` as keyof typeof t;
-    return t(key) || category.description;
+    return category.description;
   };
 
   const trustIndicators = [

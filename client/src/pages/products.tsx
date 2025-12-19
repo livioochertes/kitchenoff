@@ -78,11 +78,10 @@ export default function Products() {
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   
-  // Function to get translated category name
+  // Function to get category name - use database name directly for admin-editable names
   const getCategoryName = (category: Category | null | undefined) => {
-    if (!category || !category.slug) return category?.name || '';
-    const key = `categories.${category.slug}` as keyof typeof t;
-    return t(key) || category.name;
+    if (!category) return '';
+    return category.name;
   };
   
   // Remove local state - use React Query caching directly

@@ -27,10 +27,9 @@ export default function Header() {
 
   const cartItemCount = cart?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
-  // Function to get translated category name
+  // Function to get category name - use database name directly for admin-editable names
   const getCategoryName = (category: any) => {
-    const key = `categories.${category.slug}` as keyof typeof t;
-    return t(key) || category.name;
+    return category.name;
   };
 
   const handleSearch = (e: React.FormEvent) => {
