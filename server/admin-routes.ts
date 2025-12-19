@@ -1358,7 +1358,8 @@ export async function registerAdminRoutes(app: Express) {
       res.json({ message: "Product created successfully", product: newProduct });
     } catch (error) {
       console.error("Error creating product:", error);
-      res.status(500).json({ message: "Failed to create product" });
+      console.error("Product data that failed:", req.body);
+      res.status(500).json({ message: "Failed to create product", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
