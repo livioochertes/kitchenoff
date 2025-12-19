@@ -1729,6 +1729,7 @@ export async function registerAdminRoutes(app: Express) {
         imageUrl: cleanImageUrl
       });
 
+      await loadAllDataIntoMemory();
       res.json({ message: "Category created successfully", category: newCategory });
     } catch (error) {
       console.error("Error creating category:", error);
@@ -1750,6 +1751,7 @@ export async function registerAdminRoutes(app: Express) {
         imageUrl: cleanImageUrl
       });
 
+      await loadAllDataIntoMemory();
       res.json({ message: "Category updated successfully", category: updatedCategory });
     } catch (error) {
       console.error("Error updating category:", error);
@@ -1762,6 +1764,7 @@ export async function registerAdminRoutes(app: Express) {
       const categoryId = parseInt(req.params.id);
       
       await storage.deleteCategory(categoryId);
+      await loadAllDataIntoMemory();
       res.json({ message: "Category deleted successfully" });
     } catch (error) {
       console.error("Error deleting category:", error);

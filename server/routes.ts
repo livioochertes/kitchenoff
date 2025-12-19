@@ -800,6 +800,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const categoryData = insertCategorySchema.parse(req.body);
       const category = await storage.createCategory(categoryData);
+      await loadAllDataIntoMemory();
       res.json(category);
     } catch (error) {
       console.error("Create category error:", error);
@@ -812,6 +813,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const categoryId = parseInt(req.params.id);
       const categoryData = req.body;
       const category = await storage.updateCategory(categoryId, categoryData);
+      await loadAllDataIntoMemory();
       res.json(category);
     } catch (error) {
       console.error("Update category error:", error);
@@ -823,6 +825,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const categoryId = parseInt(req.params.id);
       await storage.deleteCategory(categoryId);
+      await loadAllDataIntoMemory();
       res.json({ message: "Category deleted successfully" });
     } catch (error) {
       console.error("Delete category error:", error);
