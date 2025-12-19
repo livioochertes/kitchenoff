@@ -1557,7 +1557,42 @@ export async function registerAdminRoutes(app: Express) {
                       $('meta[name="og:title"]').attr('content') ||
                       $('title').text() || '';
       
-      const ogDescription = $('meta[property="og:description"]').attr('content') || 
+      // Try to get a fuller description from the page content first
+      let fullDescription = '';
+      
+      // Look for common product description containers
+      const descriptionSelectors = [
+        '.product-description',
+        '.description',
+        '#description',
+        '[itemprop="description"]',
+        '.product-info',
+        '.product-details',
+        '#tab1 ul li', // xhaccp.ro specific - product details in tab1
+        '.tab-content ul li',
+        '.product-content ul li'
+      ];
+      
+      for (const selector of descriptionSelectors) {
+        const elements = $(selector);
+        if (elements.length > 0) {
+          const texts: string[] = [];
+          elements.each((_, el) => {
+            const text = $(el).text().trim();
+            if (text && text.length > 20) { // Only meaningful text
+              texts.push(text);
+            }
+          });
+          if (texts.length > 0) {
+            fullDescription = texts.join('\n');
+            break;
+          }
+        }
+      }
+      
+      // Fallback to meta description if no content found
+      const ogDescription = fullDescription || 
+                            $('meta[property="og:description"]').attr('content') || 
                             $('meta[name="og:description"]').attr('content') ||
                             $('meta[name="description"]').attr('content') || '';
       
@@ -1569,13 +1604,15 @@ export async function registerAdminRoutes(app: Express) {
         ogImage = new URL(ogImage, parsedUrl.origin).href;
       }
       
-      // Additional fallback: try to find first product image
+      // Additional fallback: try to find product image (avoid logos and icons)
       if (!ogImage) {
-        const firstImage = $('img[src*="product"]').first().attr('src') ||
-                          $('img.product-image').first().attr('src') ||
-                          $('img').first().attr('src');
-        if (firstImage) {
-          ogImage = firstImage.startsWith('http') ? firstImage : new URL(firstImage, parsedUrl.origin).href;
+        // Look for product-specific images first
+        const productImage = $('img.product-image').first().attr('src') ||
+                            $('img[itemprop="image"]').first().attr('src') ||
+                            $('img[src*="product"]').first().attr('src') ||
+                            $('img[src*="/images/db/"]').first().attr('src'); // xhaccp.ro specific
+        if (productImage) {
+          ogImage = productImage.startsWith('http') ? productImage : new URL(productImage, parsedUrl.origin).href;
         }
       }
       
