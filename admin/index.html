@@ -642,6 +642,26 @@
     
     // Admin Dashboard Component
     function AdminDashboard({ token, admin, onLogout }) {
+      // Helper function to extract URL from image (handles both objects and strings)
+      const getImageUrlGlobal = (image) => {
+        if (!image) return '';
+        if (typeof image === 'string') {
+          if (image.startsWith('{') && image.includes('"url"')) {
+            try {
+              const parsed = JSON.parse(image);
+              return parsed.thumbnailUrl || parsed.url || '';
+            } catch {
+              return image;
+            }
+          }
+          return image;
+        }
+        if (typeof image === 'object') {
+          return image.thumbnailUrl || image.url || '';
+        }
+        return '';
+      };
+
       const [stats, setStats] = useState(null);
       const [loading, setLoading] = useState(true);
       const [error, setError] = useState('');
@@ -2800,7 +2820,7 @@
                                 {product.images && product.images.length > 0 ? (
                                   <>
                                     <img 
-                                      src={product.images[0].thumbnailUrl || product.images[0].url} 
+                                      src={getImageUrlGlobal(product.images[0])} 
                                       alt={product.name}
                                       style={{
                                         width: '50px',
@@ -4109,6 +4129,27 @@
         const [uploading, setUploading] = useState(false);
         const [uploadProgress, setUploadProgress] = useState(0);
 
+        // Helper function to extract URL from image (handles both objects and strings)
+        const getImageUrl = (image) => {
+          if (!image) return '';
+          if (typeof image === 'string') {
+            // Check if it's a JSON string
+            if (image.startsWith('{') && image.includes('"url"')) {
+              try {
+                const parsed = JSON.parse(image);
+                return parsed.thumbnailUrl || parsed.url || '';
+              } catch {
+                return image;
+              }
+            }
+            return image;
+          }
+          if (typeof image === 'object') {
+            return image.thumbnailUrl || image.url || '';
+          }
+          return '';
+        };
+
         const [supplierFormData, setSupplierFormData] = useState({
           name: '',
           email: '',
@@ -4760,7 +4801,7 @@
                               backgroundColor: '#fff'
                             }}>
                               <img
-                                src={image.thumbnailUrl || image.url}
+                                src={getImageUrl(image)}
                                 alt={`Product image ${index + 1}`}
                                 style={{
                                   width: '100%',
