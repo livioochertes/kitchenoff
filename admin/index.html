@@ -4399,6 +4399,12 @@
         const handleProductSubmit = async (e) => {
           e.preventDefault();
           
+          // Check usage rights confirmation if data was imported from URL
+          if (importedData && !usageRightsConfirmed) {
+            alert('Te rog confirmă că ai dreptul de utilizare a datelor și imaginilor importate.');
+            return;
+          }
+          
           // Include uploaded images in the product data
           const productData = {
             ...productFormData,
