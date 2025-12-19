@@ -94,6 +94,19 @@ export const products = pgTable("products", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Product translations table for multilingual support
+export const productTranslations = pgTable("product_translations", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").references(() => products.id).notNull(),
+  language: varchar("language", { length: 10 }).notNull(), // ro, en, de, fr, etc.
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  slug: varchar("slug", { length: 255 }),
+  sourceUrl: text("source_url"), // URL from which this translation was imported
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Orders table
 export const orders = pgTable("orders", {
   id: serial("id").primaryKey(),
@@ -278,6 +291,14 @@ export const productsRelations = relations(products, ({ one, many }) => ({
   orderItems: many(orderItems),
   cartItems: many(cartItems),
   reviews: many(reviews),
+  translations: many(productTranslations),
+}));
+
+export const productTranslationsRelations = relations(productTranslations, ({ one }) => ({
+  product: one(products, {
+    fields: [productTranslations.productId],
+    references: [products.id],
+  }),
 }));
 
 export const ordersRelations = relations(orders, ({ one, many }) => ({
@@ -366,6 +387,12 @@ export const insertProductSchema = createInsertSchema(products).omit({
   updatedAt: true,
 });
 
+export const insertProductTranslationSchema = createInsertSchema(productTranslations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertOrderSchema = createInsertSchema(orders).omit({
   id: true,
   createdAt: true,
@@ -420,6 +447,8 @@ export type Category = typeof categories.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type ProductTranslation = typeof productTranslations.$inferSelect;
+export type InsertProductTranslation = z.infer<typeof insertProductTranslationSchema>;
 export type Order = typeof orders.$inferSelect;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type OrderItem = typeof orderItems.$inferSelect;
