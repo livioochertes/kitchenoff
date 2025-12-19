@@ -645,7 +645,22 @@ export default function Admin() {
                   </div>
                   <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button className="kitchen-pro-secondary">
+                      <Button className="kitchen-pro-secondary" onClick={() => {
+                        setEditingProduct(null);
+                        productForm.reset({
+                          name: "",
+                          slug: "",
+                          description: "",
+                          price: "",
+                          compareAtPrice: "",
+                          categoryId: 0,
+                          supplierId: undefined,
+                          imageUrl: "",
+                          inStock: true,
+                          stockQuantity: 0,
+                          featured: false,
+                        });
+                      }}>
                         <Plus className="h-4 w-4 mr-2" />
                         Add Product
                       </Button>
