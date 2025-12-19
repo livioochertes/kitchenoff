@@ -60,6 +60,41 @@ const getStorage = () => {
   return diskStorage;
 };
 
+// Helper function to save file locally
+async function saveFileLocally(file: Express.Multer.File, uploadType: string) {
+  const timestamp = Date.now();
+  const randomNum = Math.floor(Math.random() * 1000);
+  const fileType = uploadType === 'categories' ? 'category' : 'product';
+  const baseFilename = `${fileType}-${timestamp}-${randomNum}`;
+  
+  const uploadDir = path.join(process.cwd(), 'uploads', uploadType);
+  await fs.mkdir(uploadDir, { recursive: true });
+  
+  const outputPath = path.join(uploadDir, `processed-${baseFilename}.jpeg`);
+  const thumbnailPath = path.join(uploadDir, `thumb-${baseFilename}.webp`);
+  
+  await sharp(file.buffer)
+    .resize(800, 600, { fit: 'inside', withoutEnlargement: true })
+    .jpeg({ quality: 85 })
+    .toFile(outputPath);
+
+  await sharp(file.buffer)
+    .resize(200, 150, { fit: 'cover', position: 'center' })
+    .webp({ quality: 70 })
+    .toFile(thumbnailPath);
+
+  console.log(`  📁 Saved locally: /uploads/${uploadType}/processed-${baseFilename}.jpeg`);
+
+  return {
+    filename: `processed-${baseFilename}.jpeg`,
+    thumbnail: `thumb-${baseFilename}.webp`,
+    originalName: file.originalname,
+    size: file.size,
+    url: `/uploads/${uploadType}/processed-${baseFilename}.jpeg`,
+    thumbnailUrl: `/uploads/${uploadType}/thumb-${baseFilename}.webp`
+  };
+}
+
 // Configure multer with dynamic storage
 export const upload = multer({
   storage: memoryStorage, // Always use memory, we'll decide where to save in processImages
@@ -94,65 +129,45 @@ export const processImages = async (req: Request, res: Response, next: NextFunct
     const processedFiles = [];
 
     // Check if R2 is configured
-    if (isR2Configured()) {
-      console.log("☁️ Uploading to Cloudflare R2...");
+    const r2Configured = isR2Configured();
+    console.log("☁️ R2 Storage configured:", r2Configured);
+    
+    if (r2Configured) {
+      console.log("☁️ Attempting to upload to Cloudflare R2...");
       
       for (const file of files) {
-        const result = await uploadImageToR2(file.buffer, file.originalname, uploadType);
-        if (result) {
-          processedFiles.push({
-            filename: result.filename,
-            thumbnail: path.basename(result.thumbnailUrl),
-            originalName: result.originalName,
-            size: result.size,
-            url: result.url,
-            thumbnailUrl: result.thumbnailUrl
-          });
+        console.log(`  📤 Uploading: ${file.originalname} (${file.size} bytes)`);
+        try {
+          const result = await uploadImageToR2(file.buffer, file.originalname, uploadType);
+          if (result) {
+            console.log(`  ✅ R2 upload success: ${result.url}`);
+            processedFiles.push({
+              filename: result.filename,
+              thumbnail: path.basename(result.thumbnailUrl),
+              originalName: result.originalName,
+              size: result.size,
+              url: result.url,
+              thumbnailUrl: result.thumbnailUrl
+            });
+          } else {
+            console.error(`  ❌ R2 upload returned null for ${file.originalname} - falling back to local`);
+            // Fall back to local storage for this file
+            const localResult = await saveFileLocally(file, uploadType);
+            processedFiles.push(localResult);
+          }
+        } catch (r2Error) {
+          console.error(`  ❌ R2 upload error for ${file.originalname}:`, r2Error);
+          console.log(`  📁 Falling back to local storage...`);
+          // Fall back to local storage on R2 error
+          const localResult = await saveFileLocally(file, uploadType);
+          processedFiles.push(localResult);
         }
       }
     } else {
-      console.log("📁 Saving to local filesystem...");
-      
-      // Fall back to local storage
+      console.log("📁 R2 not configured - saving to local filesystem...");
       for (const file of files) {
-        const timestamp = Date.now();
-        const randomNum = Math.floor(Math.random() * 1000);
-        const fileType = uploadType === 'categories' ? 'category' : 'product';
-        const baseFilename = `${fileType}-${timestamp}-${randomNum}`;
-        
-        const uploadDir = path.join(process.cwd(), 'uploads', uploadType);
-        await fs.mkdir(uploadDir, { recursive: true });
-        
-        // Always use .jpeg extension to match the JPEG output format
-        const outputPath = path.join(uploadDir, `processed-${baseFilename}.jpeg`);
-        const thumbnailPath = path.join(uploadDir, `thumb-${baseFilename}.webp`);
-        
-        // Process main image - output as JPEG
-        await sharp(file.buffer)
-          .resize(800, 600, { 
-            fit: 'inside',
-            withoutEnlargement: true 
-          })
-          .jpeg({ quality: 85 })
-          .toFile(outputPath);
-
-        // Create thumbnail
-        await sharp(file.buffer)
-          .resize(200, 150, { 
-            fit: 'cover',
-            position: 'center' 
-          })
-          .webp({ quality: 70 })
-          .toFile(thumbnailPath);
-
-        processedFiles.push({
-          filename: `processed-${baseFilename}.jpeg`,
-          thumbnail: `thumb-${baseFilename}.webp`,
-          originalName: file.originalname,
-          size: file.size,
-          url: `/uploads/${uploadType}/processed-${baseFilename}.jpeg`,
-          thumbnailUrl: `/uploads/${uploadType}/thumb-${baseFilename}.webp`
-        });
+        const localResult = await saveFileLocally(file, uploadType);
+        processedFiles.push(localResult);
       }
     }
 
