@@ -2468,25 +2468,11 @@
                         console.log('Company defaults loaded:', defaults);
                         console.log('Setting currency to:', defaults.currency);
                         console.log('Setting VAT to:', defaults.vatPercentage);
-                        setEditingProduct({
-                          name: '',
-                          description: '',
-                          price: '',
-                          compareAtPrice: '',
-                          stockQuantity: '',
-                          categoryId: '',
-                          slug: '',
-                          images: [],
-                          productCode: '',
-                          ncCode: '',
-                          cpvCode: '',
-                          vatPercentage: defaults.vatPercentage,
-                          currency: defaults.currency,
-                          supplierId: '',
-                          status: 'active'
-                        });
                         
-                        // Also set the productFormData to match
+                        // IMPORTANT: Set to null so the form knows this is a NEW product, not an edit
+                        setEditingProduct(null);
+                        
+                        // Set the productFormData with defaults
                         setProductFormData({
                           name: '',
                           description: '',
@@ -2508,7 +2494,8 @@
                           weight: '',
                           length: '',
                           width: '',
-                          height: ''
+                          height: '',
+                          piecesPerPackage: ''
                         });
                         
                         setShowAddProductModal(true);
