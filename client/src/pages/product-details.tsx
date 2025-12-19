@@ -1,3 +1,4 @@
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRoute } from "wouter";
 import { Star, ShoppingCart, Truck, Shield, ArrowLeft } from "lucide-react";
@@ -17,6 +18,7 @@ export default function ProductDetails() {
   const [, params] = useRoute("/products/:slug");
   const { addToCart } = useCart();
   const { toast } = useToast();
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   const { data: product, isLoading } = useQuery<ProductWithCategory>({
     queryKey: [`/api/products/slug/${params?.slug}`],
@@ -33,6 +35,27 @@ export default function ProductDetails() {
     product?.name || '', 
     product?.description || null
   );
+
+  const allImages = useMemo(() => {
+    if (!product) return [];
+    const images: string[] = [];
+    if (product.imageUrl) {
+      images.push(product.imageUrl);
+    }
+    if (product.images && Array.isArray(product.images)) {
+      product.images.forEach((img: any) => {
+        const url = typeof img === 'string' ? img : img?.url;
+        if (url && url !== product.imageUrl) {
+          images.push(url);
+        }
+      });
+    }
+    return images.length > 0 ? images : ["https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800"];
+  }, [product]);
+
+  useEffect(() => {
+    setSelectedImageIndex(0);
+  }, [product?.id]);
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -106,15 +129,41 @@ export default function ProductDetails() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Product Image */}
+          {/* Product Image Gallery */}
           <div className="space-y-4">
-            <div className="aspect-square bg-white rounded-lg overflow-hidden">
+            {/* Main Image */}
+            <div className="aspect-square bg-white rounded-lg overflow-hidden border">
               <img
-                src={product.imageUrl || "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=800"}
+                src={allImages[selectedImageIndex] || allImages[0]}
                 alt={translatedName}
                 className="w-full h-full object-cover"
+                data-testid="product-main-image"
               />
             </div>
+            
+            {/* Thumbnail Images */}
+            {allImages.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto pb-2" data-testid="product-thumbnails">
+                {allImages.map((imageUrl, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                      selectedImageIndex === index 
+                        ? 'border-primary ring-2 ring-primary/20' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    data-testid={`thumbnail-${index}`}
+                  >
+                    <img
+                      src={imageUrl}
+                      alt={`${translatedName} - Image ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Product Info */}
