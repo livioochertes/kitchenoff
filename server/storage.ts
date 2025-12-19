@@ -2,6 +2,7 @@ import {
   users,
   categories,
   products,
+  productTranslations,
   orders,
   orderItems,
   cartItems,
@@ -18,6 +19,8 @@ import {
   type Product,
   type InsertProduct,
   type ProductWithCategory,
+  type ProductTranslation,
+  type InsertProductTranslation,
   type Order,
   type InsertOrder,
   type OrderWithItems,
@@ -68,6 +71,13 @@ export interface IStorage {
   updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product>;
   updateProductStock(id: number, stockQuantity: number): Promise<Product>;
   deleteProduct(id: number): Promise<void>;
+
+  // Product translation operations
+  getProductTranslations(productId: number): Promise<ProductTranslation[]>;
+  getProductTranslation(productId: number, language: string): Promise<ProductTranslation | undefined>;
+  createProductTranslation(translation: InsertProductTranslation): Promise<ProductTranslation>;
+  updateProductTranslation(id: number, translation: Partial<InsertProductTranslation>): Promise<ProductTranslation>;
+  deleteProductTranslation(id: number): Promise<void>;
 
   // Order operations
   getOrders(userId?: number): Promise<OrderWithItems[]>;
@@ -441,6 +451,35 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProduct(id: number): Promise<void> {
     await db.delete(products).where(eq(products.id, id));
+  }
+
+  // Product translation operations
+  async getProductTranslations(productId: number): Promise<ProductTranslation[]> {
+    return await db.select().from(productTranslations).where(eq(productTranslations.productId, productId));
+  }
+
+  async getProductTranslation(productId: number, language: string): Promise<ProductTranslation | undefined> {
+    const [translation] = await db.select().from(productTranslations)
+      .where(and(eq(productTranslations.productId, productId), eq(productTranslations.language, language)));
+    return translation;
+  }
+
+  async createProductTranslation(translation: InsertProductTranslation): Promise<ProductTranslation> {
+    const [newTranslation] = await db.insert(productTranslations).values(translation).returning();
+    return newTranslation;
+  }
+
+  async updateProductTranslation(id: number, translation: Partial<InsertProductTranslation>): Promise<ProductTranslation> {
+    const [updatedTranslation] = await db
+      .update(productTranslations)
+      .set({ ...translation, updatedAt: new Date() })
+      .where(eq(productTranslations.id, id))
+      .returning();
+    return updatedTranslation;
+  }
+
+  async deleteProductTranslation(id: number): Promise<void> {
+    await db.delete(productTranslations).where(eq(productTranslations.id, id));
   }
 
   // Order operations
