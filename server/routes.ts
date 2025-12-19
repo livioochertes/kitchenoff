@@ -902,6 +902,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get product translation by language (public endpoint)
+  app.get("/api/products/:id/translation/:language", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      const language = req.params.language;
+      
+      if (isNaN(productId)) {
+        return res.status(400).json({ message: "Invalid product ID" });
+      }
+      
+      const translation = await storage.getProductTranslation(productId, language);
+      if (!translation) {
+        return res.status(404).json({ message: "Translation not found" });
+      }
+      res.json(translation);
+    } catch (error) {
+      console.error("Get product translation error:", error);
+      res.status(500).json({ message: "Failed to get product translation" });
+    }
+  });
+
+  // Get all translations for multiple products by language (batch endpoint)
+  app.get("/api/translations/:language", async (req, res) => {
+    try {
+      const language = req.params.language;
+      const productIds = req.query.ids?.toString().split(',').map(Number).filter(id => !isNaN(id)) || [];
+      
+      if (productIds.length === 0) {
+        return res.json({});
+      }
+      
+      const translations: Record<number, { name: string; description: string | null }> = {};
+      
+      for (const productId of productIds) {
+        const translation = await storage.getProductTranslation(productId, language);
+        if (translation) {
+          translations[productId] = {
+            name: translation.name,
+            description: translation.description
+          };
+        }
+      }
+      
+      res.json(translations);
+    } catch (error) {
+      console.error("Get batch translations error:", error);
+      res.status(500).json({ message: "Failed to get translations" });
+    }
+  });
+
   app.post("/api/products", authenticateToken, requireAdmin, async (req, res) => {
     try {
       const productData = insertProductSchema.parse(req.body);

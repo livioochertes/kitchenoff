@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useProductTranslation } from "@/hooks/useProductTranslation";
 import type { ProductWithCategory } from "@shared/schema";
 import { memo } from "react";
 
@@ -17,6 +18,7 @@ const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const { name: translatedName } = useProductTranslation(product.id, product.name, product.description);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -25,7 +27,7 @@ const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
     addToCart(product.id, 1);
     toast({
       title: "Added to cart",
-      description: `${product.name} has been added to your cart.`,
+      description: `${translatedName} has been added to your cart.`,
     });
   };
 
@@ -41,7 +43,7 @@ const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
           <div className="relative">
             <img
               src={product.imageUrl || "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300"}
-              alt={product.name}
+              alt={translatedName}
               className="w-full h-48 object-cover"
               loading="lazy"
             />
@@ -54,7 +56,7 @@ const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
           
           <div className="p-4 flex-1 flex flex-col justify-between">
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-base">{product.name}</h3>
+              <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-base">{translatedName}</h3>
               
               {product.category && (
                 <Badge variant="secondary" className="mb-3 text-xs">

@@ -1,0 +1,60 @@
+import { useQuery } from "@tanstack/react-query";
+import { useLanguage } from "../contexts/language-context";
+import type { ProductTranslation } from "@shared/schema";
+
+interface TranslatedProduct {
+  name: string;
+  description: string | null;
+}
+
+export function useProductTranslation(productId: number | undefined, originalName: string, originalDescription: string | null) {
+  const { language } = useLanguage();
+  
+  const { data: translation } = useQuery<ProductTranslation>({
+    queryKey: [`/api/products/${productId}/translation/${language}`],
+    enabled: !!productId && language !== 'en',
+  });
+
+  if (!productId || language === 'en' || !translation) {
+    return {
+      name: originalName,
+      description: originalDescription
+    };
+  }
+
+  return {
+    name: translation.name || originalName,
+    description: translation.description || originalDescription
+  };
+}
+
+export function useProductTranslations(productIds: number[]) {
+  const { language } = useLanguage();
+  
+  const { data: translations = {} } = useQuery<Record<number, TranslatedProduct>>({
+    queryKey: ["/api/translations", language, productIds.join(',')],
+    queryFn: async () => {
+      if (productIds.length === 0 || language === 'en') {
+        return {};
+      }
+      const response = await fetch(`/api/translations/${language}?ids=${productIds.join(',')}`);
+      if (!response.ok) {
+        return {};
+      }
+      return response.json();
+    },
+    enabled: productIds.length > 0 && language !== 'en',
+  });
+
+  const getTranslation = (productId: number, originalName: string, originalDescription: string | null): TranslatedProduct => {
+    if (language === 'en' || !translations[productId]) {
+      return { name: originalName, description: originalDescription };
+    }
+    return {
+      name: translations[productId].name || originalName,
+      description: translations[productId].description || originalDescription
+    };
+  };
+
+  return { translations, getTranslation };
+}

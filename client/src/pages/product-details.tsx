@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
+import { useProductTranslation } from "@/hooks/useProductTranslation";
 import { Link } from "wouter";
 import type { ProductWithCategory, Review } from "@shared/schema";
 
@@ -27,13 +28,19 @@ export default function ProductDetails() {
     enabled: !!product?.id,
   });
 
+  const { name: translatedName, description: translatedDescription } = useProductTranslation(
+    product?.id, 
+    product?.name || '', 
+    product?.description || null
+  );
+
   const handleAddToCart = () => {
     if (!product) return;
     
     addToCart(product.id, 1);
     toast({
       title: "Added to cart",
-      description: `${product.name} has been added to your cart.`,
+      description: `${translatedName} has been added to your cart.`,
     });
   };
 
@@ -95,7 +102,7 @@ export default function ProductDetails() {
             </>
           )}
           <span>/</span>
-          <span className="text-primary">{product.name}</span>
+          <span className="text-primary">{translatedName}</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -104,7 +111,7 @@ export default function ProductDetails() {
             <div className="aspect-square bg-white rounded-lg overflow-hidden">
               <img
                 src={product.imageUrl || "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=800"}
-                alt={product.name}
+                alt={translatedName}
                 className="w-full h-full object-cover"
               />
             </div>
@@ -118,7 +125,7 @@ export default function ProductDetails() {
                   {product.category.name}
                 </Badge>
               )}
-              <h1 className="text-3xl font-bold text-primary mb-4">{product.name}</h1>
+              <h1 className="text-3xl font-bold text-primary mb-4">{translatedName}</h1>
               
               {/* Rating */}
               <div className="flex items-center space-x-2 mb-4">
@@ -202,7 +209,7 @@ export default function ProductDetails() {
                 <CardContent className="p-8">
                   <div className="prose max-w-none">
                     <p className="text-muted-foreground leading-relaxed">
-                      {product.description || "No description available for this product."}
+                      {translatedDescription || "No description available for this product."}
                     </p>
                   </div>
                 </CardContent>
