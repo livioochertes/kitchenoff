@@ -131,12 +131,18 @@ export default function ProductDetails() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Product Image Gallery */}
           <div className="space-y-4">
-            {/* Main Image */}
-            <div className="aspect-square bg-white rounded-lg overflow-hidden border">
+            {/* Main Image - with blurred background to fill space while showing full image */}
+            <div className="aspect-square rounded-lg overflow-hidden border relative bg-gray-100">
+              {/* Blurred background image */}
+              <div 
+                className="absolute inset-0 bg-cover bg-center blur-xl opacity-40 scale-110"
+                style={{ backgroundImage: `url(${allImages[selectedImageIndex] || allImages[0]})` }}
+              />
+              {/* Main image - object-contain to show full image */}
               <img
                 src={allImages[selectedImageIndex] || allImages[0]}
                 alt={translatedName}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain relative z-10"
                 data-testid="product-main-image"
               />
             </div>
