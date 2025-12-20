@@ -2889,10 +2889,10 @@
                               <span style={{
                                 padding: '4px 8px', 
                                 borderRadius: '4px', 
-                                backgroundColor: product.stock > 10 ? '#d4edda' : '#f8d7da',
-                                color: product.stock > 10 ? '#155724' : '#721c24'
+                                backgroundColor: product.stockQuantity > 10 ? '#d4edda' : '#f8d7da',
+                                color: product.stockQuantity > 10 ? '#155724' : '#721c24'
                               }}>
-                                {product.stock || 'N/A'}
+                                {product.stockQuantity ?? 0}
                               </span>
                             </td>
                             <td style={{padding: '12px'}}>
