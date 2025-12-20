@@ -4913,23 +4913,43 @@
                   )}
                   
                   <form onSubmit={handleProductSubmit}>
+                    {/* Base language notice */}
+                    <div style={{
+                      backgroundColor: '#e3f2fd',
+                      border: '1px solid #2196f3',
+                      borderRadius: '6px',
+                      padding: '12px',
+                      marginBottom: '15px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px'
+                    }}>
+                      <span style={{fontSize: '20px'}}>🇬🇧</span>
+                      <div style={{fontSize: '13px', color: '#1565c0'}}>
+                        <strong>Limba de bază: Engleză</strong> - Completați informațiile produsului în engleză. 
+                        Pentru alte limbi, folosiți secțiunea "Traduceri" de mai jos.
+                      </div>
+                    </div>
+                    
                     <div className="form-group">
-                      <label className="form-label">Product Name</label>
+                      <label className="form-label">Product Name (English)</label>
                       <input
                         type="text"
                         className="form-input"
                         value={productFormData.name}
                         onChange={(e) => setProductFormData({...productFormData, name: e.target.value})}
                         required
+                        placeholder="Enter product name in English"
                       />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Description</label>
+                      <label className="form-label">Description (English)</label>
                       <textarea
                         className="form-input"
                         value={productFormData.description}
                         onChange={(e) => setProductFormData({...productFormData, description: e.target.value})}
                         rows="3"
+                        placeholder="Enter product description in English"
                       />
                     </div>
                     <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px'}}>
