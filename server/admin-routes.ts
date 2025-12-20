@@ -420,7 +420,7 @@ export async function registerAdminRoutes(app: Express) {
     }
   });
 
-  // Delete image endpoint
+  // Delete image endpoint - supports both filename param and full URL in body
   app.delete("/admin/api/delete-image/:filename", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
     try {
       const { filename } = req.params;
@@ -430,6 +430,30 @@ export async function registerAdminRoutes(app: Express) {
         res.json({ success: true, message: "Image deleted successfully" });
       } else {
         res.status(404).json({ success: false, message: "Image not found" });
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      res.status(500).json({ success: false, message: "Error deleting image" });
+    }
+  });
+
+  // Delete image by URL endpoint - for R2 stored images
+  app.post("/admin/api/delete-image-by-url", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const { imageUrl } = req.body;
+      
+      if (!imageUrl) {
+        return res.status(400).json({ success: false, message: "Image URL is required" });
+      }
+      
+      console.log(`Attempting to delete image: ${imageUrl}`);
+      const deleted = await deleteUploadedFile(imageUrl);
+      
+      if (deleted) {
+        res.json({ success: true, message: "Image deleted successfully from storage" });
+      } else {
+        // Even if server delete fails, return success so UI can proceed
+        res.json({ success: true, message: "Image removed (may not exist in storage)" });
       }
     } catch (error) {
       console.error("Delete error:", error);

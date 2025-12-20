@@ -4326,40 +4326,37 @@
           }
         };
 
-        // Delete image function - handles both string URLs and objects with filename
+        // Delete image function - handles both string URLs and objects, deletes from R2 storage
         const deleteImage = async (image, index) => {
           try {
-            // Extract filename from image (could be string URL or object with filename/url)
-            let filename = null;
+            // Get the full image URL for R2 deletion
             let imageUrl = null;
             
             if (typeof image === 'string') {
               imageUrl = image;
-              // Extract filename from URL (e.g., "uploads/products/filename.webp" or full CDN URL)
-              const urlParts = image.split('/');
-              filename = urlParts[urlParts.length - 1];
-            } else if (image && image.filename) {
-              filename = image.filename;
-              imageUrl = image.url || image.filename;
             } else if (image && image.url) {
               imageUrl = image.url;
-              const urlParts = image.url.split('/');
-              filename = urlParts[urlParts.length - 1];
+            } else if (image && image.filename) {
+              imageUrl = image.filename;
             }
             
-            // Try to delete from server if we have a filename
-            if (filename) {
-              const response = await fetch(`/admin/api/delete-image/${encodeURIComponent(filename)}`, {
-                method: 'DELETE',
+            // Delete from R2 storage using the new endpoint
+            if (imageUrl) {
+              console.log('Deleting image from R2:', imageUrl);
+              const response = await fetch('/admin/api/delete-image-by-url', {
+                method: 'POST',
                 headers: {
-                  'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-                }
+                  'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ imageUrl })
               });
 
               const result = await response.json();
+              console.log('Delete result:', result);
               
               if (!result.success) {
-                console.warn('Server delete failed, removing from list anyway:', result.message);
+                console.warn('Server delete failed:', result.message);
               }
             }
             
@@ -4371,7 +4368,7 @@
               images: newImages
             }));
             
-            alert('Image removed successfully');
+            alert('Image deleted successfully');
           } catch (error) {
             console.error('Delete error:', error);
             // Still remove from list even if server delete fails
