@@ -12,7 +12,7 @@ import OpenAI from "openai";
 import QRCode from "qrcode";
 import path from "path";
 import { createInvoiceService } from './invoice-service.js';
-import { sendNotificationPreferencesEmail } from './email-service.js';
+import { sendNotificationPreferencesEmail, sendContactFormEmails } from './email-service.js';
 
 // Authentication interfaces
 interface AuthRequest extends Request {
@@ -1453,7 +1453,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Log the contact form submission (in a real application, you'd save this to database)
+      // Log the contact form submission
       console.log("Contact form submission:", {
         name,
         email,
@@ -1466,24 +1466,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ip: req.ip || 'unknown'
       });
 
-      // In a real application, you would:
-      // 1. Save the contact form data to database
-      // 2. Send email notifications to the support team
-      // 3. Possibly send an auto-reply to the customer
-      // 4. Create a ticket in your support system
-
-      // For now, simulate successful submission
-      res.json({
-        success: true,
-        message: "Thank you for contacting us! We've received your message and will respond within 24 hours.",
-        ticketId: `TICKET_${Date.now()}`,
-        timestamp: new Date().toISOString()
+      // Send emails: to business (info@kitchen-off.com) and confirmation to customer
+      const emailResults = await sendContactFormEmails({
+        name,
+        email,
+        phone,
+        subject,
+        category,
+        message,
+        orderNumber
       });
+
+      console.log("Contact form email results:", emailResults);
+
+      if (emailResults.toBusinessSent || emailResults.toCustomerSent) {
+        res.json({
+          success: true,
+          message: "Vă mulțumim că ne-ați contactat! Am primit mesajul dumneavoastră și vă vom răspunde în cel mai scurt timp posibil.",
+          ticketId: `TICKET_${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          emailsSent: emailResults
+        });
+      } else {
+        console.error("Failed to send contact form emails");
+        res.status(500).json({ 
+          success: false, 
+          message: "A apărut o eroare la trimiterea mesajului. Vă rugăm să încercați din nou." 
+        });
+      }
     } catch (error) {
       console.error("Contact form error:", error);
       res.status(500).json({ 
         success: false, 
-        message: "Failed to submit contact form. Please try again." 
+        message: "A apărut o eroare la trimiterea mesajului. Vă rugăm să încercați din nou." 
       });
     }
   });

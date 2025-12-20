@@ -654,3 +654,179 @@ export async function sendNotificationPreferencesEmail(
     text: `Hello ${user.firstName}, your notification preferences have been updated successfully. Email notifications: ${preferences.emailNotifications ? 'Enabled' : 'Disabled'}, Order updates: ${preferences.orderUpdates ? 'Enabled' : 'Disabled'}, Product restocks: ${preferences.productRestocks ? 'Enabled' : 'Disabled'}, Price drops: ${preferences.priceDrops ? 'Enabled' : 'Disabled'}, Promotions: ${preferences.promotions ? 'Enabled' : 'Disabled'}.`
   });
 }
+
+// Contact form email interface
+interface ContactFormData {
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  category: string;
+  message: string;
+  orderNumber?: string;
+}
+
+// Send contact form emails - to business and confirmation to customer
+export async function sendContactFormEmails(data: ContactFormData): Promise<{ toBusinessSent: boolean; toCustomerSent: boolean }> {
+  const BUSINESS_EMAIL = 'info@kitchen-off.com';
+  const ticketId = `TICKET_${Date.now()}`;
+  const timestamp = new Date().toLocaleString('ro-RO', { timeZone: 'Europe/Bucharest' });
+
+  // Email to business (info@kitchen-off.com)
+  const businessHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Mesaj nou de contact - KitchenOff</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #2c3e50; margin-bottom: 10px;">KitchenOff</h1>
+        <h2 style="color: #e74c3c; margin-top: 0;">📩 Mesaj nou de contact</h2>
+      </div>
+      
+      <div style="background-color: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
+        <h3 style="margin-top: 0; color: #856404;">Detalii Contact</h3>
+        <p><strong>ID Ticket:</strong> ${ticketId}</p>
+        <p><strong>Data:</strong> ${timestamp}</p>
+        <p><strong>Nume:</strong> ${data.name}</p>
+        <p><strong>Email:</strong> <a href="mailto:${data.email}">${data.email}</a></p>
+        <p><strong>Telefon:</strong> ${data.phone || 'Nu a fost furnizat'}</p>
+        <p><strong>Categorie:</strong> ${data.category}</p>
+        <p><strong>Subiect:</strong> ${data.subject}</p>
+        ${data.orderNumber ? `<p><strong>Număr comandă:</strong> #${data.orderNumber}</p>` : ''}
+      </div>
+
+      <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <h3 style="margin-top: 0; color: #2c3e50;">Mesaj:</h3>
+        <p style="white-space: pre-wrap; margin: 0;">${data.message}</p>
+      </div>
+
+      <div style="background-color: #d4edda; padding: 15px; border-radius: 8px;">
+        <p style="margin: 0; color: #155724;">
+          <strong>Acțiune necesară:</strong> Răspundeți clientului în termen de 24 de ore.
+        </p>
+      </div>
+
+      <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+        <p style="margin: 0; color: #666; font-size: 14px;">
+          Răspundeți direct la acest email pentru a contacta clientul.
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const businessText = `
+    KitchenOff - Mesaj nou de contact
+    
+    ID Ticket: ${ticketId}
+    Data: ${timestamp}
+    
+    Detalii Contact:
+    - Nume: ${data.name}
+    - Email: ${data.email}
+    - Telefon: ${data.phone || 'Nu a fost furnizat'}
+    - Categorie: ${data.category}
+    - Subiect: ${data.subject}
+    ${data.orderNumber ? `- Număr comandă: #${data.orderNumber}` : ''}
+    
+    Mesaj:
+    ${data.message}
+    
+    Răspundeți clientului în termen de 24 de ore.
+  `;
+
+  // Confirmation email to customer
+  const customerHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Confirmare mesaj - KitchenOff</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #2c3e50; margin-bottom: 10px;">KitchenOff</h1>
+        <h2 style="color: #27ae60; margin-top: 0;">✅ Am primit mesajul dumneavoastră</h2>
+      </div>
+      
+      <div style="background-color: #d4edda; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <h3 style="margin-top: 0; color: #155724;">Bună ${data.name},</h3>
+        <p>Vă mulțumim că ne-ați contactat! Am primit mesajul dumneavoastră și vă vom răspunde în cel mai scurt timp posibil, de obicei în 24 de ore.</p>
+        <p><strong>ID Ticket:</strong> ${ticketId}</p>
+      </div>
+
+      <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <h3 style="margin-top: 0; color: #2c3e50;">Rezumat mesaj trimis:</h3>
+        <p><strong>Categorie:</strong> ${data.category}</p>
+        <p><strong>Subiect:</strong> ${data.subject}</p>
+        ${data.orderNumber ? `<p><strong>Număr comandă:</strong> #${data.orderNumber}</p>` : ''}
+        <hr style="border: none; border-top: 1px solid #eee; margin: 15px 0;">
+        <p><strong>Mesaj:</strong></p>
+        <p style="white-space: pre-wrap; background-color: #fff; padding: 10px; border-radius: 4px; border: 1px solid #eee;">${data.message}</p>
+      </div>
+
+      <div style="background-color: #e8f4fd; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <h3 style="margin-top: 0; color: #0c5460;">Aveți nevoie de ajutor urgent?</h3>
+        <p style="margin: 0;">Dacă aveți întrebări urgente, ne puteți contacta la:</p>
+        <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+          <li>Email: <a href="mailto:info@kitchen-off.com" style="color: #27ae60;">info@kitchen-off.com</a></li>
+        </ul>
+      </div>
+
+      <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+        <p style="margin: 0; color: #666;">
+          Vă mulțumim că ați ales KitchenOff!
+        </p>
+        <p style="margin: 10px 0 0 0; color: #666; font-size: 14px;">
+          © 2025 KitchenOff. Toate drepturile rezervate.
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const customerText = `
+    KitchenOff - Confirmare mesaj
+    
+    Bună ${data.name},
+    
+    Vă mulțumim că ne-ați contactat! Am primit mesajul dumneavoastră și vă vom răspunde în cel mai scurt timp posibil, de obicei în 24 de ore.
+    
+    ID Ticket: ${ticketId}
+    
+    Rezumat mesaj trimis:
+    - Categorie: ${data.category}
+    - Subiect: ${data.subject}
+    ${data.orderNumber ? `- Număr comandă: #${data.orderNumber}` : ''}
+    
+    Mesaj:
+    ${data.message}
+    
+    Aveți nevoie de ajutor urgent?
+    Email: info@kitchen-off.com
+    
+    Vă mulțumim că ați ales KitchenOff!
+  `;
+
+  // Send both emails
+  const toBusinessSent = await sendEmail({
+    to: BUSINESS_EMAIL,
+    from: VERIFIED_SENDER,
+    subject: `📩 [${data.category}] ${data.subject} - ${data.name}`,
+    text: businessText,
+    html: businessHtml,
+  });
+
+  const toCustomerSent = await sendEmail({
+    to: data.email,
+    from: VERIFIED_SENDER,
+    subject: `Confirmare mesaj - KitchenOff (${ticketId})`,
+    text: customerText,
+    html: customerHtml,
+  });
+
+  return { toBusinessSent, toCustomerSent };
+}
