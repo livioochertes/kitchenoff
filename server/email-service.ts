@@ -23,21 +23,30 @@ interface EmailParams {
   subject: string;
   text?: string;
   html?: string;
+  replyTo?: string;
 }
 
 export async function sendEmail(params: EmailParams): Promise<boolean> {
   try {
-    await mailService.send({
+    console.log(`📧 Attempting to send email: from=${params.from}, to=${params.to}, subject=${params.subject.substring(0, 50)}...`);
+    
+    const emailData: any = {
       to: params.to,
       from: params.from,
       subject: params.subject,
       text: params.text || '',
       html: params.html || '',
-    });
+    };
+    
+    if (params.replyTo) {
+      emailData.replyTo = params.replyTo;
+    }
+    
+    await mailService.send(emailData);
     console.log(`✅ Email sent successfully to: ${params.to}`);
     return true;
   } catch (error: any) {
-    console.error('SendGrid email error:', {
+    console.error('❌ SendGrid email error:', {
       code: error.code,
       message: error.message,
       response: error.response?.body,
@@ -812,12 +821,15 @@ export async function sendContactFormEmails(data: ContactFormData): Promise<{ to
   `;
 
   // Send both emails
+  console.log(`📧 Sending contact form emails - Business: ${BUSINESS_EMAIL}, Customer: ${data.email}`);
+  
   const toBusinessSent = await sendEmail({
     to: BUSINESS_EMAIL,
     from: VERIFIED_SENDER,
     subject: `📩 [${data.category}] ${data.subject} - ${data.name}`,
     text: businessText,
     html: businessHtml,
+    replyTo: data.email, // Allow direct reply to customer
   });
 
   const toCustomerSent = await sendEmail({
@@ -828,5 +840,6 @@ export async function sendContactFormEmails(data: ContactFormData): Promise<{ to
     html: customerHtml,
   });
 
+  console.log(`📧 Contact form email results - toBusiness: ${toBusinessSent}, toCustomer: ${toCustomerSent}`);
   return { toBusinessSent, toCustomerSent };
 }
