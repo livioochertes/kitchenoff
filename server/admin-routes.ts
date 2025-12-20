@@ -1350,16 +1350,26 @@ export async function registerAdminRoutes(app: Express) {
       // Generate slug from name
       const slug = productData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
       
+      // Auto-generate product code if not provided (format: PRD-XXXXX)
+      let productCode = productData.productCode;
+      if (!productCode || productCode.trim() === '') {
+        const timestamp = Date.now().toString(36).toUpperCase();
+        const random = Math.random().toString(36).substring(2, 5).toUpperCase();
+        productCode = `PRD-${timestamp}${random}`;
+      }
+      
       // Process images array to extract clean URLs (handles both objects and strings)
       const cleanImages = processImagesArray(productData.images || []);
       const mainImageUrl = cleanImages.length > 0 ? cleanImages[0] : extractImageUrl(productData.imageUrl);
       
       console.log('Creating product with images:', cleanImages);
       console.log('Main image URL:', mainImageUrl);
+      console.log('Product code:', productCode);
       
       const newProduct = await storage.createProduct({
         ...productData,
         slug,
+        productCode,
         price: parseFloat(productData.price),
         compareAtPrice: productData.compareAtPrice ? parseFloat(productData.compareAtPrice) : undefined,
         stockQuantity: parseInt(productData.stockQuantity || 0),
@@ -1958,6 +1968,52 @@ export async function registerAdminRoutes(app: Express) {
     } catch (error) {
       console.error("Error updating product status:", error);
       res.status(500).json({ message: "Failed to update product status" });
+    }
+  });
+
+  // Bulk generate product codes for products without codes
+  app.post("/admin/api/products/bulk/generate-codes", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      // Get all products without product codes
+      const allProducts = await storage.getProducts({ limit: 10000 });
+      const productsWithoutCodes = allProducts.filter(p => !p.productCode || p.productCode.trim() === '');
+      
+      if (productsWithoutCodes.length === 0) {
+        return res.json({ 
+          message: "All products already have product codes",
+          updated: 0
+        });
+      }
+      
+      const results = [];
+      for (const product of productsWithoutCodes) {
+        try {
+          const timestamp = Date.now().toString(36).toUpperCase();
+          const random = Math.random().toString(36).substring(2, 5).toUpperCase();
+          const productCode = `PRD-${timestamp}${random}`;
+          
+          await storage.updateProduct(product.id, { productCode });
+          results.push({ id: product.id, name: product.name, productCode, success: true });
+          
+          // Small delay to ensure unique timestamps
+          await new Promise(resolve => setTimeout(resolve, 5));
+        } catch (error: any) {
+          results.push({ id: product.id, name: product.name, success: false, message: error.message });
+        }
+      }
+      
+      // Refresh memory cache
+      await loadAllDataIntoMemory();
+      
+      res.json({
+        message: `Generated product codes for ${results.filter(r => r.success).length} products`,
+        updated: results.filter(r => r.success).length,
+        failed: results.filter(r => !r.success).length,
+        results
+      });
+    } catch (error) {
+      console.error("Error generating product codes:", error);
+      res.status(500).json({ message: "Failed to generate product codes" });
     }
   });
 
