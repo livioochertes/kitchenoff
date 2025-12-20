@@ -2486,7 +2486,40 @@
                         // IMPORTANT: Set to null so the form knows this is a NEW product, not an edit
                         setEditingProduct(null);
                         
-                        // Open the modal - ModalsComponent will handle resetting the form
+                        // Pre-generate a product code for the new product
+                        const timestamp = Date.now().toString(36).toUpperCase();
+                        const random = Math.random().toString(36).substring(2, 5).toUpperCase();
+                        const generatedCode = `PRD-${timestamp}${random}`;
+                        
+                        // Set the product form data with the generated code
+                        setProductFormData(prev => ({
+                          ...prev,
+                          name: '',
+                          description: '',
+                          price: '',
+                          compareAtPrice: '',
+                          categoryId: '',
+                          supplierId: '',
+                          imageUrl: '',
+                          stockQuantity: '',
+                          featured: false,
+                          vatValue: '',
+                          vatPercentage: '19.00',
+                          currency: 'EUR',
+                          productCode: generatedCode,
+                          ncCode: '',
+                          cpvCode: '',
+                          status: 'active',
+                          images: [],
+                          weight: '',
+                          length: '',
+                          width: '',
+                          height: '',
+                          piecesPerPackage: ''
+                        }));
+                        setUploadedImages([]);
+                        
+                        // Open the modal
                         setShowAddProductModal(true);
                       }}
                     >
