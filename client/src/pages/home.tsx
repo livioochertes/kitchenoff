@@ -122,9 +122,11 @@ export default function Home() {
                   {t('home.hero.shopNow')}
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
-                {t('home.hero.quote')}
-              </Button>
+              <ContactModal>
+                <Button size="lg" variant="outline" className="border-white text-white bg-white/10 hover:bg-white hover:text-primary">
+                  {t('home.hero.quote')}
+                </Button>
+              </ContactModal>
             </div>
           </div>
         </div>
