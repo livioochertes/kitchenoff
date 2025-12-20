@@ -1,11 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { ArrowRight, Truck, Shield, Award, MessageSquare, Users, Star } from "lucide-react";
+import { ArrowRight, Truck, Shield, Award, MessageSquare, Users, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "@/hooks/useTranslation";
+import useEmblaCarousel from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
+import { useCallback, useEffect, useState, useRef } from "react";
 
 import ProductCard from "@/components/product-card";
 import ContactModal from "@/components/contact-modal";
@@ -19,8 +22,47 @@ export default function Home() {
   });
 
   const { data: featuredProducts = [] } = useQuery<ProductWithCategory[]>({
-    queryKey: ["/api/products", { featured: true, limit: 4 }],
+    queryKey: ["/api/products", { featured: true, limit: 20 }],
   });
+
+  // Carousel setup for featured products with autoplay
+  const autoplayRef = useRef(
+    Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true })
+  );
+  
+  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+    loop: true, 
+    align: 'start',
+    slidesToScroll: 1
+  }, [autoplayRef.current]);
+  
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    if (emblaApi) emblaApi.scrollNext();
+  }, [emblaApi]);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setCanScrollPrev(emblaApi.canScrollPrev());
+    setCanScrollNext(emblaApi.canScrollNext());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on('select', onSelect);
+    emblaApi.on('reInit', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+      emblaApi.off('reInit', onSelect);
+    };
+  }, [emblaApi, onSelect]);
 
   // Function to get category name - use database name directly for admin-editable names
   const getCategoryName = (category: Category) => {
@@ -113,7 +155,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {categories.filter(category => category.showOnMainShop).sort((a, b) => a.sortOrder - b.sortOrder).map((category) => (
+            {categories.filter(category => category.showOnMainShop).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)).map((category) => (
               <Card key={category.id} className="category-card group cursor-pointer">
                 <Link href={`/products?category=${category.slug}`}>
                   <CardContent className="p-0">
@@ -150,11 +192,43 @@ export default function Home() {
             <p className="text-slate-600">{t('home.products.subtitle')}</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          {featuredProducts.length > 0 && (
+            <div className="relative">
+              {/* Left Arrow */}
+              <button
+                onClick={scrollPrev}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-3 hover:bg-gray-100 transition-colors border border-gray-200"
+                style={{ marginLeft: '-20px' }}
+                data-testid="carousel-prev-button"
+              >
+                <ChevronLeft className="h-6 w-6 text-primary" />
+              </button>
+
+              {/* Carousel */}
+              <div className="overflow-hidden mx-8" ref={emblaRef}>
+                <div className="flex gap-6">
+                  {featuredProducts.map((product) => (
+                    <div 
+                      key={product.id} 
+                      className="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)]"
+                    >
+                      <ProductCard product={product} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right Arrow */}
+              <button
+                onClick={scrollNext}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-3 hover:bg-gray-100 transition-colors border border-gray-200"
+                style={{ marginRight: '-20px' }}
+                data-testid="carousel-next-button"
+              >
+                <ChevronRight className="h-6 w-6 text-primary" />
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
