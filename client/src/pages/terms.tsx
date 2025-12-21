@@ -167,7 +167,7 @@ export default function Terms() {
                     <div className="flex items-center space-x-3">
                       <Phone className="h-5 w-5 text-secondary" />
                       <div>
-                        <p className="text-slate-600">+40 745 009 000</p>
+                        <p className="text-slate-600">+40 740 000 520</p>
                       </div>
                     </div>
                   </div>
