@@ -125,7 +125,13 @@ export async function loadAllDataIntoMemory() {
       const products = await storage.getProducts({
         categoryId: category.id
       });
-      productsByCategory.set(category.slug, products);
+      // Sort products by priority (1 = highest, then 2, 3, etc. Products with 0 or null come last)
+      const sortedProducts = [...products].sort((a, b) => {
+        const priorityA = a.priority || 999;
+        const priorityB = b.priority || 999;
+        return priorityA - priorityB;
+      });
+      productsByCategory.set(category.slug, sortedProducts);
       // Add product count to category
       (category as any).productCount = products.length;
     }
@@ -136,7 +142,13 @@ export async function loadAllDataIntoMemory() {
     stringifiedCategoriesData = JSON.stringify(categoriesData);
     
     // Load all products (no filter, no limit)
-    allProductsData = await storage.getProducts({});
+    const rawAllProducts = await storage.getProducts({});
+    // Sort all products by priority (1 = highest, then 2, 3, etc. Products with 0 or null come last)
+    allProductsData = [...rawAllProducts].sort((a, b) => {
+      const priorityA = a.priority || 999;
+      const priorityB = b.priority || 999;
+      return priorityA - priorityB;
+    });
     
     // Pre-compile data structures for ultra-fast access
     for (const product of allProductsData) {

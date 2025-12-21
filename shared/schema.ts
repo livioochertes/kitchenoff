@@ -90,6 +90,7 @@ export const products = pgTable("products", {
   width: decimal("width", { precision: 8, scale: 2 }), // Width in cm
   height: decimal("height", { precision: 8, scale: 2 }), // Height in cm
   piecesPerPackage: integer("pieces_per_package").default(1), // Maximum pieces per package for shipping
+  priority: integer("priority").default(0), // Display priority: 1 = highest, 2, 3 = lower priorities, 0 = default order
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
