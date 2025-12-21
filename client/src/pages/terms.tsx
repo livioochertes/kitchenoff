@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useTranslation } from "../hooks/useTranslation";
 import { Link } from "wouter";
 import { Calendar, Mail, Phone, MapPin, FileText, Shield, Users, Globe } from "lucide-react";
@@ -6,6 +7,10 @@ import { Badge } from "../components/ui/badge";
 
 export default function Terms() {
   const { t } = useTranslation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const sections = [
     {

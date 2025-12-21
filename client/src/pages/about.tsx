@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useTranslation } from "../hooks/useTranslation";
 import { Card, CardContent } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
@@ -5,6 +6,10 @@ import { Building2, Users, Truck, HeadphonesIcon, Award, ShieldCheck } from "luc
 
 export default function About() {
   const { t } = useTranslation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const features = [
     {
