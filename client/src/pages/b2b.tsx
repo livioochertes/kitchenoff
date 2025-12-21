@@ -18,7 +18,6 @@ import {
   Headphones,
   Zap
 } from "lucide-react";
-import kitchenOffLogo from "@assets/KitchenOff_Logo_Background_Removed_1752520997429.png";
 
 export default function B2B() {
   const { t } = useTranslation();
@@ -81,39 +80,6 @@ export default function B2B() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header with Logo */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Link href="/" className="flex items-center space-x-3">
-              <img 
-                src={kitchenOffLogo} 
-                alt="KitchenOff Logo" 
-                className="w-16 h-16 object-contain"
-              />
-              <span className="text-xl font-bold text-primary">KitchenOff</span>
-            </Link>
-            
-            {/* Navigation Actions */}
-            <div className="flex items-center space-x-4">
-              <Link href="/products" className="text-slate-600 hover:text-primary transition-colors">
-                {t('nav.products')}
-              </Link>
-              <Link href="/about" className="text-slate-600 hover:text-primary transition-colors">
-                {t('footer.aboutUs')}
-              </Link>
-              <Link href="/ai-assistant" className="text-slate-600 hover:text-primary transition-colors">
-                {t('footer.support')}
-              </Link>
-              <Link href="/" className="bg-secondary text-white px-4 py-2 rounded-lg hover:bg-secondary/90 transition-colors">
-                {t('nav.home')}
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* Hero Section */}
       <section className="kitchen-pro-secondary py-16">
         <div className="container mx-auto px-4">
