@@ -35,6 +35,7 @@ const productSchema = z.object({
   inStock: z.boolean().default(true),
   stockQuantity: z.number().min(0, "Stock quantity must be positive"),
   featured: z.boolean().default(false),
+  priority: z.number().min(0, "Priority must be 0 or higher").default(0),
 });
 
 const categorySchema = z.object({
@@ -396,6 +397,7 @@ export default function Admin() {
       inStock: product.inStock || false,
       stockQuantity: product.stockQuantity || 0,
       featured: product.featured || false,
+      priority: product.priority || 0,
     });
     setProductDialogOpen(true);
   };
@@ -659,6 +661,7 @@ export default function Admin() {
                           inStock: true,
                           stockQuantity: 0,
                           featured: false,
+                          priority: 0,
                         });
                       }}>
                         <Plus className="h-4 w-4 mr-2" />
@@ -853,6 +856,27 @@ export default function Admin() {
                               )}
                             />
                           </div>
+                          <FormField
+                            control={productForm.control}
+                            name="priority"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Prioritate afișare</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="number" 
+                                    min="0"
+                                    {...field} 
+                                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                                <p className="text-sm text-muted-foreground">
+                                  1 = prioritate maximă (afișat primul), 2, 3 = priorități mai mici, 0 = ordine implicită
+                                </p>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
                           <div className="flex justify-end space-x-2">
                             <Button type="button" variant="outline" onClick={() => setProductDialogOpen(false)}>
                               Cancel
