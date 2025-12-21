@@ -2,8 +2,6 @@ import { useTranslation } from "../hooks/useTranslation";
 import { Card, CardContent } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Building2, Users, Truck, HeadphonesIcon, Award, ShieldCheck } from "lucide-react";
-import { Link } from "wouter";
-import kitchenOffLogo from "@assets/KitchenOff_Logo_Background_Removed_1752520997429.png";
 
 export default function About() {
   const { t } = useTranslation();
@@ -51,36 +49,6 @@ export default function About() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header with Logo */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Link href="/" className="flex items-center space-x-3">
-              <img 
-                src={kitchenOffLogo} 
-                alt="KitchenOff Logo" 
-                className="w-16 h-16 object-contain"
-              />
-              <span className="text-xl font-bold text-primary">KitchenOff</span>
-            </Link>
-            
-            {/* Navigation Actions */}
-            <div className="flex items-center space-x-4">
-              <Link href="/products" className="text-slate-600 hover:text-primary transition-colors">
-                Products
-              </Link>
-              <Link href="/ai-assistant" className="text-slate-600 hover:text-primary transition-colors">
-                Support
-              </Link>
-              <Link href="/" className="bg-secondary text-white px-4 py-2 rounded-lg hover:bg-secondary/90 transition-colors">
-                Home
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* Hero Section */}
       <section className="kitchen-pro-secondary py-16">
         <div className="container mx-auto px-4">
