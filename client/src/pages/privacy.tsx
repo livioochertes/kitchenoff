@@ -115,7 +115,7 @@ export default function Privacy() {
         "• The right to object to processing;",
         "• The right not to be subject to a decision based solely on automated processing, including profiling;",
         "• The right to lodge a complaint with the National Supervisory Authority for Personal Data Processing (www.dataprotection.ro) and to refer the matter to the courts.",
-        "Individuals may exercise these rights by sending a written request either to the headquarters of NAMARTE (Bucharest, Sector 2, Calea Moșilor no. 158, Romania) or electronically to the Data Protection Officer's email address: info@kitchen-off.com, or by phone at: +40745009000. The Data Protection Officer (DPO) services are outsourced and provided by GDPRComplet.",
+        "Individuals may exercise these rights by sending a written request either to the headquarters of NAMARTE (Bucharest, Sector 2, Calea Moșilor no. 158, Romania) or electronically to the Data Protection Officer's email address: info@kitchen-off.com, or by phone at: +40740000520. The Data Protection Officer (DPO) services are outsourced and provided by GDPRComplet.",
         "We will respond to your request within the legal timeframe of 30 days (with the possibility of extension if the request is complex, but we will inform you accordingly)."
       ]
     }
