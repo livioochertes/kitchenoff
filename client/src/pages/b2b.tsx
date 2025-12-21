@@ -205,8 +205,7 @@ export default function B2B() {
               </ContactModal>
               <Link href="/products">
                 <Button 
-                  variant="outline" 
-                  className="border-2 border-white text-white hover:bg-white hover:text-secondary px-8 py-3 text-lg"
+                  className="border-2 border-white bg-transparent text-white hover:bg-white hover:text-secondary px-8 py-3 text-lg"
                 >
                   {t('b2b.cta.viewProducts')}
                 </Button>
