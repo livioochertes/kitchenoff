@@ -1380,7 +1380,9 @@ export async function registerAdminRoutes(app: Express) {
         weight: productData.weight && String(productData.weight).trim() !== '' ? Math.max(1, Math.round(parseFloat(String(productData.weight)))) : null,
         length: productData.length && String(productData.length).trim() !== '' ? parseFloat(String(productData.length)) : null,
         width: productData.width && String(productData.width).trim() !== '' ? parseFloat(String(productData.width)) : null,
-        height: productData.height && String(productData.height).trim() !== '' ? parseFloat(String(productData.height)) : null
+        height: productData.height && String(productData.height).trim() !== '' ? parseFloat(String(productData.height)) : null,
+        // Priority field for product display order (1 = highest, 0 = default)
+        priority: productData.priority !== undefined ? parseInt(String(productData.priority)) || 0 : 0
       });
 
       // Refresh memory cache so site shows new product immediately
@@ -1427,7 +1429,9 @@ export async function registerAdminRoutes(app: Express) {
         weight: productData.weight && String(productData.weight).trim() !== '' ? Math.max(1, Math.round(parseFloat(String(productData.weight)))) : null,
         length: productData.length && String(productData.length).trim() !== '' ? parseFloat(String(productData.length)) : null,
         width: productData.width && String(productData.width).trim() !== '' ? parseFloat(String(productData.width)) : null,
-        height: productData.height && String(productData.height).trim() !== '' ? parseFloat(String(productData.height)) : null
+        height: productData.height && String(productData.height).trim() !== '' ? parseFloat(String(productData.height)) : null,
+        // Priority field for product display order (1 = highest, 0 = default)
+        priority: productData.priority !== undefined ? parseInt(String(productData.priority)) || 0 : undefined
       });
       
       console.log('Updated product result:', updatedProduct);
