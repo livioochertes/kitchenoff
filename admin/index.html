@@ -2515,7 +2515,8 @@
                           length: '',
                           width: '',
                           height: '',
-                          piecesPerPackage: ''
+                          piecesPerPackage: '',
+                          priority: 0
                         }));
                         setUploadedImages([]);
                         
@@ -4599,7 +4600,8 @@
               length: editingProduct.length?.toString() || '',
               width: editingProduct.width?.toString() || '',
               height: editingProduct.height?.toString() || '',
-              piecesPerPackage: editingProduct.piecesPerPackage?.toString() || ''
+              piecesPerPackage: editingProduct.piecesPerPackage?.toString() || '',
+              priority: editingProduct.priority || 0
             });
             setUploadedImages(editingProduct.images || []);
             setShowAddProductModal(true);
@@ -4742,7 +4744,8 @@
                 length: '',
                 width: '',
                 height: '',
-                piecesPerPackage: ''
+                piecesPerPackage: '',
+                priority: 0
               });
               setUploadedImages([]);
             });
@@ -5374,6 +5377,22 @@
                       </div>
                     </div>
                     
+                    {/* Priority Field */}
+                    <div className="form-group">
+                      <label className="form-label">Prioritate afișare</label>
+                      <input
+                        type="number"
+                        min="0"
+                        className="form-input"
+                        value={productFormData.priority || 0}
+                        onChange={(e) => setProductFormData({...productFormData, priority: parseInt(e.target.value) || 0})}
+                        placeholder="0"
+                      />
+                      <small style={{color: '#666', fontSize: '12px', marginTop: '4px', display: 'block'}}>
+                        1 = prioritate maximă (afișat primul), 2, 3 = priorități mai mici, 0 = ordine implicită
+                      </small>
+                    </div>
+                    
                     {/* Logistics Details Section */}
                     <div style={{marginTop: '20px', padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '6px', border: '1px solid #dee2e6'}}>
                       <h5 style={{color: '#333', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px'}}>
@@ -5665,7 +5684,8 @@
                             length: '',
                             width: '',
                             height: '',
-                            piecesPerPackage: ''
+                            piecesPerPackage: '',
+                            priority: 0
                           });
                           setUploadedImages([]);
                           // Reset import from URL state
