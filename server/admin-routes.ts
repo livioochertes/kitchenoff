@@ -1417,21 +1417,38 @@ export async function registerAdminRoutes(app: Express) {
       console.log('Updating product with clean images:', cleanImages);
       console.log('Main image URL:', mainImageUrl);
       
+      // Helper to safely parse integer fields - converts empty strings to null
+      const safeParseInt = (value: any): number | null => {
+        if (value === '' || value === undefined || value === null) return null;
+        const parsed = parseInt(String(value));
+        return isNaN(parsed) ? null : parsed;
+      };
+      
+      // Helper to safely format decimal fields as strings for database
+      const safeDecimalString = (value: any): string | null => {
+        if (value === '' || value === undefined || value === null) return null;
+        const parsed = parseFloat(String(value));
+        return isNaN(parsed) ? null : parsed.toString();
+      };
+      
       const updatedProduct = await storage.updateProduct(productId, {
         ...productData,
-        price: productData.price ? parseFloat(productData.price) : undefined,
-        compareAtPrice: productData.compareAtPrice ? parseFloat(productData.compareAtPrice) : undefined,
-        stockQuantity: productData.stockQuantity ? parseInt(productData.stockQuantity) : undefined,
+        // Override fields that need special handling/normalization
+        price: productData.price ? String(parseFloat(productData.price)) : undefined,
+        compareAtPrice: safeDecimalString(productData.compareAtPrice),
+        categoryId: safeParseInt(productData.categoryId),
+        supplierId: safeParseInt(productData.supplierId),
+        stockQuantity: safeParseInt(productData.stockQuantity) ?? 0,
         images: cleanImages,
         imageUrl: mainImageUrl,
-        // Convert logistics fields properly - weight must be minimum 1kg with 1kg increments
-        // Handle both string and number types safely
-        weight: productData.weight && String(productData.weight).trim() !== '' ? Math.max(1, Math.round(parseFloat(String(productData.weight)))) : null,
-        length: productData.length && String(productData.length).trim() !== '' ? parseFloat(String(productData.length)) : null,
-        width: productData.width && String(productData.width).trim() !== '' ? parseFloat(String(productData.width)) : null,
-        height: productData.height && String(productData.height).trim() !== '' ? parseFloat(String(productData.height)) : null,
+        // Convert logistics fields properly - weight must be minimum 1kg with 1kg increments (stored as string for decimal type)
+        weight: productData.weight && String(productData.weight).trim() !== '' ? String(Math.max(1, Math.round(parseFloat(String(productData.weight))))) : null,
+        length: safeDecimalString(productData.length),
+        width: safeDecimalString(productData.width),
+        height: safeDecimalString(productData.height),
+        piecesPerPackage: safeParseInt(productData.piecesPerPackage),
         // Priority field for product display order (1 = highest, 0 = default)
-        priority: productData.priority !== undefined ? parseInt(String(productData.priority)) || 0 : undefined
+        priority: safeParseInt(productData.priority) ?? 0
       });
       
       console.log('Updated product result:', updatedProduct);

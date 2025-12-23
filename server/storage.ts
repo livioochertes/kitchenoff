@@ -228,6 +228,7 @@ export class DatabaseStorage implements IStorage {
         width: products.width,
         height: products.height,
         piecesPerPackage: products.piecesPerPackage,
+        priority: products.priority,
         createdAt: products.createdAt,
         updatedAt: products.updatedAt,
         category: {
@@ -314,6 +315,7 @@ export class DatabaseStorage implements IStorage {
         width: products.width,
         height: products.height,
         piecesPerPackage: products.piecesPerPackage,
+        priority: products.priority,
         createdAt: products.createdAt,
         updatedAt: products.updatedAt,
         category: {
@@ -385,6 +387,7 @@ export class DatabaseStorage implements IStorage {
         width: products.width,
         height: products.height,
         piecesPerPackage: products.piecesPerPackage,
+        priority: products.priority,
         createdAt: products.createdAt,
         updatedAt: products.updatedAt,
         category: {

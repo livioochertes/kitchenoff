@@ -160,6 +160,12 @@ export async function loadAllDataIntoMemory() {
     
     console.log('✅ All data loaded into permanent memory - database queries eliminated');
     console.log(`📊 Memory data loaded: ${allProductsData.length} total products`);
+    
+    // Log products with priority for debugging
+    const productsWithPriority = allProductsData.filter(p => p.priority && p.priority > 0);
+    if (productsWithPriority.length > 0) {
+      console.log(`📊 Products with priority set: ${productsWithPriority.map(p => `${p.name}(${p.priority})`).join(', ')}`);
+    }
     console.log(`📊 First 5 products in memory:`, allProductsData.slice(0, 5).map(p => ({ id: p.id, name: p.name })));
     console.log(`📊 All products data variable type:`, typeof allProductsData);
     console.log(`📊 All products data is array:`, Array.isArray(allProductsData));
