@@ -279,6 +279,10 @@ export interface TranslationKeys {
   'home.business.accountManager': string;
   'home.business.priorityShipping': string;
   'home.business.customLabeling': string;
+  'home.business.suppliesEquipment': string;
+  'home.business.businessConsulting': string;
+  'home.business.kitchenManagement': string;
+  'home.business.personalizedSupport': string;
   'home.business.getQuote': string;
   'home.business.contactSales': string;
   
@@ -757,6 +761,10 @@ const translations: Record<Language, TranslationKeys> = {
     'home.business.accountManager': 'Dedicated account manager',
     'home.business.priorityShipping': 'Priority shipping and support',
     'home.business.customLabeling': 'Custom labeling and packaging',
+    'home.business.suppliesEquipment': 'Supplies & Equipment',
+    'home.business.businessConsulting': 'Business Consulting',
+    'home.business.kitchenManagement': 'Kitchen Management',
+    'home.business.personalizedSupport': 'Personalized Support',
     'home.business.getQuote': 'Get B2B Quote',
     'home.business.contactSales': 'Contact Sales',
     
@@ -1502,6 +1510,10 @@ const translations: Record<Language, TranslationKeys> = {
     'home.business.accountManager': 'Gestionnaire de compte dédié',
     'home.business.priorityShipping': 'Livraison et support prioritaires',
     'home.business.customLabeling': 'Étiquetage et emballage personnalisés',
+    'home.business.suppliesEquipment': 'Fournitures & Équipements',
+    'home.business.businessConsulting': 'Conseil en Entreprise',
+    'home.business.kitchenManagement': 'Gestion de Cuisine',
+    'home.business.personalizedSupport': 'Support Personnalisé',
     'home.business.getQuote': 'Demander un Devis B2B',
     'home.business.contactSales': 'Contacter les Ventes',
     
@@ -1808,6 +1820,10 @@ const translations: Record<Language, TranslationKeys> = {
     'home.business.accountManager': 'Dedizierter Kundenbetreuer',
     'home.business.priorityShipping': 'Prioritätsversand und Support',
     'home.business.customLabeling': 'Individuelle Etikettierung und Verpackung',
+    'home.business.suppliesEquipment': 'Zubehör & Ausrüstung',
+    'home.business.businessConsulting': 'Unternehmensberatung',
+    'home.business.kitchenManagement': 'Küchenmanagement',
+    'home.business.personalizedSupport': 'Personalisierter Support',
     'home.business.getQuote': 'B2B-Angebot Erhalten',
     'home.business.contactSales': 'Vertrieb Kontaktieren',
     
@@ -2135,6 +2151,10 @@ const translations: Record<Language, TranslationKeys> = {
     'home.business.accountManager': 'Manager de cont dedicat',
     'home.business.priorityShipping': 'Livrare și suport cu prioritate',
     'home.business.customLabeling': 'Etichetare și ambalare personalizată',
+    'home.business.suppliesEquipment': 'Aprovizionare & Echipamente',
+    'home.business.businessConsulting': 'Consultanță Business',
+    'home.business.kitchenManagement': 'Management Bucătărie',
+    'home.business.personalizedSupport': 'Suport Personalizat',
     'home.business.getQuote': 'Solicită Ofertă B2B',
     'home.business.contactSales': 'Contactează Vânzările',
     
@@ -2238,6 +2258,10 @@ const translations: Record<Language, TranslationKeys> = {
     'home.business.accountManager': 'Account manager dedicato',
     'home.business.priorityShipping': 'Spedizione e supporto prioritari',
     'home.business.customLabeling': 'Etichettatura e confezionamento personalizzati',
+    'home.business.suppliesEquipment': 'Forniture & Attrezzature',
+    'home.business.businessConsulting': 'Consulenza Aziendale',
+    'home.business.kitchenManagement': 'Gestione Cucina',
+    'home.business.personalizedSupport': 'Supporto Personalizzato',
     'home.business.getQuote': 'Ottieni Preventivo B2B',
     'home.business.contactSales': 'Contatta Vendite',
     
@@ -2423,6 +2447,10 @@ const translations: Record<Language, TranslationKeys> = {
     'home.business.accountManager': 'Gerente de conta dedicado',
     'home.business.priorityShipping': 'Entrega e suporte prioritários',
     'home.business.customLabeling': 'Rotulagem e embalagem personalizadas',
+    'home.business.suppliesEquipment': 'Suprimentos & Equipamentos',
+    'home.business.businessConsulting': 'Consultoria Empresarial',
+    'home.business.kitchenManagement': 'Gestão de Cozinha',
+    'home.business.personalizedSupport': 'Suporte Personalizado',
     'home.business.getQuote': 'Obter Orçamento B2B',
     'home.business.contactSales': 'Contatar Vendas',
     
@@ -2608,6 +2636,10 @@ const translations: Record<Language, TranslationKeys> = {
     'home.business.accountManager': '专门的客户经理',
     'home.business.priorityShipping': '优先配送和支持',
     'home.business.customLabeling': '定制标签和包装',
+    'home.business.suppliesEquipment': '用品与设备',
+    'home.business.businessConsulting': '商务咨询',
+    'home.business.kitchenManagement': '厨房管理',
+    'home.business.personalizedSupport': '个性化支持',
     'home.business.getQuote': '获取B2B报价',
     'home.business.contactSales': '联系销售',
     
@@ -2793,6 +2825,10 @@ const translations: Record<Language, TranslationKeys> = {
     'home.business.accountManager': '専任アカウントマネージャー',
     'home.business.priorityShipping': '優先配送とサポート',
     'home.business.customLabeling': 'カスタムラベルとパッケージング',
+    'home.business.suppliesEquipment': '備品・設備',
+    'home.business.businessConsulting': 'ビジネスコンサルティング',
+    'home.business.kitchenManagement': 'キッチン管理',
+    'home.business.personalizedSupport': 'パーソナライズドサポート',
     'home.business.getQuote': 'B2B見積もり取得',
     'home.business.contactSales': '営業担当者に連絡',
     
@@ -2978,6 +3014,10 @@ const translations: Record<Language, TranslationKeys> = {
     'home.business.accountManager': '전담 계정 매니저',
     'home.business.priorityShipping': '우선 배송 및 지원',
     'home.business.customLabeling': '맞춤형 라벨링 및 포장',
+    'home.business.suppliesEquipment': '용품 및 장비',
+    'home.business.businessConsulting': '비즈니스 컨설팅',
+    'home.business.kitchenManagement': '주방 관리',
+    'home.business.personalizedSupport': '맞춤형 지원',
     'home.business.getQuote': 'B2B 견적 받기',
     'home.business.contactSales': '영업팀 연락',
     
@@ -3165,6 +3205,10 @@ const translations: Record<Language, TranslationKeys> = {
     'home.business.accountManager': 'مدير حساب مخصص',
     'home.business.priorityShipping': 'شحن ودعم ذو أولوية',
     'home.business.customLabeling': 'ملصقات وتغليف مخصص',
+    'home.business.suppliesEquipment': 'المستلزمات والمعدات',
+    'home.business.businessConsulting': 'استشارات الأعمال',
+    'home.business.kitchenManagement': 'إدارة المطبخ',
+    'home.business.personalizedSupport': 'دعم مخصص',
     'home.business.getQuote': 'احصل على عرض سعر B2B',
     'home.business.contactSales': 'اتصل بالمبيعات',
     

@@ -14,6 +14,10 @@ import ProductCard from "@/components/product-card";
 import ContactModal from "@/components/contact-modal";
 import type { Category, ProductWithCategory } from "@shared/schema";
 import kitchenOffLogo from "@assets/KitchenOff_Logo_Background_Removed_1752520997429.png";
+import suppliesEquipmentImg from "@assets/generated_images/chef_checking_kitchen_inventory.png";
+import businessConsultingImg from "@assets/generated_images/business_consulting_meeting_chef.png";
+import kitchenManagementImg from "@assets/generated_images/chef_using_tablet_management.png";
+import personalizedSupportImg from "@assets/generated_images/support_representative_video_call.png";
 
 export default function Home() {
   const { t } = useTranslation();
@@ -247,10 +251,10 @@ export default function Home() {
 
                 <div className="space-y-4 mb-8">
                   {[
-                    t('home.business.wholesale'),
-                    t('home.business.accountManager'),
-                    t('home.business.priorityShipping'),
-                    t('home.business.customLabeling'),
+                    t('home.business.suppliesEquipment'),
+                    t('home.business.businessConsulting'),
+                    t('home.business.kitchenManagement'),
+                    t('home.business.personalizedSupport'),
                   ].map((feature, index) => (
                     <div key={index} className="flex items-center space-x-3">
                       <div className="w-5 h-5 rounded-full kitchen-pro-accent flex items-center justify-center">
@@ -276,26 +280,46 @@ export default function Home() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <img
-                  src="https://images.unsplash.com/photo-1571997478779-2adcbbe9ab2f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300"
-                  alt="Professional kitchen"
-                  className="rounded-lg shadow-md"
-                />
-                <img
-                  src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300"
-                  alt="Food safety equipment"
-                  className="rounded-lg shadow-md"
-                />
-                <img
-                  src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300"
-                  alt="Kitchen storage"
-                  className="rounded-lg shadow-md"
-                />
-                <img
-                  src="https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300"
-                  alt="Compliance materials"
-                  className="rounded-lg shadow-md"
-                />
+                <div className="relative rounded-lg overflow-hidden shadow-md group">
+                  <img
+                    src={suppliesEquipmentImg}
+                    alt="Supplies & Equipment"
+                    className="w-full h-40 object-cover transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                    <span className="text-white font-semibold text-lg p-4">{t('home.business.suppliesEquipment')}</span>
+                  </div>
+                </div>
+                <div className="relative rounded-lg overflow-hidden shadow-md group">
+                  <img
+                    src={businessConsultingImg}
+                    alt="Business Consulting"
+                    className="w-full h-40 object-cover transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                    <span className="text-white font-semibold text-lg p-4">{t('home.business.businessConsulting')}</span>
+                  </div>
+                </div>
+                <div className="relative rounded-lg overflow-hidden shadow-md group">
+                  <img
+                    src={kitchenManagementImg}
+                    alt="Kitchen Management"
+                    className="w-full h-40 object-cover transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                    <span className="text-white font-semibold text-lg p-4">{t('home.business.kitchenManagement')}</span>
+                  </div>
+                </div>
+                <div className="relative rounded-lg overflow-hidden shadow-md group">
+                  <img
+                    src={personalizedSupportImg}
+                    alt="Personalized Support"
+                    className="w-full h-40 object-cover transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                    <span className="text-white font-semibold text-lg p-4">{t('home.business.personalizedSupport')}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
