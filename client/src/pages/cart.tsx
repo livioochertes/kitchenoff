@@ -9,7 +9,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/useTranslation";
-import Header from "@/components/header";
 
 export default function Cart() {
   const { cart, updateQuantity, removeFromCart, clearCart, isLoading } = useCart();
@@ -89,8 +88,6 @@ export default function Cart() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Header />
-
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-primary">Shopping Cart</h1>
