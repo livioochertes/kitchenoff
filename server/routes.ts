@@ -125,15 +125,17 @@ export async function loadAllDataIntoMemory() {
       const products = await storage.getProducts({
         categoryId: category.id
       });
+      // Filter only active products for public display
+      const activeProducts = products.filter(p => p.status === 'active');
       // Sort products by priority (1 = highest, then 2, 3, etc. Products with 0 or null come last)
-      const sortedProducts = [...products].sort((a, b) => {
+      const sortedProducts = [...activeProducts].sort((a, b) => {
         const priorityA = a.priority || 999;
         const priorityB = b.priority || 999;
         return priorityA - priorityB;
       });
       productsByCategory.set(category.slug, sortedProducts);
-      // Add product count to category
-      (category as any).productCount = products.length;
+      // Add product count to category (only active products)
+      (category as any).productCount = activeProducts.length;
     }
     
     categoriesData = rawCategories;
@@ -143,8 +145,10 @@ export async function loadAllDataIntoMemory() {
     
     // Load all products (no filter, no limit)
     const rawAllProducts = await storage.getProducts({});
+    // Filter only active products for public display
+    const activeProducts = rawAllProducts.filter(p => p.status === 'active');
     // Sort all products by priority (1 = highest, then 2, 3, etc. Products with 0 or null come last)
-    allProductsData = [...rawAllProducts].sort((a, b) => {
+    allProductsData = [...activeProducts].sort((a, b) => {
       const priorityA = a.priority || 999;
       const priorityB = b.priority || 999;
       return priorityA - priorityB;
