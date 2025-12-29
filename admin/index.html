@@ -736,6 +736,12 @@
       const [initialProductData, setInitialProductData] = useState(null);
       const [modalKey, setModalKey] = useState(0); // Used to force re-mount of modal with fresh state
       
+      // Product translations state - at top level to survive modal remount
+      const [productTranslations, setProductTranslations] = useState([]);
+      const [showTranslationsTab, setShowTranslationsTab] = useState(false);
+      const [newTranslation, setNewTranslation] = useState({ language: '', name: '', description: '', sourceUrl: '' });
+      const [editingTranslation, setEditingTranslation] = useState(null);
+      
       useEffect(() => {
         fetchStats();
       }, []);
@@ -2527,6 +2533,12 @@
                           // Increment modal key to force re-mount with fresh state
                           setModalKey(prev => prev + 1);
                           
+                          // Reset translations state for new product
+                          setProductTranslations([]);
+                          setShowTranslationsTab(false);
+                          setNewTranslation({ language: '', name: '', description: '', sourceUrl: '' });
+                          setEditingTranslation(null);
+                          
                           // Open the modal after setting defaults
                           setShowAddProductModal(true);
                         });
@@ -4238,11 +4250,7 @@
         const [importedData, setImportedData] = useState(null);
         const [usageRightsConfirmed, setUsageRightsConfirmed] = useState(false);
 
-        // Product translations state
-        const [productTranslations, setProductTranslations] = useState([]);
-        const [showTranslationsTab, setShowTranslationsTab] = useState(false);
-        const [newTranslation, setNewTranslation] = useState({ language: '', name: '', description: '', sourceUrl: '' });
-        const [editingTranslation, setEditingTranslation] = useState(null);
+        // Product translations state - now at AdminDashboard level to survive modal remount
 
         // Import from URL handler
         const handleImportFromUrl = async () => {
@@ -5485,18 +5493,35 @@
                       </div>
                     </div>
                     
-                    {/* Translations Section - Only show when editing */}
-                    {editingProduct && (
-                      <div style={{
-                        backgroundColor: '#f0f7ff',
-                        padding: '15px',
-                        borderRadius: '8px',
-                        marginTop: '20px',
-                        border: '1px solid #b3d4fc'
-                      }}>
-                        <h4 style={{marginBottom: '15px', color: '#1976d2', fontSize: '14px'}}>
-                          🌍 Traduceri Produs ({productTranslations.length})
-                        </h4>
+                    {/* Translations Section - Show for both new and edit */}
+                    <div style={{
+                      backgroundColor: '#f0f7ff',
+                      padding: '15px',
+                      borderRadius: '8px',
+                      marginTop: '20px',
+                      border: '1px solid #b3d4fc'
+                    }}>
+                      <h4 style={{marginBottom: '15px', color: '#1976d2', fontSize: '14px'}}>
+                        🌍 Traduceri Produs ({productTranslations.length})
+                      </h4>
+                      
+                      {/* Show message for new products */}
+                      {!editingProduct && (
+                        <div style={{
+                          backgroundColor: '#fff3cd',
+                          border: '1px solid #ffc107',
+                          borderRadius: '6px',
+                          padding: '12px',
+                          marginBottom: '15px',
+                          fontSize: '13px',
+                          color: '#856404'
+                        }}>
+                          ⚠️ Salvează produsul mai întâi pentru a putea adăuga traduceri.
+                        </div>
+                      )}
+                      
+                      {editingProduct && (
+                        <>
                         
                         {/* Existing translations */}
                         {productTranslations.length > 0 && (
@@ -5656,8 +5681,9 @@
                             </button>
                           </div>
                         </div>
-                      </div>
-                    )}
+                        </>
+                      )}
+                    </div>
                     
                     <div style={{display: 'flex', gap: '10px', marginTop: '20px', justifyContent: 'flex-end'}}>
                       <button
