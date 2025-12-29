@@ -707,6 +707,22 @@
       const [selectedSuppliers, setSelectedSuppliers] = useState([]);
       const [showSupplierBulkModal, setShowSupplierBulkModal] = useState(false);
       const [supplierBulkOperation, setSupplierBulkOperation] = useState('');
+      const [supplierFormData, setSupplierFormData] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        address: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: '',
+        contactPerson: '',
+        apiEndpoint: '',
+        apiKey: '',
+        integrationType: 'email',
+        notes: '',
+        isActive: true
+      });
       const [showHomepageConfigModal, setShowHomepageConfigModal] = useState(false);
       const [homepageConfig, setHomepageConfig] = useState({
         mainTop: [],
@@ -4434,23 +4450,6 @@
           }
           return '';
         };
-
-        const [supplierFormData, setSupplierFormData] = useState({
-          name: '',
-          email: '',
-          phone: '',
-          address: '',
-          city: '',
-          state: '',
-          zipCode: '',
-          country: '',
-          contactPerson: '',
-          apiEndpoint: '',
-          apiKey: '',
-          integrationType: 'email',
-          notes: '',
-          isActive: true
-        });
 
         // Populate supplier form when editing
         useEffect(() => {
