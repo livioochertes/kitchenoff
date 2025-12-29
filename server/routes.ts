@@ -125,8 +125,8 @@ export async function loadAllDataIntoMemory() {
       const products = await storage.getProducts({
         categoryId: category.id
       });
-      // Filter only active products for public display
-      const activeProducts = products.filter(p => p.status === 'active');
+      // Filter only active products for public display (case-insensitive)
+      const activeProducts = products.filter(p => p.status?.toLowerCase() === 'active');
       // Sort products by priority (1 = highest, then 2, 3, etc. Products with 0 or null come last)
       const sortedProducts = [...activeProducts].sort((a, b) => {
         const priorityA = a.priority || 999;
@@ -145,8 +145,8 @@ export async function loadAllDataIntoMemory() {
     
     // Load all products (no filter, no limit)
     const rawAllProducts = await storage.getProducts({});
-    // Filter only active products for public display
-    const activeProducts = rawAllProducts.filter(p => p.status === 'active');
+    // Filter only active products for public display (case-insensitive)
+    const activeProducts = rawAllProducts.filter(p => p.status?.toLowerCase() === 'active');
     // Sort all products by priority (1 = highest, then 2, 3, etc. Products with 0 or null come last)
     allProductsData = [...activeProducts].sort((a, b) => {
       const priorityA = a.priority || 999;
@@ -922,6 +922,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
+      // Hide inactive products from public access (case-insensitive)
+      if (product.status?.toLowerCase() !== 'active') {
+        return res.status(404).json({ message: "Product not found" });
+      }
       res.json(product);
     } catch (error) {
       console.error("Get product error:", error);
@@ -933,6 +937,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const product = await storage.getProductBySlug(req.params.slug);
       if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      // Hide inactive products from public access (case-insensitive)
+      if (product.status?.toLowerCase() !== 'active') {
         return res.status(404).json({ message: "Product not found" });
       }
       res.json(product);
