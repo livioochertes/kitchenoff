@@ -4198,6 +4198,9 @@
       
       // Modal Forms Component - uses key prop to reset state when opening new product modal
       const ModalsComponent = () => {
+        // Ref to track last loaded product ID - prevents re-initialization on parent re-renders
+        const lastLoadedProductIdRef = React.useRef(null);
+        
         const [userFormData, setUserFormData] = useState({
           email: '',
           password: '',
@@ -4616,15 +4619,25 @@
           }
         }, [editingUser]);
         
+        // Initialize form data when editing - only runs once per product ID to prevent infinite loops
         React.useEffect(() => {
           if (editingProduct) {
-            console.log('Loading product for editing:', editingProduct);
+            // Only initialize if this is a different product than what we already loaded
+            if (lastLoadedProductIdRef.current === editingProduct.id) {
+              return; // Already loaded this product, skip re-initialization
+            }
+            
+            console.log('Loading product for editing:', editingProduct.id);
             console.log('Logistics data:', {
               weight: editingProduct.weight,
               length: editingProduct.length,
               width: editingProduct.width,
               height: editingProduct.height
             });
+            
+            // Mark this product as loaded
+            lastLoadedProductIdRef.current = editingProduct.id;
+            
             setProductFormData({
               name: editingProduct.name || '',
               description: editingProduct.description || '',
@@ -4655,8 +4668,11 @@
             
             // Fetch translations for the product
             fetchProductTranslations(editingProduct.id);
+          } else {
+            // Reset ref when modal is closed (editingProduct becomes null)
+            lastLoadedProductIdRef.current = null;
           }
-        }, [editingProduct]);
+        }, [editingProduct?.id]); // Only depend on the ID, not the entire object
         
         // Fetch product translations
         const fetchProductTranslations = async (productId) => {
