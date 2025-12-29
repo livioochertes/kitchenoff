@@ -742,6 +742,9 @@
       const [newTranslation, setNewTranslation] = useState({ language: '', name: '', description: '', sourceUrl: '' });
       const [editingTranslation, setEditingTranslation] = useState(null);
       
+      // Ref to track last loaded product ID - at AdminDashboard level to survive modal remount
+      const lastLoadedProductIdRef = React.useRef(null);
+      
       useEffect(() => {
         fetchStats();
       }, []);
@@ -2539,6 +2542,9 @@
                           setNewTranslation({ language: '', name: '', description: '', sourceUrl: '' });
                           setEditingTranslation(null);
                           
+                          // Reset the last loaded product ID ref for new product
+                          lastLoadedProductIdRef.current = null;
+                          
                           // Open the modal after setting defaults
                           setShowAddProductModal(true);
                         });
@@ -4198,8 +4204,7 @@
       
       // Modal Forms Component - uses key prop to reset state when opening new product modal
       const ModalsComponent = () => {
-        // Ref to track last loaded product ID - prevents re-initialization on parent re-renders
-        const lastLoadedProductIdRef = React.useRef(null);
+        // Note: lastLoadedProductIdRef is now at AdminDashboard level to survive modal remount
         
         const [userFormData, setUserFormData] = useState({
           email: '',
