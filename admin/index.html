@@ -745,6 +745,97 @@
       // Ref to track last loaded product ID - at AdminDashboard level to survive modal remount
       const lastLoadedProductIdRef = React.useRef(null);
       
+      // Product form data - at AdminDashboard level to survive ModalsComponent recreation
+      const [productFormData, setProductFormData] = useState({
+        name: '',
+        description: '',
+        price: '',
+        compareAtPrice: '',
+        categoryId: '',
+        supplierId: '',
+        imageUrl: '',
+        stockQuantity: '',
+        featured: false,
+        vatValue: '',
+        vatPercentage: '21.00',
+        currency: 'RON',
+        productCode: '',
+        ncCode: '',
+        cpvCode: '',
+        status: 'active',
+        images: [],
+        weight: '',
+        length: '',
+        width: '',
+        height: '',
+        piecesPerPackage: '',
+        priority: 0
+      });
+      const [uploadedImages, setUploadedImages] = useState([]);
+      
+      // Initialize form data when editing - at AdminDashboard level
+      useEffect(() => {
+        if (editingProduct) {
+          // Only initialize if this is a different product than what we already loaded
+          if (lastLoadedProductIdRef.current === editingProduct.id) {
+            return; // Already loaded this product, skip re-initialization
+          }
+          
+          console.log('Loading product for editing:', editingProduct.id);
+          
+          // Mark this product as loaded
+          lastLoadedProductIdRef.current = editingProduct.id;
+          
+          setProductFormData({
+            name: editingProduct.name || '',
+            description: editingProduct.description || '',
+            price: editingProduct.price || '',
+            compareAtPrice: editingProduct.compareAtPrice || '',
+            categoryId: editingProduct.categoryId || '',
+            supplierId: editingProduct.supplierId || '',
+            imageUrl: editingProduct.imageUrl || '',
+            stockQuantity: editingProduct.stockQuantity || '',
+            featured: editingProduct.featured || false,
+            vatValue: editingProduct.vatValue || '',
+            vatPercentage: editingProduct.vatPercentage || '19.00',
+            currency: editingProduct.currency || 'EUR',
+            productCode: editingProduct.productCode || '',
+            ncCode: editingProduct.ncCode || '',
+            cpvCode: editingProduct.cpvCode || '',
+            status: editingProduct.status || 'active',
+            images: editingProduct.images || [],
+            weight: editingProduct.weight?.toString() || '',
+            length: editingProduct.length?.toString() || '',
+            width: editingProduct.width?.toString() || '',
+            height: editingProduct.height?.toString() || '',
+            piecesPerPackage: editingProduct.piecesPerPackage?.toString() || '',
+            priority: editingProduct.priority || 0
+          });
+          setUploadedImages(editingProduct.images || []);
+          setShowAddProductModal(true);
+          
+          // Fetch translations for the product
+          const fetchTranslations = async () => {
+            try {
+              const response = await fetch(`/admin/api/products/${editingProduct.id}/translations`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+              if (response.ok) {
+                const translations = await response.json();
+                setProductTranslations(translations);
+              }
+            } catch (error) {
+              console.error('Error fetching translations:', error);
+              setProductTranslations([]);
+            }
+          };
+          fetchTranslations();
+        } else {
+          // Reset ref when modal is closed (editingProduct becomes null)
+          lastLoadedProductIdRef.current = null;
+        }
+      }, [editingProduct?.id]);
+      
       useEffect(() => {
         fetchStats();
       }, []);
@@ -4204,7 +4295,7 @@
       
       // Modal Forms Component - uses key prop to reset state when opening new product modal
       const ModalsComponent = () => {
-        // Note: lastLoadedProductIdRef is now at AdminDashboard level to survive modal remount
+        // Note: productFormData, uploadedImages, and lastLoadedProductIdRef are now at AdminDashboard level
         
         const [userFormData, setUserFormData] = useState({
           email: '',
@@ -4213,40 +4304,6 @@
           lastName: '',
           isAdmin: false
         });
-        
-        // Product form data - local to this component to avoid focus loss on parent re-render
-        const [productFormData, setProductFormData] = useState(() => {
-          // Initialize from initialProductData if available, otherwise use defaults
-          if (initialProductData) {
-            return initialProductData;
-          }
-          return {
-            name: '',
-            description: '',
-            price: '',
-            compareAtPrice: '',
-            categoryId: '',
-            supplierId: '',
-            imageUrl: '',
-            stockQuantity: '',
-            featured: false,
-            vatValue: '',
-            vatPercentage: '21.00',
-            currency: 'RON',
-            productCode: '',
-            ncCode: '',
-            cpvCode: '',
-            status: 'active',
-            images: [],
-            weight: '',
-            length: '',
-            width: '',
-            height: '',
-            piecesPerPackage: '',
-            priority: 0
-          };
-        });
-        const [uploadedImages, setUploadedImages] = useState([]);
 
         const [uploading, setUploading] = useState(false);
         const [uploadProgress, setUploadProgress] = useState(0);
@@ -4624,76 +4681,7 @@
           }
         }, [editingUser]);
         
-        // Initialize form data when editing - only runs once per product ID to prevent infinite loops
-        React.useEffect(() => {
-          if (editingProduct) {
-            // Only initialize if this is a different product than what we already loaded
-            if (lastLoadedProductIdRef.current === editingProduct.id) {
-              return; // Already loaded this product, skip re-initialization
-            }
-            
-            console.log('Loading product for editing:', editingProduct.id);
-            console.log('Logistics data:', {
-              weight: editingProduct.weight,
-              length: editingProduct.length,
-              width: editingProduct.width,
-              height: editingProduct.height
-            });
-            
-            // Mark this product as loaded
-            lastLoadedProductIdRef.current = editingProduct.id;
-            
-            setProductFormData({
-              name: editingProduct.name || '',
-              description: editingProduct.description || '',
-              price: editingProduct.price || '',
-              compareAtPrice: editingProduct.compareAtPrice || '',
-              categoryId: editingProduct.categoryId || '',
-              supplierId: editingProduct.supplierId || '',
-              imageUrl: editingProduct.imageUrl || '',
-              stockQuantity: editingProduct.stockQuantity || '',
-              featured: editingProduct.featured || false,
-              vatValue: editingProduct.vatValue || '',
-              vatPercentage: editingProduct.vatPercentage || '19.00',
-              currency: editingProduct.currency || 'EUR',
-              productCode: editingProduct.productCode || '',
-              ncCode: editingProduct.ncCode || '',
-              cpvCode: editingProduct.cpvCode || '',
-              status: editingProduct.status || 'active',
-              images: editingProduct.images || [],
-              weight: editingProduct.weight?.toString() || '',
-              length: editingProduct.length?.toString() || '',
-              width: editingProduct.width?.toString() || '',
-              height: editingProduct.height?.toString() || '',
-              piecesPerPackage: editingProduct.piecesPerPackage?.toString() || '',
-              priority: editingProduct.priority || 0
-            });
-            setUploadedImages(editingProduct.images || []);
-            setShowAddProductModal(true);
-            
-            // Fetch translations for the product
-            fetchProductTranslations(editingProduct.id);
-          } else {
-            // Reset ref when modal is closed (editingProduct becomes null)
-            lastLoadedProductIdRef.current = null;
-          }
-        }, [editingProduct?.id]); // Only depend on the ID, not the entire object
-        
-        // Fetch product translations
-        const fetchProductTranslations = async (productId) => {
-          try {
-            const response = await fetch(`/admin/api/products/${productId}/translations`, {
-              headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (response.ok) {
-              const translations = await response.json();
-              setProductTranslations(translations);
-            }
-          } catch (error) {
-            console.error('Error fetching translations:', error);
-            setProductTranslations([]);
-          }
-        };
+        // Note: Product form initialization useEffect is now at AdminDashboard level
         
         // Add new translation
         const handleAddTranslation = async (productId) => {
