@@ -1366,12 +1366,21 @@ export async function registerAdminRoutes(app: Express) {
       console.log('Main image URL:', mainImageUrl);
       console.log('Product code:', productCode);
       
+      // Helper to safely parse integer fields - converts empty strings to null/undefined
+      const safeParseInt = (value: any): number | undefined => {
+        if (value === '' || value === undefined || value === null) return undefined;
+        const parsed = parseInt(String(value));
+        return isNaN(parsed) ? undefined : parsed;
+      };
+      
       const newProduct = await storage.createProduct({
         ...productData,
         slug,
         productCode,
         price: parseFloat(productData.price),
-        compareAtPrice: productData.compareAtPrice ? parseFloat(productData.compareAtPrice) : undefined,
+        compareAtPrice: productData.compareAtPrice && productData.compareAtPrice !== '' ? parseFloat(productData.compareAtPrice) : undefined,
+        categoryId: safeParseInt(productData.categoryId),
+        supplierId: safeParseInt(productData.supplierId),
         stockQuantity: parseInt(productData.stockQuantity || 0),
         images: cleanImages,
         imageUrl: mainImageUrl,
