@@ -2618,8 +2618,7 @@
                           // Reset translations state for new product
                           setProductTranslations([]);
                           setShowTranslationsTab(false);
-                          setNewTranslation({ language: '', name: '', description: '', sourceUrl: '' });
-                          setEditingTranslation(null);
+                          // newTranslation and editingTranslation are local to ModalsComponent, will reset automatically
                           
                           // Reset the last loaded product ID ref for new product
                           lastLoadedProductIdRef.current = null;
