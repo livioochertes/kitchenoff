@@ -745,8 +745,7 @@
       // Product translations state - at top level to survive modal remount
       const [productTranslations, setProductTranslations] = useState([]);
       const [showTranslationsTab, setShowTranslationsTab] = useState(false);
-      const [newTranslation, setNewTranslation] = useState({ language: '', name: '', description: '', sourceUrl: '' });
-      const [editingTranslation, setEditingTranslation] = useState(null);
+      // newTranslation and editingTranslation moved to ModalsComponent to prevent focus loss
       
       // Ref to track last loaded product ID - at AdminDashboard level to survive modal remount
       const lastLoadedProductIdRef = React.useRef(null);
@@ -4368,6 +4367,10 @@
           priority: 0
         });
         const [uploadedImages, setUploadedImages] = useState([]);
+        
+        // Translation form states - local to ModalsComponent to prevent focus loss
+        const [newTranslation, setNewTranslation] = useState({ language: '', name: '', description: '', sourceUrl: '' });
+        const [editingTranslation, setEditingTranslation] = useState(null);
         
         // Load product data from ref when productLoadTrigger changes
         React.useEffect(() => {
