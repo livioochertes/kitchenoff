@@ -707,22 +707,12 @@
       const [selectedSuppliers, setSelectedSuppliers] = useState([]);
       const [showSupplierBulkModal, setShowSupplierBulkModal] = useState(false);
       const [supplierBulkOperation, setSupplierBulkOperation] = useState('');
-      const [supplierFormData, setSupplierFormData] = useState({
-        name: '',
-        email: '',
-        phone: '',
-        address: '',
-        city: '',
-        state: '',
-        zipCode: '',
-        country: '',
-        contactPerson: '',
-        apiEndpoint: '',
-        apiKey: '',
-        integrationType: 'email',
-        notes: '',
-        isActive: true
-      });
+      // Ref for initial supplier data - used to pass data to ModalsComponent without causing re-renders
+      const supplierInitialDataRef = React.useRef(null);
+      
+      // Trigger for ModalsComponent to know when to load new supplier data
+      const [supplierLoadTrigger, setSupplierLoadTrigger] = useState(0);
+      
       const [showHomepageConfigModal, setShowHomepageConfigModal] = useState(false);
       const [homepageConfig, setHomepageConfig] = useState({
         mainTop: [],
@@ -3436,7 +3426,7 @@
                     style={{background: '#28a745', width: 'auto', padding: '12px 20px'}}
                     onClick={() => {
                       setEditingSupplier(null);
-                      setSupplierFormData({
+                      supplierInitialDataRef.current = {
                         name: '',
                         email: '',
                         phone: '',
@@ -3451,7 +3441,8 @@
                         integrationType: 'email',
                         notes: '',
                         isActive: true
-                      });
+                      };
+                      setSupplierLoadTrigger(prev => prev + 1);
                       setShowEditSupplierModal(true);
                     }}
                   >
@@ -3601,6 +3592,23 @@
                                   }}
                                   onClick={() => {
                                     setEditingSupplier(supplier);
+                                    supplierInitialDataRef.current = {
+                                      name: supplier.name || '',
+                                      email: supplier.email || '',
+                                      phone: supplier.phone || '',
+                                      address: supplier.address || '',
+                                      city: supplier.city || '',
+                                      state: supplier.state || '',
+                                      zipCode: supplier.zipCode || '',
+                                      country: supplier.country || '',
+                                      contactPerson: supplier.contactPerson || '',
+                                      apiEndpoint: supplier.apiEndpoint || '',
+                                      apiKey: supplier.apiKey || '',
+                                      integrationType: supplier.integrationType || 'email',
+                                      notes: supplier.notes || '',
+                                      isActive: supplier.isActive !== undefined ? supplier.isActive : true
+                                    };
+                                    setSupplierLoadTrigger(prev => prev + 1);
                                     setShowEditSupplierModal(true);
                                   }}
                                 >
@@ -3659,7 +3667,7 @@
                       style={{background: '#28a745', width: 'auto', padding: '12px 24px'}}
                       onClick={() => {
                         setEditingSupplier(null);
-                        setSupplierFormData({
+                        supplierInitialDataRef.current = {
                           name: '',
                           email: '',
                           phone: '',
@@ -3674,7 +3682,8 @@
                           integrationType: 'email',
                           notes: '',
                           isActive: true
-                        });
+                        };
+                        setSupplierLoadTrigger(prev => prev + 1);
                         setShowEditSupplierModal(true);
                       }}
                     >
@@ -4451,27 +4460,31 @@
           return '';
         };
 
-        // Populate supplier form when editing
+        // Local supplier form data state - lives in ModalsComponent to avoid re-renders
+        const [supplierFormData, setSupplierFormData] = useState({
+          name: '',
+          email: '',
+          phone: '',
+          address: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          country: '',
+          contactPerson: '',
+          apiEndpoint: '',
+          apiKey: '',
+          integrationType: 'email',
+          notes: '',
+          isActive: true
+        });
+
+        // Load supplier form data when trigger changes
         useEffect(() => {
-          if (editingSupplier) {
-            setSupplierFormData({
-              name: editingSupplier.name || '',
-              email: editingSupplier.email || '',
-              phone: editingSupplier.phone || '',
-              address: editingSupplier.address || '',
-              city: editingSupplier.city || '',
-              state: editingSupplier.state || '',
-              zipCode: editingSupplier.zipCode || '',
-              country: editingSupplier.country || '',
-              contactPerson: editingSupplier.contactPerson || '',
-              apiEndpoint: editingSupplier.apiEndpoint || '',
-              apiKey: editingSupplier.apiKey || '',
-              integrationType: editingSupplier.integrationType || 'email',
-              notes: editingSupplier.notes || '',
-              isActive: editingSupplier.isActive !== undefined ? editingSupplier.isActive : true
-            });
+          if (supplierLoadTrigger > 0 && supplierInitialDataRef.current) {
+            console.log('ModalsComponent: Loading supplier data from ref');
+            setSupplierFormData(supplierInitialDataRef.current);
           }
-        }, [editingSupplier]);
+        }, [supplierLoadTrigger]);
 
         // Handle supplier form submission (create or update)
         const handleSupplierSubmit = async (e) => {
