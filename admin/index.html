@@ -745,35 +745,13 @@
       // Ref to track last loaded product ID - at AdminDashboard level to survive modal remount
       const lastLoadedProductIdRef = React.useRef(null);
       
-      // Product form data - at AdminDashboard level to survive ModalsComponent recreation
-      const [productFormData, setProductFormData] = useState({
-        name: '',
-        description: '',
-        price: '',
-        compareAtPrice: '',
-        categoryId: '',
-        supplierId: '',
-        imageUrl: '',
-        stockQuantity: '',
-        featured: false,
-        vatValue: '',
-        vatPercentage: '21.00',
-        currency: 'RON',
-        productCode: '',
-        ncCode: '',
-        cpvCode: '',
-        status: 'active',
-        images: [],
-        weight: '',
-        length: '',
-        width: '',
-        height: '',
-        piecesPerPackage: '',
-        priority: 0
-      });
-      const [uploadedImages, setUploadedImages] = useState([]);
+      // Ref for initial product data - used to pass data to ModalsComponent without causing re-renders
+      const initialProductDataRef = React.useRef(null);
       
-      // Initialize form data when editing - at AdminDashboard level
+      // Trigger for ModalsComponent to know when to load new product data
+      const [productLoadTrigger, setProductLoadTrigger] = useState(0);
+      
+      // Initialize editing data - stores in ref to avoid re-renders, then triggers modal
       useEffect(() => {
         if (editingProduct) {
           // Only initialize if this is a different product than what we already loaded
@@ -786,7 +764,8 @@
           // Mark this product as loaded
           lastLoadedProductIdRef.current = editingProduct.id;
           
-          setProductFormData({
+          // Store initial data in ref (doesn't cause re-render)
+          initialProductDataRef.current = {
             name: editingProduct.name || '',
             description: editingProduct.description || '',
             price: editingProduct.price || '',
@@ -810,8 +789,10 @@
             height: editingProduct.height?.toString() || '',
             piecesPerPackage: editingProduct.piecesPerPackage?.toString() || '',
             priority: editingProduct.priority || 0
-          });
-          setUploadedImages(editingProduct.images || []);
+          };
+          
+          // Trigger ModalsComponent to load the data
+          setProductLoadTrigger(prev => prev + 1);
           setShowAddProductModal(true);
           
           // Fetch translations for the product
@@ -833,6 +814,7 @@
         } else {
           // Reset ref when modal is closed (editingProduct becomes null)
           lastLoadedProductIdRef.current = null;
+          initialProductDataRef.current = null;
         }
       }, [editingProduct?.id]);
       
@@ -4295,7 +4277,42 @@
       
       // Modal Forms Component - uses key prop to reset state when opening new product modal
       const ModalsComponent = () => {
-        // Note: productFormData, uploadedImages, and lastLoadedProductIdRef are now at AdminDashboard level
+        // Local state for form data - updates here don't cause parent re-render
+        const [productFormData, setProductFormData] = useState({
+          name: '',
+          description: '',
+          price: '',
+          compareAtPrice: '',
+          categoryId: '',
+          supplierId: '',
+          imageUrl: '',
+          stockQuantity: '',
+          featured: false,
+          vatValue: '',
+          vatPercentage: '21.00',
+          currency: 'RON',
+          productCode: '',
+          ncCode: '',
+          cpvCode: '',
+          status: 'active',
+          images: [],
+          weight: '',
+          length: '',
+          width: '',
+          height: '',
+          piecesPerPackage: '',
+          priority: 0
+        });
+        const [uploadedImages, setUploadedImages] = useState([]);
+        
+        // Load product data from ref when productLoadTrigger changes
+        React.useEffect(() => {
+          if (productLoadTrigger > 0 && initialProductDataRef.current) {
+            console.log('ModalsComponent: Loading product data from ref');
+            setProductFormData(initialProductDataRef.current);
+            setUploadedImages(initialProductDataRef.current.images || []);
+          }
+        }, [productLoadTrigger]);
         
         const [userFormData, setUserFormData] = useState({
           email: '',
