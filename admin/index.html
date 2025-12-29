@@ -732,33 +732,9 @@
       const [excelFile, setExcelFile] = useState(null);
       const [importResults, setImportResults] = useState(null);
       
-      // Product form data - moved to top level for button access
-      const [productFormData, setProductFormData] = useState({
-        name: '',
-        description: '',
-        price: '',
-        compareAtPrice: '',
-        categoryId: '',
-        supplierId: '',
-        imageUrl: '',
-        stockQuantity: '',
-        featured: false,
-        vatValue: '',
-        vatPercentage: '21.00',
-        currency: 'RON',
-        productCode: '',
-        ncCode: '',
-        cpvCode: '',
-        status: 'active',
-        images: [],
-        weight: '',
-        length: '',
-        width: '',
-        height: '',
-        piecesPerPackage: '',
-        priority: 0
-      });
-      const [uploadedImages, setUploadedImages] = useState([]);
+      // Initial product data for new products - passed to ModalsComponent
+      const [initialProductData, setInitialProductData] = useState(null);
+      const [modalKey, setModalKey] = useState(0); // Used to force re-mount of modal with fresh state
       
       useEffect(() => {
         fetchStats();
@@ -2519,10 +2495,11 @@
                         const random = Math.random().toString(36).substring(2, 5).toUpperCase();
                         const generatedCode = `PRD-${timestamp}${random}`;
                         
-                        // Fetch company defaults and set form data
+                        // Fetch company defaults and set initial data
                         fetchCompanyDefaults().then(defaults => {
                           console.log('Company defaults for new product:', defaults);
-                          setProductFormData({
+                          // Set initial data that will be used by ModalsComponent
+                          setInitialProductData({
                             name: '',
                             description: '',
                             price: '',
@@ -2547,7 +2524,8 @@
                             piecesPerPackage: '',
                             priority: 0
                           });
-                          setUploadedImages([]);
+                          // Increment modal key to force re-mount with fresh state
+                          setModalKey(prev => prev + 1);
                           
                           // Open the modal after setting defaults
                           setShowAddProductModal(true);
@@ -4206,7 +4184,7 @@
         );
       };
       
-      // Modal Forms Component
+      // Modal Forms Component - uses key prop to reset state when opening new product modal
       const ModalsComponent = () => {
         const [userFormData, setUserFormData] = useState({
           email: '',
@@ -4216,7 +4194,39 @@
           isAdmin: false
         });
         
-        // productFormData and uploadedImages are now at top level scope
+        // Product form data - local to this component to avoid focus loss on parent re-render
+        const [productFormData, setProductFormData] = useState(() => {
+          // Initialize from initialProductData if available, otherwise use defaults
+          if (initialProductData) {
+            return initialProductData;
+          }
+          return {
+            name: '',
+            description: '',
+            price: '',
+            compareAtPrice: '',
+            categoryId: '',
+            supplierId: '',
+            imageUrl: '',
+            stockQuantity: '',
+            featured: false,
+            vatValue: '',
+            vatPercentage: '21.00',
+            currency: 'RON',
+            productCode: '',
+            ncCode: '',
+            cpvCode: '',
+            status: 'active',
+            images: [],
+            weight: '',
+            length: '',
+            width: '',
+            height: '',
+            piecesPerPackage: '',
+            priority: 0
+          };
+        });
+        const [uploadedImages, setUploadedImages] = useState([]);
 
         const [uploading, setUploading] = useState(false);
         const [uploadProgress, setUploadProgress] = useState(0);
@@ -8350,7 +8360,7 @@ TOTAL: $${selectedOrder.totalAmount}
           <div className="content-area">
             {renderContent()}
           </div>
-          <ModalsComponent />
+          <ModalsComponent key={modalKey} />
         </div>
       );
     }
