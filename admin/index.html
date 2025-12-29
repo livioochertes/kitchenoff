@@ -2519,37 +2519,39 @@
                         const random = Math.random().toString(36).substring(2, 5).toUpperCase();
                         const generatedCode = `PRD-${timestamp}${random}`;
                         
-                        // Set the product form data with the generated code
-                        setProductFormData(prev => ({
-                          ...prev,
-                          name: '',
-                          description: '',
-                          price: '',
-                          compareAtPrice: '',
-                          categoryId: '',
-                          supplierId: '',
-                          imageUrl: '',
-                          stockQuantity: '',
-                          featured: false,
-                          vatValue: '',
-                          vatPercentage: '19.00',
-                          currency: 'EUR',
-                          productCode: generatedCode,
-                          ncCode: '',
-                          cpvCode: '',
-                          status: 'active',
-                          images: [],
-                          weight: '',
-                          length: '',
-                          width: '',
-                          height: '',
-                          piecesPerPackage: '',
-                          priority: 0
-                        }));
-                        setUploadedImages([]);
-                        
-                        // Open the modal
-                        setShowAddProductModal(true);
+                        // Fetch company defaults and set form data
+                        fetchCompanyDefaults().then(defaults => {
+                          console.log('Company defaults for new product:', defaults);
+                          setProductFormData({
+                            name: '',
+                            description: '',
+                            price: '',
+                            compareAtPrice: '',
+                            categoryId: '',
+                            supplierId: '',
+                            imageUrl: '',
+                            stockQuantity: '',
+                            featured: false,
+                            vatValue: '',
+                            vatPercentage: defaults.vatPercentage || '21.00',
+                            currency: defaults.currency || 'RON',
+                            productCode: generatedCode,
+                            ncCode: '',
+                            cpvCode: '',
+                            status: 'active',
+                            images: [],
+                            weight: '',
+                            length: '',
+                            width: '',
+                            height: '',
+                            piecesPerPackage: '',
+                            priority: 0
+                          });
+                          setUploadedImages([]);
+                          
+                          // Open the modal after setting defaults
+                          setShowAddProductModal(true);
+                        });
                       }}
                     >
                       ➕ Add New Product
@@ -4742,50 +4744,8 @@
           }
         };
         
-        // Track if we've already initialized for this modal open
-        const modalInitializedRef = React.useRef(false);
-        
-        // Reset form when opening modal for NEW product (editingProduct is null)
-        React.useEffect(() => {
-          if (showAddProductModal && editingProduct === null && !modalInitializedRef.current) {
-            modalInitializedRef.current = true;
-            console.log('Opening modal for NEW product - resetting form');
-            // Fetch company defaults and reset form
-            fetchCompanyDefaults().then(defaults => {
-              console.log('Company defaults for new product:', defaults);
-              setProductFormData({
-                name: '',
-                description: '',
-                price: '',
-                compareAtPrice: '',
-                categoryId: '',
-                supplierId: '',
-                imageUrl: '',
-                stockQuantity: '',
-                featured: false,
-                vatValue: '',
-                vatPercentage: defaults.vatPercentage || '21.00',
-                currency: defaults.currency || 'RON',
-                productCode: '',
-                ncCode: '',
-                cpvCode: '',
-                status: 'active',
-                images: [],
-                weight: '',
-                length: '',
-                width: '',
-                height: '',
-                piecesPerPackage: '',
-                priority: 0
-              });
-              setUploadedImages([]);
-            });
-          }
-          // Reset the ref when modal closes
-          if (!showAddProductModal) {
-            modalInitializedRef.current = false;
-          }
-        }, [showAddProductModal, editingProduct]);
+        // Form initialization for new products is now handled by the "Add New Product" button click handler
+        // This avoids infinite loops caused by useEffect re-triggering on state changes
         
         return (
           <>
