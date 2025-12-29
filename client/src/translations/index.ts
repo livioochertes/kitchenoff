@@ -231,6 +231,7 @@ export interface TranslationKeys {
   'footer.chat': string;
   'footer.copyright': string;
   'footer.freeShipping': string;
+  'footer.freeShippingPrefix': string;
   'footer.professionalSupport': string;
   
   // Language
@@ -713,6 +714,7 @@ const translations: Record<Language, TranslationKeys> = {
     'footer.chat': 'Chat:',
     'footer.copyright': '© 2025 KitchenOff. All rights reserved.',
     'footer.freeShipping': 'Free shipping on orders over $500',
+    'footer.freeShippingPrefix': 'Free shipping on orders over',
     'footer.professionalSupport': 'Professional support available',
     
     // Language
@@ -1161,6 +1163,7 @@ const translations: Record<Language, TranslationKeys> = {
     'footer.chat': 'Chat:',
     'footer.copyright': '© 2025 KitchenOff. Todos los derechos reservados.',
     'footer.freeShipping': 'Envío gratis en pedidos superiores a $500',
+    'footer.freeShippingPrefix': 'Envío gratis en pedidos superiores a',
     'footer.professionalSupport': 'Soporte profesional disponible',
     
     // Language
@@ -1462,6 +1465,7 @@ const translations: Record<Language, TranslationKeys> = {
     'footer.chat': 'Chat:',
     'footer.copyright': '© 2025 KitchenOff. Tous droits réservés.',
     'footer.freeShipping': 'Livraison gratuite pour les commandes de plus de 500$',
+    'footer.freeShippingPrefix': 'Livraison gratuite pour les commandes de plus de',
     'footer.professionalSupport': 'Support professionnel disponible',
     
     // Language
@@ -1773,6 +1777,7 @@ const translations: Record<Language, TranslationKeys> = {
     'footer.chat': 'Chat:',
     'footer.copyright': '© 2025 KitchenOff. Alle Rechte vorbehalten.',
     'footer.freeShipping': 'Kostenloser Versand bei Bestellungen über 500$',
+    'footer.freeShippingPrefix': 'Kostenloser Versand bei Bestellungen über',
     'footer.professionalSupport': 'Professioneller Support verfügbar',
     'language.select': 'Sprache auswählen',
     'language.current': 'Aktuelle Sprache',
@@ -2103,6 +2108,7 @@ const translations: Record<Language, TranslationKeys> = {
     'footer.chat': 'Chat:',
     'footer.copyright': '© 2025 KitchenOff. Toate drepturile rezervate.',
     'footer.freeShipping': 'Livrare gratuită pentru comenzi peste 500$',
+    'footer.freeShippingPrefix': 'Livrare gratuită pentru comenzi peste',
     'footer.professionalSupport': 'Suport profesional disponibil',
     
     // Language
@@ -2305,6 +2311,7 @@ const translations: Record<Language, TranslationKeys> = {
     'footer.chat': 'Chat:',
     'footer.copyright': '© 2025 KitchenOff. Tutti i diritti riservati.',
     'footer.freeShipping': 'Spedizione gratuita sopra i $500',
+    'footer.freeShippingPrefix': 'Spedizione gratuita sopra i',
     'footer.professionalSupport': 'Supporto professionale disponibile',
     
     // Account
@@ -2488,6 +2495,7 @@ const translations: Record<Language, TranslationKeys> = {
     'footer.chat': 'Chat:',
     'footer.copyright': '© 2025 KitchenOff. Todos os direitos reservados.',
     'footer.freeShipping': 'Frete grátis acima de $500',
+    'footer.freeShippingPrefix': 'Frete grátis acima de',
     'footer.professionalSupport': 'Suporte profissional disponível',
     'footer.aboutUs': 'Sobre Nós',
     'footer.products': 'Produtos',
@@ -2683,6 +2691,7 @@ const translations: Record<Language, TranslationKeys> = {
     'footer.chat': '聊天:',
     'footer.copyright': '© 2025 KitchenOff. 保留所有权利。',
     'footer.freeShipping': '500美元以上免费配送',
+    'footer.freeShippingPrefix': '免费配送订单满',
     'footer.professionalSupport': '专业支持服务',
     
     // Account
@@ -2872,6 +2881,7 @@ const translations: Record<Language, TranslationKeys> = {
     'footer.chat': 'チャット:',
     'footer.copyright': '© 2025 KitchenOff. すべての権利を保有。',
     'footer.freeShipping': '500ドル以上で送料無料',
+    'footer.freeShippingPrefix': '送料無料：',
     'footer.professionalSupport': 'プロフェッショナルサポート利用可能',
     
     // Account
@@ -3149,6 +3159,7 @@ const translations: Record<Language, TranslationKeys> = {
     'footer.chat': '채팅:',
     'footer.copyright': '© 2025 KitchenOff. 모든 권리 보유.',
     'footer.freeShipping': '500달러 이상 무료배송',
+    'footer.freeShippingPrefix': '무료배송 주문 금액',
     'footer.professionalSupport': '전문 지원 서비스',
   } as TranslationKeys,
   ar: {
@@ -3309,6 +3320,7 @@ const translations: Record<Language, TranslationKeys> = {
     'footer.chat': 'المحادثة:',
     'footer.copyright': '© 2025 KitchenOff. جميع الحقوق محفوظة.',
     'footer.freeShipping': 'شحن مجاني للطلبات فوق 500 دولار',
+    'footer.freeShippingPrefix': 'شحن مجاني للطلبات فوق',
     'footer.professionalSupport': 'دعم مهني متاح',
     
     // Contact form

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link, useLocation } from "wouter";
 import { Search, ShoppingCart, User, Menu, X, Bot, LogOut, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,11 @@ import LanguageSwitcher from "@/components/language-switcher";
 import ContactModal from "@/components/contact-modal";
 import kitchenOffLogo from "@assets/KitchenOff_Logo_Background_Removed_1752520997429.png";
 
+interface CompanySettings {
+  freeShippingThreshold?: string;
+  defaultCurrency?: string;
+}
+
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [, navigate] = useLocation();
@@ -25,7 +30,26 @@ export default function Header() {
     queryKey: ["/api/categories"],
   });
 
+  const { data: companySettings } = useQuery<CompanySettings>({
+    queryKey: ["/admin/api/company-settings"],
+  });
+
   const cartItemCount = cart?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+
+  const freeShippingMessage = useMemo(() => {
+    const thresholdValue = parseFloat(companySettings?.freeShippingThreshold || "500");
+    const currency = companySettings?.defaultCurrency || "RON";
+    
+    const formattedAmount = new Intl.NumberFormat('ro-RO', {
+      style: 'decimal',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(thresholdValue);
+    
+    const currencyLabel = currency === "RON" ? "lei" : currency === "EUR" ? "€" : currency === "USD" ? "$" : currency === "GBP" ? "£" : currency;
+    
+    return `${t('footer.freeShippingPrefix')} ${formattedAmount} ${currencyLabel}`;
+  }, [companySettings, t]);
 
   // Function to get category name - use database name directly for admin-editable names
   const getCategoryName = (category: any) => {
@@ -44,7 +68,7 @@ export default function Header() {
       {/* Top Banner */}
       <div className="kitchen-pro-primary py-2">
         <div className="container mx-auto px-4 text-center text-sm">
-          <span>{t('footer.freeShipping')} • {t('footer.professionalSupport')}</span>
+          <span>{freeShippingMessage} • {t('footer.professionalSupport')}</span>
         </div>
       </div>
 
