@@ -3418,7 +3418,26 @@
                   <button 
                     className="btn" 
                     style={{background: '#28a745', width: 'auto', padding: '12px 20px'}}
-                    onClick={() => alert('Add new supplier:\n\n• Company details\n• Contact information\n• API integration settings\n• Product assignments\n• Email notifications')}
+                    onClick={() => {
+                      setEditingSupplier(null);
+                      setSupplierFormData({
+                        name: '',
+                        email: '',
+                        phone: '',
+                        address: '',
+                        city: '',
+                        state: '',
+                        zipCode: '',
+                        country: '',
+                        contactPerson: '',
+                        apiEndpoint: '',
+                        apiKey: '',
+                        integrationType: 'email',
+                        notes: '',
+                        isActive: true
+                      });
+                      setShowEditSupplierModal(true);
+                    }}
                   >
                     ➕ Add New Supplier
                   </button>
@@ -3622,7 +3641,26 @@
                     <button 
                       className="btn" 
                       style={{background: '#28a745', width: 'auto', padding: '12px 24px'}}
-                      onClick={() => alert('Add your first supplier:\n\n• Company name and details\n• Contact information\n• Integration preferences\n• Email notifications\n• Product assignments')}
+                      onClick={() => {
+                        setEditingSupplier(null);
+                        setSupplierFormData({
+                          name: '',
+                          email: '',
+                          phone: '',
+                          address: '',
+                          city: '',
+                          state: '',
+                          zipCode: '',
+                          country: '',
+                          contactPerson: '',
+                          apiEndpoint: '',
+                          apiKey: '',
+                          integrationType: 'email',
+                          notes: '',
+                          isActive: true
+                        });
+                        setShowEditSupplierModal(true);
+                      }}
                     >
                       ➕ Add Your First Supplier
                     </button>
@@ -4436,19 +4474,64 @@
           }
         }, [editingSupplier]);
 
-        // Handle supplier form submission
+        // Handle supplier form submission (create or update)
         const handleSupplierSubmit = async (e) => {
           e.preventDefault();
           
-          const result = await updateSupplier(editingSupplier.id, supplierFormData);
-          
-          if (result.success) {
-            alert('✅ Supplier updated successfully!');
-            setShowEditSupplierModal(false);
-            setEditingSupplier(null);
-            fetchSuppliers(); // Refresh the suppliers list
+          if (editingSupplier) {
+            // Update existing supplier
+            const result = await updateSupplier(editingSupplier.id, supplierFormData);
+            
+            if (result.success) {
+              alert('✅ Supplier updated successfully!');
+              setShowEditSupplierModal(false);
+              setEditingSupplier(null);
+              fetchSuppliers(); // Refresh the suppliers list
+            } else {
+              alert(`❌ Error updating supplier: ${result.message}`);
+            }
           } else {
-            alert(`❌ Error updating supplier: ${result.message}`);
+            // Create new supplier
+            try {
+              const token = localStorage.getItem('adminToken');
+              const response = await fetch('/admin/api/suppliers', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(supplierFormData)
+              });
+              
+              if (response.ok) {
+                alert('✅ Supplier created successfully!');
+                setShowEditSupplierModal(false);
+                // Reset form
+                setSupplierFormData({
+                  name: '',
+                  email: '',
+                  phone: '',
+                  address: '',
+                  city: '',
+                  state: '',
+                  zipCode: '',
+                  country: '',
+                  contactPerson: '',
+                  apiEndpoint: '',
+                  apiKey: '',
+                  integrationType: 'email',
+                  notes: '',
+                  isActive: true
+                });
+                fetchSuppliers(); // Refresh the suppliers list
+              } else {
+                const error = await response.json();
+                alert(`❌ Error creating supplier: ${error.message || 'Unknown error'}`);
+              }
+            } catch (error) {
+              console.error('Error creating supplier:', error);
+              alert('❌ Failed to create supplier');
+            }
           }
         };
 
@@ -6296,7 +6379,7 @@ TOTAL: $${selectedOrder.totalAmount}
               </div>
             )}
             
-            {/* Edit Supplier Modal */}
+            {/* Add/Edit Supplier Modal */}
             {showEditSupplierModal && (
               <div style={{
                 position: 'fixed',
@@ -6320,7 +6403,7 @@ TOTAL: $${selectedOrder.totalAmount}
                   overflow: 'auto'
                 }}>
                   <h3 style={{marginBottom: '20px', color: '#333'}}>
-                    ✏️ Edit Supplier
+                    {editingSupplier ? '✏️ Edit Supplier' : '➕ Add New Supplier'}
                   </h3>
                   
                   <form onSubmit={handleSupplierSubmit}>
@@ -6597,9 +6680,9 @@ TOTAL: $${selectedOrder.totalAmount}
                       <button
                         type="submit"
                         className="btn"
-                        style={{background: '#007bff'}}
+                        style={{background: editingSupplier ? '#007bff' : '#28a745'}}
                       >
-                        ✅ Update Supplier
+                        {editingSupplier ? '✅ Update Supplier' : '➕ Create Supplier'}
                       </button>
                     </div>
                   </form>
