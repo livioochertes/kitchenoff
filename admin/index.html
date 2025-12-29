@@ -732,6 +732,34 @@
       const [excelFile, setExcelFile] = useState(null);
       const [importResults, setImportResults] = useState(null);
       
+      // Product form data - moved to top level for button access
+      const [productFormData, setProductFormData] = useState({
+        name: '',
+        description: '',
+        price: '',
+        compareAtPrice: '',
+        categoryId: '',
+        supplierId: '',
+        imageUrl: '',
+        stockQuantity: '',
+        featured: false,
+        vatValue: '',
+        vatPercentage: '21.00',
+        currency: 'RON',
+        productCode: '',
+        ncCode: '',
+        cpvCode: '',
+        status: 'active',
+        images: [],
+        weight: '',
+        length: '',
+        width: '',
+        height: '',
+        piecesPerPackage: '',
+        priority: 0
+      });
+      const [uploadedImages, setUploadedImages] = useState([]);
+      
       useEffect(() => {
         fetchStats();
       }, []);
@@ -4186,33 +4214,8 @@
           isAdmin: false
         });
         
-        const [productFormData, setProductFormData] = useState({
-          name: '',
-          description: '',
-          price: '',
-          compareAtPrice: '',
-          categoryId: '',
-          supplierId: '',
-          imageUrl: '',
-          stockQuantity: '',
-          featured: false,
-          vatValue: '',
-          vatPercentage: '21.00',
-          currency: 'RON',
-          productCode: '',
-          ncCode: '',
-          cpvCode: '',
-          status: 'active',
-          images: [],
-          weight: '',
-          length: '',
-          width: '',
-          height: '',
-          piecesPerPackage: '',
-          priority: 0
-        });
+        // productFormData and uploadedImages are now at top level scope
 
-        const [uploadedImages, setUploadedImages] = useState([]);
         const [uploading, setUploading] = useState(false);
         const [uploadProgress, setUploadProgress] = useState(0);
 
