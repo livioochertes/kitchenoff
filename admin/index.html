@@ -4742,9 +4742,13 @@
           }
         };
         
+        // Track if we've already initialized for this modal open
+        const modalInitializedRef = React.useRef(false);
+        
         // Reset form when opening modal for NEW product (editingProduct is null)
         React.useEffect(() => {
-          if (showAddProductModal && editingProduct === null) {
+          if (showAddProductModal && editingProduct === null && !modalInitializedRef.current) {
+            modalInitializedRef.current = true;
             console.log('Opening modal for NEW product - resetting form');
             // Fetch company defaults and reset form
             fetchCompanyDefaults().then(defaults => {
@@ -4776,6 +4780,10 @@
               });
               setUploadedImages([]);
             });
+          }
+          // Reset the ref when modal closes
+          if (!showAddProductModal) {
+            modalInitializedRef.current = false;
           }
         }, [showAddProductModal, editingProduct]);
         
