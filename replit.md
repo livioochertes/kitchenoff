@@ -22,6 +22,7 @@ The platform features a modern React frontend with Radix UI components styled wi
     - **Invoicing**: Smartbill API integration for automated invoice generation with Romanian tax compliance (RON, 19% VAT), sequential numbering, and local fallback.
     - **Shipping**: Sameday Courier API integration for AWB generation with smart fallback to manual AWB system, and configurable shipping settings with currency awareness.
     - **Checkout Flow**: Intelligent, streamlined checkout for authenticated users with pre-filled data (2-steps) and full 3-step for guests. Supports Cash on Delivery and various online payment methods.
+    - **Voucher/Discount System**: Complete voucher code system with admin management (create, edit, delete vouchers). Supports fixed amount and percentage discounts, minimum order amounts, usage limits, and validity date ranges. Customers can apply voucher codes at checkout for instant discounts.
     - **Admin Panel**: Extensive CRUD operations for products, categories, users, orders, and suppliers. Includes bulk operations, product analytics, and a comprehensive Excel import system for product data.
     - **AI Assistant**: ChatGPT-powered multilingual AI assistant with session and chat history persistence, capable of providing product information and order support.
     - **Image Management**: Comprehensive image upload system with multiple images per product, drag-and-drop, Sharp image processing (WebP conversion, thumbnails), and main image designation.

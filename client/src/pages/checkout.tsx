@@ -79,6 +79,19 @@ export default function Checkout() {
   const { cart, clearCart } = useCart();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Voucher state
+  const [voucherCode, setVoucherCode] = useState("");
+  const [appliedVoucher, setAppliedVoucher] = useState<{
+    id: number;
+    code: string;
+    name: string;
+    discountType: string;
+    discountValue: string;
+    discountAmount: string;
+  } | null>(null);
+  const [voucherLoading, setVoucherLoading] = useState(false);
+  const [voucherError, setVoucherError] = useState("");
 
   // Fetch shipping settings
   const { data: shippingSettings } = useQuery({
@@ -236,7 +249,60 @@ export default function Checkout() {
   const currencySymbol = cartCurrency === 'RON' ? 'lei' : getCurrencySymbol(cartCurrency);
   
   const vat = subtotal * 0.19; // 19% VAT for Romanian market
-  const finalTotal = subtotal + shipping + vat;
+  
+  // Calculate voucher discount based on subtotal (before VAT and shipping)
+  // This matches the server-side calculation which uses orderTotal = subtotal
+  const voucherDiscount = appliedVoucher ? parseFloat(appliedVoucher.discountAmount) : 0;
+  
+  // Apply discount to subtotal, then add shipping and VAT
+  const discountedSubtotal = Math.max(0, subtotal - voucherDiscount);
+  const discountedVat = discountedSubtotal * 0.19; // Recalculate VAT on discounted amount
+  const finalTotal = discountedSubtotal + shipping + discountedVat;
+  
+  // Apply voucher function
+  const handleApplyVoucher = async () => {
+    if (!voucherCode.trim()) {
+      setVoucherError("Please enter a voucher code");
+      return;
+    }
+    
+    setVoucherLoading(true);
+    setVoucherError("");
+    
+    try {
+      const response = await fetch('/api/vouchers/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          code: voucherCode.trim(), 
+          orderTotal: subtotal.toString() 
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.valid) {
+        setAppliedVoucher(data.voucher);
+        setVoucherCode("");
+        toast({
+          title: "Voucher Applied!",
+          description: `Discount of ${data.voucher.discountAmount} ${currencySymbol} applied.`,
+        });
+      } else {
+        setVoucherError(data.message || "Invalid voucher code");
+      }
+    } catch (err) {
+      console.error("Error validating voucher:", err);
+      setVoucherError("Failed to validate voucher. Please try again.");
+    } finally {
+      setVoucherLoading(false);
+    }
+  };
+  
+  const handleRemoveVoucher = () => {
+    setAppliedVoucher(null);
+    setVoucherError("");
+  };
 
   const handleNext = async (e?: React.MouseEvent) => {
     e?.preventDefault(); // Prevent any default form behavior
@@ -1034,9 +1100,55 @@ export default function Checkout() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>VAT (19%):</span>
-                    <span>{vat.toFixed(2)} {currencySymbol}</span>
+                    <span>{(appliedVoucher ? discountedVat : vat).toFixed(2)} {currencySymbol}</span>
                   </div>
+                  {appliedVoucher && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span className="flex items-center gap-1">
+                        Voucher ({appliedVoucher.code}):
+                        <button 
+                          onClick={handleRemoveVoucher}
+                          className="text-red-500 hover:text-red-700 text-xs ml-1"
+                          title="Remove voucher"
+                        >
+                          ✕
+                        </button>
+                      </span>
+                      <span>-{appliedVoucher.discountAmount} {currencySymbol}</span>
+                    </div>
+                  )}
                 </div>
+                
+                {/* Voucher Code Input */}
+                {!appliedVoucher && (
+                  <div className="space-y-2">
+                    <Label htmlFor="voucher-code" className="text-sm">Voucher Code</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="voucher-code"
+                        placeholder="Enter code"
+                        value={voucherCode}
+                        onChange={(e) => {
+                          setVoucherCode(e.target.value.toUpperCase());
+                          setVoucherError("");
+                        }}
+                        className="flex-1"
+                      />
+                      <Button 
+                        type="button"
+                        onClick={handleApplyVoucher}
+                        disabled={voucherLoading || !voucherCode.trim()}
+                        variant="outline"
+                        size="sm"
+                      >
+                        {voucherLoading ? "..." : "Apply"}
+                      </Button>
+                    </div>
+                    {voucherError && (
+                      <p className="text-xs text-red-500">{voucherError}</p>
+                    )}
+                  </div>
+                )}
 
                 <Separator />
 
