@@ -12,15 +12,23 @@ if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
+interface CartItem {
+  productId: number;
+  quantity: number;
+  price: string;
+}
+
 interface StripePaymentProps {
   amount: number;
   currency: string;
   onSuccess: (paymentId: string) => void;
   onError: (error: string) => void;
   disabled?: boolean;
+  cartItems?: CartItem[];
+  voucherCode?: string | null;
 }
 
-function CheckoutForm({ amount, currency, onSuccess, onError, disabled }: StripePaymentProps) {
+function CheckoutForm({ amount, currency, onSuccess, onError, disabled, cartItems, voucherCode }: StripePaymentProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [isLoading, setIsLoading] = useState(false);
@@ -39,10 +47,12 @@ function CheckoutForm({ amount, currency, onSuccess, onError, disabled }: Stripe
     try {
       console.log("Creating payment intent for amount:", amount, "currency:", currency);
       
-      // Create payment intent
+      // Create payment intent with cart items for server-side calculation
       const response = await apiRequest("POST", "/api/payments/stripe/create-payment-intent", {
         amount: Math.round(amount * 100),
         currency: currency.toLowerCase(),
+        cartItems: cartItems || [],
+        voucherCode: voucherCode || null,
       });
       
       console.log("Payment intent response:", response.status);

@@ -1186,22 +1186,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/orders", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const { shippingAddress, billingAddress, paymentMethod, items } = req.body;
+      const { shippingAddress, billingAddress, paymentMethod, items, notes, voucherCode } = req.body;
       
-      // Calculate total amount
-      const totalAmount = items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
+      // Validate items array
+      if (!items || !Array.isArray(items) || items.length === 0) {
+        return res.status(400).json({ message: "Cart items are required" });
+      }
+      
+      // SECURITY: Look up product prices from database - NEVER trust client-provided prices or quantities
+      const validatedItems = await Promise.all(items.map(async (item: any) => {
+        // Validate quantity - must be positive integer
+        const quantity = parseInt(item.quantity);
+        if (!Number.isInteger(quantity) || quantity < 1 || quantity > 9999) {
+          throw new Error(`Invalid quantity for product ${item.productId}: must be between 1 and 9999`);
+        }
+        
+        const product = await storage.getProduct(item.productId);
+        if (!product) {
+          throw new Error(`Product not found: ${item.productId}`);
+        }
+        
+        // Check if product is active
+        if (!product.isActive) {
+          throw new Error(`Product is not available: ${product.name}`);
+        }
+        
+        return {
+          productId: item.productId,
+          quantity: quantity, // Use validated quantity
+          price: product.price, // Use server-side price
+          totalPrice: (parseFloat(product.price) * quantity).toFixed(2),
+        };
+      }));
+      
+      // Calculate subtotal from validated items (using server-side prices)
+      const subtotal = validatedItems.reduce((sum: number, item: any) => sum + parseFloat(item.price) * item.quantity, 0);
+      
+      // Get shipping settings for threshold and cost
+      const companySettings = await storage.getCompanySettings();
+      const freeShippingThreshold = companySettings?.freeShippingThreshold ? parseFloat(companySettings.freeShippingThreshold) : 500;
+      const standardShippingCost = companySettings?.standardShippingCost ? parseFloat(companySettings.standardShippingCost) : 25;
+      
+      // Calculate shipping cost
+      const shippingCost = subtotal > freeShippingThreshold ? 0 : standardShippingCost;
+      
+      // Server-side voucher validation (do NOT trust client-provided discount amounts)
+      let discountAmount = 0;
+      let validatedVoucher: { id: number; code: string; discountType: string; discountValue: string } | null = null;
+      
+      if (voucherCode) {
+        const voucher = await storage.getVoucherByCode(voucherCode);
+        if (voucher && voucher.isActive) {
+          const now = new Date();
+          const validFrom = voucher.validFrom ? new Date(voucher.validFrom) : null;
+          const validUntil = voucher.validUntil ? new Date(voucher.validUntil) : null;
+          const maxUsesReached = voucher.maxUses && voucher.usedCount && voucher.usedCount >= voucher.maxUses;
+          const minOrderMet = !voucher.minOrderAmount || subtotal >= parseFloat(voucher.minOrderAmount);
+          
+          if (!maxUsesReached && minOrderMet && 
+              (!validFrom || now >= validFrom) && 
+              (!validUntil || now <= validUntil)) {
+            // Calculate discount based on voucher type
+            if (voucher.discountType === 'percentage') {
+              discountAmount = subtotal * (parseFloat(voucher.discountValue) / 100);
+            } else {
+              discountAmount = parseFloat(voucher.discountValue);
+            }
+            validatedVoucher = voucher;
+          }
+        }
+      }
+      
+      // Apply voucher discount (to subtotal only, not shipping)
+      const discountedSubtotal = Math.max(0, subtotal - discountAmount);
+      
+      // Final total = discounted subtotal + shipping (prices already include VAT)
+      const totalAmount = discountedSubtotal + shippingCost;
+      
+      // Add voucher info to notes if applied
+      let orderNotes = notes || '';
+      if (validatedVoucher && discountAmount > 0) {
+        orderNotes = `Voucher: ${validatedVoucher.code} (-${discountAmount.toFixed(2)})${orderNotes ? '\n' + orderNotes : ''}`;
+      }
       
       const orderData = {
         userId: req.userId!,
         status: "pending",
-        totalAmount: totalAmount.toString(),
+        totalAmount: totalAmount.toFixed(2),
         shippingAddress,
         billingAddress,
         paymentMethod,
         paymentStatus: "pending",
+        notes: orderNotes || undefined,
       };
 
-      const order = await storage.createOrder(orderData, items);
+      const order = await storage.createOrder(orderData, validatedItems);
+      
+      // Increment voucher usage AFTER order creation succeeds
+      if (validatedVoucher && discountAmount > 0) {
+        await storage.incrementVoucherUsage(validatedVoucher.id);
+      }
       
       // Get full order with items for email notification
       const fullOrder = await storage.getOrder(order.id);
@@ -1778,10 +1862,77 @@ Always be helpful, professional, and focus on practical solutions. When recommen
   // Stripe Payment Routes
   app.post("/api/payments/stripe/create-payment-intent", async (req, res) => {
     try {
-      const { amount, currency, orderId } = req.body;
+      const { currency, orderId, cartItems, voucherCode } = req.body;
 
-      if (!amount || !currency) {
-        return res.status(400).json({ message: "Amount and currency are required" });
+      if (!currency) {
+        return res.status(400).json({ message: "Currency is required" });
+      }
+      
+      // SECURITY: Cart items are required - no fallback to client amount
+      if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
+        return res.status(400).json({ message: "Cart items are required" });
+      }
+      
+      // SECURITY: Look up product prices from database - NEVER trust client-provided prices or quantities
+      let subtotal = 0;
+      for (const item of cartItems) {
+        // Validate quantity - must be positive integer
+        const quantity = parseInt(item.quantity);
+        if (!Number.isInteger(quantity) || quantity < 1 || quantity > 9999) {
+          return res.status(400).json({ message: `Invalid quantity for product ${item.productId}: must be between 1 and 9999` });
+        }
+        
+        const product = await storage.getProduct(item.productId);
+        if (!product) {
+          return res.status(400).json({ message: `Product not found: ${item.productId}` });
+        }
+        
+        // Check if product is active
+        if (!product.isActive) {
+          return res.status(400).json({ message: `Product is not available: ${product.name}` });
+        }
+        
+        subtotal += parseFloat(product.price) * quantity;
+      }
+      
+      // Get shipping settings
+      const companySettings = await storage.getCompanySettings();
+      const freeShippingThreshold = companySettings?.freeShippingThreshold ? parseFloat(companySettings.freeShippingThreshold) : 500;
+      const standardShippingCost = companySettings?.standardShippingCost ? parseFloat(companySettings.standardShippingCost) : 25;
+      
+      // Calculate shipping
+      const shippingCost = subtotal > freeShippingThreshold ? 0 : standardShippingCost;
+      
+      // Validate voucher if provided
+      let discountAmount = 0;
+      if (voucherCode) {
+        const voucher = await storage.getVoucherByCode(voucherCode);
+        if (voucher && voucher.isActive) {
+          const now = new Date();
+          const validFrom = voucher.validFrom ? new Date(voucher.validFrom) : null;
+          const validUntil = voucher.validUntil ? new Date(voucher.validUntil) : null;
+          const maxUsesReached = voucher.maxUses && voucher.usedCount && voucher.usedCount >= voucher.maxUses;
+          const minOrderMet = !voucher.minOrderAmount || subtotal >= parseFloat(voucher.minOrderAmount);
+          
+          if (!maxUsesReached && minOrderMet && 
+              (!validFrom || now >= validFrom) && 
+              (!validUntil || now <= validUntil)) {
+            if (voucher.discountType === 'percentage') {
+              discountAmount = subtotal * (parseFloat(voucher.discountValue) / 100);
+            } else {
+              discountAmount = parseFloat(voucher.discountValue);
+            }
+          }
+        }
+      }
+      
+      // Calculate final total (prices already include VAT)
+      const discountedSubtotal = Math.max(0, subtotal - discountAmount);
+      const finalAmount = (discountedSubtotal + shippingCost) * 100; // Convert to cents
+      
+      // SECURITY: Ensure final amount is positive
+      if (finalAmount < 50) { // Stripe minimum is 50 cents
+        return res.status(400).json({ message: "Order total is too low" });
       }
 
       // Create payment intent with Stripe
@@ -1790,15 +1941,19 @@ Always be helpful, professional, and focus on practical solutions. When recommen
       });
       
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(amount),
+        amount: Math.round(finalAmount),
         currency: currency.toLowerCase(),
         metadata: {
           source: 'kitchenoff',
-          orderId: orderId?.toString() || ''
+          orderId: orderId?.toString() || '',
+          voucherCode: voucherCode || ''
         }
       });
 
-      res.json({ clientSecret: paymentIntent.client_secret });
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        serverCalculatedAmount: Math.round(finalAmount) / 100 // Return for verification
+      });
     } catch (error) {
       console.error("Error creating Stripe payment intent:", error);
       res.status(500).json({ message: "Failed to create payment intent" });

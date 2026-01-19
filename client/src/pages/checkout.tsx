@@ -212,6 +212,8 @@ export default function Checkout() {
         paymentMethod: data.paymentMethod,
         items: orderItems,
         notes: data.notes,
+        // Only send voucher code - server will validate and calculate discount
+        voucherCode: appliedVoucher?.code || null,
       });
     },
     onSuccess: (data) => {
@@ -253,19 +255,21 @@ export default function Checkout() {
   const cartCurrency = cart.length > 0 && cart[0].product?.currency ? cart[0].product.currency : currency;
   const currencySymbol = cartCurrency === 'RON' ? 'lei' : getCurrencySymbol(cartCurrency);
   
-  const vat = subtotal * vatPercentage; // VAT from company settings
-  
-  // Calculate voucher discount based on subtotal (before VAT and shipping)
-  // This matches the server-side calculation which uses orderTotal = subtotal
+  // Calculate voucher discount (applies only to product subtotal, not shipping)
   const voucherDiscount = appliedVoucher ? parseFloat(appliedVoucher.discountAmount) : 0;
   
-  // Apply discount to subtotal, then add shipping and VAT
+  // Apply discount to subtotal only (voucher applies to products, not shipping)
   const discountedSubtotal = Math.max(0, subtotal - voucherDiscount);
-  const discountedVat = discountedSubtotal * vatPercentage; // Recalculate VAT on discounted amount
-  const finalTotal = discountedSubtotal + shipping + discountedVat;
+  
+  // Final total = discounted subtotal + shipping (NO VAT added - prices already include VAT)
+  const finalTotal = discountedSubtotal + shipping;
   
   // VAT display percentage (for UI display)
   const vatDisplayPercentage = Math.round(vatPercentage * 100);
+  
+  // VAT is INCLUDED in prices - calculate for display only (reverse VAT calculation)
+  // Formula: VAT = Total * (vatRate / (1 + vatRate))
+  const vatIncludedInFinal = finalTotal * (vatPercentage / (1 + vatPercentage));
   
   // Apply voucher function
   const handleApplyVoucher = async () => {
@@ -910,7 +914,7 @@ export default function Checkout() {
                     {/* Revolut Payment Component */}
                     {form.watch("paymentMethod") === "revolut" && (
                       <RevolutPayment
-                        amount={total}
+                        amount={finalTotal}
                         currency="USD"
                         onSuccess={(paymentId) => {
                           console.log("Payment successful in checkout:", paymentId);
@@ -935,8 +939,14 @@ export default function Checkout() {
                     {/* Stripe Payment Component */}
                     {form.watch("paymentMethod") === "stripe" && (
                       <StripePayment
-                        amount={total}
-                        currency="USD"
+                        amount={finalTotal}
+                        currency={cartCurrency}
+                        cartItems={cart.map(item => ({
+                          productId: item.product.id,
+                          quantity: item.quantity,
+                          price: item.product.price,
+                        }))}
+                        voucherCode={appliedVoucher?.code}
                         onSuccess={(paymentId) => {
                           console.log("Stripe payment successful in checkout:", paymentId);
                           // Create order after successful payment
@@ -1106,9 +1116,9 @@ export default function Checkout() {
                       )}
                     </span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span>VAT ({vatDisplayPercentage}%):</span>
-                    <span>{(appliedVoucher ? discountedVat : vat).toFixed(2)} {currencySymbol}</span>
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>VAT ({vatDisplayPercentage}% included):</span>
+                    <span>{vatIncludedInFinal.toFixed(2)} {currencySymbol}</span>
                   </div>
                   {appliedVoucher && (
                     <div className="flex justify-between text-sm text-green-600">
