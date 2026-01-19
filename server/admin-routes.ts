@@ -3843,7 +3843,14 @@ export async function registerAdminRoutes(app: Express) {
 
   app.post("/admin/api/vouchers", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
     try {
-      const voucherData = req.body;
+      const voucherData = { ...req.body };
+      // Convert date strings to Date objects for database
+      if (voucherData.validFrom) {
+        voucherData.validFrom = new Date(voucherData.validFrom);
+      }
+      if (voucherData.validUntil) {
+        voucherData.validUntil = new Date(voucherData.validUntil);
+      }
       const voucher = await storage.createVoucher(voucherData);
       res.status(201).json(voucher);
     } catch (error) {
@@ -3855,7 +3862,14 @@ export async function registerAdminRoutes(app: Express) {
   app.put("/admin/api/vouchers/:id", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const voucherData = req.body;
+      const voucherData = { ...req.body };
+      // Convert date strings to Date objects for database
+      if (voucherData.validFrom) {
+        voucherData.validFrom = new Date(voucherData.validFrom);
+      }
+      if (voucherData.validUntil) {
+        voucherData.validUntil = new Date(voucherData.validUntil);
+      }
       const voucher = await storage.updateVoucher(id, voucherData);
       res.json(voucher);
     } catch (error) {
