@@ -2007,6 +2007,7 @@ Always be helpful, professional, and focus on practical solutions. When recommen
         freeShippingThreshold: settings?.freeShippingThreshold || "500.00",
         standardShippingCost: settings?.standardShippingCost || "25.00",
         currency: settings?.defaultCurrency || "EUR",
+        vatPercentage: settings?.defaultVatPercentage || "19.00",
       });
     } catch (error) {
       console.error("Error fetching shipping settings:", error);

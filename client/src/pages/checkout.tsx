@@ -93,7 +93,7 @@ export default function Checkout() {
   const [voucherLoading, setVoucherLoading] = useState(false);
   const [voucherError, setVoucherError] = useState("");
 
-  // Fetch shipping settings
+  // Fetch shipping settings (includes VAT percentage)
   const { data: shippingSettings } = useQuery({
     queryKey: ['/api/shipping-settings'],
     queryFn: async () => {
@@ -102,6 +102,11 @@ export default function Checkout() {
       return response.json();
     },
   });
+  
+  // Get VAT percentage from shipping settings (stored as "21.00" format, convert to decimal like 0.21)
+  const vatPercentage = shippingSettings?.vatPercentage 
+    ? parseFloat(shippingSettings.vatPercentage) / 100 
+    : 0.19;
 
   // Helper function to get default form values
   const getDefaultFormValues = (): CheckoutFormData => {
@@ -248,7 +253,7 @@ export default function Checkout() {
   const cartCurrency = cart.length > 0 && cart[0].product?.currency ? cart[0].product.currency : currency;
   const currencySymbol = cartCurrency === 'RON' ? 'lei' : getCurrencySymbol(cartCurrency);
   
-  const vat = subtotal * 0.19; // 19% VAT for Romanian market
+  const vat = subtotal * vatPercentage; // VAT from company settings
   
   // Calculate voucher discount based on subtotal (before VAT and shipping)
   // This matches the server-side calculation which uses orderTotal = subtotal
@@ -256,8 +261,11 @@ export default function Checkout() {
   
   // Apply discount to subtotal, then add shipping and VAT
   const discountedSubtotal = Math.max(0, subtotal - voucherDiscount);
-  const discountedVat = discountedSubtotal * 0.19; // Recalculate VAT on discounted amount
+  const discountedVat = discountedSubtotal * vatPercentage; // Recalculate VAT on discounted amount
   const finalTotal = discountedSubtotal + shipping + discountedVat;
+  
+  // VAT display percentage (for UI display)
+  const vatDisplayPercentage = Math.round(vatPercentage * 100);
   
   // Apply voucher function
   const handleApplyVoucher = async () => {
@@ -1099,7 +1107,7 @@ export default function Checkout() {
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span>VAT (19%):</span>
+                    <span>VAT ({vatDisplayPercentage}%):</span>
                     <span>{(appliedVoucher ? discountedVat : vat).toFixed(2)} {currencySymbol}</span>
                   </div>
                   {appliedVoucher && (
