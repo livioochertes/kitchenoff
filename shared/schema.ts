@@ -268,6 +268,23 @@ export const shippingSettings = pgTable("shipping_settings", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Vouchers table for discount codes
+export const vouchers = pgTable("vouchers", {
+  id: serial("id").primaryKey(),
+  code: varchar("code", { length: 50 }).notNull().unique(),
+  name: varchar("name", { length: 255 }).notNull(),
+  discountType: varchar("discount_type", { length: 20 }).notNull().default("fixed"), // fixed or percentage
+  discountValue: decimal("discount_value", { precision: 10, scale: 2 }).notNull(),
+  minOrderAmount: decimal("min_order_amount", { precision: 10, scale: 2 }),
+  maxUses: integer("max_uses"),
+  usedCount: integer("used_count").default(0),
+  isActive: boolean("is_active").default(true),
+  validFrom: timestamp("valid_from"),
+  validUntil: timestamp("valid_until"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   orders: many(orders),
@@ -441,6 +458,13 @@ export const insertShippingSettingsSchema = createInsertSchema(shippingSettings)
   updatedAt: true,
 });
 
+export const insertVoucherSchema = createInsertSchema(vouchers).omit({
+  id: true,
+  usedCount: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -468,6 +492,8 @@ export type CompanySettings = typeof companySettings.$inferSelect;
 export type InsertCompanySettings = z.infer<typeof insertCompanySettingsSchema>;
 export type ShippingSettings = typeof shippingSettings.$inferSelect;
 export type InsertShippingSettings = z.infer<typeof insertShippingSettingsSchema>;
+export type Voucher = typeof vouchers.$inferSelect;
+export type InsertVoucher = z.infer<typeof insertVoucherSchema>;
 
 // Additional types for API responses
 export type ProductWithCategory = Product & { category: Category | null; supplier: Supplier | null };

@@ -3815,4 +3815,63 @@ export async function registerAdminRoutes(app: Express) {
       res.status(500).json({ message: "Failed to update shipping settings" });
     }
   });
+
+  // Voucher Routes
+  app.get("/admin/api/vouchers", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const vouchers = await storage.getVouchers();
+      res.json(vouchers);
+    } catch (error) {
+      console.error("Error fetching vouchers:", error);
+      res.status(500).json({ message: "Failed to fetch vouchers" });
+    }
+  });
+
+  app.get("/admin/api/vouchers/:id", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const voucher = await storage.getVoucher(id);
+      if (!voucher) {
+        return res.status(404).json({ message: "Voucher not found" });
+      }
+      res.json(voucher);
+    } catch (error) {
+      console.error("Error fetching voucher:", error);
+      res.status(500).json({ message: "Failed to fetch voucher" });
+    }
+  });
+
+  app.post("/admin/api/vouchers", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const voucherData = req.body;
+      const voucher = await storage.createVoucher(voucherData);
+      res.status(201).json(voucher);
+    } catch (error) {
+      console.error("Error creating voucher:", error);
+      res.status(500).json({ message: "Failed to create voucher" });
+    }
+  });
+
+  app.put("/admin/api/vouchers/:id", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const voucherData = req.body;
+      const voucher = await storage.updateVoucher(id, voucherData);
+      res.json(voucher);
+    } catch (error) {
+      console.error("Error updating voucher:", error);
+      res.status(500).json({ message: "Failed to update voucher" });
+    }
+  });
+
+  app.delete("/admin/api/vouchers/:id", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteVoucher(id);
+      res.json({ message: "Voucher deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting voucher:", error);
+      res.status(500).json({ message: "Failed to delete voucher" });
+    }
+  });
 }

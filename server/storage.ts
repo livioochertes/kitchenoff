@@ -12,6 +12,7 @@ import {
   invoiceItems,
   companySettings,
   shippingSettings,
+  vouchers,
   type User,
   type InsertUser,
   type Category,
@@ -42,6 +43,8 @@ import {
   type InsertCompanySettings,
   type ShippingSettings,
   type InsertShippingSettings,
+  type Voucher,
+  type InsertVoucher,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, and, sql } from "drizzle-orm";
@@ -127,6 +130,15 @@ export interface IStorage {
   getShippingSettings(): Promise<ShippingSettings | undefined>;
   updateShippingSettings(settings: Partial<InsertShippingSettings>): Promise<ShippingSettings>;
   createShippingSettings(settings: InsertShippingSettings): Promise<ShippingSettings>;
+
+  // Voucher operations
+  getVouchers(): Promise<Voucher[]>;
+  getVoucher(id: number): Promise<Voucher | undefined>;
+  getVoucherByCode(code: string): Promise<Voucher | undefined>;
+  createVoucher(voucher: InsertVoucher): Promise<Voucher>;
+  updateVoucher(id: number, voucher: Partial<InsertVoucher>): Promise<Voucher>;
+  deleteVoucher(id: number): Promise<void>;
+  incrementVoucherUsage(id: number): Promise<Voucher>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -992,6 +1004,56 @@ export class DatabaseStorage implements IStorage {
   async createShippingSettings(settings: InsertShippingSettings): Promise<ShippingSettings> {
     const [newSettings] = await db.insert(shippingSettings).values([settings]).returning();
     return newSettings;
+  }
+
+  // Voucher operations
+  async getVouchers(): Promise<Voucher[]> {
+    return db.select().from(vouchers).orderBy(desc(vouchers.createdAt));
+  }
+
+  async getVoucher(id: number): Promise<Voucher | undefined> {
+    const [voucher] = await db.select().from(vouchers).where(eq(vouchers.id, id));
+    return voucher;
+  }
+
+  async getVoucherByCode(code: string): Promise<Voucher | undefined> {
+    const [voucher] = await db.select().from(vouchers).where(eq(vouchers.code, code.toUpperCase()));
+    return voucher;
+  }
+
+  async createVoucher(voucher: InsertVoucher): Promise<Voucher> {
+    const [newVoucher] = await db.insert(vouchers).values({
+      ...voucher,
+      code: voucher.code.toUpperCase(),
+    }).returning();
+    return newVoucher;
+  }
+
+  async updateVoucher(id: number, voucher: Partial<InsertVoucher>): Promise<Voucher> {
+    const updateData = {
+      ...voucher,
+      updatedAt: new Date(),
+    };
+    if (voucher.code) {
+      updateData.code = voucher.code.toUpperCase();
+    }
+    const [updated] = await db.update(vouchers).set(updateData).where(eq(vouchers.id, id)).returning();
+    return updated;
+  }
+
+  async deleteVoucher(id: number): Promise<void> {
+    await db.delete(vouchers).where(eq(vouchers.id, id));
+  }
+
+  async incrementVoucherUsage(id: number): Promise<Voucher> {
+    const [updated] = await db.update(vouchers)
+      .set({ 
+        usedCount: sql`${vouchers.usedCount} + 1`,
+        updatedAt: new Date() 
+      })
+      .where(eq(vouchers.id, id))
+      .returning();
+    return updated;
   }
 }
 
