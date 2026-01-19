@@ -718,6 +718,22 @@
         mainTop: [],
         mainShop: []
       });
+      
+      // Voucher state
+      const [vouchers, setVouchers] = useState([]);
+      const [showAddVoucherModal, setShowAddVoucherModal] = useState(false);
+      const [editingVoucher, setEditingVoucher] = useState(null);
+      const [voucherForm, setVoucherForm] = useState({
+        code: '',
+        name: '',
+        discountType: 'fixed',
+        discountValue: '',
+        minOrderAmount: '',
+        maxUses: '',
+        isActive: true,
+        validFrom: '',
+        validUntil: ''
+      });
       const [companySettings, setCompanySettings] = useState({
         name: '',
         email: '',
@@ -997,6 +1013,26 @@
           }
         } catch (err) {
           console.error('Network error fetching suppliers:', err);
+        }
+      };
+
+      const fetchVouchers = async () => {
+        try {
+          const response = await fetch('/admin/api/vouchers', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            setVouchers(data);
+          } else {
+            console.error('Failed to fetch vouchers:', data.message);
+          }
+        } catch (err) {
+          console.error('Network error fetching vouchers:', err);
         }
       };
 
@@ -2056,6 +2092,8 @@
           fetchSuppliers();
         } else if (view === 'company-settings') {
           fetchCompanySettings();
+        } else if (view === 'vouchers' && vouchers.length === 0) {
+          fetchVouchers();
         }
       };
       
@@ -3836,6 +3874,331 @@
                     <li>All changes are automatically saved and will be reflected in new orders and communications</li>
                   </ul>
                 </div>
+              </div>
+            );
+          
+          case 'vouchers':
+            return (
+              <div style={{background: 'white', padding: '30px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+                  <h3 style={{color: '#333', margin: '0'}}>🎟️ Voucher Management</h3>
+                  <button 
+                    className="btn" 
+                    style={{background: '#28a745', width: 'auto', padding: '8px 16px'}}
+                    onClick={() => {
+                      setVoucherForm({
+                        code: '',
+                        name: '',
+                        discountType: 'fixed',
+                        discountValue: '',
+                        minOrderAmount: '',
+                        maxUses: '',
+                        isActive: true,
+                        validFrom: '',
+                        validUntil: ''
+                      });
+                      setEditingVoucher(null);
+                      setShowAddVoucherModal(true);
+                    }}
+                  >
+                    + Add New Voucher
+                  </button>
+                </div>
+                
+                <p style={{color: '#666', marginBottom: '20px'}}>
+                  Manage discount voucher codes. Customers can apply these codes at checkout to receive discounts.
+                </p>
+                
+                {vouchers.length > 0 ? (
+                  <div style={{overflowX: 'auto'}}>
+                    <table style={{width: '100%', borderCollapse: 'collapse'}}>
+                      <thead>
+                        <tr style={{backgroundColor: '#f5f5f5'}}>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Code</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Name</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Discount</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Min Order</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Usage</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Valid Period</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Status</th>
+                          <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd'}}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {vouchers.map((voucher) => (
+                          <tr key={voucher.id} style={{borderBottom: '1px solid #eee'}}>
+                            <td style={{padding: '12px'}}>
+                              <code style={{background: '#f0f0f0', padding: '4px 8px', borderRadius: '4px', fontWeight: 'bold'}}>{voucher.code}</code>
+                            </td>
+                            <td style={{padding: '12px'}}>{voucher.name}</td>
+                            <td style={{padding: '12px'}}>
+                              {voucher.discountType === 'percentage' 
+                                ? `${voucher.discountValue}%` 
+                                : `${voucher.discountValue} RON`}
+                            </td>
+                            <td style={{padding: '12px'}}>
+                              {voucher.minOrderAmount ? `${voucher.minOrderAmount} RON` : '-'}
+                            </td>
+                            <td style={{padding: '12px'}}>
+                              {voucher.usedCount || 0}{voucher.maxUses ? ` / ${voucher.maxUses}` : ''}
+                            </td>
+                            <td style={{padding: '12px', fontSize: '12px'}}>
+                              {voucher.validFrom || voucher.validUntil ? (
+                                <>
+                                  {voucher.validFrom ? new Date(voucher.validFrom).toLocaleDateString() : 'N/A'}
+                                  {' - '}
+                                  {voucher.validUntil ? new Date(voucher.validUntil).toLocaleDateString() : 'N/A'}
+                                </>
+                              ) : 'No expiry'}
+                            </td>
+                            <td style={{padding: '12px'}}>
+                              <span style={{
+                                padding: '4px 8px',
+                                borderRadius: '12px',
+                                fontSize: '12px',
+                                fontWeight: 'bold',
+                                background: voucher.isActive ? '#d4edda' : '#f8d7da',
+                                color: voucher.isActive ? '#155724' : '#721c24'
+                              }}>
+                                {voucher.isActive ? 'Active' : 'Inactive'}
+                              </span>
+                            </td>
+                            <td style={{padding: '12px'}}>
+                              <div style={{display: 'flex', gap: '5px'}}>
+                                <button 
+                                  className="btn" 
+                                  style={{background: '#007bff', width: 'auto', padding: '4px 10px', fontSize: '12px'}}
+                                  onClick={() => {
+                                    setEditingVoucher(voucher);
+                                    setVoucherForm({
+                                      code: voucher.code || '',
+                                      name: voucher.name || '',
+                                      discountType: voucher.discountType || 'fixed',
+                                      discountValue: voucher.discountValue || '',
+                                      minOrderAmount: voucher.minOrderAmount || '',
+                                      maxUses: voucher.maxUses || '',
+                                      isActive: voucher.isActive !== false,
+                                      validFrom: voucher.validFrom ? new Date(voucher.validFrom).toISOString().slice(0, 16) : '',
+                                      validUntil: voucher.validUntil ? new Date(voucher.validUntil).toISOString().slice(0, 16) : ''
+                                    });
+                                    setShowAddVoucherModal(true);
+                                  }}
+                                >
+                                  Edit
+                                </button>
+                                <button 
+                                  className="btn" 
+                                  style={{background: '#dc3545', width: 'auto', padding: '4px 10px', fontSize: '12px'}}
+                                  onClick={async () => {
+                                    if (confirm(`Are you sure you want to delete voucher "${voucher.code}"?`)) {
+                                      try {
+                                        const response = await fetch(`/admin/api/vouchers/${voucher.id}`, {
+                                          method: 'DELETE',
+                                          headers: { 'Authorization': `Bearer ${token}` }
+                                        });
+                                        if (response.ok) {
+                                          setVouchers(vouchers.filter(v => v.id !== voucher.id));
+                                        } else {
+                                          alert('Failed to delete voucher');
+                                        }
+                                      } catch (err) {
+                                        console.error('Error deleting voucher:', err);
+                                        alert('Failed to delete voucher');
+                                      }
+                                    }
+                                  }}
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div style={{textAlign: 'center', padding: '40px', color: '#666'}}>
+                    <p>No vouchers created yet. Click "Add New Voucher" to create one.</p>
+                  </div>
+                )}
+                
+                {/* Add/Edit Voucher Modal */}
+                {showAddVoucherModal && (
+                  <div className="modal-backdrop" onClick={() => setShowAddVoucherModal(false)}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()} style={{maxWidth: '500px'}}>
+                      <h3 style={{marginBottom: '20px'}}>{editingVoucher ? 'Edit Voucher' : 'Add New Voucher'}</h3>
+                      
+                      <div style={{marginBottom: '15px'}}>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Voucher Code *</label>
+                        <input
+                          type="text"
+                          value={voucherForm.code}
+                          onChange={(e) => setVoucherForm({...voucherForm, code: e.target.value.toUpperCase()})}
+                          placeholder="e.g., DISCOUNT10"
+                          style={{width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd'}}
+                        />
+                      </div>
+                      
+                      <div style={{marginBottom: '15px'}}>
+                        <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Name/Description *</label>
+                        <input
+                          type="text"
+                          value={voucherForm.name}
+                          onChange={(e) => setVoucherForm({...voucherForm, name: e.target.value})}
+                          placeholder="e.g., 10% Summer Sale"
+                          style={{width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd'}}
+                        />
+                      </div>
+                      
+                      <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px'}}>
+                        <div>
+                          <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Discount Type</label>
+                          <select
+                            value={voucherForm.discountType}
+                            onChange={(e) => setVoucherForm({...voucherForm, discountType: e.target.value})}
+                            style={{width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd'}}
+                          >
+                            <option value="fixed">Fixed Amount (RON)</option>
+                            <option value="percentage">Percentage (%)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Discount Value *</label>
+                          <input
+                            type="number"
+                            value={voucherForm.discountValue}
+                            onChange={(e) => setVoucherForm({...voucherForm, discountValue: e.target.value})}
+                            placeholder={voucherForm.discountType === 'percentage' ? 'e.g., 10' : 'e.g., 50'}
+                            style={{width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd'}}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px'}}>
+                        <div>
+                          <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Min Order Amount</label>
+                          <input
+                            type="number"
+                            value={voucherForm.minOrderAmount}
+                            onChange={(e) => setVoucherForm({...voucherForm, minOrderAmount: e.target.value})}
+                            placeholder="Optional"
+                            style={{width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd'}}
+                          />
+                        </div>
+                        <div>
+                          <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Max Uses</label>
+                          <input
+                            type="number"
+                            value={voucherForm.maxUses}
+                            onChange={(e) => setVoucherForm({...voucherForm, maxUses: e.target.value})}
+                            placeholder="Unlimited"
+                            style={{width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd'}}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px'}}>
+                        <div>
+                          <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Valid From</label>
+                          <input
+                            type="datetime-local"
+                            value={voucherForm.validFrom}
+                            onChange={(e) => setVoucherForm({...voucherForm, validFrom: e.target.value})}
+                            style={{width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd'}}
+                          />
+                        </div>
+                        <div>
+                          <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>Valid Until</label>
+                          <input
+                            type="datetime-local"
+                            value={voucherForm.validUntil}
+                            onChange={(e) => setVoucherForm({...voucherForm, validUntil: e.target.value})}
+                            style={{width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd'}}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div style={{marginBottom: '20px'}}>
+                        <label style={{display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer'}}>
+                          <input
+                            type="checkbox"
+                            checked={voucherForm.isActive}
+                            onChange={(e) => setVoucherForm({...voucherForm, isActive: e.target.checked})}
+                          />
+                          <span style={{fontWeight: 'bold'}}>Voucher is active</span>
+                        </label>
+                      </div>
+                      
+                      <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                        <button 
+                          className="btn btn-secondary" 
+                          onClick={() => setShowAddVoucherModal(false)}
+                          style={{width: 'auto', padding: '10px 20px'}}
+                        >
+                          Cancel
+                        </button>
+                        <button 
+                          className="btn" 
+                          style={{background: '#28a745', width: 'auto', padding: '10px 20px'}}
+                          onClick={async () => {
+                            if (!voucherForm.code || !voucherForm.name || !voucherForm.discountValue) {
+                              alert('Please fill in all required fields (Code, Name, Discount Value)');
+                              return;
+                            }
+                            
+                            try {
+                              const voucherData = {
+                                code: voucherForm.code,
+                                name: voucherForm.name,
+                                discountType: voucherForm.discountType,
+                                discountValue: voucherForm.discountValue,
+                                minOrderAmount: voucherForm.minOrderAmount || null,
+                                maxUses: voucherForm.maxUses ? parseInt(voucherForm.maxUses) : null,
+                                isActive: voucherForm.isActive,
+                                validFrom: voucherForm.validFrom ? new Date(voucherForm.validFrom).toISOString() : null,
+                                validUntil: voucherForm.validUntil ? new Date(voucherForm.validUntil).toISOString() : null
+                              };
+                              
+                              const url = editingVoucher 
+                                ? `/admin/api/vouchers/${editingVoucher.id}` 
+                                : '/admin/api/vouchers';
+                              const method = editingVoucher ? 'PUT' : 'POST';
+                              
+                              const response = await fetch(url, {
+                                method,
+                                headers: {
+                                  'Authorization': `Bearer ${token}`,
+                                  'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(voucherData)
+                              });
+                              
+                              if (response.ok) {
+                                const savedVoucher = await response.json();
+                                if (editingVoucher) {
+                                  setVouchers(vouchers.map(v => v.id === savedVoucher.id ? savedVoucher : v));
+                                } else {
+                                  setVouchers([savedVoucher, ...vouchers]);
+                                }
+                                setShowAddVoucherModal(false);
+                                setEditingVoucher(null);
+                              } else {
+                                const error = await response.json();
+                                alert(error.message || 'Failed to save voucher');
+                              }
+                            } catch (err) {
+                              console.error('Error saving voucher:', err);
+                              alert('Failed to save voucher');
+                            }
+                          }}
+                        >
+                          {editingVoucher ? 'Update Voucher' : 'Create Voucher'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           
@@ -8504,6 +8867,13 @@ TOTAL: $${selectedOrder.totalAmount}
             >
               <span style={{fontSize: '18px'}}>⚙️</span>
               <span style={{fontSize: '12px'}}>Company Settings</span>
+            </button>
+            <button 
+              className={`nav-tab ${activeView === 'vouchers' ? 'active' : ''}`}
+              onClick={() => handleViewChange('vouchers')}
+            >
+              <span style={{fontSize: '18px'}}>🎟️</span>
+              <span style={{fontSize: '12px'}}>Vouchers</span>
             </button>
           </div>
           
