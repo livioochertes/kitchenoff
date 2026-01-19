@@ -1092,6 +1092,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Voucher validation route (public for checkout)
+  app.post("/api/vouchers/validate", async (req, res) => {
+    try {
+      const { code, orderTotal } = req.body;
+      
+      if (!code) {
+        return res.status(400).json({ valid: false, message: "Voucher code is required" });
+      }
+
+      const voucher = await storage.getVoucherByCode(code);
+      
+      if (!voucher) {
+        return res.status(404).json({ valid: false, message: "Voucher code not found" });
+      }
+
+      // Check if voucher is active
+      if (!voucher.isActive) {
+        return res.status(400).json({ valid: false, message: "This voucher is no longer active" });
+      }
+
+      // Check validity dates
+      const now = new Date();
+      if (voucher.validFrom && new Date(voucher.validFrom) > now) {
+        return res.status(400).json({ valid: false, message: "This voucher is not yet valid" });
+      }
+      if (voucher.validUntil && new Date(voucher.validUntil) < now) {
+        return res.status(400).json({ valid: false, message: "This voucher has expired" });
+      }
+
+      // Check max uses
+      if (voucher.maxUses && voucher.usedCount !== null && voucher.usedCount >= voucher.maxUses) {
+        return res.status(400).json({ valid: false, message: "This voucher has reached its usage limit" });
+      }
+
+      // Check minimum order amount
+      if (voucher.minOrderAmount && orderTotal && parseFloat(orderTotal) < parseFloat(voucher.minOrderAmount)) {
+        return res.status(400).json({ 
+          valid: false, 
+          message: `Minimum order amount for this voucher is ${voucher.minOrderAmount}` 
+        });
+      }
+
+      // Calculate discount
+      let discountAmount = 0;
+      if (voucher.discountType === 'percentage') {
+        discountAmount = orderTotal ? (parseFloat(orderTotal) * parseFloat(voucher.discountValue)) / 100 : 0;
+      } else {
+        discountAmount = parseFloat(voucher.discountValue);
+      }
+
+      res.json({
+        valid: true,
+        voucher: {
+          id: voucher.id,
+          code: voucher.code,
+          name: voucher.name,
+          discountType: voucher.discountType,
+          discountValue: voucher.discountValue,
+          discountAmount: discountAmount.toFixed(2)
+        }
+      });
+    } catch (error) {
+      console.error("Validate voucher error:", error);
+      res.status(500).json({ valid: false, message: "Failed to validate voucher" });
+    }
+  });
+
   // Order routes
   app.get("/api/orders", authenticateToken, async (req: AuthRequest, res) => {
     try {
