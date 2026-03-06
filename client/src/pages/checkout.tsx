@@ -23,7 +23,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "@/hooks/useTranslation";
 import Header from "@/components/header";
-import RevolutPayment from "@/components/revolut-payment";
 import StripePayment from "@/components/stripe-payment";
 import { getCountyOptions, getCitiesForCounty, getCountryOptions, romanianCounties } from "@/utils/location-data";
 
@@ -62,7 +61,7 @@ const checkoutSchema = z.object({
   email: z.string().email("Invalid email address"),
   shippingAddress: shippingAddressSchema,
   billingAddress: billingAddressSchema,
-  paymentMethod: z.enum(["revolut", "stripe", "paypal", "cash"]),
+  paymentMethod: z.enum(["stripe", "cash"]),
   sameAsBilling: z.boolean().default(false),
   notes: z.string().optional(),
 }).refine((data) => {
@@ -165,7 +164,7 @@ export default function Checkout() {
           companyName: user.companyName || "",
           registrationNumber: user.registrationNumber || "",
         },
-        paymentMethod: "cash",
+        paymentMethod: "stripe",
         sameAsBilling: !user.deliveryAddress, // Default to same if no separate delivery address
         notes: "",
       };
@@ -203,7 +202,7 @@ export default function Checkout() {
         companyName: "",
         registrationNumber: "",
       },
-      paymentMethod: "cash",
+      paymentMethod: "stripe",
       sameAsBilling: false,
       notes: "",
     };
@@ -1023,20 +1022,8 @@ export default function Checkout() {
                                   <div className="flex items-center space-x-2 p-3 border rounded-lg">
                                     <RadioGroupItem value="stripe" id="stripe" />
                                     <Label htmlFor="stripe" className="flex items-center space-x-2 cursor-pointer">
-                                      <span>{t('checkout.stripePayment')}</span>
+                                      <span>{t('checkout.stripePayment')}, Apple Pay, Google Pay</span>
                                       <Badge variant="secondary">Recommended</Badge>
-                                    </Label>
-                                  </div>
-                                  <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                                    <RadioGroupItem value="revolut" id="revolut" />
-                                    <Label htmlFor="revolut" className="cursor-pointer">
-                                      {t('checkout.revolutPayment')}
-                                    </Label>
-                                  </div>
-                                  <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                                    <RadioGroupItem value="paypal" id="paypal" />
-                                    <Label htmlFor="paypal" className="cursor-pointer">
-                                      {t('checkout.paypalPayment')}
                                     </Label>
                                   </div>
                                   <div className="flex items-center space-x-2 p-3 border rounded-lg">
@@ -1054,31 +1041,6 @@ export default function Checkout() {
                         />
                       </CardContent>
                     </Card>
-
-                    {/* Revolut Payment Component */}
-                    {form.watch("paymentMethod") === "revolut" && (
-                      <RevolutPayment
-                        amount={finalTotal}
-                        currency="USD"
-                        onSuccess={(paymentId) => {
-                          console.log("Payment successful in checkout:", paymentId);
-                          toast({
-                            title: t('checkout.success'),
-                            description: t('checkout.orderPlacedDesc'),
-                          });
-                          clearCart();
-                          navigate("/");
-                        }}
-                        onError={(error) => {
-                          console.error("Payment failed in checkout:", error);
-                          toast({
-                            title: t('checkout.orderFailed'),
-                            description: error,
-                            variant: "destructive",
-                          });
-                        }}
-                      />
-                    )}
 
                     {/* Stripe Payment Component */}
                     {form.watch("paymentMethod") === "stripe" && (
@@ -1185,14 +1147,6 @@ export default function Checkout() {
                         <div className="text-sm text-gray-600">
                           Use the payment form above to complete your order
                         </div>
-                      ) : form.watch("paymentMethod") === "cash" ? (
-                        <Button
-                          type="submit"
-                          disabled={createOrderMutation.isPending}
-                          className="kitchen-pro-secondary"
-                        >
-                          {createOrderMutation.isPending ? t('checkout.processing') : t('checkout.placeOrder')}
-                        </Button>
                       ) : (
                         <Button
                           type="submit"

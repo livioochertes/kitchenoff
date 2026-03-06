@@ -1,0 +1,30 @@
+Set Stripe (Credit/Debit Card) as the default payment method at checkout instead of Cash on Delivery.
+Remove Revolut as a separate payment processor and instead add Apple Pay / Google Pay support directly through Stripe's Payment Request Button API — consolidating everything under a single processor (Stripe).
+Remove PayPal as a payment option (not functional, and we want a single processor).
+Keep Cash on Delivery as an option.
+Tasks
+T001: Set Stripe as default payment method
+Blocked By: []
+Details:
+Change paymentMethod: "cash" to paymentMethod: "stripe" in the getDefaultFormValues() function in client/src/pages/checkout.tsx (around line 193)
+Files: client/src/pages/checkout.tsx
+Acceptance: When the checkout page loads, Stripe (Credit/Debit Card) is pre-selected
+T002: Add Apple Pay / Google Pay via Stripe Payment Request Button
+Blocked By: []
+Details:
+Update client/src/components/stripe-payment.tsx to include Stripe's PaymentRequestButtonElement alongside the existing CardElement
+The Payment Request Button automatically shows Apple Pay (on Safari/iOS) and Google Pay (on Chrome/Android) when the user's device/browser supports them
+If neither is available, it gracefully hides itself and only the card form shows
+This uses the same Stripe payment intent flow — no new backend changes needed
+Files: client/src/components/stripe-payment.tsx
+Acceptance: Apple Pay / Google Pay buttons appear when supported by the browser, and fall back to card-only when not
+T003: Remove Revolut and PayPal payment options from checkout
+Blocked By: [T002]
+Details:
+Remove the Revolut and PayPal radio options from the payment method RadioGroup in client/src/pages/checkout.tsx
+Remove the Revolut payment component rendering block ({form.watch("paymentMethod") === "revolut" && ...})
+Remove the RevolutPayment import from checkout.tsx
+Update the Stripe option label to indicate it also supports Apple Pay / Google Pay (e.g., "Credit/Debit Card, Apple Pay, Google Pay")
+Keep only "stripe" and "cash" as payment method options
+Files: client/src/pages/checkout.tsx
+Acceptance: Checkout shows only two payment options: Stripe (Card + Apple Pay/Google Pay) and Cash on Delivery
