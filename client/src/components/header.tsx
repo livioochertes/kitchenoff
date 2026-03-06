@@ -80,7 +80,6 @@ export default function Header() {
               alt="KitchenOff Logo" 
               className="w-[100px] h-[100px] object-contain -my-4"
             />
-            <span className="text-xl font-bold text-primary">KitchenOff</span>
           </Link>
 
           {/* Search Bar */}
