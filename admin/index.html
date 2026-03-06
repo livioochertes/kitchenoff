@@ -678,6 +678,7 @@
       const [editingUser, setEditingUser] = useState(null);
       const [editingProduct, setEditingProduct] = useState(null);
       const [editingCategory, setEditingCategory] = useState(null);
+      const [categoryTranslations, setCategoryTranslations] = useState([]);
       const [selectedOrders, setSelectedOrders] = useState([]);
       const [showBulkModal, setShowBulkModal] = useState(false);
       const [bulkOperation, setBulkOperation] = useState('');
@@ -3402,7 +3403,22 @@
                                     cursor: 'pointer',
                                     fontSize: '12px'
                                   }}
-                                  onClick={() => setEditingCategory(category)}
+                                  onClick={async () => {
+                                    setEditingCategory(category);
+                                    try {
+                                      const response = await fetch(`/admin/api/categories/${category.id}/translations`, {
+                                        headers: { 'Authorization': `Bearer ${adminToken}` }
+                                      });
+                                      if (response.ok) {
+                                        const translations = await response.json();
+                                        setCategoryTranslations(translations);
+                                      } else {
+                                        setCategoryTranslations([]);
+                                      }
+                                    } catch (e) {
+                                      setCategoryTranslations([]);
+                                    }
+                                  }}
                                 >
                                   ✏️ Edit
                                 </button>
@@ -7893,6 +7909,7 @@ TOTAL: $${selectedOrder.totalAmount}
                         onClick={() => {
                           setShowAddCategoryModal(false);
                           setEditingCategory(null);
+                          setCategoryTranslations([]);
                         }}
                       >
                         Cancel
@@ -7902,6 +7919,183 @@ TOTAL: $${selectedOrder.totalAmount}
                       </button>
                     </div>
                   </form>
+
+                  {editingCategory && (
+                    <div style={{marginTop: '20px', borderTop: '2px solid #e0e0e0', paddingTop: '20px'}}>
+                      <h4 style={{marginBottom: '15px', color: '#333', display: 'flex', alignItems: 'center', gap: '8px'}}>
+                        🌍 Traduceri Categorie ({categoryTranslations.length})
+                      </h4>
+
+                      {categoryTranslations.length > 0 && (
+                        <div style={{marginBottom: '15px'}}>
+                          {categoryTranslations.map(translation => (
+                            <div key={translation.id} style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '8px 12px',
+                              backgroundColor: '#f8f9fa',
+                              borderRadius: '6px',
+                              marginBottom: '6px',
+                              border: '1px solid #e9ecef'
+                            }}>
+                              <div>
+                                <span style={{
+                                  fontWeight: 'bold',
+                                  color: '#007bff',
+                                  textTransform: 'uppercase',
+                                  fontSize: '11px',
+                                  marginRight: '8px',
+                                  backgroundColor: '#e7f1ff',
+                                  padding: '2px 6px',
+                                  borderRadius: '3px'
+                                }}>{translation.language}</span>
+                                <span style={{fontSize: '14px'}}>{translation.name}</span>
+                                {translation.description && (
+                                  <span style={{fontSize: '12px', color: '#666', marginLeft: '8px'}}>
+                                    - {translation.description.substring(0, 50)}{translation.description.length > 50 ? '...' : ''}
+                                  </span>
+                                )}
+                              </div>
+                              <button
+                                style={{
+                                  padding: '3px 8px',
+                                  border: 'none',
+                                  borderRadius: '3px',
+                                  backgroundColor: '#dc3545',
+                                  color: 'white',
+                                  cursor: 'pointer',
+                                  fontSize: '11px'
+                                }}
+                                onClick={async () => {
+                                  if (!confirm('Delete this translation?')) return;
+                                  try {
+                                    const response = await fetch(`/admin/api/categories/translations/${translation.id}`, {
+                                      method: 'DELETE',
+                                      headers: { 'Authorization': `Bearer ${adminToken}` }
+                                    });
+                                    if (response.ok) {
+                                      setCategoryTranslations(categoryTranslations.filter(t => t.id !== translation.id));
+                                    }
+                                  } catch (e) {
+                                    alert('Error deleting translation');
+                                  }
+                                }}
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: '80px 1fr',
+                        gap: '8px',
+                        alignItems: 'end'
+                      }}>
+                        <div>
+                          <label style={{fontSize: '12px', fontWeight: 'bold', color: '#555'}}>Limba</label>
+                          <select id="cat-trans-lang" style={{
+                            width: '100%',
+                            padding: '6px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px',
+                            fontSize: '13px'
+                          }}>
+                            <option value="ro">RO</option>
+                            <option value="en">EN</option>
+                            <option value="es">ES</option>
+                            <option value="fr">FR</option>
+                            <option value="de">DE</option>
+                            <option value="it">IT</option>
+                            <option value="pt">PT</option>
+                            <option value="zh">ZH</option>
+                            <option value="ja">JA</option>
+                            <option value="ko">KO</option>
+                            <option value="ar">AR</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style={{fontSize: '12px', fontWeight: 'bold', color: '#555'}}>Nume tradus</label>
+                          <input
+                            type="text"
+                            id="cat-trans-name"
+                            placeholder="Numele categoriei tradus"
+                            style={{
+                              width: '100%',
+                              padding: '6px',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px',
+                              fontSize: '13px'
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div style={{marginTop: '8px'}}>
+                        <label style={{fontSize: '12px', fontWeight: 'bold', color: '#555'}}>Descriere tradusă (opțional)</label>
+                        <textarea
+                          id="cat-trans-desc"
+                          placeholder="Descrierea categoriei tradusă"
+                          rows={2}
+                          style={{
+                            width: '100%',
+                            padding: '6px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px',
+                            fontSize: '13px',
+                            resize: 'vertical'
+                          }}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        style={{
+                          marginTop: '10px',
+                          padding: '6px 16px',
+                          border: 'none',
+                          borderRadius: '4px',
+                          backgroundColor: '#17a2b8',
+                          color: 'white',
+                          cursor: 'pointer',
+                          fontSize: '13px'
+                        }}
+                        onClick={async () => {
+                          const lang = document.getElementById('cat-trans-lang').value;
+                          const name = document.getElementById('cat-trans-name').value;
+                          const desc = document.getElementById('cat-trans-desc').value;
+                          if (!name.trim()) {
+                            alert('Numele tradus este obligatoriu');
+                            return;
+                          }
+                          try {
+                            const response = await fetch(`/admin/api/categories/${editingCategory.id}/translations`, {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${adminToken}`
+                              },
+                              body: JSON.stringify({ language: lang, name: name.trim(), description: desc.trim() || null })
+                            });
+                            if (response.ok) {
+                              const newTranslation = await response.json();
+                              setCategoryTranslations([...categoryTranslations, newTranslation]);
+                              document.getElementById('cat-trans-name').value = '';
+                              document.getElementById('cat-trans-desc').value = '';
+                            } else {
+                              const err = await response.json();
+                              alert('Eroare: ' + err.message);
+                            }
+                          } catch (e) {
+                            alert('Eroare la adăugare traducere');
+                          }
+                        }}
+                      >
+                        ➕ Adaugă Traducere
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

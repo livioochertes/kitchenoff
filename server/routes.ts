@@ -950,6 +950,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all category translations for a language (batch endpoint for frontend)
+  app.get("/api/category-translations/:language", async (req, res) => {
+    try {
+      const language = req.params.language;
+      const translations = await storage.getAllCategoryTranslations(language);
+      const result: Record<number, { name: string; description: string | null }> = {};
+      for (const t of translations) {
+        result[t.categoryId] = { name: t.name, description: t.description };
+      }
+      res.json(result);
+    } catch (error) {
+      console.error("Get category translations error:", error);
+      res.status(500).json({ message: "Failed to get category translations" });
+    }
+  });
+
   // Get product translation by language (public endpoint)
   app.get("/api/products/:id/translation/:language", async (req, res) => {
     try {

@@ -60,6 +60,17 @@ export const categories = pgTable("categories", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Category translations table for multilingual support
+export const categoryTranslations = pgTable("category_translations", {
+  id: serial("id").primaryKey(),
+  categoryId: integer("category_id").references(() => categories.id, { onDelete: 'cascade' }).notNull(),
+  language: varchar("language", { length: 10 }).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Products table
 export const products = pgTable("products", {
   id: serial("id").primaryKey(),
@@ -295,6 +306,14 @@ export const usersRelations = relations(users, ({ many }) => ({
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
   products: many(products),
+  translations: many(categoryTranslations),
+}));
+
+export const categoryTranslationsRelations = relations(categoryTranslations, ({ one }) => ({
+  category: one(categories, {
+    fields: [categoryTranslations.categoryId],
+    references: [categories.id],
+  }),
 }));
 
 export const productsRelations = relations(products, ({ one, many }) => ({
@@ -405,6 +424,12 @@ export const insertProductSchema = createInsertSchema(products).omit({
   updatedAt: true,
 });
 
+export const insertCategoryTranslationSchema = createInsertSchema(categoryTranslations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertProductTranslationSchema = createInsertSchema(productTranslations).omit({
   id: true,
   createdAt: true,
@@ -472,6 +497,8 @@ export type Category = typeof categories.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type CategoryTranslation = typeof categoryTranslations.$inferSelect;
+export type InsertCategoryTranslation = z.infer<typeof insertCategoryTranslationSchema>;
 export type ProductTranslation = typeof productTranslations.$inferSelect;
 export type InsertProductTranslation = z.infer<typeof insertProductTranslationSchema>;
 export type Order = typeof orders.$inferSelect;

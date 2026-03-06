@@ -2,6 +2,7 @@ import {
   users,
   categories,
   products,
+  categoryTranslations,
   productTranslations,
   orders,
   orderItems,
@@ -20,6 +21,8 @@ import {
   type Product,
   type InsertProduct,
   type ProductWithCategory,
+  type CategoryTranslation,
+  type InsertCategoryTranslation,
   type ProductTranslation,
   type InsertProductTranslation,
   type Order,
@@ -74,6 +77,14 @@ export interface IStorage {
   updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product>;
   updateProductStock(id: number, stockQuantity: number): Promise<Product>;
   deleteProduct(id: number): Promise<void>;
+
+  // Category translation operations
+  getCategoryTranslations(categoryId: number): Promise<CategoryTranslation[]>;
+  getCategoryTranslation(categoryId: number, language: string): Promise<CategoryTranslation | undefined>;
+  createCategoryTranslation(translation: InsertCategoryTranslation): Promise<CategoryTranslation>;
+  updateCategoryTranslation(id: number, translation: Partial<InsertCategoryTranslation>): Promise<CategoryTranslation>;
+  deleteCategoryTranslation(id: number): Promise<void>;
+  getAllCategoryTranslations(language: string): Promise<CategoryTranslation[]>;
 
   // Product translation operations
   getProductTranslations(productId: number): Promise<ProductTranslation[]>;
@@ -466,6 +477,39 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProduct(id: number): Promise<void> {
     await db.delete(products).where(eq(products.id, id));
+  }
+
+  // Category translation operations
+  async getCategoryTranslations(categoryId: number): Promise<CategoryTranslation[]> {
+    return await db.select().from(categoryTranslations).where(eq(categoryTranslations.categoryId, categoryId));
+  }
+
+  async getCategoryTranslation(categoryId: number, language: string): Promise<CategoryTranslation | undefined> {
+    const [translation] = await db.select().from(categoryTranslations)
+      .where(and(eq(categoryTranslations.categoryId, categoryId), eq(categoryTranslations.language, language)));
+    return translation;
+  }
+
+  async createCategoryTranslation(translation: InsertCategoryTranslation): Promise<CategoryTranslation> {
+    const [newTranslation] = await db.insert(categoryTranslations).values(translation).returning();
+    return newTranslation;
+  }
+
+  async updateCategoryTranslation(id: number, translation: Partial<InsertCategoryTranslation>): Promise<CategoryTranslation> {
+    const [updatedTranslation] = await db
+      .update(categoryTranslations)
+      .set({ ...translation, updatedAt: new Date() })
+      .where(eq(categoryTranslations.id, id))
+      .returning();
+    return updatedTranslation;
+  }
+
+  async deleteCategoryTranslation(id: number): Promise<void> {
+    await db.delete(categoryTranslations).where(eq(categoryTranslations.id, id));
+  }
+
+  async getAllCategoryTranslations(language: string): Promise<CategoryTranslation[]> {
+    return await db.select().from(categoryTranslations).where(eq(categoryTranslations.language, language));
   }
 
   // Product translation operations

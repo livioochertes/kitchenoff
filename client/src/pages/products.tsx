@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useCategoryTranslations } from "@/hooks/useCategoryTranslation";
 
 import ProductCard from "@/components/product-card";
 import type { Category, ProductWithCategory } from "@shared/schema";
@@ -78,10 +79,10 @@ export default function Products() {
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   
-  // Function to get category name - use database name directly for admin-editable names
+  const { getCategoryName: getCategoryNameTranslated } = useCategoryTranslations();
   const getCategoryName = (category: Category | null | undefined) => {
     if (!category) return '';
-    return category.name;
+    return getCategoryNameTranslated(category);
   };
   
   // Remove local state - use React Query caching directly

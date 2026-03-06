@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useCategoryTranslations } from "@/hooks/useCategoryTranslation";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { useCallback, useEffect, useState, useRef } from "react";
@@ -68,15 +69,7 @@ export default function Home() {
     };
   }, [emblaApi, onSelect]);
 
-  // Function to get category name - use database name directly for admin-editable names
-  const getCategoryName = (category: Category) => {
-    return category.name;
-  };
-
-  // Function to get category description - use database description directly
-  const getCategoryDescription = (category: Category) => {
-    return category.description;
-  };
+  const { getCategoryName, getCategoryDescription } = useCategoryTranslations();
 
   const trustIndicators = [
     { icon: Truck, text: t('home.features.shipping') },

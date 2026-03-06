@@ -1585,6 +1585,76 @@ export async function registerAdminRoutes(app: Express) {
     }
   });
 
+  // Category translation admin routes
+  app.get("/admin/api/categories/:id/translations", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const categoryId = parseInt(req.params.id);
+      const translations = await storage.getCategoryTranslations(categoryId);
+      res.json(translations);
+    } catch (error) {
+      console.error("Error fetching category translations:", error);
+      res.status(500).json({ message: "Failed to fetch translations" });
+    }
+  });
+
+  app.post("/admin/api/categories/:id/translations", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const categoryId = parseInt(req.params.id);
+      const { language, name, description } = req.body;
+      
+      if (!language || !name) {
+        return res.status(400).json({ message: "Language and name are required" });
+      }
+      
+      const existingTranslation = await storage.getCategoryTranslation(categoryId, language);
+      if (existingTranslation) {
+        const updated = await storage.updateCategoryTranslation(existingTranslation.id, { name, description: description || null });
+        return res.json(updated);
+      }
+      
+      const translation = await storage.createCategoryTranslation({
+        categoryId,
+        language,
+        name,
+        description: description || null
+      });
+      
+      res.status(201).json(translation);
+    } catch (error) {
+      console.error("Error creating category translation:", error);
+      res.status(500).json({ message: "Failed to create translation" });
+    }
+  });
+
+  app.put("/admin/api/categories/translations/:id", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const translationId = parseInt(req.params.id);
+      const { language, name, description } = req.body;
+      
+      const translation = await storage.updateCategoryTranslation(translationId, {
+        language,
+        name,
+        description
+      });
+      
+      res.json(translation);
+    } catch (error) {
+      console.error("Error updating category translation:", error);
+      res.status(500).json({ message: "Failed to update translation" });
+    }
+  });
+
+  app.delete("/admin/api/categories/translations/:id", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
+    try {
+      const translationId = parseInt(req.params.id);
+      await storage.deleteCategoryTranslation(translationId);
+      res.json({ message: "Translation deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting category translation:", error);
+      res.status(500).json({ message: "Failed to delete translation" });
+    }
+  });
+
   // Import product data from URL using web scraping
   app.post("/admin/api/products/import-from-url", authenticateAdmin, async (req: AdminAuthRequest, res: Response) => {
     try {

@@ -10,6 +10,7 @@ import { useCart } from "@/hooks/use-cart";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useCategoryTranslations } from "@/hooks/useCategoryTranslation";
 import LanguageSwitcher from "@/components/language-switcher";
 import ContactModal from "@/components/contact-modal";
 import kitchenOffLogo from "@assets/KitchenOff_Logo_Background_Removed_1752520997429.png";
@@ -51,10 +52,7 @@ export default function Header() {
     return `${t('footer.freeShippingPrefix')} ${formattedAmount} ${currencyLabel}`;
   }, [companySettings, t]);
 
-  // Function to get category name - use database name directly for admin-editable names
-  const getCategoryName = (category: any) => {
-    return category.name;
-  };
+  const { getCategoryName } = useCategoryTranslations();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
