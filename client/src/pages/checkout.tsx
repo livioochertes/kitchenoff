@@ -323,8 +323,8 @@ export default function Checkout() {
     let fieldsToValidate: any[] = [];
     
     if (step === 1 && !isAuthenticated) {
-      // Guest users need to validate email on step 1
-      fieldsToValidate = ["email"];
+      // Guest users need to validate email and phone on step 1
+      fieldsToValidate = ["email", "shippingAddress.phone"];
     } else if ((step === 1 && isAuthenticated) || (step === 2)) {
       // Address validation for authenticated users on step 1 or guest users on step 2
       fieldsToValidate = [
@@ -512,6 +512,19 @@ export default function Checkout() {
                             <FormLabel>Email Address</FormLabel>
                             <FormControl>
                               <Input placeholder="your@email.com" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="shippingAddress.phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Phone Number</FormLabel>
+                            <FormControl>
+                              <Input placeholder="+40 7XX XXX XXX" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
