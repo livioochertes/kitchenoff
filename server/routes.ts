@@ -1771,8 +1771,9 @@ When user asks about orders, invoices, or order status, provide specific informa
       }
 
       // Language context for multilingual support
-      const languageMap = {
+      const languageMap: Record<string, string> = {
         'en': 'English',
+        'ro': 'Romanian',
         'es': 'Spanish',
         'fr': 'French', 
         'de': 'German',
@@ -1784,9 +1785,9 @@ When user asks about orders, invoices, or order status, provide specific informa
         'ar': 'Arabic'
       };
       
-      const userLanguage = (languageMap as any)[language] || 'English';
+      const userLanguage = languageMap[language] || 'English';
       const languageInstruction = language && language !== 'en' 
-        ? `\n\nIMPORTANT: Respond in ${userLanguage} language. The user interface is in ${userLanguage}, so provide your response in the same language to ensure consistency.`
+        ? `\n\nCRITICAL INSTRUCTION: You MUST respond ENTIRELY in ${userLanguage}. Every word of your response must be in ${userLanguage}. The user's interface language is ${userLanguage} and the user is writing in ${userLanguage}. Do NOT respond in English under any circumstances.`
         : '';
 
       // Create system prompt with KitchenOff context
