@@ -620,26 +620,39 @@ export function orderToSmartbillInvoice(
     itemCount: order.items?.length || 0
   });
 
-  // Format client data with proper address mapping including mandatory Județ for Romania
-  // ⚠️ CRITICAL: Omit vatCode and regCom fields completely if empty (Smartbill API fix)
+  const billing = order.billingAddress || order.shippingAddress || {};
+  const isCompany = billing.clientType === 'company';
+
+  const clientName = isCompany
+    ? (billing.companyName || user.companyName || `${billing.firstName || ''} ${billing.lastName || ''}`.trim())
+    : `${billing.firstName || user.firstName || ''} ${billing.lastName || user.lastName || ''}`.trim() || user.email.split('@')[0];
+
   const client: SmartbillClient = {
-    name: user.companyName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email.split('@')[0],
-    address: order.billingAddress?.address || order.shippingAddress?.address || 'Strada Exemple 123',
-    isTaxPayer: false,
-    saveToDb: true, // Allow Smartbill to save client information
-    city: order.billingAddress?.city || order.shippingAddress?.city || 'Bucharest',
-    county: order.billingAddress?.county || order.shippingAddress?.county || user.companyCounty || 'Bucuresti', // Mandatory Județ for Romania
-    country: order.billingAddress?.country || order.shippingAddress?.country || 'Romania',
+    name: clientName,
+    address: billing.address || order.shippingAddress?.address || 'Strada Exemple 123',
+    isTaxPayer: isCompany,
+    saveToDb: true,
+    city: billing.city || order.shippingAddress?.city || 'Bucharest',
+    county: billing.county || order.shippingAddress?.county || user.companyCounty || 'Bucuresti',
+    country: billing.country || order.shippingAddress?.country || 'Romania',
     email: user.email
   };
-  
-  // Only add vatCode and regCom if they have actual values (not empty strings)
-  if (user.vatNumber && user.vatNumber.trim()) {
-    client.vatCode = user.vatNumber.trim();
+
+  const vatNumber = billing.vatNumber || user.vatNumber;
+  const regNumber = billing.registrationNumber || user.registrationNumber;
+
+  if (vatNumber && vatNumber.trim()) {
+    client.vatCode = vatNumber.trim();
   }
-  if (user.registrationNumber && user.registrationNumber.trim()) {
-    client.regCom = user.registrationNumber.trim();
+  if (regNumber && regNumber.trim()) {
+    client.regCom = regNumber.trim();
   }
+
+  if (!isCompany && billing.identityDocument && billing.identityDocument.trim()) {
+    console.log('📋 Individual client - Identity document:', billing.identityDocument);
+  }
+
+  console.log('📋 Client type:', isCompany ? 'Company' : 'Individual');
 
   // Format products using Romanian tax settings
   const products: SmartbillProduct[] = order.items.map((item: any) => {

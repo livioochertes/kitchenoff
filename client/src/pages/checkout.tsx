@@ -46,10 +46,15 @@ const billingAddressSchema = z.object({
   address: z.string().min(1, "Address is required"),
   city: z.string().min(1, "City is required"),
   state: z.string().min(1, "State is required"),
-  county: z.string().optional(), // Optional for billing - will be copied from shipping when same
+  county: z.string().optional(),
   zipCode: z.string().min(1, "ZIP code is required"),
   country: z.string().min(1, "Country is required"),
   phone: z.string().min(1, "Phone number is required"),
+  clientType: z.enum(["individual", "company"]).default("individual"),
+  identityDocument: z.string().optional(),
+  vatNumber: z.string().optional(),
+  companyName: z.string().optional(),
+  registrationNumber: z.string().optional(),
 });
 
 const checkoutSchema = z.object({
@@ -60,7 +65,6 @@ const checkoutSchema = z.object({
   sameAsBilling: z.boolean().default(false),
   notes: z.string().optional(),
 }).refine((data) => {
-  // When billing address is different from shipping, county becomes required
   if (!data.sameAsBilling && !data.billingAddress.county) {
     return false;
   }
@@ -68,6 +72,22 @@ const checkoutSchema = z.object({
 }, {
   message: "County (Județ) is required for Romanian invoices when using different billing address",
   path: ["billingAddress", "county"]
+}).refine((data) => {
+  if (data.billingAddress.clientType === "company") {
+    if (!data.billingAddress.vatNumber?.trim()) return false;
+  }
+  return true;
+}, {
+  message: "VAT Number (CUI) is required for company invoices",
+  path: ["billingAddress", "vatNumber"]
+}).refine((data) => {
+  if (data.billingAddress.clientType === "company") {
+    if (!data.billingAddress.companyName?.trim()) return false;
+  }
+  return true;
+}, {
+  message: "Company name is required for company invoices",
+  path: ["billingAddress", "companyName"]
 });
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
@@ -137,6 +157,11 @@ export default function Checkout() {
           zipCode: user.companyZip || "",
           country: user.companyCountry || "Romania",
           phone: user.billingPhone || "",
+          clientType: user.companyName ? "company" : "individual",
+          identityDocument: "",
+          vatNumber: user.vatNumber || "",
+          companyName: user.companyName || "",
+          registrationNumber: user.registrationNumber || "",
         },
         paymentMethod: "cash",
         sameAsBilling: !user.deliveryAddress, // Default to same if no separate delivery address
@@ -170,6 +195,11 @@ export default function Checkout() {
         zipCode: "",
         country: "Romania",
         phone: "",
+        clientType: "individual",
+        identityDocument: "",
+        vatNumber: "",
+        companyName: "",
+        registrationNumber: "",
       },
       paymentMethod: "cash",
       sameAsBilling: false,
@@ -206,9 +236,20 @@ export default function Checkout() {
         totalPrice: (parseFloat(item.product.price) * item.quantity).toString(),
       }));
 
+      const billingData = sameAsBilling
+        ? {
+            ...data.shippingAddress,
+            clientType: data.billingAddress.clientType,
+            identityDocument: data.billingAddress.identityDocument,
+            vatNumber: data.billingAddress.vatNumber,
+            companyName: data.billingAddress.companyName,
+            registrationNumber: data.billingAddress.registrationNumber,
+          }
+        : data.billingAddress;
+
       return await apiRequest("POST", "/api/orders", {
         shippingAddress: data.shippingAddress,
-        billingAddress: sameAsBilling ? data.shippingAddress : data.billingAddress,
+        billingAddress: billingData,
         paymentMethod: data.paymentMethod,
         items: orderItems,
         notes: data.notes,
@@ -243,7 +284,6 @@ export default function Checkout() {
   const currency = shippingSettings?.currency || 'EUR';
   
   const shipping = subtotal > freeShippingThreshold ? 0 : standardShippingCost;
-  const total = subtotal + shipping;
 
   // Currency symbol helper
   const getCurrencySymbol = (curr: string) => {
@@ -559,7 +599,7 @@ export default function Checkout() {
                       <CardHeader>
                         <CardTitle className="flex items-center">
                           <Truck className="h-5 w-5 mr-2" />
-                          Shipping Address
+                          Shipping Address / Adresă Livrare
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
@@ -717,10 +757,98 @@ export default function Checkout() {
                       <CardHeader>
                         <CardTitle className="flex items-center">
                           <MapPin className="h-5 w-5 mr-2" />
-                          Billing Address
+                          Invoice Details / Date Facturare
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="billingAddress.clientType"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Tip Client / Client Type *</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selectează tipul clientului" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="individual">Persoană Fizică / Individual</SelectItem>
+                                  <SelectItem value="company">Companie / Company</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {form.watch("billingAddress.clientType") === "individual" && (
+                          <FormField
+                            control={form.control}
+                            name="billingAddress.identityDocument"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Serie / Număr CI (Identity Document)</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="ex: CJ1234567" {...field} />
+                                </FormControl>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Serie și număr carte de identitate (opțional)
+                                </p>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
+
+                        {form.watch("billingAddress.clientType") === "company" && (
+                          <div className="space-y-4 p-4 bg-muted/30 rounded-lg border">
+                            <p className="text-sm font-medium text-muted-foreground">Date companie pentru facturare</p>
+                            <FormField
+                              control={form.control}
+                              name="billingAddress.companyName"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Nume Companie / Company Name *</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="ex: SC Exemplu SRL" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <FormField
+                                control={form.control}
+                                name="billingAddress.vatNumber"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>CUI / VAT Number *</FormLabel>
+                                    <FormControl>
+                                      <Input placeholder="ex: RO12345678" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name="billingAddress.registrationNumber"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Nr. Înregistrare / Reg. No.</FormLabel>
+                                    <FormControl>
+                                      <Input placeholder="ex: J40/1234/2020" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </div>
+                        )}
+
                         <FormField
                           control={form.control}
                           name="sameAsBilling"
@@ -733,13 +861,14 @@ export default function Checkout() {
                                 />
                               </FormControl>
                               <div className="space-y-1 leading-none">
-                                <FormLabel>Same as shipping address</FormLabel>
+                                <FormLabel>Adresa de facturare este aceeași cu cea de livrare</FormLabel>
                               </div>
                             </FormItem>
                           )}
                         />
                         {!sameAsBilling && (
                           <div className="space-y-4">
+                            <p className="text-sm font-medium text-muted-foreground">Adresă de facturare / Billing Address</p>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <FormField
                                 control={form.control}
@@ -1088,7 +1217,7 @@ export default function Checkout() {
           <div className="lg:col-span-1">
             <Card className="sticky top-24">
               <CardHeader>
-                <CardTitle>Order Summary</CardTitle>
+                <CardTitle>Sumar Comandă / Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
@@ -1119,20 +1248,6 @@ export default function Checkout() {
                     <span>Subtotal:</span>
                     <span>{subtotal.toFixed(2)} {currencySymbol}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Shipping:</span>
-                    <span>
-                      {shipping === 0 ? (
-                        <Badge variant="secondary">Free</Badge>
-                      ) : (
-                        `${shipping.toFixed(2)} ${currencySymbol}`
-                      )}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>VAT ({vatDisplayPercentage}% included):</span>
-                    <span>{vatIncludedInFinal.toFixed(2)} {currencySymbol}</span>
-                  </div>
                   {appliedVoucher && (
                     <div className="flex justify-between text-sm text-green-600">
                       <span className="flex items-center gap-1">
@@ -1148,6 +1263,20 @@ export default function Checkout() {
                       <span>-{appliedVoucher.discountAmount} {currencySymbol}</span>
                     </div>
                   )}
+                  <div className="flex justify-between text-sm">
+                    <span>Transport / Shipping:</span>
+                    <span>
+                      {shipping === 0 ? (
+                        <Badge variant="secondary">Free</Badge>
+                      ) : (
+                        `${shipping.toFixed(2)} ${currencySymbol}`
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>TVA ({vatDisplayPercentage}% inclus / included):</span>
+                    <span>{vatIncludedInFinal.toFixed(2)} {currencySymbol}</span>
+                  </div>
                 </div>
                 
                 {/* Voucher Code Input */}
