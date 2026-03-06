@@ -9,7 +9,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { useCategoryTranslations } from "@/hooks/useCategoryTranslation";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
-import { useCallback, useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef, useMemo } from "react";
 
 import ProductCard from "@/components/product-card";
 import ContactModal from "@/components/contact-modal";
@@ -69,10 +69,26 @@ export default function Home() {
     };
   }, [emblaApi, onSelect]);
 
+  const { data: companySettings } = useQuery<{ freeShippingThreshold?: string; defaultCurrency?: string }>({
+    queryKey: ["/admin/api/company-settings"],
+  });
+
+  const freeShippingText = useMemo(() => {
+    const thresholdValue = parseFloat(companySettings?.freeShippingThreshold || "500");
+    const currency = companySettings?.defaultCurrency || "RON";
+    const formattedAmount = new Intl.NumberFormat('ro-RO', {
+      style: 'decimal',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(thresholdValue);
+    const currencyLabel = currency === "RON" ? "lei" : currency === "EUR" ? "€" : currency === "USD" ? "$" : currency === "GBP" ? "£" : currency;
+    return `${t('footer.freeShippingPrefix')} ${formattedAmount} ${currencyLabel}`;
+  }, [companySettings, t]);
+
   const { getCategoryName, getCategoryDescription } = useCategoryTranslations();
 
   const trustIndicators = [
-    { icon: Truck, text: t('home.features.shipping') },
+    { icon: Truck, text: freeShippingText },
     { icon: Shield, text: t('home.features.compliant') },
     { icon: Award, text: t('home.features.certified') },
     { icon: MessageSquare, text: t('home.features.support') },

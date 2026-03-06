@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "@/hooks/useTranslation";
 import { useRoute } from "wouter";
 import { Star, ShoppingCart, Truck, Shield, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ export default function ProductDetails() {
   const [, params] = useRoute("/products/:slug");
   const { addToCart } = useCart();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   const { data: product, isLoading } = useQuery<ProductWithCategory>({
@@ -29,6 +31,22 @@ export default function ProductDetails() {
     queryKey: ["/api/products", product?.id, "reviews"],
     enabled: !!product?.id,
   });
+
+  const { data: companySettings } = useQuery<{ freeShippingThreshold?: string; defaultCurrency?: string }>({
+    queryKey: ["/admin/api/company-settings"],
+  });
+
+  const freeShippingText = useMemo(() => {
+    const thresholdValue = parseFloat(companySettings?.freeShippingThreshold || "500");
+    const currency = companySettings?.defaultCurrency || "RON";
+    const formattedAmount = new Intl.NumberFormat('ro-RO', {
+      style: 'decimal',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(thresholdValue);
+    const currencyLabel = currency === "RON" ? "lei" : currency === "EUR" ? "€" : currency === "USD" ? "$" : currency === "GBP" ? "£" : currency;
+    return `${t('footer.freeShippingPrefix')} ${formattedAmount} ${currencyLabel}`;
+  }, [companySettings, t]);
 
   const { name: translatedName, description: translatedDescription } = useProductTranslation(
     product?.id, 
@@ -233,7 +251,7 @@ export default function ProductDetails() {
               <div className="flex items-center space-x-6 text-sm text-muted-foreground">
                 <div className="flex items-center">
                   <Truck className="h-4 w-4 mr-1" />
-                  <span>Free shipping over $500</span>
+                  <span>{freeShippingText}</span>
                 </div>
                 <div className="flex items-center">
                   <Shield className="h-4 w-4 mr-1" />
