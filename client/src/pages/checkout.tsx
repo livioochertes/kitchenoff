@@ -21,6 +21,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "@/hooks/useTranslation";
 import Header from "@/components/header";
 import RevolutPayment from "@/components/revolut-payment";
 import StripePayment from "@/components/stripe-payment";
@@ -94,6 +95,7 @@ type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
 export default function Checkout() {
   const { user, isAuthenticated } = useAuth();
+  const { t } = useTranslation();
   const [step, setStep] = useState(isAuthenticated ? 2 : 1); // Skip contact info for logged-in users
   const [, navigate] = useLocation();
   const { cart, clearCart } = useCart();
@@ -260,15 +262,15 @@ export default function Checkout() {
     onSuccess: (data) => {
       clearCart();
       toast({
-        title: "Order placed successfully!",
-        description: "Thank you for your order. You will receive a confirmation email shortly.",
+        title: t('checkout.success'),
+        description: t('checkout.orderPlacedDesc'),
       });
       navigate("/");
     },
     onError: (error) => {
       toast({
-        title: "Order failed",
-        description: "There was an error placing your order. Please try again.",
+        title: t('checkout.orderFailed'),
+        description: t('checkout.error'),
         variant: "destructive",
       });
     },
@@ -314,7 +316,7 @@ export default function Checkout() {
   // Apply voucher function
   const handleApplyVoucher = async () => {
     if (!voucherCode.trim()) {
-      setVoucherError("Please enter a voucher code");
+      setVoucherError(t('checkout.enterVoucherCode'));
       return;
     }
     
@@ -337,15 +339,15 @@ export default function Checkout() {
         setAppliedVoucher(data.voucher);
         setVoucherCode("");
         toast({
-          title: "Voucher Applied!",
-          description: `Discount of ${data.voucher.discountAmount} ${currencySymbol} applied.`,
+          title: t('checkout.voucherApplied'),
+          description: t('checkout.voucherDiscountApplied').replace('{0}', data.voucher.discountAmount).replace('{1}', currencySymbol),
         });
       } else {
-        setVoucherError(data.message || "Invalid voucher code");
+        setVoucherError(data.message || t('checkout.invalidVoucher'));
       }
     } catch (err) {
       console.error("Error validating voucher:", err);
-      setVoucherError("Failed to validate voucher. Please try again.");
+      setVoucherError(t('checkout.voucherValidationFailed'));
     } finally {
       setVoucherLoading(false);
     }
@@ -420,13 +422,13 @@ export default function Checkout() {
         <div className="container mx-auto px-4 py-8">
           <Card className="text-center py-16">
             <CardContent>
-              <h2 className="text-2xl font-semibold mb-2">Your cart is empty</h2>
+              <h2 className="text-2xl font-semibold mb-2">{t('checkout.emptyCart')}</h2>
               <p className="text-muted-foreground mb-6">
-                Add some products to your cart before checkout
+                {t('checkout.emptyCartDesc')}
               </p>
               <Link href="/products">
                 <Button size="lg" className="kitchen-pro-secondary">
-                  Continue Shopping
+                  {t('checkout.goShopping')}
                 </Button>
               </Link>
             </CardContent>
@@ -444,7 +446,7 @@ export default function Checkout() {
           <Link href="/cart">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Cart
+              {t('checkout.back')}
             </Button>
           </Link>
         </div>
@@ -465,7 +467,7 @@ export default function Checkout() {
                   >
                     1
                   </div>
-                  <div className="ml-2 text-sm">Address</div>
+                  <div className="ml-2 text-sm">{t('checkout.stepAddress')}</div>
                 </div>
                 <div
                   className={`w-16 h-0.5 ${
@@ -482,16 +484,16 @@ export default function Checkout() {
                   >
                     2
                   </div>
-                  <div className="ml-2 text-sm">Payment</div>
+                  <div className="ml-2 text-sm">{t('checkout.stepPayment')}</div>
                 </div>
               </>
             ) : (
               // For guest users: Contact, Address, and Payment steps
               <>
                 {[
-                  { num: 1, label: "Contact" },
-                  { num: 2, label: "Address" },
-                  { num: 3, label: "Payment" }
+                  { num: 1, label: t('checkout.stepContact') },
+                  { num: 2, label: t('checkout.stepAddress') },
+                  { num: 3, label: t('checkout.stepPayment') }
                 ].map((stepInfo, index) => (
                   <div key={stepInfo.num} className="flex items-center">
                     <div
@@ -540,7 +542,7 @@ export default function Checkout() {
                     <CardHeader>
                       <CardTitle className="flex items-center">
                         <User className="h-5 w-5 mr-2" />
-                        Contact Information
+                        {t('checkout.contactInfo')}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -549,9 +551,9 @@ export default function Checkout() {
                         name="email"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Email Address</FormLabel>
+                            <FormLabel>{t('checkout.guestEmail')}</FormLabel>
                             <FormControl>
-                              <Input placeholder="your@email.com" {...field} />
+                              <Input placeholder={t('checkout.emailPlaceholder')} {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -562,9 +564,9 @@ export default function Checkout() {
                         name="shippingAddress.phone"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Phone Number</FormLabel>
+                            <FormLabel>{t('checkout.phone')}</FormLabel>
                             <FormControl>
-                              <Input placeholder="+40 7XX XXX XXX" {...field} />
+                              <Input placeholder={t('checkout.phonePlaceholder')} {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -599,7 +601,7 @@ export default function Checkout() {
                       <CardHeader>
                         <CardTitle className="flex items-center">
                           <Truck className="h-5 w-5 mr-2" />
-                          Shipping Address / Adresă Livrare
+                          {t('checkout.shippingAddress')}
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
@@ -609,7 +611,7 @@ export default function Checkout() {
                             name="shippingAddress.firstName"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>First Name</FormLabel>
+                                <FormLabel>{t('checkout.firstName')}</FormLabel>
                                 <FormControl>
                                   <Input {...field} />
                                 </FormControl>
@@ -622,7 +624,7 @@ export default function Checkout() {
                             name="shippingAddress.lastName"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Last Name</FormLabel>
+                                <FormLabel>{t('checkout.lastName')}</FormLabel>
                                 <FormControl>
                                   <Input {...field} />
                                 </FormControl>
@@ -636,7 +638,7 @@ export default function Checkout() {
                           name="shippingAddress.company"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Company (Optional)</FormLabel>
+                              <FormLabel>{t('checkout.company_field')}</FormLabel>
                               <FormControl>
                                 <Input {...field} />
                               </FormControl>
@@ -649,7 +651,7 @@ export default function Checkout() {
                           name="shippingAddress.address"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Address</FormLabel>
+                              <FormLabel>{t('checkout.address')}</FormLabel>
                               <FormControl>
                                 <Input {...field} />
                               </FormControl>
@@ -663,7 +665,7 @@ export default function Checkout() {
                             name="shippingAddress.city"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>City</FormLabel>
+                                <FormLabel>{t('checkout.city')}</FormLabel>
                                 <FormControl>
                                   <Input {...field} />
                                 </FormControl>
@@ -676,7 +678,7 @@ export default function Checkout() {
                             name="shippingAddress.state"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>State</FormLabel>
+                                <FormLabel>{t('checkout.state')}</FormLabel>
                                 <FormControl>
                                   <Input {...field} />
                                 </FormControl>
@@ -691,9 +693,9 @@ export default function Checkout() {
                             name="shippingAddress.county"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>County (Județ) *</FormLabel>
+                                <FormLabel>{t('checkout.county')} *</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="e.g. Bucharest, Cluj, Ilfov" {...field} />
+                                  <Input placeholder={t('checkout.countyPlaceholder')} {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -704,7 +706,7 @@ export default function Checkout() {
                             name="shippingAddress.zipCode"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>ZIP Code</FormLabel>
+                                <FormLabel>{t('checkout.zipCode')}</FormLabel>
                                 <FormControl>
                                   <Input {...field} />
                                 </FormControl>
@@ -718,11 +720,11 @@ export default function Checkout() {
                           name="shippingAddress.country"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Country *</FormLabel>
+                              <FormLabel>{t('checkout.country')} *</FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
-                                    <SelectValue placeholder="Select country" />
+                                    <SelectValue placeholder={t('checkout.country')} />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -742,7 +744,7 @@ export default function Checkout() {
                           name="shippingAddress.phone"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Phone Number</FormLabel>
+                              <FormLabel>{t('checkout.phone')}</FormLabel>
                               <FormControl>
                                 <Input {...field} />
                               </FormControl>
@@ -757,7 +759,7 @@ export default function Checkout() {
                       <CardHeader>
                         <CardTitle className="flex items-center">
                           <MapPin className="h-5 w-5 mr-2" />
-                          Invoice Details / Date Facturare
+                          {t('checkout.invoiceDetails')}
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
@@ -766,16 +768,16 @@ export default function Checkout() {
                           name="billingAddress.clientType"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Tip Client / Client Type *</FormLabel>
+                              <FormLabel>{t('checkout.clientType')} *</FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
-                                    <SelectValue placeholder="Selectează tipul clientului" />
+                                    <SelectValue placeholder={t('checkout.clientType')} />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="individual">Persoană Fizică / Individual</SelectItem>
-                                  <SelectItem value="company">Companie / Company</SelectItem>
+                                  <SelectItem value="individual">{t('checkout.individual')}</SelectItem>
+                                  <SelectItem value="company">{t('checkout.company')}</SelectItem>
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -789,12 +791,12 @@ export default function Checkout() {
                             name="billingAddress.identityDocument"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Serie / Număr CI (Identity Document)</FormLabel>
+                                <FormLabel>{t('checkout.identityDocument')}</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="ex: CJ1234567" {...field} />
+                                  <Input placeholder="CJ1234567" {...field} />
                                 </FormControl>
                                 <p className="text-xs text-muted-foreground mt-1">
-                                  Serie și număr carte de identitate (opțional)
+                                  {t('checkout.identityDocumentHint')}
                                 </p>
                                 <FormMessage />
                               </FormItem>
@@ -804,15 +806,15 @@ export default function Checkout() {
 
                         {form.watch("billingAddress.clientType") === "company" && (
                           <div className="space-y-4 p-4 bg-muted/30 rounded-lg border">
-                            <p className="text-sm font-medium text-muted-foreground">Date companie pentru facturare</p>
+                            <p className="text-sm font-medium text-muted-foreground">{t('checkout.companyData')}</p>
                             <FormField
                               control={form.control}
                               name="billingAddress.companyName"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Nume Companie / Company Name *</FormLabel>
+                                  <FormLabel>{t('checkout.companyName')} *</FormLabel>
                                   <FormControl>
-                                    <Input placeholder="ex: SC Exemplu SRL" {...field} />
+                                    <Input placeholder="SC Exemplu SRL" {...field} />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -824,9 +826,9 @@ export default function Checkout() {
                                 name="billingAddress.vatNumber"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>CUI / VAT Number *</FormLabel>
+                                    <FormLabel>{t('checkout.vatNumber')} *</FormLabel>
                                     <FormControl>
-                                      <Input placeholder="ex: RO12345678" {...field} />
+                                      <Input placeholder="RO12345678" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                   </FormItem>
@@ -837,9 +839,9 @@ export default function Checkout() {
                                 name="billingAddress.registrationNumber"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Nr. Înregistrare / Reg. No.</FormLabel>
+                                    <FormLabel>{t('checkout.registrationNumber')}</FormLabel>
                                     <FormControl>
-                                      <Input placeholder="ex: J40/1234/2020" {...field} />
+                                      <Input placeholder="J40/1234/2020" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                   </FormItem>
@@ -861,21 +863,21 @@ export default function Checkout() {
                                 />
                               </FormControl>
                               <div className="space-y-1 leading-none">
-                                <FormLabel>Adresa de facturare este aceeași cu cea de livrare</FormLabel>
+                                <FormLabel>{t('checkout.sameAsBilling')}</FormLabel>
                               </div>
                             </FormItem>
                           )}
                         />
                         {!sameAsBilling && (
                           <div className="space-y-4">
-                            <p className="text-sm font-medium text-muted-foreground">Adresă de facturare / Billing Address</p>
+                            <p className="text-sm font-medium text-muted-foreground">{t('checkout.billingAddress')}</p>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <FormField
                                 control={form.control}
                                 name="billingAddress.firstName"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>First Name</FormLabel>
+                                    <FormLabel>{t('checkout.firstName')}</FormLabel>
                                     <FormControl>
                                       <Input {...field} />
                                     </FormControl>
@@ -888,7 +890,7 @@ export default function Checkout() {
                                 name="billingAddress.lastName"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Last Name</FormLabel>
+                                    <FormLabel>{t('checkout.lastName')}</FormLabel>
                                     <FormControl>
                                       <Input {...field} />
                                     </FormControl>
@@ -902,7 +904,7 @@ export default function Checkout() {
                               name="billingAddress.address"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Address</FormLabel>
+                                  <FormLabel>{t('checkout.address')}</FormLabel>
                                   <FormControl>
                                     <Input {...field} />
                                   </FormControl>
@@ -916,7 +918,7 @@ export default function Checkout() {
                                 name="billingAddress.city"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>City</FormLabel>
+                                    <FormLabel>{t('checkout.city')}</FormLabel>
                                     <FormControl>
                                       <Input {...field} />
                                     </FormControl>
@@ -929,7 +931,7 @@ export default function Checkout() {
                                 name="billingAddress.state"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>State</FormLabel>
+                                    <FormLabel>{t('checkout.state')}</FormLabel>
                                     <FormControl>
                                       <Input {...field} />
                                     </FormControl>
@@ -944,9 +946,9 @@ export default function Checkout() {
                                 name="billingAddress.county"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>County (Județ) *</FormLabel>
+                                    <FormLabel>{t('checkout.county')} *</FormLabel>
                                     <FormControl>
-                                      <Input placeholder="e.g. Bucharest, Cluj, Ilfov" {...field} />
+                                      <Input placeholder={t('checkout.countyPlaceholder')} {...field} />
                                     </FormControl>
                                     <FormMessage />
                                   </FormItem>
@@ -957,7 +959,7 @@ export default function Checkout() {
                                 name="billingAddress.zipCode"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>ZIP Code</FormLabel>
+                                    <FormLabel>{t('checkout.zipCode')}</FormLabel>
                                     <FormControl>
                                       <Input {...field} />
                                     </FormControl>
@@ -971,11 +973,11 @@ export default function Checkout() {
                               name="billingAddress.country"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Country *</FormLabel>
+                                  <FormLabel>{t('checkout.country')} *</FormLabel>
                                   <Select onValueChange={field.onChange} value={field.value}>
                                     <FormControl>
                                       <SelectTrigger>
-                                        <SelectValue placeholder="Select country" />
+                                        <SelectValue placeholder={t('checkout.country')} />
                                       </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
@@ -1003,7 +1005,7 @@ export default function Checkout() {
                       <CardHeader>
                         <CardTitle className="flex items-center">
                           <CreditCard className="h-5 w-5 mr-2" />
-                          Payment Method
+                          {t('checkout.paymentMethod')}
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
@@ -1021,27 +1023,27 @@ export default function Checkout() {
                                   <div className="flex items-center space-x-2 p-3 border rounded-lg">
                                     <RadioGroupItem value="stripe" id="stripe" />
                                     <Label htmlFor="stripe" className="flex items-center space-x-2 cursor-pointer">
-                                      <span>Credit/Debit Card</span>
+                                      <span>{t('checkout.stripePayment')}</span>
                                       <Badge variant="secondary">Recommended</Badge>
                                     </Label>
                                   </div>
                                   <div className="flex items-center space-x-2 p-3 border rounded-lg">
                                     <RadioGroupItem value="revolut" id="revolut" />
                                     <Label htmlFor="revolut" className="cursor-pointer">
-                                      Revolut Pay (Apple Pay/Google Pay)
+                                      {t('checkout.revolutPayment')}
                                     </Label>
                                   </div>
                                   <div className="flex items-center space-x-2 p-3 border rounded-lg">
                                     <RadioGroupItem value="paypal" id="paypal" />
                                     <Label htmlFor="paypal" className="cursor-pointer">
-                                      PayPal
+                                      {t('checkout.paypalPayment')}
                                     </Label>
                                   </div>
                                   <div className="flex items-center space-x-2 p-3 border rounded-lg">
                                     <RadioGroupItem value="cash" id="cash" />
                                     <Label htmlFor="cash" className="flex items-center space-x-2 cursor-pointer">
-                                      <span>Cash on Delivery</span>
-                                      <Badge variant="outline">Pay when delivered</Badge>
+                                      <span>{t('checkout.cashOnDelivery')}</span>
+                                      <Badge variant="outline">{t('checkout.cashOnDeliveryDesc')}</Badge>
                                     </Label>
                                   </div>
                                 </RadioGroup>
@@ -1061,8 +1063,8 @@ export default function Checkout() {
                         onSuccess={(paymentId) => {
                           console.log("Payment successful in checkout:", paymentId);
                           toast({
-                            title: "Payment successful!",
-                            description: "Your order has been placed successfully.",
+                            title: t('checkout.success'),
+                            description: t('checkout.orderPlacedDesc'),
                           });
                           clearCart();
                           navigate("/");
@@ -1070,7 +1072,7 @@ export default function Checkout() {
                         onError={(error) => {
                           console.error("Payment failed in checkout:", error);
                           toast({
-                            title: "Payment failed",
+                            title: t('checkout.orderFailed'),
                             description: error,
                             variant: "destructive",
                           });
@@ -1097,7 +1099,7 @@ export default function Checkout() {
                         onError={(error) => {
                           console.error("Stripe payment failed in checkout:", error);
                           toast({
-                            title: "Payment failed",
+                            title: t('checkout.orderFailed'),
                             description: error,
                             variant: "destructive",
                           });
@@ -1111,22 +1113,16 @@ export default function Checkout() {
                         <CardHeader>
                           <CardTitle className="flex items-center text-green-800">
                             <div className="h-5 w-5 mr-2">💰</div>
-                            Cash on Delivery
+                            {t('checkout.cashOnDelivery')}
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="text-green-700">
                           <div className="space-y-2">
                             <p className="text-sm">
-                              • You will pay in cash when your order is delivered to your address
+                              • {t('checkout.cashOnDeliveryDesc')}
                             </p>
                             <p className="text-sm">
-                              • Please have the exact amount ready: <strong>{getCurrencySymbol(currency)} {finalTotal.toFixed(2)}</strong>
-                            </p>
-                            <p className="text-sm">
-                              • Our delivery agent will provide a receipt upon payment
-                            </p>
-                            <p className="text-sm">
-                              • Delivery time: 1-3 business days in Bucharest, 2-5 days nationwide
+                              • {t('checkout.cashOnDeliveryNote')}: <strong>{getCurrencySymbol(currency)} {finalTotal.toFixed(2)}</strong>
                             </p>
                           </div>
                         </CardContent>
@@ -1135,7 +1131,7 @@ export default function Checkout() {
 
                     <Card>
                       <CardHeader>
-                        <CardTitle>Order Notes</CardTitle>
+                        <CardTitle>{t('checkout.notes')}</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <FormField
@@ -1145,7 +1141,7 @@ export default function Checkout() {
                             <FormItem>
                               <FormControl>
                                 <Textarea
-                                  placeholder="Special instructions for your order..."
+                                  placeholder={t('checkout.notesPlaceholder')}
                                   {...field}
                                 />
                               </FormControl>
@@ -1166,7 +1162,7 @@ export default function Checkout() {
                       variant="outline"
                       onClick={() => setStep(step - 1)}
                     >
-                      Previous
+                      {t('checkout.back')}
                     </Button>
                   )}
                   <div className="ml-auto">
@@ -1181,7 +1177,7 @@ export default function Checkout() {
                         }} 
                         className="kitchen-pro-secondary"
                       >
-                        Next
+                        {t('checkout.next')}
                       </Button>
                     ) : (
                       /* Payment step - show different UI based on payment method */
@@ -1195,7 +1191,7 @@ export default function Checkout() {
                           disabled={createOrderMutation.isPending}
                           className="kitchen-pro-secondary"
                         >
-                          {createOrderMutation.isPending ? "Processing..." : "Confirm Cash on Delivery Order"}
+                          {createOrderMutation.isPending ? t('checkout.processing') : t('checkout.placeOrder')}
                         </Button>
                       ) : (
                         <Button
@@ -1203,7 +1199,7 @@ export default function Checkout() {
                           disabled={createOrderMutation.isPending}
                           className="kitchen-pro-secondary"
                         >
-                          {createOrderMutation.isPending ? "Processing..." : "Place Order"}
+                          {createOrderMutation.isPending ? t('checkout.processing') : t('checkout.placeOrder')}
                         </Button>
                       )
                     )}
@@ -1217,7 +1213,7 @@ export default function Checkout() {
           <div className="lg:col-span-1">
             <Card className="sticky top-24">
               <CardHeader>
-                <CardTitle>Sumar Comandă / Order Summary</CardTitle>
+                <CardTitle>{t('checkout.orderSummary')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
@@ -1245,7 +1241,7 @@ export default function Checkout() {
 
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span>Subtotal:</span>
+                    <span>{t('checkout.subtotal')}:</span>
                     <span>{subtotal.toFixed(2)} {currencySymbol}</span>
                   </div>
                   {appliedVoucher && (
@@ -1255,7 +1251,7 @@ export default function Checkout() {
                         <button 
                           onClick={handleRemoveVoucher}
                           className="text-red-500 hover:text-red-700 text-xs ml-1"
-                          title="Remove voucher"
+                          title={t('checkout.removeVoucher')}
                         >
                           ✕
                         </button>
@@ -1264,17 +1260,17 @@ export default function Checkout() {
                     </div>
                   )}
                   <div className="flex justify-between text-sm">
-                    <span>Transport / Shipping:</span>
+                    <span>{t('checkout.shipping')}:</span>
                     <span>
                       {shipping === 0 ? (
-                        <Badge variant="secondary">Free</Badge>
+                        <Badge variant="secondary">{t('checkout.shippingFree')}</Badge>
                       ) : (
                         `${shipping.toFixed(2)} ${currencySymbol}`
                       )}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>TVA ({vatDisplayPercentage}% inclus / included):</span>
+                    <span>{t('checkout.vatIncluded').replace('{0}', vatDisplayPercentage.toString())}:</span>
                     <span>{vatIncludedInFinal.toFixed(2)} {currencySymbol}</span>
                   </div>
                 </div>
@@ -1282,11 +1278,11 @@ export default function Checkout() {
                 {/* Voucher Code Input */}
                 {!appliedVoucher && (
                   <div className="space-y-2">
-                    <Label htmlFor="voucher-code" className="text-sm">Voucher Code</Label>
+                    <Label htmlFor="voucher-code" className="text-sm">{t('checkout.voucherCode')}</Label>
                     <div className="flex gap-2">
                       <Input
                         id="voucher-code"
-                        placeholder="Enter code"
+                        placeholder={t('checkout.enterVoucherCode')}
                         value={voucherCode}
                         onChange={(e) => {
                           setVoucherCode(e.target.value.toUpperCase());
@@ -1301,7 +1297,7 @@ export default function Checkout() {
                         variant="outline"
                         size="sm"
                       >
-                        {voucherLoading ? "..." : "Apply"}
+                        {voucherLoading ? "..." : t('checkout.applyVoucher')}
                       </Button>
                     </div>
                     {voucherError && (
@@ -1313,7 +1309,7 @@ export default function Checkout() {
                 <Separator />
 
                 <div className="flex justify-between font-semibold text-lg">
-                  <span>Total:</span>
+                  <span>{t('checkout.total')}:</span>
                   <span>{finalTotal.toFixed(2)} {currencySymbol}</span>
                 </div>
               </CardContent>
